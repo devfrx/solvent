@@ -75,24 +75,24 @@ Regole di configurazione e di processo, con la stessa dignità:
 Conseguenze delle decisioni che vale la pena verificare direttamente, perché la loro rottura
 segnala che un confine si sta spostando.
 
-| ID     | Invariante                                                                        | Da       | Verifica                                                          |
-| ------ | --------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
-| INV-01 | `src/core/**` dipende solo da `decimal.js`                                        | ADR 0015 | `tests/rules/core-deps` — allowlist, non esprimibile in ESLint    |
-| INV-02 | `src/core/**` non importa mai `vue`, `pinia`, `electron`                          | ADR 0001 | `no-restricted-imports`                                           |
-| INV-03 | `src/main/**` importa da `core/` solo `contracts/save.ts`                         | ADR 0004 | `no-restricted-imports` + `tests/rules/main-save-only`            |
-| INV-04 | Il denaro attraversa il confine di persistenza come stringa                       | ADR 0006 | schema `zod` + `tests/save/roundtrip`                             |
-| INV-05 | Ogni `System` registrato compare in save, load, reset e stats                     | ADR 0002 | `tests/rules/registry-completeness`                               |
-| INV-06 | La dimensione massima del salvataggio è calcolabile a priori                      | ADR 0010 | somma dei `max` dichiarati                                        |
-| INV-07 | Ogni `Reason` e ogni `code` di errore ha una chiave in ogni lingua                | ADR 0011 | `tests/i18n/parity`                                               |
-| INV-08 | **La somma di tutti i conti è sempre zero**, anche dopo un caricamento            | ADR 0020 | `tests/kernel/ledger` (invariante su 1.000 transazioni)           |
-| INV-09 | Nessuna transazione è mai applicata parzialmente                                  | ADR 0019 | `tests/kernel/ledger` (fallimento indotto sull'ultimo movimento)  |
-| INV-10 | Nessun dominio nomina a mano i pool non-giocatore                                 | ADR 0020 | `grep` di `world`/`sink`/`fees` sotto `domains/`                  |
-| INV-11 | La commissione mostrata in anteprima è calcolata dalla stessa funzione che esegue | ADR 0018 | `tests/domains/atm`                                               |
-| INV-12 | Il cruscotto della home non supera i **sei** riquadri                             | ADR 0018 | `tests/rules/home-tiles`                                          |
-| INV-13 | Il renderer non può usare le API di Node                                          | ADR 0001 | `tsconfig.web.json` senza tipi `node` — 🔒, non compila           |
-| INV-14 | Nessun gate sparisce dalla catena `verify`                                        | ADR 0013 | `tests/rules/gates`                                               |
-| INV-15 | Il Bus è sincrono: nessuna attesa, nessuna coda dentro `emit`                     | ADR 0016 | `tests/rules/bus-synchronous` — la firma `void` da sola non basta |
-| INV-16 | Il preload espone tre funzioni, non `ipcRenderer`                                 | ADR 0004 | `tests/save/preload` — guarda l'oggetto esposto, non il sorgente  |
+| ID     | Invariante                                                                | Da       | Verifica                                                          |
+| ------ | ------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
+| INV-01 | `src/core/**` dipende solo da `decimal.js`                                | ADR 0015 | `tests/rules/core-deps` — allowlist, non esprimibile in ESLint    |
+| INV-02 | `src/core/**` non importa mai `vue`, `pinia`, `electron`                  | ADR 0001 | `no-restricted-imports`                                           |
+| INV-03 | `src/main/**` importa da `core/` solo `contracts/save.ts`                 | ADR 0004 | `no-restricted-imports` + `tests/rules/main-save-only`            |
+| INV-04 | Il denaro attraversa il confine di persistenza come stringa               | ADR 0006 | schema `zod` + `tests/save/roundtrip`                             |
+| INV-05 | Ogni `System` registrato compare in save, load, reset e stats             | ADR 0002 | `tests/rules/registry-completeness`                               |
+| INV-06 | La dimensione massima del salvataggio è calcolabile a priori              | ADR 0010 | somma dei `max` dichiarati                                        |
+| INV-07 | Ogni `Reason` e ogni `code` di errore ha una chiave in ogni lingua        | ADR 0011 | `tests/i18n/parity`                                               |
+| INV-08 | **La somma di tutti i conti è sempre zero**, anche dopo un caricamento    | ADR 0020 | `tests/kernel/ledger` (invariante su 1.000 transazioni)           |
+| INV-09 | Nessuna transazione è mai applicata parzialmente                          | ADR 0019 | `tests/kernel/ledger` (fallimento indotto sull'ultimo movimento)  |
+| INV-10 | Nessun dominio nomina a mano i pool non-giocatore                         | ADR 0020 | `grep` di `world`/`sink`/`fees` sotto `domains/`                  |
+| INV-11 | La commissione in anteprima è lo **stesso valore** che il comando applica | ADR 0018 | `tests/domains/atm` — l'anteprima è l'elenco dei movimenti        |
+| INV-12 | Il cruscotto della home non supera i **sei** riquadri                     | ADR 0018 | `tests/rules/home-tiles`                                          |
+| INV-13 | Il renderer non può usare le API di Node                                  | ADR 0001 | `tsconfig.web.json` senza tipi `node` — 🔒, non compila           |
+| INV-14 | Nessun gate sparisce dalla catena `verify`                                | ADR 0013 | `tests/rules/gates`                                               |
+| INV-15 | Il Bus è sincrono: nessuna attesa, nessuna coda dentro `emit`             | ADR 0016 | `tests/rules/bus-synchronous` — la firma `void` da sola non basta |
+| INV-16 | Il preload espone tre funzioni, non `ipcRenderer`                         | ADR 0004 | `tests/save/preload` — guarda l'oggetto esposto, non il sorgente  |
 
 ## Le regole di lint si verificano da sole
 
