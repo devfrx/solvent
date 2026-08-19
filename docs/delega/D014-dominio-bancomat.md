@@ -1,6 +1,6 @@
 # D014 — Dominio: bancomat
 
-- **Stato:** **Chiusa** — 2026-08-19, ramo `d014-dominio-bancomat`
+- **Stato:** **Chiusa** — 2026-08-19, commit `a0b3b9f`, ramo `d014-dominio-bancomat`
 - **Dipende da:** D007, D008
 - **Sblocca:** D011, D012
 - **ADR vincolanti:** 0017, 0018, 0019, 0020, 0021, 0024
