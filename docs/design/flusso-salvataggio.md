@@ -99,6 +99,27 @@ sequenceDiagram
 Il payload si valida **dopo** la migrazione, non prima: prima della migrazione ha la forma
 vecchia, e validarlo contro lo schema corrente fallirebbe sempre.
 
+## Gli esiti attraversano il confine
+
+I `Result` dei due diagrammi qui sopra hanno una forma precisa, e vive in `core/contracts/save.ts`
+insieme al resto del contratto. Non è una comodità: INV-03 lascia al main **quel file e nient'altro**,
+quindi un tipo d'esito che stesse altrove non sarebbe importabile dal main — e la risposta sbagliata
+a quel problema è allargare INV-03.
+
+| Codice                     | Quando                                                 | Cosa porta con sé             |
+| -------------------------- | ------------------------------------------------------ | ----------------------------- |
+| `error.save.corrupt`       | il file c'è ma non è JSON                              | —                             |
+| `error.save.invalid`       | lo schema ha rifiutato la busta o il payload           | il percorso del campo         |
+| `error.save.version_ahead` | la busta viene da una versione più nuova del programma | versione trovata e supportata |
+| `error.save.io`            | lettura o scrittura fallita                            | il messaggio, non l'`Error`   |
+
+L'ultima riga non è pignoleria: un `Error` non sopravvive alla clonazione strutturata dell'IPC e
+arriverebbe dall'altra parte come `{}`.
+
+**Il file assente non è un errore.** `load()` ritorna `ok` con `{ present: false }`: è una partita
+nuova, non un guasto. Confonderli è il modo più veloce di mostrare una schermata di errore a chi ha
+appena installato il gioco.
+
 ## Politica di versionamento
 
 | Modifica al payload                                | Serve una migrazione?                       | Serve alzare la versione? |
@@ -138,3 +159,13 @@ componente Vue (difetto A09), ed è il motivo per cui `reset` è nel tipo `Syste
 
 **`soft` non è "un hard più leggero".** Ogni sistema decide cosa conserva, e lo decide nel proprio
 file — non in una lista di eccezioni centralizzata, che è la forma in cui questo si degrada.
+
+### Il canale `reset` del main è un'altra cosa
+
+Il diagramma qui sopra è tutto nel renderer: `ResetScope` vive in `contracts/lifecycle.ts`, che
+INV-03 **non** concede al main. Il terzo canale IPC non porta quindi nessun ambito e fa una cosa
+sola: **cancella il file di salvataggio**. Cancellare un file che non c'è è `ok`, non un errore.
+
+Sono due operazioni con lo stesso nome, e vanno tenute distinte: il reset del renderer decide cosa
+il gioco conserva, quello del main decide cosa resta sul disco. Un prestige chiama il primo e non
+il secondo.
