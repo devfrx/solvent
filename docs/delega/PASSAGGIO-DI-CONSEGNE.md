@@ -18,15 +18,19 @@ stesso numero.
 
 ## Dove siamo, esattamente
 
-|                       |                                                       |
-| --------------------- | ----------------------------------------------------- |
-| STOP 1                | **approvato** — nome, stile, dipendenze, architettura |
-| D001 — tooling e gate | **chiusa**, commit `e275f59`                          |
-| Codice di dominio     | **zero righe**. `src/` non esiste ancora              |
-| `npm run verify`      | **verde** — 33 test su 5 file, 8 secondi              |
-| Prossimo passo        | **[D002 — Contratti](D002-contratti.md)**             |
+|                       |                                                                    |
+| --------------------- | ------------------------------------------------------------------ |
+| STOP 1                | **approvato** — nome, stile, dipendenze, architettura              |
+| D001 — tooling e gate | **chiusa**, commit `e275f59`                                       |
+| D002 — contratti      | **chiusa**, ramo `d002-contratti`                                  |
+| Codice di dominio     | **zero righe**. Esistono i contratti; nessun sistema, nessun saldo |
+| `npm run verify`      | **verde** — 76 test su 13 file                                     |
+| Prossimo passo        | **[D003 — Kernel: Clock](D003-kernel-clock.md)**                   |
 
-Due commit in tutto: la documentazione dello STOP 1, e il tooling.
+I contratti sono in `src/core/contracts/`: `Result`, `Money`, i pool con le loro affordance, i tipi
+del Ledger, `boundedList`, `GameEvents`, il salvataggio senza versione, `CommandHandler`. Sono 113
+righe di codice e 417 di test. Le **sette correzioni** rispetto a com'era scritta la delega stanno
+in fondo a [D002](D002-contratti.md): leggile prima di fidarti di un altro documento di delega.
 
 ## Le sei cose da non fare
 
@@ -59,19 +63,21 @@ Non serve leggere tutti i 20 ADR. Servono quando stai per contraddirne uno: allo
 
 ## Il prossimo passo, in concreto
 
-**[D002 — Contratti](D002-contratti.md).** Crea `src/core/contracts/`: `Result`, `Money`,
-`bounded`, `pools`, `ledger`, `events`, `save`, `commands`. Circa 120 righe, quasi tutte tipi.
+**[D003 — Kernel: Clock](D003-kernel-clock.md).** Crea `src/core/kernel/Clock.ts`:
+`TICKS_PER_SECOND`, i tipi branded `Ticks` e `Seconds`, e le quattro conversioni. ~40 righe.
 
 Tre cose da sapere prima di iniziare:
 
-1. **Il primo file sotto `src/core` farà diventare rosso `tests/rules/gates.test.ts`.** È voluto:
-   quel test pretende che `typecheck:web` rientri nella catena di `typecheck` nel momento esatto in
-   cui il progetto web ha dei file. Aggiungilo in `package.json` e torna verde. Non è un difetto,
-   è un promemoria che non si può ignorare.
-2. **`SavePayload` non deve avere un campo versione.** Non è una convenzione: è la ragione per cui
-   il renderer non può sbagliare la versione del salvataggio. Scrivi il test `@ts-expect-error` che
-   lo dimostra.
-3. **`boundedList<T>(max)` con `max` obbligatorio.** Nessun default, nessun opzionale.
+1. **Il Clock non ha stato.** Non sa che ora è e non sa quanto tempo è passato: converte e basta.
+   Il tempo che scorre è del loop (D011). Se il Clock avesse stato, ogni test di dominio dovrebbe
+   controllarlo, e il tempo tornerebbe globale — il difetto A04 con un nome nuovo.
+2. **`Ticks` e `Seconds` non sono intercambiabili**, e un `number` nudo non è assegnabile a
+   nessuno dei due. È il punto di tutta la delega: un `10` scritto dentro un sistema deve essere un
+   errore di compilazione, non una svista invisibile.
+3. **D003, D004 e D005 dipendono solo da D002**, quindi sono indipendenti fra loro e si possono
+   fare in qualunque ordine. D006 le vuole tutte e tre.
+
+I contratti che servono ci sono già: `Money` per `perSecondToPerTick`, che ritorna un `Decimal`.
 
 Poi si prosegue col grafo in [delega/README.md](README.md): D003 → D008 sono il kernel (~560
 righe in tutto), D009 la persistenza, D010 e D014 i domini, D011 e D012 il runtime e la UI, D013 la
@@ -88,7 +94,7 @@ verifica finale — che è lo **STOP 2**, dove ci si ferma di nuovo.
   una volta: costa trenta secondi. È così che si è scoperto che il primo caso di prova per R04 era
   sbagliato, e che la regola sembrava funzionare senza funzionare.
 - **Commit:** Conventional Commits con lo scope uguale all'ID della delega —
-  `feat(D002): contratti fondamentali`. Un ramo per delega: `d002-contratti`.
+  `feat(D003): clock a passo fisso`. Un ramo per delega: `d003-kernel-clock`.
 - **Quando una delega è finita:** marcala `Chiusa` con il commit, aggiorna
   [tracciabilita.md](../tracciabilita.md) se hai cambiato un meccanismo, e scrivi le **correzioni
   rispetto a com'era scritta la delega** — vedi [D001](D001-tooling-e-gate.md) come esempio: aveva
@@ -122,17 +128,17 @@ Riprendi il progetto Solvent in questa repo.
 Leggi prima `docs/delega/PASSAGGIO-DI-CONSEGNE.md`: contiene lo stato, le regole e il prossimo
 passo. Poi `docs/README.md` per la mappa della documentazione.
 
-Stato: STOP 1 approvato, D001 (tooling e gate) chiusa, `npm run verify` verde, zero codice di
-dominio. Il prossimo passo è **D002 — Contratti**.
+Stato: STOP 1 approvato, D001 (tooling e gate) e D002 (contratti) chiuse, `npm run verify` verde,
+zero codice di dominio. Il prossimo passo è **D003 — Kernel: Clock**.
 
 Come voglio che lavori:
 
-- Esegui la delega D002 così com'è scritta. Se qualcosa nella delega si rivela sbagliato,
+- Esegui la delega D003 così com'è scritta. Se qualcosa nella delega si rivela sbagliato,
   correggilo e **scrivilo** nella sezione delle correzioni — non aggirarlo in silenzio.
 - Fermati e presentami 2 opzioni solo sulle decisioni strutturali. Il resto fallo.
 - Niente `TODO`, niente `any`, niente scorciatoie presentate come soluzioni.
 - Nessun claim di completamento senza l'output reale di `npm run verify`.
 - La documentazione toccata dal cambiamento si aggiorna nello stesso commit.
 
-Quando D002 è chiusa, fermati e mostrami l'output dei gate prima di passare a D003.
+Quando D003 è chiusa, fermati e mostrami l'output dei gate prima di passare alla successiva.
 ```

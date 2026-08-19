@@ -30,8 +30,8 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 | A07 `version: 3` nel renderer          | R08    | 0004 | il tipo `SavePayload` **non ha** un campo versione                           | `npm run typecheck`                             | 🔒    | D002, D009 |
 | A08 schema "advisory" e stale          | R08    | 0004 | lo schema è `zod`, quindi **eseguito**: non può divergere senza rompere      | `tests/save/schema`                             | ✅    | D009       |
 | A09 logica di dominio nei `.vue`       | R05    | 0001 | ESLint su `**/*.vue` vieta `domains/*/rules` e `kernel/*`                    | `npm run lint` + `tests/rules/no-logic-in-vue`  | ✅    | D001, D012 |
-| A10 liste storiche illimitate          | R09    | 0010 | `boundedList<T>(max)` è l'unico costruttore; `max` obbligatorio              | `npm run typecheck` + `tests/save/bounded`      | 🔒    | D002       |
-| A11 pipeline mista `number`/`Decimal`  | R11    | 0006 | `Money = Decimal` è una classe: TS rifiuta `number` e rifiuta `+` e `*`      | `npm run typecheck`                             | 🔒    | D002       |
+| A10 liste storiche illimitate          | R09    | 0010 | `boundedList<T>(max)` è l'unico costruttore; `max` obbligatorio              | `npm run typecheck` + `tests/contracts/bounded` | 🔒    | D002       |
+| A11 pipeline mista `number`/`Decimal`  | R11    | 0006 | `Money = Decimal` è una classe + lint sulle conversioni sotto `domains/**`   | `npm run typecheck` + `npm run lint`            | 🔒    | D002       |
 | A12 62 `boolean` contro 35 `{success}` | R10    | 0007 | `CommandHandler` ritorna `Result` per tipo + lint contro i literal `success` | `npm run typecheck` + `npm run lint`            | ⚠️    | D002       |
 | A13 20 chiavi i18n mancanti            | R12    | 0011 | confronto degli insiemi di chiavi nelle due direzioni                        | `tests/i18n/parity`                             | ✅    | D012       |
 | A14 codice morto (CSS, API)            | C01    | 0012 | `noUnusedLocals` + `noUnusedParameters` in `tsconfig`                        | `npm run typecheck`                             | ✅    | D001       |
@@ -53,7 +53,7 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 | R08 | Il contratto di salvataggio appartiene al main | 🔒      | `contracts/save.ts` + `main/save/schema.ts`                |
 | R09 | Ogni lista storica ha un limite dichiarato     | 🔒      | `contracts/bounded.ts`                                     |
 | R10 | Un solo stile di esito                         | ⚠️      | `contracts/commands.ts` + `eslint.config.js`               |
-| R11 | Denaro `Decimal` end-to-end                    | 🔒      | `contracts/money.ts`                                       |
+| R11 | Denaro `Decimal` end-to-end                    | 🔒      | `contracts/money.ts` + `eslint.config.js`                  |
 | R12 | Nessuna stringa utente hardcoded               | ✅ / ⚠️ | `tests/i18n/parity` + `tests/rules/no-literal-in-template` |
 
 Regole di configurazione e di processo, con la stessa dignità:

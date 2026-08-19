@@ -82,6 +82,33 @@ describe('regole che devono scattare', () => {
     expect(has(f, 'R10')).toBe(true)
   })
 
+  it('R11 — un dominio che importa una conversione del denaro', async () => {
+    const f = await lint(
+      'src/core/domains/income/rules.ts',
+      `import { fromNumber } from '@core/contracts/money'\n\nexport const a = fromNumber(1)\n`
+    )
+    expect(has(f, 'R11')).toBe(true)
+  })
+
+  it('R11 — la stessa conversione presa per via relativa', async () => {
+    const f = await lint(
+      'src/core/domains/income/rules.ts',
+      `import { fromNumber } from '../../contracts/money'\n\nexport const a = fromNumber(1)\n`
+    )
+    expect(has(f, 'R11')).toBe(true)
+  })
+
+  // Il blocco R11 sovrascrive `no-restricted-imports` sotto domains/: in flat config l'ultima
+  // configurazione sostituisce le precedenti, non le somma. Questo caso è la prova che INV-02
+  // non è sparita nel passaggio.
+  it('INV-02 — resta attiva sotto domains/, dove R11 riscrive la stessa regola', async () => {
+    const f = await lint(
+      'src/core/domains/income/system.ts',
+      `import { ref } from 'vue'\n\nexport const a = ref(0)\n`
+    )
+    expect(has(f, 'INV-02')).toBe(true)
+  })
+
   it('INV-02 — core/ che importa Vue', async () => {
     const f = await lint(
       'src/core/kernel/Bus.ts',
@@ -140,6 +167,14 @@ describe('eccezioni dichiarate — devono NON scattare', () => {
   it('R10 resta attiva anche dentro Ledger.ts — l’eccezione riguarda solo R06', async () => {
     const f = await lint('src/core/kernel/Ledger.ts', `export const r = { success: true }\n`)
     expect(has(f, 'R10')).toBe(true)
+  })
+
+  it('R11 è spenta fuori dai domini: alla presentazione le conversioni sono legittime', async () => {
+    const f = await lint(
+      'src/renderer/stores/game.ts',
+      `import { toDisplayNumber } from '@core/contracts/money'\n\nexport const a = toDisplayNumber\n`
+    )
+    expect(has(f, 'R11')).toBe(false)
   })
 
   it('un file pulito non produce nulla', async () => {

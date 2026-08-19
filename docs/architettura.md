@@ -29,7 +29,7 @@ flowchart TD
     DOM["domains/*<br/>rules · system"]
     BAL["balance/*<br/>constants · modifiers · targets"]
     KER["kernel/*<br/>Clock · Rng · Bus · Registry · Ledger"]
-    CON["contracts/*<br/>events · save · commands · result · money"]
+    CON["contracts/*<br/>result · money · pools · ledger<br/>bounded · events · save · commands"]
   end
 
   CMP --> ST
@@ -101,12 +101,14 @@ solvent/
 │  │  │  ├─ modifiers.ts          # unico registro dei moltiplicatori
 │  │  │  └─ targets.ts            # bersagli di bilanciamento come DATI
 │  │  ├─ contracts/
-│  │  │  ├─ events.ts             # interface GameEvents — unico file
-│  │  │  ├─ save.ts               # SavePayload · SaveEnvelope
-│  │  │  ├─ commands.ts
 │  │  │  ├─ result.ts             # Result<T, E>
 │  │  │  ├─ money.ts              # Money = Decimal + le uniche conversioni
-│  │  │  └─ bounded.ts            # boundedList<T>(max) — regola 9
+│  │  │  ├─ pools.ts              # Pool · PoolProps · POOLS come dati
+│  │  │  ├─ ledger.ts             # Posting · Transaction · Balances · LedgerError
+│  │  │  ├─ bounded.ts            # boundedList<T>(max) — regola 9
+│  │  │  ├─ events.ts             # interface GameEvents — unico file
+│  │  │  ├─ save.ts               # SavePayload · SaveEnvelope
+│  │  │  └─ commands.ts           # CommandHandler — ritorna Result
 │  │  └─ domains/
 │  │     └─ income/
 │  │        ├─ types.ts
@@ -129,6 +131,7 @@ solvent/
 │        ├─ it.ts
 │        └─ en.ts
 └─ tests/
+   ├─ contracts/       result · money · pools · ledger · bounded · events · save · commands
    ├─ kernel/          clock · rng · bus · registry · ledger
    ├─ domains/         income (seed fisso)
    ├─ save/            roundtrip
@@ -155,7 +158,7 @@ Legenda: **🔒 impossibile** = il tipo o la struttura non permettono di scriver
 | 8   | Il main scrive la versione del salvataggio | Il tipo `SavePayload` del renderer non ha un campo `version`                                               | 🔒      |
 | 9   | Ogni lista storica ha un limite dichiarato | `boundedList<T>(max)` è l'unico costruttore + il validatore rifiuta array oltre `max`                      | 🔒      |
 | 10  | Un solo stile di esito                     | `CommandHandler` ritorna `Result` per tipo; fuori dai comandi serve un lint                                | ⚠️ → ✅ |
-| 11  | Denaro `Decimal` end-to-end                | `Money = Decimal` è una classe: TS rifiuta `number` e rifiuta `+` / `*`                                    | 🔒      |
+| 11  | Denaro `Decimal` end-to-end                | `Money = Decimal` è una classe + lint sulle conversioni nei domini                                         | 🔒      |
 | 12  | Nessuna stringa utente hardcoded           | Test di parità i18n (✅) + test euristico sui template `.vue` (⚠️)                                         | ✅ / ⚠️ |
 
 ### Le due regole non meccanizzabili al 100%, e la proposta

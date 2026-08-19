@@ -81,7 +81,7 @@ configurato dopo che c'erano già 156 file.
 | ID                                   | Titolo                                                                | Budget                | Stato      |
 | ------------------------------------ | --------------------------------------------------------------------- | --------------------- | ---------- |
 | [D001](D001-tooling-e-gate.md)       | Tooling, regole e gate di qualità                                     | 191 config + 265 test | **Chiusa** |
-| [D002](D002-contratti.md)            | Contratti: `Result`, `Money`, `bounded`, eventi, salvataggio, comandi | ~120                  | Aperta     |
+| [D002](D002-contratti.md)            | Contratti: `Result`, `Money`, `bounded`, eventi, salvataggio, comandi | 113 codice + 417 test | **Chiusa** |
 | [D003](D003-kernel-clock.md)         | Kernel: Clock                                                         | ~40                   | Aperta     |
 | [D004](D004-kernel-rng.md)           | Kernel: Rng                                                           | ~70                   | Aperta     |
 | [D005](D005-kernel-bus.md)           | Kernel: Bus                                                           | ~50                   | Aperta     |

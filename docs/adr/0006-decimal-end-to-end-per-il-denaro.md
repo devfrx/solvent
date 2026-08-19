@@ -1,6 +1,6 @@
 # ADR 0006 — Il denaro è `Decimal` end-to-end
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — D002: `contracts/money.ts` e il lint sulle conversioni sotto `domains/**`
 - **Data:** 2026-08-19
 
 ## Contesto
