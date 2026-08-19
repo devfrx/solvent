@@ -26,9 +26,12 @@ stateDiagram-v2
 
     InGioco --> Chiusura: l'utente chiude
     Chiusura --> [*]: salvataggio completato
+    Chiusura --> Errore: salvataggio fallito
 
+    Errore --> Caricamento: l'utente riprova a caricare
+    Errore --> Chiusura: l'utente riprova a salvare
     Errore --> InGioco: l'utente sceglie partita nuova
-    Errore --> [*]: l'utente chiude
+    Errore --> [*]: l'utente chiude lo stesso
 ```
 
 ## Le regole che il diagramma stabilisce
@@ -48,8 +51,16 @@ che sono la stessa: _è passato del tempo mentre non guardavamo_.
 scelte. Non azzera in silenzio: la partita di qualcuno vale più della comodità di non gestire il
 caso.
 
+**`Errore` ha due cause e una schermata sola**, e le due uscite non coincidono (D012). Da un
+**caricamento** fallito si esce ritentando o iniziando una partita nuova. Da un **salvataggio
+finale** fallito si esce ritentando, oppure chiudendo lo stesso e perdendo i progressi non
+scritti — lì la partita è ancora tutta in memoria, e la finestra è rimasta aperta apposta. Il
+codice dell'errore non basta a distinguerle (`error.save.io` esce da entrambe): a dirlo è
+`failedDuring` nello store.
+
 **`Chiusura` attende il salvataggio.** La finestra si chiude dopo che il main ha completato la
-scrittura atomica, non prima.
+scrittura atomica, non prima. Se quella scrittura fallisce la finestra **non** si chiude: si passa
+in `Errore`, che è l'unico arco che entra in quello stato senza venire da `Caricamento`.
 
 ## Quando si salva
 

@@ -323,3 +323,238 @@ describe('i comandi', () => {
     expect(toString(store.balances.cash)).toBe('0')
   })
 })
+
+describe('i selettori del reddito', () => {
+  /** L'upgrade si paga **solo** con la carta (D010), e il reddito entra in contanti. */
+  const fundCard = (amount: string): void => {
+    game.ctx.ledger.transaction(income('card', fromString(amount)), {
+      reason: 'reason.income.tick'
+    })
+  }
+
+  it('il prezzo è quello del dominio, non un numero ricopiato', async () => {
+    const store = await start()
+
+    expect(toString(store.upgradeCost)).toBe(toString(BALANCE.UPGRADE_COST))
+  })
+
+  it('il reddito al secondo è quello base finché non si compra', async () => {
+    const store = await start()
+
+    expect(toString(store.incomePerSecond)).toBe(toString(BALANCE.INCOME_BASE_PER_SECOND))
+  })
+
+  it('e cresce quando l’acquisto riesce: i modificatori non annunciano niente', async () => {
+    // Registrare un modificatore non è un movimento economico, quindi il Bus tace: se lo store
+    // non rileggesse, il pannello resterebbe a 12,00 €/s per sempre dopo un acquisto riuscito.
+    const store = await start()
+    fundCard('800')
+
+    expect(store.buyUpgrade().ok).toBe(true)
+
+    const boosted = BALANCE.INCOME_BASE_PER_SECOND.mul(BALANCE.UPGRADE_MULTIPLIER)
+    expect(toString(store.incomePerSecond)).toBe(toString(boosted))
+    expect(store.upgraded).toBe(true)
+  })
+
+  it('un caricamento con l’upgrade già comprato arriva con i numeri giusti', async () => {
+    // Il mirror va riletto a mano anche qui: caricare non emette, e il registro dei modificatori
+    // lo rimette a posto il sistema durante `load`.
+    const payload = freshPayload()
+    const upgraded: SavePayload = { ...payload, systems: { income: { upgraded: true } } }
+
+    const store = await start({ load: found(upgraded, SAVED_AT), wallClock: SAVED_AT })
+
+    expect(store.upgraded).toBe(true)
+    expect(store.canBuyUpgrade).toBe(false)
+    const boosted = BALANCE.INCOME_BASE_PER_SECOND.mul(BALANCE.UPGRADE_MULTIPLIER)
+    expect(toString(store.incomePerSecond)).toBe(toString(boosted))
+  })
+
+  it('una partita nuova riporta indietro anche il reddito', async () => {
+    const store = await start()
+    fundCard('800')
+    store.buyUpgrade()
+
+    await store.newGame()
+
+    expect(store.upgraded).toBe(false)
+    expect(toString(store.incomePerSecond)).toBe(toString(BALANCE.INCOME_BASE_PER_SECOND))
+  })
+})
+
+describe('l’anteprima e il comando dicono la stessa cosa', () => {
+  const fundCard = (amount: string): void => {
+    game.ctx.ledger.transaction(income('card', fromString(amount)), {
+      reason: 'reason.income.tick'
+    })
+  }
+
+  /** Quando i due divergono si spegne un pulsante che avrebbe funzionato, o viceversa. */
+  const agreeOn = (store: ReturnType<typeof useGameStore>): boolean => {
+    const foreseen = store.canBuyUpgrade
+    const actual = store.buyUpgrade()
+    expect(actual.ok).toBe(foreseen)
+    return foreseen
+  }
+
+  it('con la carta vuota: no, e il Ledger dice perché', async () => {
+    const store = await start()
+
+    expect(agreeOn(store)).toBe(false)
+  })
+
+  it('con un centesimo in meno del prezzo: ancora no', async () => {
+    const store = await start()
+    fundCard(toString(BALANCE.UPGRADE_COST.minus(fromString('0.01'))))
+
+    expect(agreeOn(store)).toBe(false)
+  })
+
+  it('con il prezzo esatto: sì', async () => {
+    const store = await start()
+    fundCard(toString(BALANCE.UPGRADE_COST))
+
+    expect(agreeOn(store)).toBe(true)
+  })
+
+  it('con i soldi in contanti invece che sulla carta: no, e non è il saldo totale a decidere', async () => {
+    // È la trappola della fetta: il reddito entra in contanti, l'upgrade si paga con la carta, e
+    // il ponte fra i due è il bancomat. Un selettore che guardasse la somma direbbe di sì.
+    const store = await start()
+    game.ctx.ledger.transaction(income('cash', fromString('5000')), {
+      reason: 'reason.income.tick'
+    })
+
+    expect(agreeOn(store)).toBe(false)
+  })
+
+  it('la seconda volta: no da entrambe le parti', async () => {
+    const store = await start()
+    fundCard('2000')
+    expect(agreeOn(store)).toBe(true)
+
+    expect(agreeOn(store)).toBe(false)
+  })
+})
+
+describe('le due cause di un errore', () => {
+  it('un caricamento fallito si dichiara tale', async () => {
+    const store = await start({
+      load: () => Promise.resolve({ ok: false, error: { code: 'error.save.corrupt' } })
+    })
+
+    expect(store.status).toBe('failed')
+    expect(store.failedDuring).toBe('loading')
+  })
+
+  it('un salvataggio finale fallito no, e lo stesso codice non basta a distinguerli', async () => {
+    const store = await start({
+      save: () =>
+        Promise.resolve({ ok: false, error: { code: 'error.save.io', cause: 'disco pieno' } })
+    })
+
+    stage.requestClose()
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(store.failure?.code).toBe('error.save.io')
+    expect(store.failedDuring).toBe('saving')
+  })
+
+  it('riprovare dopo un salvataggio fallito riscrive, e allora la finestra si chiude', async () => {
+    const written: SavePayload[] = []
+    let broken = true
+    const store = await start({
+      save: (payload) => {
+        written.push(payload)
+        if (broken) {
+          return Promise.resolve({ ok: false, error: { code: 'error.save.io', cause: 'pieno' } })
+        }
+        return Promise.resolve({ ok: true, value: SAVED_AT })
+      }
+    })
+
+    stage.requestClose()
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(stage.isClosed()).toBe(false)
+
+    broken = false
+    await store.retry()
+
+    expect(written).toHaveLength(2)
+    expect(stage.isClosed()).toBe(true)
+    expect(store.savedAt).toBe(SAVED_AT)
+  })
+
+  it('riprovare dopo un caricamento fallito ricarica', async () => {
+    let broken = true
+    const store = await start({
+      load: () => {
+        if (broken) return Promise.resolve({ ok: false, error: { code: 'error.save.corrupt' } })
+        return Promise.resolve({ ok: true, value: { present: false } })
+      }
+    })
+    expect(store.status).toBe('failed')
+
+    broken = false
+    await store.retry()
+
+    expect(store.status).toBe('playing')
+    expect(store.failedDuring).toBeNull()
+  })
+
+  it('chiudere lo stesso non riscrive niente: è la scelta di perdere qualcosa', async () => {
+    const written: SavePayload[] = []
+    const store = await start({
+      save: (payload) => {
+        written.push(payload)
+        return Promise.resolve({ ok: false, error: { code: 'error.save.io', cause: 'pieno' } })
+      }
+    })
+
+    stage.requestClose()
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(store.status).toBe('failed')
+
+    store.closeWithoutSaving()
+
+    expect(stage.isClosed()).toBe(true)
+    expect(written).toHaveLength(1)
+  })
+})
+
+describe('il tempo passato che la schermata di recupero mostra', () => {
+  it("all'avvio è la distanza dall'ultimo salvataggio", async () => {
+    const store = await start({
+      load: found(freshPayload(), SAVED_AT),
+      wallClock: SAVED_AT + FIVE_SECONDS * SECOND
+    })
+
+    expect(store.awayFor).toBe(FIVE_SECONDS * SECOND)
+  })
+
+  it('un salvataggio dal futuro non produce un tempo negativo', async () => {
+    const store = await start({
+      load: found(freshPayload(), SAVED_AT),
+      wallClock: SAVED_AT - 60 * SECOND
+    })
+
+    expect(store.awayFor).toBe(0)
+  })
+
+  it('al ritorno da Sospeso è quanto la finestra è stata nascosta', async () => {
+    const hidden = 3 * 60 * SECOND
+    const store = await start({ wallClock: SAVED_AT })
+    stage.frame()
+
+    stage.setVisible(false)
+    stage.setWallClock(SAVED_AT + hidden)
+    stage.setVisible(true)
+
+    expect(store.status).toBe('recovering')
+    expect(store.awayFor).toBe(hidden)
+  })
+})

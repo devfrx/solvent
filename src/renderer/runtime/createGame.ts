@@ -3,6 +3,7 @@ import type { Result } from '@core/contracts/result'
 import { err } from '@core/contracts/result'
 import type { SavePayload } from '@core/contracts/save'
 
+import type { Modifiers } from '@core/balance/modifiers'
 import { createModifiers } from '@core/balance/modifiers'
 import { createAtm, type Atm } from '@core/domains/atm/commands'
 import { createIncome, type Income } from '@core/domains/income/system'
@@ -44,6 +45,12 @@ export type GameLoadError =
 export interface Game {
   readonly ctx: SystemContext
   readonly registry: Registry
+  /**
+   * Il registro dei modificatori. Non sta nel `SystemContext` — vive in `balance/`, e `kernel/`
+   * non può importarlo (D008) — ma esce di qui perché `incomePerSecond` lo vuole: è il numero che
+   * la UI mostra, e a leggerlo è lo store, non un `.vue` (R05).
+   */
+  readonly modifiers: Modifiers
   readonly income: Income
   readonly atm: Atm
   readonly save: () => SavePayload
@@ -68,6 +75,7 @@ export const createGame = (seed: number = randomSeed()): Game => {
   return {
     ctx,
     registry,
+    modifiers,
     income,
     atm,
 

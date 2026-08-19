@@ -34,6 +34,8 @@ flowchart TD
 
   CMP --> ST
   CMP --> I18N
+  I18N --> CON
+  I18N --> DOM
   ST  --> RT
   ST  --> DOM
   RT  --> DOM
@@ -134,17 +136,20 @@ solvent/
 │  └─ renderer/
 │     ├─ index.html
 │     ├─ main.ts
-│     ├─ App.vue
+│     ├─ App.vue                  # il guscio: i 7 stati, la navigazione, i token di stile
 │     ├─ runtime/
 │     │  ├─ createGame.ts         # registra i sistemi, monta il contesto
+│     │  ├─ host.ts               # l'unico file che tocca il browser
 │     │  └─ loop.ts               # rAF + accumulatore -> tick a passo fisso
 │     ├─ stores/
-│     │  └─ game.ts               # unico store della fetta
+│     │  └─ game.ts               # unico store della fetta: stato, comandi, selettori
+│     ├─ views/
+│     │  ├─ HomeView.vue          # saldo + upgrade; bancomat e cruscotto con D015
+│     │  └─ StatsView.vue
 │     ├─ components/
-│     │  ├─ BalancePanel.vue
-│     │  └─ IncomePanel.vue
+│     │  └─ IncomePanel.vue       # + BankCard3d, CashPanel, AtmPanel, StatTile con D015
 │     └─ i18n/
-│        ├─ index.ts
+│        ├─ index.ts              # chiavi tipizzate, Translator, GameError
 │        ├─ it.ts
 │        └─ en.ts
 └─ tests/
@@ -154,7 +159,7 @@ solvent/
    ├─ domains/         income/ rules - commands - system
    ├─ save/            schema - roundtrip - kernel-roundtrip - migrations - ipc - preload
    ├─ balance/         modifiers · targets
-   ├─ i18n/            parity
+   ├─ i18n/            parity · translator
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
                        eslint-disable · bus-synchronous · main-save-only
                        registry-completeness · registry-no-special-cases

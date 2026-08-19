@@ -26,7 +26,7 @@ Colonna "cosa lo farebbe tornare": il gesto preciso che riaprirebbe il difetto.
 | A10 | liste storiche illimitate           | ADR 0010 — `boundedList`          | basso           | usare un array normale per una history                                                                      |
 | A11 | pipeline mista `number`/`Decimal`   | ADR 0006 — tipo classe            | molto basso     | un `.toNumber()` in mezzo a una catena                                                                      |
 | A12 | 62 `boolean` contro 35 `{success}`  | ADR 0007 + lint                   | **medio**       | ritornare `boolean` da una funzione che non è un comando                                                    |
-| A13 | 20 chiavi i18n mancanti             | ADR 0011 — test di parità         | molto basso     | aggiungere una terza lingua senza estendere il test                                                         |
+| A13 | 20 chiavi i18n mancanti             | ADR 0011 — test di parità         | molto basso     | una terza lingua che il test non confronta — il tipo `Dictionary` però la ferma prima che compili           |
 | A14 | codice morto (CSS, API)             | ADR 0012 — flag TS                | **medio**       | il CSS morto non è visto da TypeScript: resta scoperto                                                      |
 | A15 | 4 nomi, `publish.url` finto         | ADR 0008 + test identità          | basso           | aggiungere un quinto posto dove appare il nome, non coperto dal test                                        |
 | A16 | 154/156 file non formattati         | ADR 0013 — gate                   | molto basso     | disattivare il gate perché "urgente"                                                                        |

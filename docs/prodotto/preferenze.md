@@ -39,7 +39,9 @@ sale non fa ballare il resto della riga — è la differenza fra un contatore le
 fastidioso. L'accento riservato al denaro in entrata fa sì che il verde voglia dire sempre la
 stessa cosa.
 
-**Come si applica:** i colori diventano token CSS in D012. Nessun secondo verde, mai.
+**Come si applica:** fatto in D012. I token vivono in un blocco `<style>` non scoped dentro
+`App.vue` — l'unico non scoped del progetto — e il resto del CSS sta attaccato al componente che lo
+usa, così togliere il componente toglie anche il suo stile. Nessun secondo verde, mai.
 
 ---
 

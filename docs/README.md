@@ -82,10 +82,12 @@ dominio**: `income` produce reddito in contanti a ogni tick e vende un upgrade c
 la carta. Con D014 è nato il **secondo**, e il ciclo si chiude: `atm` sposta denaro fra contanti e
 carta trattenendo una commissione, e non ha stato — è un dominio di soli comandi. Con D011 il gioco
 **gira**: il bootstrap monta i sistemi, il loop avanza a passo fisso con l'accumulatore, lo store
-rispecchia il Bus senza calcolare, e la finestra salva prima di chiudersi. La prossima delega è
-[D012 — Il guscio, le parole e il reddito](delega/D012-ui-e-i18n.md), che il 2026-08-19 è stata
-**spezzata** in due: la home col bancomat è diventata
-[D015](delega/D015-home-bancomat.md).
+rispecchia il Bus senza calcolare, e la finestra salva prima di chiudersi. Con D012 il gioco **parla**: il guscio veste i sette stati
+del ciclo di vita, il saldo e l'upgrade hanno una schermata, e ogni parola passa da una chiave in
+due lingue — le chiavi del bancomat comprese, perché una lingua che si completa in due tempi è il
+difetto A13. La prossima delega è
+[D015 — La home: bancomat, carta e cruscotto](delega/D015-home-bancomat.md), nata il 2026-08-19
+dallo spezzamento di [D012](delega/D012-ui-e-i18n.md).
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati
@@ -99,5 +101,8 @@ delega per delega, non per decreto. Con D002 sono passati
 [0019](adr/0019-transazioni-atomiche-nel-ledger.md),
 [0020](adr/0020-partita-doppia.md) e il nuovo
 [0021](adr/0021-una-sola-primitiva-per-il-denaro.md), con D009
-[0004](adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md) e con D010 il nuovo
-[0024](adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md).
+[0004](adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md), con D010 il nuovo
+[0024](adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md), con D011
+[0001](adr/0001-simulazione-nel-renderer-core-puro.md) e
+[0009](adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md), e con D012
+[0011](adr/0011-i18n-obbligatoria-con-parita-verificata.md).
