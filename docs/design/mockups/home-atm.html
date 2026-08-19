@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mockup — Home ATM e carta 3D</title>
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #171a21;
+        --panel2: #1e222b;
+        --line: #2a2f3a;
+        --text: #e6e8ec;
+        --muted: #939aa8;
+        --accent: #4ade80;
+        --warn: #fbbf24;
+        --danger: #f87171;
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #090a0d;
+        color: var(--text);
+        padding: 32px;
+      }
+      h1 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 4px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 0 0 8px;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 12px;
+        max-width: 720px;
+        line-height: 1.65;
+        margin: 0 0 26px;
+      }
+      .note b {
+        color: var(--text);
+      }
+      .lay {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 28px;
+        align-items: flex-start;
+      }
+      .col > .label {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 8px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .app {
+        width: 420px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .titlebar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: var(--panel2);
+        border-bottom: 1px solid var(--line);
+      }
+      .titlebar .name {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .dots {
+        display: flex;
+        gap: 6px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--line);
+      }
+      .nav {
+        display: flex;
+        gap: 2px;
+        padding: 8px 10px 0;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel2);
+      }
+      .nav span {
+        font-size: 12px;
+        color: var(--muted);
+        padding: 7px 11px;
+        border-radius: 6px 6px 0 0;
+      }
+      .nav span.on {
+        color: var(--text);
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-bottom-color: var(--bg);
+        margin-bottom: -1px;
+      }
+      .body {
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      /* ---- carta 3D ---- */
+      .stage {
+        perspective: 1100px;
+        display: flex;
+        justify-content: center;
+        padding: 6px 0 2px;
+        user-select: none;
+      }
+      .card3d {
+        width: 290px;
+        height: 180px;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+        cursor: grab;
+        touch-action: none;
+      }
+      .card3d.drag {
+        transition: none;
+        cursor: grabbing;
+      }
+      .face {
+        position: absolute;
+        inset: 0;
+        border-radius: 14px;
+        backface-visibility: hidden;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow:
+          0 18px 40px -18px rgba(0, 0, 0, 0.9),
+          0 0 0 1px rgba(255, 255, 255, 0.07) inset;
+      }
+      .front {
+        background: linear-gradient(
+          135deg,
+          #3a3016 0%,
+          #8a6d24 38%,
+          #d9b451 55%,
+          #8a6d24 72%,
+          #3a3016 100%
+        );
+      }
+      .back {
+        background: linear-gradient(135deg, #2a2413 0%, #6d5620 50%, #2a2413 100%);
+        transform: rotateY(180deg);
+      }
+      .brand {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .brand .b {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        color: #1c1608;
+      }
+      .brand .t {
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        color: #3a2f10;
+        text-transform: uppercase;
+      }
+      .chip {
+        width: 38px;
+        height: 28px;
+        border-radius: 5px;
+        background: linear-gradient(145deg, #f5e2a0, #b8912f);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+      }
+      .pan {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 16px;
+        letter-spacing: 0.13em;
+        color: #231a07;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.22);
+      }
+      .foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        font-size: 9px;
+        color: #2e2409;
+        letter-spacing: 0.08em;
+      }
+      .foot .nm {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+      }
+      .stripe {
+        height: 36px;
+        background: #120f06;
+        margin: -16px -16px 0;
+        border-radius: 14px 14px 0 0;
+      }
+      .backrow {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #231a07;
+        padding: 2px 0;
+      }
+      .backrow b {
+        font-size: 12px;
+      }
+      .bar {
+        height: 5px;
+        border-radius: 3px;
+        background: rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        margin-top: 3px;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+        background: #231a07;
+      }
+      .hint {
+        text-align: center;
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      /* ---- pannelli ---- */
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 14px;
+      }
+      .k {
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+      }
+      .amt {
+        font-size: 27px;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+        margin: 5px 0 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .amt.small {
+        font-size: 20px;
+      }
+      .cap {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 9px;
+      }
+      .capbar {
+        height: 5px;
+        border-radius: 3px;
+        background: var(--panel2);
+        overflow: hidden;
+        margin-top: 4px;
+      }
+      .capbar i {
+        display: block;
+        height: 100%;
+        background: var(--warn);
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      button {
+        padding: 11px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        width: 100%;
+      }
+      .prim {
+        background: var(--accent);
+        color: #06240f;
+      }
+      .sec {
+        background: var(--panel2);
+        color: var(--text);
+        border-color: var(--line);
+      }
+      .ops {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        margin-top: 9px;
+      }
+      .op {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+      .op .d {
+        color: var(--muted);
+      }
+      .plus {
+        color: var(--accent);
+      }
+      .minus {
+        color: var(--text);
+      }
+      .fee {
+        color: var(--warn);
+      }
+      .zone {
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: 6px 0 -3px;
+      }
+      .zone:after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--line);
+      }
+      .zone em {
+        font-style: normal;
+        color: var(--warn);
+        letter-spacing: 0;
+        text-transform: none;
+      }
+      .tiles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .tile {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 11px;
+      }
+      .tile .v {
+        font-size: 15px;
+        font-weight: 600;
+        margin-top: 3px;
+        font-variant-numeric: tabular-nums;
+      }
+      .tile .v.up {
+        color: var(--accent);
+      }
+
+      .legs {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 11.5px;
+        line-height: 1.9;
+        background: var(--panel2);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 11px;
+      }
+      .legs .z {
+        border-top: 1px solid var(--line);
+        margin-top: 6px;
+        padding-top: 6px;
+        color: var(--accent);
+      }
+      .keys {
+        margin-top: 10px;
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.75;
+        max-width: 420px;
+      }
+      .key {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 11px;
+        color: var(--warn);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .card3d {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Mockup — Home ATM e carta 3D</h1>
+    <p class="sub">Fetta 01. Trascina la carta per ruotarla; lasciala e torna a riposo.</p>
+    <p class="note">
+      La home è <b>bancomat sopra, cruscotto sotto</b>. Il bancomat chiede una cosa — dove metti i
+      soldi — e la commissione si vede <b>prima</b> della conferma. Il cruscotto ha un
+      <b>tetto di sei riquadri</b>, verificato da un test: il settimo sostituisce, non si aggiunge.
+      È l'unica cosa che impedisce alle statistiche di mangiarsi il bancomat, che è quello che
+      succede sempre. Il retro della carta non è decorativo: ospita plafond, limite e punteggio di
+      credito. Ogni testo è una chiave i18n (in giallo sotto). Vedi <code>adr/0018</code> e
+      <code>prodotto/preferenze.md</code>.
+    </p>
+
+    <div class="lay">
+      <div class="col">
+        <div class="label">Home — bancomat + cruscotto</div>
+        <div class="app">
+          <div class="titlebar">
+            <span class="name">Solvent</span
+            ><span class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+          </div>
+          <div class="nav">
+            <span class="on">Bancomat</span><span>Statistiche</span><span>Caveau</span
+            ><span>Impostazioni</span>
+          </div>
+          <div class="body">
+            <div class="zone">Bancomat</div>
+
+            <div class="stage">
+              <div class="card3d" id="card">
+                <div class="face front">
+                  <div class="brand"><span class="b">SOLVENT</span><span class="t">Gold</span></div>
+                  <div class="chip"></div>
+                  <div class="pan">4218&nbsp; 9042&nbsp; 1177&nbsp; 3065</div>
+                  <div class="foot">
+                    <span class="nm">M. ROSSI</span><span>VALIDA FINO 09/31</span>
+                  </div>
+                </div>
+                <div class="face back">
+                  <div class="stripe"></div>
+                  <div>
+                    <div class="backrow"><span>Plafond usato</span><b>3.100 / 12.000 €</b></div>
+                    <div class="bar"><i style="width: 26%"></i></div>
+                  </div>
+                  <div class="backrow"><span>Punteggio di credito</span><b>742 · buono</b></div>
+                  <div class="backrow"><span>Interesse maturato oggi</span><b>+ 18,40 €</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="hint">Trascina per girare la carta</div>
+
+            <div class="panel">
+              <div class="k">Sul conto</div>
+              <div class="amt">18.402,15 €</div>
+            </div>
+
+            <div class="panel">
+              <div class="k">Contanti</div>
+              <div class="amt small">8.420,00 €</div>
+              <div class="cap"><span>Capienza del caveau</span><span>8.420 / 10.000</span></div>
+              <div class="capbar"><i style="width: 84%"></i></div>
+            </div>
+
+            <div class="grid2">
+              <button class="sec">Deposita</button>
+              <button class="prim">Preleva</button>
+            </div>
+
+            <div class="zone">
+              Cruscotto <em>6 / 6 — il settimo sostituisce, non si aggiunge</em>
+            </div>
+
+            <div class="tiles">
+              <div class="tile">
+                <div class="k">Reddito</div>
+                <div class="v up">+ 12,00 €/s</div>
+              </div>
+              <div class="tile">
+                <div class="k">Patrimonio netto</div>
+                <div class="v">26.822,15 €</div>
+              </div>
+              <div class="tile">
+                <div class="k">Guadagnato oggi</div>
+                <div class="v up">+ 4.180,00 €</div>
+              </div>
+              <div class="tile">
+                <div class="k">Commissioni pagate</div>
+                <div class="v">− 41,50 €</div>
+              </div>
+              <div class="tile">
+                <div class="k">Punteggio credito</div>
+                <div class="v">742</div>
+              </div>
+              <div class="tile">
+                <div class="k">Tempo di gioco</div>
+                <div class="v">6h 12m</div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="k">Ultime operazioni</div>
+              <div class="ops">
+                <div class="op">
+                  <span class="d">Stipendio</span><span class="plus">+ 1.240,00 €</span>
+                </div>
+                <div class="op">
+                  <span class="d">Prelievo</span><span class="minus">− 500,00 €</span>
+                </div>
+                <div class="op">
+                  <span class="d">Commissione bancomat</span><span class="fee">− 2,50 €</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="keys">
+          <span class="key">atm.account.title</span> · <span class="key">atm.cash.title</span> ·
+          <span class="key">atm.cash.capacity</span> · <span class="key">atm.deposit</span> ·
+          <span class="key">atm.withdraw</span> · <span class="key">atm.recent.title</span><br />
+          <span class="key">card.tier.gold</span> · <span class="key">card.back.limit_used</span> ·
+          <span class="key">card.back.credit_score</span> · <span class="key">card.hint.drag</span>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="label">Prelievo — la commissione si vede prima</div>
+        <div class="app" style="width: 380px">
+          <div class="titlebar">
+            <span class="name">Solvent</span
+            ><span class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+          </div>
+          <div class="body">
+            <div class="panel">
+              <div class="k">Preleva dal conto</div>
+              <div class="amt" style="font-size: 30px">500,00 €</div>
+              <div class="grid2" style="margin-top: 12px">
+                <button class="sec">100 €</button><button class="sec">500 €</button>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="k" style="margin-bottom: 9px">Cosa succede</div>
+              <div class="legs">
+                Dal conto &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;− 500,00<br />
+                Ai contanti &nbsp;&nbsp;&nbsp;+ 497,50<br />
+                Commissione &nbsp;&nbsp;+&nbsp;&nbsp; 2,50
+                <div class="z">
+                  somma&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0,00 &nbsp;
+                  ✓ i conti tornano
+                </div>
+              </div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 9px; line-height: 1.55">
+                Il caveau passerebbe a 8.917 / 10.000. Sopra la capienza il prelievo viene
+                rifiutato, con un motivo, non con un pulsante spento.
+              </div>
+            </div>
+
+            <button class="prim">Conferma prelievo</button>
+          </div>
+        </div>
+        <div class="keys">
+          <span class="key">atm.withdraw.title</span> ·
+          <span class="key">atm.withdraw.breakdown</span> · <span class="key">atm.fee</span> ·
+          <span class="key">atm.confirm</span><br />
+          <span class="key">error.ledger.capacity_exceeded</span> ·
+          <span class="key">error.ledger.insufficient_funds</span><br />
+          Il riquadro monospazio è la <b>transazione</b> vera: tre movimenti che sommano a zero
+          (<code>adr/0019</code>, <code>adr/0020</code>). Mostrarla non è un vezzo — è ciò che rende
+          il gioco leggibile invece che magico.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      ;(function () {
+        var el = document.getElementById('card')
+        var ry = -14,
+          rx = 6,
+          dragging = false,
+          sx = 0,
+          sy = 0,
+          bry = 0,
+          brx = 0,
+          flipped = false,
+          moved = 0
+        function apply() {
+          el.style.transform = 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)'
+        }
+        apply()
+
+        el.addEventListener('pointerdown', function (e) {
+          dragging = true
+          moved = 0
+          sx = e.clientX
+          sy = e.clientY
+          bry = ry
+          brx = rx
+          el.classList.add('drag')
+          el.setPointerCapture(e.pointerId)
+        })
+        el.addEventListener('pointermove', function (e) {
+          if (!dragging) return
+          var dx = e.clientX - sx,
+            dy = e.clientY - sy
+          moved = Math.max(moved, Math.abs(dx) + Math.abs(dy))
+          ry = bry + dx * 0.6
+          rx = Math.max(-28, Math.min(28, brx - dy * 0.35))
+          apply()
+        })
+        function end() {
+          if (!dragging) return
+          dragging = false
+          el.classList.remove('drag')
+          if (moved < 6) {
+            flipped = !flipped
+          } // clic secco = gira
+          else {
+            flipped = Math.abs((((ry % 360) + 360) % 360) - 180) < 90
+          }
+          ry = flipped ? 180 : 0
+          rx = flipped ? -4 : 6 // riposo: leggera prospettiva
+          if (!flipped) ry = -14
+          apply()
+        }
+        el.addEventListener('pointerup', end)
+        el.addEventListener('pointercancel', end)
+      })()
+    </script>
+  </body>
+</html>
