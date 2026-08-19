@@ -1,6 +1,6 @@
 # D002 — Contratti
 
-- **Stato:** **Chiusa** — 2026-08-19, ramo `d002-contratti`
+- **Stato:** **Chiusa** — 2026-08-19, commit `288367e`, ramo `d002-contratti`
 - **Dipende da:** D001
 - **Sblocca:** D003, D004, D005, D009
 - **ADR vincolanti:** 0004, 0006, 0007, 0010
