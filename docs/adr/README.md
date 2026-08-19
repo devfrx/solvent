@@ -26,13 +26,13 @@ prima, altrimenti sarebbe solo una buona intenzione.
 
 Sono passate ad _Accettata_: **0006** e **0007** con [D002](../delega/D002-contratti.md),
 **0005** con [D004](../delega/D004-kernel-rng.md), **0016** con
-[D005](../delega/D005-kernel-bus.md), **0002** con
-[D006](../delega/D006-kernel-registry.md). Il loro meccanismo è tutto dentro quella delega.
+[D005](../delega/D005-kernel-bus.md), **0002** con [D006](../delega/D006-kernel-registry.md),
+**0003**, **0017**, **0019**, **0020** e **0021** con
+[D007](../delega/D007-kernel-ledger.md). Il loro meccanismo è tutto dentro quella delega.
 
 Le altre restano _Proposta_ perché il meccanismo è a metà: **0004** e **0010** si chiudono con D009
-(lo schema del main), **0017** con D007 (il Ledger che legge `POOLS`), **0009** con D011 — i tipi
-branded ci sono, il passo fisso con accumulatore è nel loop. Metà meccanismo non è una decisione in
-vigore.
+(lo schema del main), **0009** con D011 — i tipi branded ci sono, il passo fisso con accumulatore è
+nel loop. Metà meccanismo non è una decisione in vigore.
 
 ## Le decisioni
 
@@ -40,7 +40,7 @@ vigore.
 | ------------------------------------------------------------------- | ------------------------------------------------------ | ------------- | ----------------------------------------------------------------------- | --------------- |
 | [0001](0001-simulazione-nel-renderer-core-puro.md)                  | La simulazione gira nel renderer, `core/` è puro       | Proposta      | dove vive la logica, cosa può importare `core/`                         | A02             |
 | [0002](0002-registry-unica-lista-di-sistemi.md)                     | Il Registry è l'unica lista di sistemi                 | **Accettata** | come si aggiunge un sistema, chi itera                                  | A01, A06        |
-| [0003](0003-ledger-unica-porta-del-denaro.md)                       | Il Ledger è l'unica porta del denaro                   | Proposta      | chi può cambiare un saldo                                               | A05             |
+| [0003](0003-ledger-unica-porta-del-denaro.md)                       | Il Ledger è l'unica porta del denaro                   | **Accettata** | chi può cambiare un saldo                                               | A05             |
 | [0004](0004-il-main-e-proprietario-del-contratto-di-salvataggio.md) | Il main possiede il contratto di salvataggio           | Proposta      | chi scrive la versione, dove vivono le migrazioni                       | A07, A08        |
 | [0005](0005-rng-seedato-con-stream-per-dominio.md)                  | PRNG seedato con stream per dominio                    | **Accettata** | ogni sorgente di casualità del gioco                                    | A03             |
 | [0006](0006-decimal-end-to-end-per-il-denaro.md)                    | Il denaro è `Decimal` end-to-end                       | **Accettata** | il tipo di ogni valore monetario                                        | A11             |
@@ -54,15 +54,18 @@ vigore.
 | [0014](0014-una-fetta-verticale-alla-volta.md)                      | Una fetta verticale alla volta                         | Proposta      | l'ordine di tutto il lavoro futuro                                      | A17             |
 | [0015](0015-criterio-di-ammissione-delle-dipendenze.md)             | Criterio di ammissione delle dipendenze                | Proposta      | ogni `npm install` da qui in avanti                                     | —               |
 | [0016](0016-il-bus-e-sincrono-e-fire-and-forget.md)                 | Il Bus è sincrono, fire-and-forget, non event sourcing | **Accettata** | la forma di ogni handler e di ogni sistema                              | —               |
-| [0017](0017-il-denaro-e-plurale.md)                                 | Il denaro è plurale: pool con affordance diverse       | Proposta      | ogni azione che muove denaro, in ogni dominio                           | —               |
+| [0017](0017-il-denaro-e-plurale.md)                                 | Il denaro è plurale: pool con affordance diverse       | **Accettata** | ogni azione che muove denaro, in ogni dominio                           | —               |
 | [0018](0018-la-home-e-un-atm.md)                                    | La home è un ATM, non una dashboard                    | Proposta      | la schermata principale e la navigazione                                | —               |
-| [0019](0019-transazioni-atomiche-nel-ledger.md)                     | Il Ledger applica transazioni atomiche                 | Proposta      | la primitiva di ogni movimento di denaro                                | —               |
-| [0020](0020-partita-doppia.md)                                      | Ogni transazione bilancia a zero                       | Proposta      | come si scrive ogni riga di economia, e come si misura il bilanciamento | —               |
+| [0019](0019-transazioni-atomiche-nel-ledger.md)                     | Il Ledger applica transazioni atomiche                 | **Accettata** | la primitiva di ogni movimento di denaro                                | —               |
+| [0020](0020-partita-doppia.md)                                      | Ogni transazione bilancia a zero                       | **Accettata** | come si scrive ogni riga di economia, e come si misura il bilanciamento | —               |
+| [0021](0021-una-sola-primitiva-per-il-denaro.md)                    | Una sola primitiva per il denaro: `post()` non esiste  | **Accettata** | come un dominio chiede un movimento di denaro                           | —               |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è
 esattamente il valore di quel passaggio, e sarebbe costato una migrazione del salvataggio farlo
-dopo.
+dopo. Il 0021 nasce invece dallo **scriverlo**, quel Ledger: la contraddizione fra il `post()` del
+0019 e la somma zero del 0020 era visibile sulla carta, ma quale delle due dovesse cedere si è
+visto solo con il codice davanti.
 
 I codici `A01`–`A17` sono i difetti misurati nell'audit del progetto precedente, elencati in
 [../rischi.md](../rischi.md). La catena completa difetto → regola → meccanismo → test sta in
@@ -87,11 +90,16 @@ Prese seguendo la direttiva _"la soluzione più coerente, professionale, meno pi
 Non bloccano, ma sono strutturali: se una non convince, il momento di dirlo è adesso — dopo tre
 domini costerebbe una migrazione.
 
-| Cosa                                              | ADR                                             | Alternativa scartata                                                                          |
-| ------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Ogni transazione bilancia a zero                  | [0020](0020-partita-doppia.md)                  | movimenti singoli con categoria: più corto, ma la categoria è un'etichetta che nulla verifica |
-| Il Ledger espone transazioni, non movimenti       | [0019](0019-transazioni-atomiche-nel-ledger.md) | due `post()` con rollback nel chiamante: rimette la logica del denaro fuori dal Ledger        |
-| I pool dichiarano le proprie affordance come dati | [0017](0017-il-denaro-e-plurale.md)             | un saldo unico con etichette nella UI                                                         |
+| Cosa                                              | ADR                                              | Alternativa scartata                                                                          |
+| ------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Ogni transazione bilancia a zero                  | [0020](0020-partita-doppia.md)                   | movimenti singoli con categoria: più corto, ma la categoria è un'etichetta che nulla verifica |
+| Il Ledger espone transazioni, non movimenti       | [0019](0019-transazioni-atomiche-nel-ledger.md)  | due `post()` con rollback nel chiamante: rimette la logica del denaro fuori dal Ledger        |
+| I pool dichiarano le proprie affordance come dati | [0017](0017-il-denaro-e-plurale.md)              | un saldo unico con etichette nella UI                                                         |
+| `post()` non esiste: una primitiva sola           | [0021](0021-una-sola-primitiva-per-il-denaro.md) | zucchero a due movimenti, che però rimetterebbe `world` e `sink` nei domini (INV-10)          |
+
+Le prime tre sono ora **in vigore**: D007 le ha scritte. Cambiarle non costa più zero — costa il
+Ledger e i suoi test, che è ancora poco, ma non è più niente. Il momento buono per contestarle era
+prima di D007; il secondo momento buono è prima di D014, che sarà il primo dominio a usarle.
 
 ## Decisioni deliberatamente rimandate
 

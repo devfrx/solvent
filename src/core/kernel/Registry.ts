@@ -1,9 +1,11 @@
+import type { ResetScope } from '@core/contracts/lifecycle'
 import type { Result } from '@core/contracts/result'
 import { err, ok } from '@core/contracts/result'
 import type { SystemsSave } from '@core/contracts/save'
 
 import type { Bus } from '@core/kernel/Bus'
 import type { Clock, Ticks } from '@core/kernel/Clock'
+import type { Ledger } from '@core/kernel/Ledger'
 import type { Rng } from '@core/kernel/Rng'
 
 /**
@@ -45,9 +47,6 @@ export const ORDER = {
  */
 export type SystemId = string
 
-/** `soft` = prestige, ogni sistema decide cosa conserva. `hard` = partita nuova, tutti azzerano. */
-export type ResetScope = 'soft' | 'hard'
-
 /**
  * Il kernel non sa cosa sia una statistica, per la stessa ragione per cui non sa cosa sia lo stato
  * di un sistema: lo sa il dominio che la produce e la schermata che la mostra.
@@ -59,6 +58,8 @@ export interface SystemContext {
   readonly clock: Clock
   readonly rng: Rng
   readonly bus: Bus
+  /** L'unica porta del denaro (ADR 0003). Un sistema chiede una transazione, non tocca un saldo. */
+  readonly ledger: Ledger
 }
 
 interface SystemBase {

@@ -20,13 +20,13 @@ Non si dice mai "frame" per intendere "tick": il frame è la UI, il tick è la s
 
 ## Sistemi
 
-| Termine                              | Significato                                                                                                                                     |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sistema**                          | un'unità di simulazione registrata nel Registry. Ha un `id`, un `order`, e può avere `tick`, `save`, `load`, `reset`, `stats`                   |
-| **Sistema con stato**                | un sistema che ha `save`. Se ce l'ha, ha per forza anche `load` e `reset`: lo impone il tipo                                                    |
-| **Ordine** _(`order`)_               | la posizione del sistema nella sequenza di tick. È una costante nominata, mai un numero sparso                                                  |
-| **Contesto** _(`ctx`)_               | l'insieme di Clock, Rng, Bus e Ledger passato a ogni `tick`. Non è un singleton: arriva per parametro. Oggi ne ha tre: il Ledger entra con D007 |
-| **Ambito di reset** _(`ResetScope`)_ | `soft` = prestige, alcuni sistemi conservano lo stato. `hard` = partita nuova, tutti azzerano                                                   |
+| Termine                              | Significato                                                                                                                   |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Sistema**                          | un'unità di simulazione registrata nel Registry. Ha un `id`, un `order`, e può avere `tick`, `save`, `load`, `reset`, `stats` |
+| **Sistema con stato**                | un sistema che ha `save`. Se ce l'ha, ha per forza anche `load` e `reset`: lo impone il tipo                                  |
+| **Ordine** _(`order`)_               | la posizione del sistema nella sequenza di tick. È una costante nominata, mai un numero sparso                                |
+| **Contesto** _(`ctx`)_               | l'insieme di Clock, Rng, Bus e Ledger passato a ogni `tick`. Non è un singleton: arriva per parametro. Da D007 sono quattro   |
+| **Ambito di reset** _(`ResetScope`)_ | `soft` = prestige, alcuni sistemi conservano lo stato. `hard` = partita nuova, tutti azzerano                                 |
 
 ## Denaro
 

@@ -29,7 +29,7 @@ flowchart TD
     DOM["domains/*<br/>rules · system"]
     BAL["balance/*<br/>constants · modifiers · targets"]
     KER["kernel/*<br/>Clock · Rng · Bus · Registry · Ledger"]
-    CON["contracts/*<br/>result · money · pools · ledger<br/>bounded · events · save · commands"]
+    CON["contracts/*<br/>result · money · pools · ledger · lifecycle<br/>bounded · events · save · commands"]
   end
 
   CMP --> ST
@@ -110,7 +110,8 @@ solvent/
 │  │  │  ├─ result.ts             # Result<T, E>
 │  │  │  ├─ money.ts              # Money = Decimal + le uniche conversioni
 │  │  │  ├─ pools.ts              # Pool · PoolProps · POOLS come dati
-│  │  │  ├─ ledger.ts             # Posting · Transaction · Balances · LedgerError
+│  │  │  ├─ ledger.ts             # Posting · Transaction · TransactionMeta · Balances · LedgerError
+│  │  │  ├─ lifecycle.ts          # ResetScope — la parola che Registry e Ledger si scambiano
 │  │  │  ├─ bounded.ts            # boundedList<T>(max) — regola 9
 │  │  │  ├─ events.ts             # interface GameEvents — unico file
 │  │  │  ├─ save.ts               # SavePayload · SaveEnvelope
