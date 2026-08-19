@@ -1,5 +1,8 @@
 # Documenti di delega
 
+> Se stai arrivando ora sul progetto, parti da
+> **[PASSAGGIO-DI-CONSEGNE.md](PASSAGGIO-DI-CONSEGNE.md)**: stato, regole e prossimo passo.
+
 Una **delega** è un pacchetto di lavoro autosufficiente: chi la prende in mano deve poterla
 eseguire senza fare domande e senza aver letto la conversazione in cui è nata.
 

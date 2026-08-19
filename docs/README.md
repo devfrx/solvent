@@ -4,24 +4,25 @@ Mappa di tutto ciò che è scritto, a cosa serve, e quanto ci si può fidare che
 
 ## I documenti
 
-| Documento                                                    | Risponde a                                                                          | Tipo            |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------------------- | --------------- |
-| [prodotto/visione.md](prodotto/visione.md)                   | cosa sarà Solvent finito: i domini, cosa li rende profondi, come si collegano       | **vivo**        |
-| [prodotto/preferenze.md](prodotto/preferenze.md)             | le preferenze permanenti: nome, stile, home ATM, contanti/carta, carta 3D           | **vivo**        |
-| [architettura.md](architettura.md)                           | com'è fatto il sistema, cosa può importare cosa                                     | **vivo**        |
-| [adr/README.md](adr/README.md)                               | **compendio delle decisioni**: quali sono, il loro stato, cosa vincolano            | **vivo**        |
-| [adr/NNNN-*.md](adr/)                                        | _perché_ una singola decisione è stata presa così, e cosa è stato scartato          | append-only     |
-| [tracciabilita.md](tracciabilita.md)                         | dato un difetto, cosa lo impedisce; data una regola, chi la impone                  | **vivo**        |
-| [rischi.md](rischi.md)                                       | i 17 difetti misurati, i rischi che questa architettura introduce, quelli accettati | **vivo**        |
-| [glossario.md](glossario.md)                                 | cosa significa esattamente una parola, nel codice e fuori                           | **vivo**        |
-| [convenzioni.md](convenzioni.md)                             | come si chiamano le cose, come si commenta, come si committa                        | **vivo**        |
-| [qualita.md](qualita.md)                                     | quali sono i gate, cosa garantiscono, cosa **non** garantiscono                     | **vivo**        |
-| [roadmap-fette.md](roadmap-fette.md)                         | cosa si costruisce dopo, e cosa è stato lasciato fuori con quale grilletto          | **vivo**        |
-| [design/flusso-tick.md](design/flusso-tick.md)               | cosa succede fra un frame e un cambiamento di saldo                                 | **vivo**        |
-| [design/flusso-salvataggio.md](design/flusso-salvataggio.md) | chi possiede il contratto di salvataggio, e come si migra                           | **vivo**        |
-| [design/ciclo-di-vita.md](design/ciclo-di-vita.md)           | in quali stati può trovarsi l'applicazione                                          | **vivo**        |
-| [design/mockups/](design/mockups/)                           | com'è fatta la schermata, e in quali stati                                          | snapshot        |
-| [delega/](delega/)                                           | i pacchetti di lavoro: cosa fare, cosa non fare, quando è finito                    | si **chiudono** |
+| Documento                                                          | Risponde a                                                                          | Tipo            |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | --------------- |
+| [prodotto/visione.md](prodotto/visione.md)                         | cosa sarà Solvent finito: i domini, cosa li rende profondi, come si collegano       | **vivo**        |
+| [prodotto/preferenze.md](prodotto/preferenze.md)                   | le preferenze permanenti: nome, stile, home ATM, contanti/carta, carta 3D           | **vivo**        |
+| [architettura.md](architettura.md)                                 | com'è fatto il sistema, cosa può importare cosa                                     | **vivo**        |
+| [adr/README.md](adr/README.md)                                     | **compendio delle decisioni**: quali sono, il loro stato, cosa vincolano            | **vivo**        |
+| [adr/NNNN-*.md](adr/)                                              | _perché_ una singola decisione è stata presa così, e cosa è stato scartato          | append-only     |
+| [tracciabilita.md](tracciabilita.md)                               | dato un difetto, cosa lo impedisce; data una regola, chi la impone                  | **vivo**        |
+| [rischi.md](rischi.md)                                             | i 17 difetti misurati, i rischi che questa architettura introduce, quelli accettati | **vivo**        |
+| [glossario.md](glossario.md)                                       | cosa significa esattamente una parola, nel codice e fuori                           | **vivo**        |
+| [convenzioni.md](convenzioni.md)                                   | come si chiamano le cose, come si commenta, come si committa                        | **vivo**        |
+| [qualita.md](qualita.md)                                           | quali sono i gate, cosa garantiscono, cosa **non** garantiscono                     | **vivo**        |
+| [roadmap-fette.md](roadmap-fette.md)                               | cosa si costruisce dopo, e cosa è stato lasciato fuori con quale grilletto          | **vivo**        |
+| [design/flusso-tick.md](design/flusso-tick.md)                     | cosa succede fra un frame e un cambiamento di saldo                                 | **vivo**        |
+| [design/flusso-salvataggio.md](design/flusso-salvataggio.md)       | chi possiede il contratto di salvataggio, e come si migra                           | **vivo**        |
+| [design/ciclo-di-vita.md](design/ciclo-di-vita.md)                 | in quali stati può trovarsi l'applicazione                                          | **vivo**        |
+| [design/mockups/](design/mockups/)                                 | com'è fatta la schermata, e in quali stati                                          | snapshot        |
+| [delega/PASSAGGIO-DI-CONSEGNE.md](delega/PASSAGGIO-DI-CONSEGNE.md) | dove siamo, cosa non fare, qual è il prossimo passo — per chi arriva ora            | **vivo**        |
+| [delega/](delega/)                                                 | i pacchetti di lavoro: cosa fare, cosa non fare, quando è finito                    | si **chiudono** |
 
 **Vivo** significa: se una modifica al codice lo contraddice, quel documento cambia nello stesso
 commit. **Append-only**: un ADR superato non si cancella, se ne scrive uno nuovo. **Si chiudono**:
@@ -29,7 +30,7 @@ una delega chiusa è un documento storico, non una fonte di verità sul codice c
 
 ## Da dove cominciare
 
-**Arrivi ora sul progetto** → [architettura.md](architettura.md), poi
+**Arrivi ora sul progetto** → [delega/PASSAGGIO-DI-CONSEGNE.md](delega/PASSAGGIO-DI-CONSEGNE.md), dieci minuti e sai ripartire. Poi → [architettura.md](architettura.md), poi
 [glossario.md](glossario.md), poi il [compendio](adr/README.md) scorrendo solo i titoli.
 Venti minuti.
 
