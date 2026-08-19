@@ -7,8 +7,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { POOL_IDS } from '@core/contracts/pools'
 import { SAVE_VERSION, type SavePayload } from '@core/contracts/save'
 
-import { createSaveStore, type SaveStore } from '../../src/main/save/ipc'
 import { createSaveFile, SAVE_FILE_NAME } from '../../src/main/save/SaveFile'
+import { createSaveStore, type SaveStore } from '../../src/main/save/SaveStore'
 
 /**
  * Il confine intero, su file veri: costruisci → salva → ricarica → confronta.

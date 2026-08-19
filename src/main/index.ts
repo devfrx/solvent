@@ -2,8 +2,9 @@ import { join } from 'node:path'
 
 import { app, BrowserWindow, ipcMain } from 'electron'
 
-import { createSaveStore, mountSaveIpc } from './save/ipc'
+import { mountSaveIpc } from './save/ipc'
 import { createSaveFile } from './save/SaveFile'
+import { createSaveStore } from './save/SaveStore'
 
 /**
  * Il processo main: una finestra con le tre difese accese e i tre canali di persistenza.

@@ -14,7 +14,7 @@ Una freccia `A --> B` significa: **A può importare B**. Non esistono frecce all
 ```mermaid
 flowchart TD
   subgraph MAIN["main + preload — Electron"]
-    SAVE["main/save/*<br/>SaveFile · schema · migrations · ipc"]
+    SAVE["main/save/*<br/>SaveFile · SaveStore · schema<br/>migrations · channels · ipc"]
     PRE["preload/index.ts"]
   end
 
@@ -96,9 +96,10 @@ solvent/
 │  │  └─ save/
 │  │     ├─ SaveFile.ts           # lettura/scrittura atomica su disco
 │  │     ├─ schema.ts             # validazione ESEGUIBILE del SaveEnvelope
+│  │     ├─ SaveStore.ts          # salva / carica / azzera: l'ordine dei passi
 │  │     ├─ migrations.ts         # unico posto al mondo
 │  │     ├─ channels.ts           # i nomi dei tre canali - condivisi col preload
-│  │     └─ ipc.ts                # save / load / reset, tipizzati
+│  │     └─ ipc.ts                # attacca i tre canali allo SaveStore
 │  ├─ preload/
 │  │  └─ index.ts                 # espone solo il contratto di persistenza
 │  ├─ core/                       # NESSUN import di vue / pinia / electron

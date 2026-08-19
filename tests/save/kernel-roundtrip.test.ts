@@ -13,8 +13,8 @@ import { createLedger, income, spend, transfer, UnbalancedSaveError } from '@cor
 import { createRegistry, defineSystem, ORDER } from '@core/kernel/Registry'
 import { createRng } from '@core/kernel/Rng'
 
-import { createSaveStore, type SaveStore } from '../../src/main/save/ipc'
 import { createSaveFile, SAVE_FILE_NAME } from '../../src/main/save/SaveFile'
+import { createSaveStore, type SaveStore } from '../../src/main/save/SaveStore'
 
 /**
  * Il giro completo che l'ADR 0004 chiama "la rete che impedisce a metà dei difetti di persistenza

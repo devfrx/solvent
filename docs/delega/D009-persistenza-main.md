@@ -5,7 +5,7 @@
 - **Sblocca:** D011
 - **ADR vincolanti:** 0004, 0006, 0007, 0010, 0022
 - **Regole:** R08, R09, R10, C08, INV-03, INV-04
-- **Budget:** ~280 righe di sorgente → **consuntivo: 257 righe di codice** (438 con i commenti) + 456 di test
+- **Budget:** ~280 righe di sorgente → **consuntivo: 259 righe di codice** (447 con i commenti) + 591 di test
 
 ## Obiettivo
 
@@ -39,7 +39,8 @@ con il codice del kernel già scritto davanti.
 | `save/schema.ts`     | schema `zod` della busta e del payload — **eseguito**, non descrittivo                             |
 | `save/SaveFile.ts`   | lettura e scrittura atomica (temporaneo, `fsync`, `rename`), percorso in `app.getPath('userData')` |
 | `save/migrations.ts` | la mappa versione → versione+1. Per la versione 1: vuota, e va bene                                |
-| `save/ipc.ts`        | i tre canali `save`, `load`, `reset`, tipizzati                                                    |
+| `save/SaveStore.ts`  | salva, carica, azzera: l'ordine dei passi. Non era in tabella: vedi la correzione 10               |
+| `save/ipc.ts`        | attacca i tre canali `save`, `load`, `reset` allo `SaveStore`                                      |
 | `save/channels.ts`   | i nomi dei tre canali, in un file senza import — non era in tabella: correzione 1                  |
 
 `src/preload/index.ts` — espone **solo** questi tre, nient'altro.
@@ -104,7 +105,7 @@ denylist da mantenere — cioè la regola che si apre da sola, in silenzio.
 - Identificatori in inglese, prosa in italiano (C08). Questa è la prima delega che scrive codice
   fuori da `core/`, e la regola vale da subito: `tests/rules/english-identifiers` la impone.
 
-## Nove correzioni rispetto a com'era scritta questa delega
+## Dieci correzioni rispetto a com'era scritta questa delega
 
 **1. Il preload e il main hanno bisogno degli stessi tre nomi, e la tabella dei file non aveva
 dove metterli.** I nomi dei canali non possono stare in `ipc.ts`: quel file importa `zod`, e un
@@ -169,6 +170,21 @@ corretto che non si parlano sono due cose corrette e una partita persa — ed è
 l'[ADR 0004](../adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md) chiama per nome.
 `tests/save/kernel-roundtrip` la stende, con lo stato non banale che
 [qualita.md](../qualita.md#il-test-round-trip-e-perché-è-il-più-importante) descrive.
+
+**10. Il flusso di salvataggio non è "i tre canali", e il nome del file lo diceva.** Trovata da una
+revisione di disciplina fatta a delega già chiusa, e corretta subito perché il costo cresce con
+ogni riga che ci si appoggia sopra.
+
+`ipc.ts` esportava due cose con ragioni di cambiare diverse: `SaveStore` più `createSaveStore` —
+l'ordine dei passi di salvataggio e caricamento — e `mountSaveIpc`, che li attacca a `IpcMain`. Le
+[convenzioni](../convenzioni.md#nomi-di-file) riservano `PascalCase.ts` ai moduli che esportano
+un'interfaccia e la sua factory, ed è esattamente la ragione per cui `SaveFile.ts` si chiama così:
+il flusso viveva in un file dal nome sbagliato, e chi cercava "dove si salva" apriva `SaveFile.ts`
+e trovava solo I/O su disco.
+
+Ora il flusso è in `save/SaveStore.ts` (46 righe) e `ipc.ts` ne ha otto. Il confine è reale, non
+solo nominale: `SaveStore.ts` non nomina `electron` nemmeno come tipo, `ipc.ts` non nomina né
+`zod` né il disco né lo schema. Nessun cambio di comportamento, `verify` verde prima e dopo.
 
 ## Fuori scope
 
@@ -271,10 +287,11 @@ ancora convertendo la stringa, e la scrittura diretta sembra sicura.
 
 ### Il budget
 
-~280 righe dichiarate, **257 scritte**: `main` e `preload` ne fanno 239, i tipi d'esito in
-`contracts/save.ts` altre 18. Con i commenti sono 438. I test sono 456, su sei file.
+~280 righe dichiarate, **259 scritte**: `main` e `preload` ne fanno 241, i tipi d'esito in
+`contracts/save.ts` altre 18. Con i commenti sono 447. I test sono **591**, su sei file: più del
+doppio del codice che coprono, ed è la proporzione normale di questo repo — D007 stava a 197 contro 420.
 
-La delega diceva "se esce molto sotto, probabilmente manca qualcosa". Ventitré righe sotto non è
+La delega diceva "se esce molto sotto, probabilmente manca qualcosa". Ventun righe sotto non è
 molto sotto, e le due voci che l'avrebbero fatta sforare — il controllo sul `max` di una lista e le
 migrazioni vere — sono entrambe fuori scopo per una ragione scritta.
 

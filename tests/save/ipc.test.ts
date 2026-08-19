@@ -2,7 +2,8 @@ import type { IpcMain } from 'electron'
 import { describe, expect, it } from 'vitest'
 
 import { SAVE_CHANNELS } from '../../src/main/save/channels'
-import { mountSaveIpc, type SaveStore } from '../../src/main/save/ipc'
+import { mountSaveIpc } from '../../src/main/save/ipc'
+import type { SaveStore } from '../../src/main/save/SaveStore'
 
 /**
  * I tre canali, e solo i tre.

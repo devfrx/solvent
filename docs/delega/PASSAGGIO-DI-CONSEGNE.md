@@ -23,23 +23,23 @@ leggi che tengono il gioco bilanciato stanno in [prodotto/visione.md](../prodott
 
 ## Dove siamo, esattamente
 
-|                         |                                                       |
-| ----------------------- | ----------------------------------------------------- |
-| STOP 1                  | **approvato** — nome, stile, dipendenze, architettura |
-| D001 — tooling e gate   | **chiusa**, commit `e275f59`                          |
-| D002 — contratti        | **chiusa**, commit `288367e`                          |
-| D003 — kernel: Clock    | **chiusa**, commit `f398a47`                          |
-| D004 — kernel: Rng      | **chiusa**, commit `a87d8cf`                          |
-| D005 — kernel: Bus      | **chiusa**, commit `e9cf441`                          |
-| D006 — kernel: Registry | **chiusa**, commit `39b8520`                          |
-| D007 — kernel: Ledger   | **chiusa**, commit `f9a0c59`                          |
-| D008 — balance          | **chiusa**, commit `e01e885`                          |
-| D009 — persistenza main | **chiusa**, commit `256f622`                          |
-| Kernel                  | **finito** — 535 righe, da D003 a D008                |
-| Persistenza nel main    | **finita** — 257 righe, `src/main/` e `src/preload/`  |
-| Codice di dominio       | **zero righe**                                        |
-| `npm run verify`        | **verde** — 266 test su 35 file                       |
-| Prossimo passo          | **[D010 — Dominio: income](D010-dominio-income.md)**  |
+|                         |                                                        |
+| ----------------------- | ------------------------------------------------------ |
+| STOP 1                  | **approvato** — nome, stile, dipendenze, architettura  |
+| D001 — tooling e gate   | **chiusa**, commit `e275f59`                           |
+| D002 — contratti        | **chiusa**, commit `288367e`                           |
+| D003 — kernel: Clock    | **chiusa**, commit `f398a47`                           |
+| D004 — kernel: Rng      | **chiusa**, commit `a87d8cf`                           |
+| D005 — kernel: Bus      | **chiusa**, commit `e9cf441`                           |
+| D006 — kernel: Registry | **chiusa**, commit `39b8520`                           |
+| D007 — kernel: Ledger   | **chiusa**, commit `f9a0c59`                           |
+| D008 — balance          | **chiusa**, commit `e01e885`                           |
+| D009 — persistenza main | **chiusa**, commit `256f622`                           |
+| Kernel                  | **finito** — 535 righe, da D003 a D008                 |
+| Persistenza nel main    | **finita** — 241 righe in `src/main/` e `src/preload/` |
+| Codice di dominio       | **zero righe**                                         |
+| `npm run verify`        | **verde** — 266 test su 35 file                        |
+| Prossimo passo          | **[D010 — Dominio: income](D010-dominio-income.md)**   |
 
 I contratti sono in `src/core/contracts/`, Clock, Rng, Bus, Registry e Ledger in
 `src/core/kernel/`, i numeri di gioco in `src/core/balance/`, lo schema del salvataggio e i tre
