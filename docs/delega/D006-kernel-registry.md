@@ -1,6 +1,6 @@
 # D006 — Kernel: Registry
 
-- **Stato:** **Chiusa** — 2026-08-19, ramo `d006-kernel-registry`
+- **Stato:** **Chiusa** — 2026-08-19, commit `39b8520`, ramo `d006-kernel-registry`
 - **Dipende da:** D003, D004, D005
 - **Sblocca:** D008, D009
 - **ADR vincolanti:** 0002

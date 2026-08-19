@@ -26,7 +26,7 @@ stesso numero.
 | D003 — kernel: Clock    | **chiusa**, commit `f398a47`                             |
 | D004 — kernel: Rng      | **chiusa**, commit `a87d8cf`                             |
 | D005 — kernel: Bus      | **chiusa**, commit `e9cf441`                             |
-| D006 — kernel: Registry | **chiusa**, commit `PENDING`                             |
+| D006 — kernel: Registry | **chiusa**, commit `39b8520`                             |
 | Codice di dominio       | **zero righe**. Del kernel mancano solo Ledger e Balance |
 | `npm run verify`        | **verde** — 150 test su 22 file                          |
 | Prossimo passo          | **[D007 — Ledger](D007-kernel-ledger.md)**               |
