@@ -78,7 +78,7 @@ segnala che un confine si sta spostando.
 | ------ | --------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
 | INV-01 | `src/core/**` dipende solo da `decimal.js`                                        | ADR 0015 | `tests/rules/core-deps` — allowlist, non esprimibile in ESLint   |
 | INV-02 | `src/core/**` non importa mai `vue`, `pinia`, `electron`                          | ADR 0001 | `no-restricted-imports`                                          |
-| INV-03 | `src/main/**` importa da `core/` solo `contracts/save.ts`                         | ADR 0004 | `no-restricted-imports`                                          |
+| INV-03 | `src/main/**` importa da `core/` solo `contracts/save.ts`                         | ADR 0004 | `no-restricted-imports` + `tests/rules/main-solo-save`           |
 | INV-04 | Il denaro attraversa il confine di persistenza come stringa                       | ADR 0006 | schema `zod` + `tests/save/roundtrip`                            |
 | INV-05 | Ogni `System` registrato compare in save, load, reset e stats                     | ADR 0002 | `tests/rules/registry-completeness`                              |
 | INV-06 | La dimensione massima del salvataggio è calcolabile a priori                      | ADR 0010 | somma dei `max` dichiarati                                       |
