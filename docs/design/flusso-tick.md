@@ -1,8 +1,11 @@
 # Flusso di un tick
 
 Cosa succede fra un frame del browser e un cambiamento di saldo. È il disegno **vincolante** del
-loop della fetta 01: il codice arriva con D007, D010 e D011 e deve corrispondere a questo. Se il
-loop cambia, questo file cambia nello stesso commit.
+loop della fetta 01. Il Ledger che si vede qui esiste da [D007](../delega/D007-kernel-ledger.md);
+il sistema che lo chiama e il loop che lo fa girare **non esistono ancora**, e arrivano con
+[D010](../delega/D010-dominio-income.md) e [D011](../delega/D011-runtime-e-store.md). Quando
+arriveranno dovranno corrispondere a questo disegno, e se il loop cambia questo file cambia nello
+stesso commit.
 
 Decisioni rilevanti: [ADR 0009](../adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md) (passo
 fisso), [ADR 0002](../adr/0002-registry-unica-lista-di-sistemi.md) (chi itera),

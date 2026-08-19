@@ -31,7 +31,7 @@ stesso numero.
 | D008 — balance          | **chiusa**, commit `e01e885`                                |
 | Kernel                  | **finito** — 535 righe, da D003 a D008                      |
 | Codice di dominio       | **zero righe**                                              |
-| `npm run verify`        | **verde** — 204 test su 27 file                             |
+| `npm run verify`        | **verde** — 206 test su 28 file                             |
 | Prossimo passo          | **[D009 — Persistenza nel main](D009-persistenza-main.md)** |
 
 I contratti sono in `src/core/contracts/`, Clock, Rng, Bus, Registry e Ledger in
@@ -45,7 +45,7 @@ sono ancora state eseguite.
 
 ### Cosa è già cambiato nelle deleghe ancora aperte
 
-Quattordici cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve
+Diciotto cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve
 sapere prima di iniziare. Sono qui perché una delega chiusa è un documento storico: nessuno la
 rilegge.
 
@@ -62,6 +62,9 @@ rilegge.
 | D010, D014       | La **ragione** sta sulla `Transaction`, la **categoria** sul `Posting`. Un prelievo è un evento solo con tre righe                                                                                                                                                                                             |
 | D010, D014       | Un'azione che accetta solo certi strumenti lo dichiara in `TransactionMeta.accepts`. Assente = nessun vincolo, e vincola solo i pool del giocatore                                                                                                                                                             |
 | D009             | `SavePayload` ha tre chiavi: `ledger`, `rng`, `systems`. Le prime due sono tipizzate a fondo, lo stato dei sistemi è opaco (`Record<string, unknown>`), perché il contratto non può conoscere i domini                                                                                                         |
+| D009             | `LedgerSave.balances` ha **sei** chiavi, non due: i conti non-giocatore entrano nel salvataggio (ADR 0020), altrimenti al ricaricamento la somma non farebbe zero. Lo schema `zod` le vuole tutte e sei, come stringhe decimali                                                                                |
+| D009             | **Il main non verifica la somma zero**, e non deve: lo fa il Ledger quando carica, e lancia `UnbalancedSaveError`. Lo schema controlla la forma; l'invariante è del Ledger, non del contratto                                                                                                                  |
+| D009             | **Il canale `reset` non porta un `ResetScope`**: quel tipo vive in `contracts/lifecycle.ts` e INV-03 lascia al main il solo `contracts/save.ts`. Il reset del main è "cancella il salvataggio"; l'ambito soft/hard resta del renderer. INV-03 adesso ha la sua rete: `tests/rules/main-solo-save`              |
 | D010, D011, D014 | **`Bus.emit` può lanciare**: `EventCycleError` sui cicli, o l'errore di un handler (`AggregateError` se sono più d'uno). Un `tick` che emette non è un'operazione che non fallisce mai                                                                                                                         |
 | D011             | **Anche il Ledger lancia**: `UnbalancedTransactionError` e `NestedTransactionError` dicono che il codice è scritto male, `UnbalancedSaveError` che il salvataggio è manomesso. E **`RECOVERY_CAP` è in tick**, non in secondi: il loop lo confronta con i tick interi da recuperare, senza conversioni proprie |
 | D011             | Il loop deve decidere cosa fa quando `emit` o il Ledger lanciano. Fermare la simulazione è la risposta giusta: dicono che qualcosa è scritto male, non che il giocatore ha sbagliato. **`loadAll` ritorna `Result<LoadReport, RegistryError>`**, e quel caso va nello stato `Errore`, non ignorato             |

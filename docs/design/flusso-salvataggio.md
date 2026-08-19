@@ -1,6 +1,12 @@
 # Flusso di salvataggio e caricamento
 
 Il confine più importante del progetto, e quello che nella versione precedente era una finzione.
+
+Questo è un disegno **vincolante**, non una descrizione: dei pezzi qui sotto esistono solo i
+contratti (`core/contracts/save.ts`, [D002](../delega/D002-contratti.md)) e il lato renderer del
+Registry e del Ledger. Lo schema, il file su disco, le migrazioni e l'IPC **non esistono ancora**:
+li scrive [D009](../delega/D009-persistenza-main.md), e devono corrispondere a questo.
+
 Decisioni rilevanti: [ADR 0004](../adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md),
 [ADR 0006](../adr/0006-decimal-end-to-end-per-il-denaro.md),
 [ADR 0010](../adr/0010-liste-storiche-limitate-alla-definizione.md).
