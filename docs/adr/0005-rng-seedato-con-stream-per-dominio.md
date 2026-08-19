@@ -1,6 +1,6 @@
 # ADR 0005 — Un solo PRNG seedato, con stream separati per dominio
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — D004: `kernel/Rng.ts`, gli stream per dominio e il lint su `Math.random`
 - **Data:** 2026-08-19
 
 ## Contesto

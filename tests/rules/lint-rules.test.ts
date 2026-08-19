@@ -82,6 +82,11 @@ describe('regole che devono scattare', () => {
     expect(has(f, 'R10')).toBe(true)
   })
 
+  it('R03 — un secondo Math.random dentro Rng.ts, senza motivazione', async () => {
+    const f = await lint('src/core/kernel/Rng.ts', `export const seed = Math.random()\n`)
+    expect(has(f, 'R03')).toBe(true)
+  })
+
   it('R11 — un dominio che importa una conversione del denaro', async () => {
     const f = await lint(
       'src/core/domains/income/rules.ts',
@@ -151,8 +156,11 @@ describe('regole che devono scattare', () => {
 })
 
 describe('eccezioni dichiarate — devono NON scattare', () => {
-  it('R03 è spenta dentro Rng.ts, che è il solo posto autorizzato (ADR 0005)', async () => {
-    const f = await lint('src/core/kernel/Rng.ts', `export const seed = Math.random()\n`)
+  it('R03 è esente sulla sola riga motivata dentro Rng.ts (ADR 0005)', async () => {
+    const f = await lint(
+      'src/core/kernel/Rng.ts',
+      `// eslint-disable-next-line no-restricted-properties -- il seed di una partita nuova\nexport const seed = Math.random()\n`
+    )
     expect(has(f, 'R03')).toBe(false)
   })
 
