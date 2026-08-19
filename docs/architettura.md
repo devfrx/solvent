@@ -147,6 +147,7 @@ solvent/
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
                        eslint-disable · bus-sincrono
                        registry-completeness · registry-senza-casi-speciali
+                       link-documenti
                        no-logic-in-vue · no-literal-in-template
 ```
 

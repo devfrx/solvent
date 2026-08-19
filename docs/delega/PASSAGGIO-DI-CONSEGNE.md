@@ -55,6 +55,26 @@ prima di iniziare. Sono qui perché una delega chiusa è un documento storico: n
 | D011             | **`loadAll` ritorna `Result<LoadReport, RegistryError>`**, e l'errore accade davvero: un `load` che lancia su un salvataggio manomesso. Quel caso va nello stato `Errore`, non ignorato                         |
 | tutte            | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                           |
 
+### Quanto ci si può fidare di questi documenti
+
+Sono stati **auditati per intero** dopo D005: tutti e cinquanta i markdown, collegamenti e ancore
+inclusi. Sono usciti quindici disallineamenti, corretti tutti tranne uno — il `post(posting)` di
+D007, che è nella tabella qui sopra perché la decisione spetta a chi esegue quella delega. Il
+dettaglio di cosa è stato trovato sta in `git log` (`docs: audit di coerenza`) e la lezione in
+[rischi.md](../rischi.md), sotto N07.
+
+Da lì in avanti valgono due cose:
+
+- **I collegamenti non si rompono più in silenzio**: `tests/rules/link-documenti` verifica ogni
+  link e ogni ancora fra i documenti, ed è un gate come gli altri (regola C07).
+- **I documenti sono di due tipi, e non è un difetto.** Alcuni descrivono ciò che c'è
+  (architettura, tracciabilità, glossario); altri **vincolano** ciò che verrà
+  ([design/flusso-tick.md](../design/flusso-tick.md), le deleghe aperte). I secondi parlano di
+  codice che non esiste ancora, e lo dichiarano in testa. Se ne trovi uno che non lo dichiara, è
+  quello il difetto.
+
+Quello che l'audit **non** copre è tutto ciò che è cambiato dopo D006, cioè da ora in poi.
+
 ## Le sei cose da non fare
 
 Sono le regole che, violate, riportano il progetto a com'era. Tutte hanno un meccanismo che le
@@ -121,17 +141,24 @@ lo **STOP 2**, dove ci si ferma di nuovo.
   `feat(D007): il ledger a partita doppia`. Un ramo per delega: `d007-kernel-ledger`.
 - **Quando una delega è finita:** marcala `Chiusa` con il commit, aggiorna
   [tracciabilita.md](../tracciabilita.md) se hai cambiato un meccanismo, e scrivi le **correzioni
-  rispetto a com'era scritta la delega** — ogni delega chiusa finora ne ha da quattro a sette, e
+  rispetto a com'era scritta la delega** — ogni delega chiusa finora ne ha da cinque a sette, e
   sono scritte lì invece che nascoste. Se una delega esce senza correzioni, o era perfetta o non
   è stata letta con attenzione.
+- **Un numero scritto in un documento è una misura scaduta.** Conteggi, tempi, righe: quando ne
+  incontri uno che riguarda ciò che stai toccando, rimisuralo invece di ricopiarlo. `verify` ha
+  dichiarato otto secondi da D001 a D006, quando erano venticinque; `rischi.md` ha detto "i quattro
+  difetti" davanti a un elenco di cinque per altrettanto tempo.
+- **Quando correggi un fatto sbagliato, cerca il concetto, non la frase.** Un `grep` sulla frase
+  intera trova le copie identiche e lascia indietro le parafrasi — è successo davvero, con
+  "progresso offline" scritto in quattro punti e corretto in due.
 
 ## Come verificare di non aver rotto niente
 
-```
+```bash
 npm run verify
 ```
 
-Quattro gate in otto secondi: typecheck, lint, format:check, test. Se è rosso, non è finito.
+Quattro gate in venticinque secondi: typecheck, lint, format:check, test. Se è rosso, non è finito.
 `npm run verify:release` aggiunge la compilazione, e diventerà verde con D011.
 
 ## Le decisioni contestabili
