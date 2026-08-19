@@ -67,10 +67,12 @@ agganciata al difetto misurato che la giustifica.
 la simulazione nel renderer. Le decisioni prese in autonomia — pool con affordance, transazioni
 atomiche, partita doppia — sono elencate nel [compendio](adr/README.md#decisioni-prese-in-autonomia-contestabili).
 
-**[D001](delega/D001-tooling-e-gate.md) e [D002](delega/D002-contratti.md) sono chiuse.** Le
-regole del progetto sono eseguibili e i contratti esistono: `Result`, `Money`, i pool, i tipi del
-Ledger, `boundedList`, gli eventi, il salvataggio, i comandi. Il codice di dominio non è ancora
-iniziato — la prossima delega è [D003 — Kernel: Clock](delega/D003-kernel-clock.md).
+**[D001](delega/D001-tooling-e-gate.md), [D002](delega/D002-contratti.md) e
+[D003](delega/D003-kernel-clock.md) sono chiuse.** Le regole del progetto sono eseguibili, i
+contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger, `boundedList`, gli eventi, il
+salvataggio, i comandi — e il kernel è iniziato dal Clock. Il codice di dominio non è ancora
+iniziato: le prossime deleghe sono [D004 — Rng](delega/D004-kernel-rng.md) e
+[D005 — Bus](delega/D005-kernel-bus.md), indipendenti fra loro.
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati

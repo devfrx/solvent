@@ -18,19 +18,20 @@ stesso numero.
 
 ## Dove siamo, esattamente
 
-|                       |                                                                    |
-| --------------------- | ------------------------------------------------------------------ |
-| STOP 1                | **approvato** — nome, stile, dipendenze, architettura              |
-| D001 — tooling e gate | **chiusa**, commit `e275f59`                                       |
-| D002 — contratti      | **chiusa**, commit `288367e`                                       |
-| Codice di dominio     | **zero righe**. Esistono i contratti; nessun sistema, nessun saldo |
-| `npm run verify`      | **verde** — 76 test su 13 file                                     |
-| Prossimo passo        | **[D003 — Kernel: Clock](D003-kernel-clock.md)**                   |
+|                       |                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------- |
+| STOP 1                | **approvato** — nome, stile, dipendenze, architettura                            |
+| D001 — tooling e gate | **chiusa**, commit `e275f59`                                                     |
+| D002 — contratti      | **chiusa**, commit `288367e`                                                     |
+| D003 — kernel: Clock  | **chiusa**, ramo `d003-kernel-clock`                                             |
+| Codice di dominio     | **zero righe**. Ci sono i contratti e il Clock                                   |
+| `npm run verify`      | **verde** — 88 test su 15 file                                                   |
+| Prossimo passo        | **[D004 — Rng](D004-kernel-rng.md)** oppure **[D005 — Bus](D005-kernel-bus.md)** |
 
-I contratti sono in `src/core/contracts/`: `Result`, `Money`, i pool con le loro affordance, i tipi
-del Ledger, `boundedList`, `GameEvents`, il salvataggio senza versione, `CommandHandler`. Sono 113
-righe di codice e 417 di test. Le **sette correzioni** rispetto a com'era scritta la delega stanno
-in fondo a [D002](D002-contratti.md): leggile prima di fidarti di un altro documento di delega.
+I contratti sono in `src/core/contracts/` e il Clock in `src/core/kernel/`. Ogni delega chiusa ha
+in fondo le **correzioni** rispetto a com'era scritta: [D002](D002-contratti.md) ne ha sette,
+[D003](D003-kernel-clock.md) cinque. Leggile prima di fidarti del testo di una delega ancora aperta
+— due di quelle correzioni riguardano proprio deleghe che non sono ancora state eseguite.
 
 ## Le sei cose da non fare
 
@@ -63,21 +64,25 @@ Non serve leggere tutti i 20 ADR. Servono quando stai per contraddirne uno: allo
 
 ## Il prossimo passo, in concreto
 
-**[D003 — Kernel: Clock](D003-kernel-clock.md).** Crea `src/core/kernel/Clock.ts`:
-`TICKS_PER_SECOND`, i tipi branded `Ticks` e `Seconds`, e le quattro conversioni. ~40 righe.
+**[D004 — Rng](D004-kernel-rng.md)** e **[D005 — Bus](D005-kernel-bus.md)**: dipendono solo da
+D002, quindi sono indipendenti fra loro e si fanno in qualunque ordine. D006 le vuole entrambe,
+più il Clock che c'è già.
 
 Tre cose da sapere prima di iniziare:
 
-1. **Il Clock non ha stato.** Non sa che ora è e non sa quanto tempo è passato: converte e basta.
-   Il tempo che scorre è del loop (D011). Se il Clock avesse stato, ogni test di dominio dovrebbe
-   controllarlo, e il tempo tornerebbe globale — il difetto A04 con un nome nuovo.
-2. **`Ticks` e `Seconds` non sono intercambiabili**, e un `number` nudo non è assegnabile a
-   nessuno dei due. È il punto di tutta la delega: un `10` scritto dentro un sistema deve essere un
-   errore di compilazione, non una svista invisibile.
-3. **D003, D004 e D005 dipendono solo da D002**, quindi sono indipendenti fra loro e si possono
-   fare in qualunque ordine. D006 le vuole tutte e tre.
+1. **`Rng.ts` è l'unico file dove `Math.random` è consentito**, e solo per il seed iniziale di una
+   partita nuova. Serve l'`eslint-disable` **motivato** previsto dalle
+   [convenzioni](../convenzioni.md#eslint-disable): senza la riga di motivazione è un difetto in
+   review. La regola R03 è già configurata e già verificata.
+2. **Il test statistico su `next()` è quello che si dimentica.** Un PRNG che ritorna sempre `0.5`
+   passa tutti gli altri test della delega: determinismo e round-trip non dicono nulla sulla
+   qualità della sequenza.
+3. **Il Bus è sincrono e basta** (ADR 0016). Niente `Promise`, niente `queueMicrotask`. La trappola
+   di implementazione è iterare l'array degli handler mentre qualcuno si disiscrive: si itera una
+   copia.
 
-I contratti che servono ci sono già: `Money` per `perSecondToPerTick`, che ritorna un `Decimal`.
+`GameEvents` esiste già in `contracts/events.ts` e contiene un evento solo, `money.posted`: il Bus
+si tipizza su quello, e cresce con i sistemi.
 
 Poi si prosegue col grafo in [delega/README.md](README.md): D003 → D008 sono il kernel (~560
 righe in tutto), D009 la persistenza, D010 e D014 i domini, D011 e D012 il runtime e la UI, D013 la
@@ -94,7 +99,7 @@ verifica finale — che è lo **STOP 2**, dove ci si ferma di nuovo.
   una volta: costa trenta secondi. È così che si è scoperto che il primo caso di prova per R04 era
   sbagliato, e che la regola sembrava funzionare senza funzionare.
 - **Commit:** Conventional Commits con lo scope uguale all'ID della delega —
-  `feat(D003): clock a passo fisso`. Un ramo per delega: `d003-kernel-clock`.
+  `feat(D004): rng seedato con stream`. Un ramo per delega: `d004-kernel-rng`.
 - **Quando una delega è finita:** marcala `Chiusa` con il commit, aggiorna
   [tracciabilita.md](../tracciabilita.md) se hai cambiato un meccanismo, e scrivi le **correzioni
   rispetto a com'era scritta la delega** — vedi [D001](D001-tooling-e-gate.md) come esempio: aveva
@@ -128,17 +133,17 @@ Riprendi il progetto Solvent in questa repo.
 Leggi prima `docs/delega/PASSAGGIO-DI-CONSEGNE.md`: contiene lo stato, le regole e il prossimo
 passo. Poi `docs/README.md` per la mappa della documentazione.
 
-Stato: STOP 1 approvato, D001 (tooling e gate) e D002 (contratti) chiuse, `npm run verify` verde,
-zero codice di dominio. Il prossimo passo è **D003 — Kernel: Clock**.
+Stato: STOP 1 approvato, D001, D002 e D003 chiuse, `npm run verify` verde, zero codice di dominio.
+Il prossimo passo è **D004 — Kernel: Rng**.
 
 Come voglio che lavori:
 
-- Esegui la delega D003 così com'è scritta. Se qualcosa nella delega si rivela sbagliato,
+- Esegui la delega D004 così com'è scritta. Se qualcosa nella delega si rivela sbagliato,
   correggilo e **scrivilo** nella sezione delle correzioni — non aggirarlo in silenzio.
 - Fermati e presentami 2 opzioni solo sulle decisioni strutturali. Il resto fallo.
 - Niente `TODO`, niente `any`, niente scorciatoie presentate come soluzioni.
 - Nessun claim di completamento senza l'output reale di `npm run verify`.
 - La documentazione toccata dal cambiamento si aggiorna nello stesso commit.
 
-Quando D003 è chiusa, fermati e mostrami l'output dei gate prima di passare alla successiva.
+Quando D004 è chiusa, fermati e mostrami l'output dei gate prima di passare alla successiva.
 ```
