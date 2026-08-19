@@ -14,7 +14,7 @@ Una freccia `A --> B` significa: **A può importare B**. Non esistono frecce all
 ```mermaid
 flowchart TD
   subgraph MAIN["main + preload — Electron"]
-    SAVE["main/save/*<br/>SaveFile · schema · migrations · ipc"]
+    SAVE["main/save/*<br/>SaveFile · SaveStore · schema<br/>migrations · channels · ipc"]
     PRE["preload/index.ts"]
   end
 
@@ -46,6 +46,7 @@ flowchart TD
   DOM --> CON
   SAVE --> CON
   PRE --> CON
+  PRE -->|solo channels.ts| SAVE
 ```
 
 ### Frecce vietate — e chi le impedisce
@@ -59,6 +60,11 @@ flowchart TD
 | `main/* --> kernel/*`, `main/* --> domains/*`     | il main conosce il contratto, non il motore        | ESLint                         |
 
 Il main tocca **solo** `core/contracts/save.ts`. È un arco stretto e voluto.
+
+L'unica freccia dentro il riquadro `main + preload` è `preload --> main/save/channels.ts`, e porta
+tre stringhe: i nomi dei canali IPC. Non passa da `ipc.ts` perché quel file importa `zod`, e un
+preload in **sandbox** non carica pacchetti esterni; non è duplicata perché due costanti che devono
+coincidere, e che nessuno confronta, prima o poi non coincidono più.
 
 ## Albero delle cartelle — la forma della fetta 01
 
@@ -90,8 +96,10 @@ solvent/
 │  │  └─ save/
 │  │     ├─ SaveFile.ts           # lettura/scrittura atomica su disco
 │  │     ├─ schema.ts             # validazione ESEGUIBILE del SaveEnvelope
+│  │     ├─ SaveStore.ts          # salva / carica / azzera: l'ordine dei passi
 │  │     ├─ migrations.ts         # unico posto al mondo
-│  │     └─ ipc.ts                # save / load / reset, tipizzati
+│  │     ├─ channels.ts           # i nomi dei tre canali - condivisi col preload
+│  │     └─ ipc.ts                # attacca i tre canali allo SaveStore
 │  ├─ preload/
 │  │  └─ index.ts                 # espone solo il contratto di persistenza
 │  ├─ core/                       # NESSUN import di vue / pinia / electron
@@ -142,7 +150,7 @@ solvent/
    ├─ contracts/       result · money · pools · ledger · bounded · events · save · commands
    ├─ kernel/          clock · rng · bus · registry · ledger
    ├─ domains/         income (seed fisso)
-   ├─ save/            roundtrip
+   ├─ save/            schema - roundtrip - kernel-roundtrip - migrations - ipc - preload
    ├─ balance/         modifiers · targets
    ├─ i18n/            parity
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate

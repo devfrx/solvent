@@ -1,4 +1,5 @@
 import type { Pool } from './pools'
+import type { Result } from './result'
 
 /**
  * R08 · ADR 0004 — il contratto di salvataggio appartiene al processo main.
@@ -42,4 +43,46 @@ export interface SaveEnvelope {
   readonly version: number
   readonly savedAt: number
   readonly payload: SavePayload
+}
+
+/**
+ * Gli esiti che attraversano il confine (docs/design/flusso-salvataggio.md).
+ *
+ * Vivono qui e non in un file loro per una ragione sola: INV-03 lascia al main
+ * `contracts/save.ts` **e nient'altro**, quindi un tipo d'esito scritto altrove non sarebbe
+ * importabile da chi lo produce. La risposta sbagliata a quel problema è allargare INV-03: un
+ * allowlist di un file diventerebbe un denylist da mantenere, cioè la regola che si apre da sola.
+ *
+ * `Result` invece si importa qui dentro senza problemi: siamo in `core/`, dove è lecito.
+ */
+export type SaveError =
+  | { readonly code: 'error.save.corrupt' }
+  | { readonly code: 'error.save.invalid'; readonly path: string }
+  | {
+      readonly code: 'error.save.version_ahead'
+      readonly found: number
+      readonly supported: number
+    }
+  /** Il **messaggio**, non l'`Error`: un `Error` non sopravvive alla clonazione dell'IPC. */
+  | { readonly code: 'error.save.io'; readonly cause: string }
+
+/** Il file assente non è un errore: è una partita nuova (ADR 0004). */
+export type LoadedSave =
+  { readonly present: false } | { readonly present: true; readonly payload: SavePayload }
+
+export type SaveResult<T> = Result<T, SaveError>
+
+/**
+ * Ciò che il preload espone al renderer. Le tre funzioni ritornano una `Promise` perché l'IPC è
+ * asincrono e sta fuori da `core/`: l'ADR 0016 vieta l'asincronia nel **Bus**, non al confine con
+ * il sistema operativo.
+ *
+ * Il `declare global` che aggancia questa API a `window` è del renderer, quindi di D011. Qui il
+ * preload si limita a soddisfare l'interfaccia.
+ */
+export interface SaveApi {
+  /** Ritorna l'istante scritto nella busta. */
+  readonly save: (payload: SavePayload) => Promise<SaveResult<number>>
+  readonly load: () => Promise<SaveResult<LoadedSave>>
+  readonly reset: () => Promise<SaveResult<null>>
 }

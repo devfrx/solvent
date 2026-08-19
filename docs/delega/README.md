@@ -89,7 +89,7 @@ configurato dopo che c'erano già 156 file.
 | [D006](D006-kernel-registry.md)      | Kernel: Registry                                                      | 124 codice + 406 test | **Chiusa** |
 | [D007](D007-kernel-ledger.md)        | Kernel: Ledger — pool, transazioni atomiche, partita doppia           | 197 codice + 420 test | **Chiusa** |
 | [D008](D008-balance.md)              | Balance: costanti, modificatori, bersagli                             | 70 codice + 154 test  | **Chiusa** |
-| [D009](D009-persistenza-main.md)     | Persistenza nel processo main                                         | ~180                  | Aperta     |
+| [D009](D009-persistenza-main.md)     | Persistenza nel processo main                                         | 259 codice + 591 test | **Chiusa** |
 | [D010](D010-dominio-income.md)       | Dominio: income                                                       | ~90                   | Aperta     |
 | [D014](D014-dominio-bancomat.md)     | Dominio: bancomat — deposita, preleva, commissione                    | ~80                   | Aperta     |
 | [D011](D011-runtime-e-store.md)      | Runtime e store                                                       | ~120                  | Aperta     |
