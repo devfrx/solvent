@@ -143,8 +143,13 @@ const ITALIAN_WORDS = new Set([
  *   parola dopo la finta chiusura diventa un identificatore che non è mai stato scritto.
  *
  * Limiti dichiarati: sparisce anche ciò che sta dentro `${…}`, e un'espressione regolare che
- * contiene apici o `//` può confondere la scansione. Sono rumore, non falsi positivi: producono
- * frammenti senza parole italiane.
+ * contiene apici o `//` **manda fuori fase** la scansione — da lì in poi il file è disallineato e
+ * le descrizioni dei test vengono lette come codice. Non è rumore: sono falsi positivi, e ne ha
+ * prodotti tre in D014, su una classe di caratteri che elencava le tre virgolette — cioè su
+ * un'espressione regolare perfettamente legittima. Riconoscere un letterale di
+ * espressione regolare richiederebbe di distinguerlo da una divisione, che è il problema difficile
+ * del parsing di JavaScript; l'aggiramento costa una riga — si costruisce la classe di caratteri
+ * come **stringa** e si passa a `new RegExp`, e allora la scansione la consuma correttamente.
  */
 const NOISE =
   /\/\*[\s\S]*?\*\/|\/\/[^\n]*|`(?:\\.|\$\{[^}]*\}|[^\\`])*`|'(?:\\.|[^\\'])*'|"(?:\\.|[^\\"])*"/g

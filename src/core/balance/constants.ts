@@ -36,6 +36,19 @@ export const BALANCE = {
   UPGRADE_MULTIPLIER: fromString('1.5'),
 
   /**
+   * La commissione che il bancomat trattiene su ogni operazione, deposito o prelievo che sia
+   * (D014). È un **importo fisso** e non una percentuale, ed è una scelta di gioco prima che di
+   * forma: con una percentuale il caso "la commissione supera l'importo" non si presenterebbe mai,
+   * e con esso sparirebbe la dinamica che il caveau della fetta 02 userà — prelevare poco costa
+   * proporzionalmente molto, quindi conviene prelevare grosso, ma i contanti hanno una capienza.
+   *
+   * Sta qui e non in `domains/atm/` perché `no-magic-numbers` sotto `domains/**` lo impedisce, ed
+   * è proprio il punto: un numero di gioco scritto dentro un dominio è un bilanciamento che si
+   * sposta da solo.
+   */
+  ATM_FEE: fromString('2.50'),
+
+  /**
    * ADR 0009 — il tetto ai tick di recupero. Riaprire il gioco dopo giorni non deve bloccare
    * l'avvio per minuti, e il recupero usa lo **stesso** codice del tempo reale: non esiste una
    * formula offline separata da bilanciare a parte, che è la fonte classica di exploit negli idle.
