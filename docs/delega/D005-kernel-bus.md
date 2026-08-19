@@ -5,7 +5,7 @@
 - **Sblocca:** D006, D007
 - **ADR vincolanti:** 0016
 - **Invarianti:** INV-15
-- **Budget:** ~50 righe → **consuntivo: 71 righe di codice** (125 con i commenti) + 303 di test
+- **Budget:** ~50 righe → **consuntivo: 67 righe di codice** (121 con i commenti) + 303 di test
 
 ## Obiettivo
 
@@ -87,8 +87,8 @@ per poter costruire nei test una mappa con più eventi. Scartata: aprirebbe un v
 sistema può dichiararsi una mappa di eventi propria, e `GameEvents` smetterebbe di essere l'unica
 interfaccia degli eventi del gioco. Un test più forte non vale un'invariante più debole.
 
-Sul budget: ~50 righe previste, 71 di codice. Sopra il segno di venti righe, e la ragione è la
-correzione 3: l'iscrizione con il proprio stato costa più di un array di funzioni.
+Sul budget: ~50 righe previste, 67 di codice. Sopra il segno di diciassette righe, e la ragione è
+la correzione 3: l'iscrizione con il proprio stato costa più di un array di funzioni.
 
 ## Fuori scope
 

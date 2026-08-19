@@ -1,11 +1,14 @@
 # Flusso di un tick
 
-Cosa succede fra un frame del browser e un cambiamento di saldo. Descrive lo stato **corrente**
-del progetto; se il loop cambia, questo file cambia nello stesso commit.
+Cosa succede fra un frame del browser e un cambiamento di saldo. È il disegno **vincolante** del
+loop della fetta 01: il codice arriva con D007, D010 e D011 e deve corrispondere a questo. Se il
+loop cambia, questo file cambia nello stesso commit.
 
 Decisioni rilevanti: [ADR 0009](../adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md) (passo
 fisso), [ADR 0002](../adr/0002-registry-unica-lista-di-sistemi.md) (chi itera),
-[ADR 0016](../adr/0016-il-bus-e-sincrono-e-fire-and-forget.md) (il Bus è sincrono).
+[ADR 0016](../adr/0016-il-bus-e-sincrono-e-fire-and-forget.md) (il Bus è sincrono),
+[ADR 0019](../adr/0019-transazioni-atomiche-nel-ledger.md) (la primitiva è la transazione) e
+[ADR 0020](../adr/0020-partita-doppia.md) (ogni transazione somma a zero).
 
 ## Dal frame al tick
 
@@ -52,21 +55,25 @@ sequenceDiagram
     S->>P: guadagnoPerTick(stato, modificatori)
     Note over P: funzione pura:<br/>nessun ctx, nessun effetto
     P-->>S: Money
-    S->>LG: post({ cash, +Money, reason.income.tick, income })
-    LG->>LG: valida e applica sul saldo privato
-    LG->>B: emit('money.posted', ...)
+    S->>LG: transaction — reason.income.tick, categoria income
+    Note over LG: due movimenti: world -X e cash +X<br/>somma zero (ADR 0020)
+    LG->>LG: valida TUTTI i movimenti, poi applica sul saldo privato
+    LG->>B: emit('money.posted', { transaction, balances })
     B->>ST: l'handler aggiorna il mirror reattivo
-    LG-->>S: Result<Money, PostError>
+    LG-->>S: Result<Balances, LedgerError>
     S-->>R: void
     Note over R: prossimo sistema
 ```
 
-Tre punti che il diagramma rende visibili meglio di qualsiasi paragrafo:
+Quattro punti che il diagramma rende visibili meglio di qualsiasi paragrafo:
 
 1. **Il sistema non tocca mai un saldo.** Chiede al Ledger, che gli risponde con un `Result`.
-2. **Il calcolo è nella funzione pura**, che non riceve il contesto. È testabile da sola con un
+2. **Il reddito non nasce dal nulla: esce da `world`.** Il sistema non nomina `world` a mano — lo
+   fa il costruttore `income()` del Ledger (INV-10). Se un movimento solo bastasse, la somma di
+   tutti i conti smetterebbe di essere zero e la partita doppia sarebbe una decorazione.
+3. **Il calcolo è nella funzione pura**, che non riceve il contesto. È testabile da sola con un
    seed fisso e senza impalcature.
-3. **Lo store è un lettore, non una fonte.** Riceve dal Bus, non calcola. Se lo store calcolasse,
+4. **Lo store è un lettore, non una fonte.** Riceve dal Bus, non calcola. Se lo store calcolasse,
    il gioco non sarebbe simulabile senza Vue — e cadrebbe l'ADR 0001.
 
 ## Un comando che può fallire
@@ -84,14 +91,16 @@ sequenceDiagram
 
     C->>ST: compraUpgrade()
     ST->>CMD: esegue
-    CMD->>LG: post({ cash, -costo, reason.upgrade.buy, purchase })
+    CMD->>LG: transaction — reason.income.upgrade, categoria purchase
+    Note over LG: due movimenti: card -costo e sink +costo<br/>l'upgrade si paga solo con la carta (D010)
     alt saldo sufficiente
-        LG->>B: emit('money.posted')
-        LG-->>CMD: ok
+        LG->>B: emit('money.posted', { transaction, balances })
+        LG-->>CMD: Result ok con i saldi nuovi
         CMD->>CMD: registra il modificatore sul bersaglio income.all
         CMD-->>ST: Result ok
     else saldo insufficiente
-        LG-->>CMD: error { code: 'error.ledger.insufficient_funds', required, available }
+        Note over LG: nessun saldo si muove, nessun evento (ADR 0019)
+        LG-->>CMD: error error.ledger.insufficient_funds — pool, required, available
         CMD-->>ST: Result error
         ST->>C: il codice di errore
         C->>I: traduce il codice

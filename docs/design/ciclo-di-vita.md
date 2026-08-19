@@ -50,7 +50,7 @@ scrittura atomica, non prima.
 | Momento                      | In questa fetta | Nota                                                            |
 | ---------------------------- | --------------- | --------------------------------------------------------------- |
 | alla chiusura della finestra | **sì**          | è l'unico salvataggio della fetta 01                            |
-| a intervalli regolari        | no              | fetta 04, insieme al progresso offline: sono lo stesso problema |
+| a intervalli regolari        | no              | fetta 03, insieme al progresso offline: sono lo stesso problema |
 | a ogni transazione           | mai             | scriverebbe su disco dieci volte al secondo                     |
 | su richiesta dell'utente     | no              | quando esisterà una schermata che lo offre                      |
 

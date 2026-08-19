@@ -1,6 +1,6 @@
 # D001 — Tooling, regole e gate di qualità
 
-- **Stato:** **Chiusa** — 2026-08-19 (nessun commit: il repo non è ancora sotto git, vedi in fondo)
+- **Stato:** **Chiusa** — 2026-08-19, commit `e275f59` su `main` (fatto a posteriori: vedi in fondo)
 - **Dipende da:** le tre decisioni approvate (nome, dipendenze, ADR 0001)
 - **Sblocca:** tutto
 - **ADR vincolanti:** 0008, 0012, 0013, 0015
@@ -96,15 +96,18 @@ perché è obbligatorio, non perché qualcuno se ne ricorda.
 - [x] `tests/rules/no-todo.test.ts` cerca i marcatori in `src/**`, e verifica il proprio rilevatore
 - [x] `tests/rules/gates.test.ts` impedisce che un gate sparisca dalla catena
 - [x] [tracciabilita.md](../tracciabilita.md) aggiornata: nessuna riga con un meccanismo inesistente
-- [ ] commit — **non fatto**: il repo non è ancora sotto git
+- [x] commit — `e275f59`, fatto a posteriori: quando D001 si è chiusa il repo non era ancora sotto
+      git, e l'inizializzazione è avvenuta prima di D002 (vedi la nota di chiusura)
 
 ## Nota di chiusura
 
 `npm run verify` → typecheck, lint, format:check, test: **verdi**, 33 test su 5 file, 8 secondi.
 
-Il repo **non è un repository git**. Le [convenzioni](../convenzioni.md) prevedono un ramo e dei
-commit per delega, quindi va inizializzato prima di D002 — è una decisione da prendere insieme
-(nome del ramo principale, eventuale remoto), non da subire.
+Alla chiusura il repo **non era un repository git**, e questa delega restò senza commit. Le
+[convenzioni](../convenzioni.md) prevedono un ramo e dei commit per delega, quindi
+l'inizializzazione è stata fatta subito dopo, prima di D002: il contenuto di D001 è entrato con
+`e275f59` (`chore(D001): tooling, regole e gate eseguibili`), direttamente su `main` perché il ramo
+per delega esiste da D002 in poi.
 
 ## Trappole note
 

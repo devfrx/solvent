@@ -63,25 +63,21 @@ export interface Bus {
 
 export const createBus = (): Bus => {
   const iscritti = new Map<keyof GameEvents, Iscrizione[]>()
-  const catena: string[] = []
+  const catena: (keyof GameEvents)[] = []
 
   return {
     on: <E extends keyof GameEvents>(event: E, handler: Handler<E>): Unsubscribe => {
-      let lista = iscritti.get(event)
-      if (lista === undefined) {
-        lista = []
-        iscritti.set(event, lista)
-      }
+      const lista = iscritti.get(event) ?? []
+      iscritti.set(event, lista)
 
       const iscrizione: Iscrizione = { handler, attiva: true }
-      const suaLista = lista
-      suaLista.push(iscrizione)
+      lista.push(iscrizione)
 
       return () => {
         if (!iscrizione.attiva) return
         iscrizione.attiva = false
-        const indice = suaLista.indexOf(iscrizione)
-        if (indice !== -1) suaLista.splice(indice, 1)
+        const indice = lista.indexOf(iscrizione)
+        if (indice !== -1) lista.splice(indice, 1)
       }
     },
 

@@ -37,8 +37,10 @@ Venti minuti.
 **Devi cambiare qualcosa** → cerca la decisione nel [compendio](adr/README.md). Se esiste, la
 discussione riparte dalle alternative già scartate. Poi [convenzioni.md](convenzioni.md).
 
-**Devi aggiungere un sistema** → il README di progetto (20 righe), poi
-[delega/D006](delega/D006-kernel-registry.md) per capire cosa il Registry si aspetta.
+**Devi aggiungere un sistema** → [delega/D006](delega/D006-kernel-registry.md), per capire cosa il
+Registry si aspetta, e [architettura.md](architettura.md#albero-delle-cartelle--la-forma-della-fetta-01)
+per sapere dove va il file. La procedura in venti righe si scrive quando il Registry esiste
+davvero: prima sarebbe una descrizione di codice non scritto.
 
 **Devi decidere se una cosa si fa adesso** → [roadmap-fette.md](roadmap-fette.md), sezione
 registro YAGNI. Se è lì, guarda il grilletto.

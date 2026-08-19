@@ -44,15 +44,22 @@ Non si dice mai "frame" per intendere "tick": il frame è la UI, il tick è la s
 
 ### I pool
 
+I sei che esistono, cioè quelli in `POOL_IDS` (`contracts/pools.ts`):
+
 | Pool    | Del giocatore? | Cos'è                                                                        |
 | ------- | -------------- | ---------------------------------------------------------------------------- |
 | `cash`  | sì             | contanti: anonimi, capienza limitata dal caveau, nessun interesse            |
 | `card`  | sì             | carta e conto: tracciati, illimitati, generano interessi e credito           |
-| `chips` | sì             | fiches del casinò: convertibili solo verso `cash`, a spread                  |
 | `world` | **no**         | da dove nasce il reddito. Va in negativo, ed è corretto                      |
 | `sink`  | **no**         | dove finiscono acquisti e costi                                              |
 | `fees`  | **no**         | commissioni, spread, percentuali. Separato perché il bilanciamento lo guarda |
 | `house` | **no**         | il margine del banco al casinò                                               |
+
+Il nome è deciso, il pool no: **`chips`** — le fiches del casinò, del giocatore, convertibili solo
+verso `cash` e a spread — **non è in `POOL_IDS`**. Entra col dominio che lo usa, ed è una riga del
+[registro YAGNI](roadmap-fette.md). Vale per le proprietà quanto per i pool: la capienza di `cash`
+e gli interessi di `card` sono descritti qui e sono `null`/`false` nel codice finché non esiste il
+dominio che li rende veri.
 
 "Cash" è il nome di un pool, non un sinonimo di "denaro". Il denaro è `Money`. I pool non-giocatore
 non compaiono mai nella UI, ma entrano nel salvataggio: senza, la somma non farebbe zero al

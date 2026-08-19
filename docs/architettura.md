@@ -60,7 +60,11 @@ flowchart TD
 
 Il main tocca **solo** `core/contracts/save.ts`. È un arco stretto e voluto.
 
-## Albero delle cartelle
+## Albero delle cartelle — la forma della fetta 01
+
+Questo è l'albero **a fetta 01 finita**, non quello di oggi: serve a sapere dove va una cosa prima
+di scriverla. Cosa esiste già lo dice `git ls-files`; a che punto siamo lo dice
+[delega/PASSAGGIO-DI-CONSEGNE.md](delega/PASSAGGIO-DI-CONSEGNE.md).
 
 ```
 solvent/
@@ -71,13 +75,15 @@ solvent/
 ├─ electron.vite.config.ts
 ├─ electron-builder.yml           # appId, productName — nessun publish finto
 ├─ package.json
-├─ tsconfig.json                  # solution: references a node/web
+├─ tsconfig.json                  # solution: references a node/web/test
+├─ tsconfig.base.json             # le opzioni comuni, strict incluso
 ├─ tsconfig.node.json             # main + preload
 ├─ tsconfig.web.json              # renderer + core
+├─ tsconfig.test.json             # tests/
 ├─ vitest.config.ts
 ├─ docs/
 │  ├─ architettura.md             # questo file
-│  └─ adr/0001..0008-*.md
+│  └─ adr/0001..0020-*.md
 ├─ src/
 │  ├─ main/
 │  │  ├─ index.ts
@@ -131,6 +137,7 @@ solvent/
 │        ├─ it.ts
 │        └─ en.ts
 └─ tests/
+   ├─ helpers/         sorgenti (lettura dei sorgenti per i test di regola)
    ├─ contracts/       result · money · pools · ledger · bounded · events · save · commands
    ├─ kernel/          clock · rng · bus · registry · ledger
    ├─ domains/         income (seed fisso)
@@ -151,23 +158,29 @@ Legenda: **🔒 impossibile** = il tipo o la struttura non permettono di scriver
 | --- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------- | ------- |
 | 1   | Nessuno store importa un altro store       | ESLint `no-restricted-imports` su `src/renderer/stores/**`                                                 | ✅      |
 | 2   | Nessuna lista di sistemi scritta a mano    | Solo il Registry itera + test: sistemi registrati == file `domains/*/system.ts`                            | ✅      |
-| 3   | `Math.random` solo in `Rng.ts`             | ESLint `no-restricted-properties` globale, con override per il solo `Rng.ts`                               | ✅      |
+| 3   | `Math.random` solo in `Rng.ts`             | ESLint `no-restricted-properties` globale, **senza eccezioni di file**: l'unica riga esente si motiva      | ✅      |
 | 4   | Nessun numero magico di tempo              | Tipi branded `Ticks` / `Seconds`: un `number` nudo non è assegnabile. + `no-magic-numbers` su `domains/**` | 🔒      |
 | 5   | Nessuna logica di dominio nei `.vue`       | ESLint su `**/*.vue` vieta `domains/*/rules` e `kernel/*` + test grep di backstop                          | ✅      |
 | 6   | Nessun denaro fuori dal Ledger             | I saldi vivono in una Map privata nella closure: non c'è nulla da assegnare. + lint di rete                | 🔒      |
 | 7   | Se un sistema ha stato, ha save/load/reset | Unione discriminata `System`: con `save` presente, `load` e `reset` sono obbligatori                       | 🔒      |
 | 8   | Il main scrive la versione del salvataggio | Il tipo `SavePayload` del renderer non ha un campo `version`                                               | 🔒      |
 | 9   | Ogni lista storica ha un limite dichiarato | `boundedList<T>(max)` è l'unico costruttore + il validatore rifiuta array oltre `max`                      | 🔒      |
-| 10  | Un solo stile di esito                     | `CommandHandler` ritorna `Result` per tipo; fuori dai comandi serve un lint                                | ⚠️ → ✅ |
+| 10  | Un solo stile di esito                     | `CommandHandler` ritorna `Result` per tipo + lint contro i literal con chiave `success`                    | ⚠️      |
 | 11  | Denaro `Decimal` end-to-end                | `Money = Decimal` è una classe + lint sulle conversioni nei domini                                         | 🔒      |
 | 12  | Nessuna stringa utente hardcoded           | Test di parità i18n (✅) + test euristico sui template `.vue` (⚠️)                                         | ✅ / ⚠️ |
 
-### Le due regole non meccanizzabili al 100%, e la proposta
+**Quando entra ciascun meccanismo.** Alcune di queste regole sono già in vigore, altre nascono con
+la delega che le usa: la colonna _Delega_ di [tracciabilita.md](tracciabilita.md) dice quale, per
+ognuna. Qui c'è la forma finale del meccanismo, non la data.
+
+### Le due regole non meccanizzabili al 100%
 
 **Regola 10 — `Result` ovunque.** Il tipo copre i comandi, ma non impedisce a una funzione
-qualunque di ritornare `boolean`. Proposta: `no-restricted-syntax` che vieta i literal di oggetto
-con chiave `success`. Non copre il `boolean` nudo, ma elimina la seconda convenzione — che è
-esattamente il difetto misurato (62 contro 35).
+qualunque di ritornare `boolean`. Il lint `no-restricted-syntax` vieta i literal di oggetto con
+chiave `success` (in vigore da D001, verificato in `tests/rules/lint-rules`). Non copre il
+`boolean` nudo, ma elimina la seconda convenzione — che è esattamente il difetto misurato
+(62 contro 35). Resta ⚠️ per quello che non copre, ed è dichiarato in
+[tracciabilita.md](tracciabilita.md#cosa-questa-tabella-non-copre).
 
 **Regola 12 — nessuna stringa hardcoded.** La parità fra lingue è un test esatto. Il "nessun
 testo letterale nei template" è un test a regex sui nodi di testo dei `.vue`: cattura il caso

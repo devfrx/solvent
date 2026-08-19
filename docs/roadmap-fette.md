@@ -68,7 +68,7 @@ condizione, non entra — nemmeno se sembra ovvia.
 | Cosa manca                                      | Grilletto                                                                                |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Salvataggi multipli / slot                      | quando esiste una ragione di gioco per più partite parallele                             |
-| Salvataggio automatico a intervalli             | fetta 04, insieme al progresso offline: sono lo stesso problema                          |
+| Salvataggio automatico a intervalli             | fetta 03, insieme al progresso offline: sono lo stesso problema                          |
 | Undo / annulla                                  | mai, salvo decisione di design esplicita                                                 |
 | Obiettivi, achievement                          | quando esistono abbastanza sistemi da renderli non banali                                |
 | Impostazioni (audio, lingua da UI, scorciatoie) | quando esiste più di una cosa da impostare. La lingua si cambia già da codice            |

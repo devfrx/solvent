@@ -32,7 +32,7 @@ Colonna "cosa lo farebbe tornare": il gesto preciso che riaprirebbe il difetto.
 | A16 | 154/156 file non formattati         | ADR 0013 — gate                   | molto basso     | disattivare il gate perché "urgente"                                                                        |
 | A17 | 24 sistemi prima del kernel         | ADR 0014 — una fetta alla volta   | **alto**        | è l'unico difetto la cui mitigazione è **disciplina di processo**, non un meccanismo                        |
 
-I quattro difetti a rischio residuo **medio o alto** sono A08, A09, A12, A14, A17. Sono quelli su
+I cinque difetti a rischio residuo **medio o alto** sono A08, A09, A12, A14, A17. Sono quelli su
 cui vale la pena spendere attenzione in review — gli altri li tiene il tooling.
 
 **A17 merita una nota.** È il difetto che ha generato tutti gli altri, ed è l'unico che nessun
@@ -75,9 +75,11 @@ Dichiarati, non nascosti:
   problema non esiste; alla seconda fetta si valuta un tool (ADR 0012).
 - **La logica scritta inline in un `.vue`, senza import, sfugge al lint** (A09). Nessuna regola
   automatica distingue "calcolo di presentazione" da "calcolo economico". Resta alla review.
-- **Un `eslint-disable` sconfigge qualsiasi regola.** Non lo vietiamo: vietarlo produce
-  aggiramenti peggiori. Ma `eslint-disable` senza una riga di motivazione accanto è, per
-  convenzione, un difetto in review.
+- **Un `eslint-disable` motivato sconfigge qualsiasi regola.** Non lo vietiamo: vietarlo produce
+  aggiramenti peggiori. Resta accettato che una motivazione plausibile ma sbagliata passi: nessun
+  test giudica il **contenuto** della motivazione, solo che ci sia. Che ci sia, però, non è più una
+  convenzione: da D004 è la regola C06, cioè `tests/rules/eslint-disable.test.ts`, e un
+  `eslint-disable` muto è un test rosso.
 - **Nessuna difesa contro la manomissione del file di salvataggio.** È un singleplayer offline: il
   giocatore che vuole barare con il proprio salvataggio ne ha diritto. Lo schema `zod` serve a non
   far entrare in memoria dati malformati, non a impedire il cheating.
