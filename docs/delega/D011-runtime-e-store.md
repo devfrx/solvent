@@ -1,6 +1,6 @@
 # D011 — Runtime e store
 
-- **Stato:** **Chiusa** — 2026-08-19, ramo `d011-runtime-e-store`
+- **Stato:** **Chiusa** — 2026-08-19, commit `dbf821c`, ramo `d011-runtime-e-store`
 - **Dipende da:** D009, D010
 - **Sblocca:** D012
 - **ADR vincolanti:** 0001, 0009, 0016
