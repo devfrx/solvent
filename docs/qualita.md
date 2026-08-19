@@ -9,13 +9,13 @@ Questo documento dice quali sono, cosa garantisce ciascuno, e cosa nessuno di es
 
 | #   | Comando                | Cosa garantisce                                                                                   | Tempo reale       |
 | --- | ---------------------- | ------------------------------------------------------------------------------------------------- | ----------------- |
-| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, INV-13 + nessun codice morto (C01) | ~10 s             |
-| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                         | ~9 s              |
+| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, INV-13 + nessun codice morto (C01) | ~9 s              |
+| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                         | ~11 s             |
 | G3  | `npm run format:check` | il codice è formattato (C02)                                                                      | ~5 s              |
-| G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint          | ~8 s              |
+| G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint          | ~7 s              |
 | G5  | `npm run build`        | l'applicazione si compila davvero, main e renderer                                                | decine di secondi |
 
-Misurati a D007 chiusa su Windows, con 187 test. Sono tempi **di parete**, quindi comprendono
+Misurati a D008 chiusa su Windows, con 204 test. Sono tempi **di parete**, quindi comprendono
 l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre `npm run`. La parte di
 lavoro vero è meno della metà del totale.
 
@@ -25,8 +25,8 @@ Due comandi, non uno, ed è deliberato:
     npm run verify:release  # verify + G5
 
 **Perché separati.** Il tempo atteso è parte della specifica: un gate lento viene aggirato. I
-quattro veloci stanno **sotto il minuto** — a D006 chiusa venticinque secondi, a D007 trentuno — e
-si eseguono a ogni modifica; la compilazione costa un ordine di grandezza in più e serve prima di
+quattro veloci stanno **sotto il minuto** — venticinque secondi a D006, trentuno a D007, fra
+ventisette e trenta a D008 su due misure consecutive — e si eseguono a ogni modifica; la compilazione costa un ordine di grandezza in più e serve prima di
 un rilascio, non prima di un salvataggio. Se `verify` supera il minuto, è un problema da risolvere, non da
 tollerare, e il rimedio è già censito nel [registro YAGNI](roadmap-fette.md): togliere l'avvio di
 `npm` ripetuto, non togliere un gate.
@@ -34,7 +34,9 @@ tollerare, e il rimedio è già censito nel [registro YAGNI](roadmap-fette.md): 
 Quella cifra è stata **misurata**, non stimata: a D001 il documento diceva otto secondi con 33
 test, e ci è rimasto fino a D006 con 150. Un tempo dichiarato e mai più misurato è la stessa
 categoria di bugia di un `TODO`. Da D006 a D007 sono cresciuti tutti e quattro i gate, non solo i
-test: è l'andamento normale, e va guardato ogni volta invece che una volta sola.
+test: è l'andamento normale, e va guardato ogni volta invece che una volta sola. Da D007 a D008
+non si sono mossi — la variazione fra due esecuzioni della stessa catena è ormai più grande della
+crescita fra due deleghe, ed è per questo che qui c'è un intervallo e non una cifra.
 
 `verify:release` non è verde finché non esiste sorgente: diventa eseguibile con D011.
 `tests/rules/gates.test.ts` impedisce che un gate sparisca da una delle due catene (INV-14).
