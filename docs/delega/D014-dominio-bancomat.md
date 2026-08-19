@@ -349,7 +349,7 @@ movimento a tre righe fra due pool del giocatore — e nessuno di loro ha dovuto
   contengono anche lo stipendio, che è di `income`: è un mirror dello store, non lo stato di un
   dominio.
 
-## Cosa deve sapere chi prende D012
+## Cosa deve sapere chi prende D012 e D015
 
 - **Tre codici d'errore vogliono la loro chiave i18n** (INV-07): `error.income.already_upgraded` da
   D010, `error.atm.amount_not_positive` e `error.atm.fee_exceeds_amount` da qui. I due del bancomat

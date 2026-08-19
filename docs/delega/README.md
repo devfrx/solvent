@@ -68,8 +68,10 @@ flowchart TD
   D009 --> D011["D011 · Runtime e store"]
   D010 --> D011
   D014 --> D011
-  D011 --> D012["D012 · UI e i18n"]
-  D012 --> D013["D013 · Verifica della fetta — STOP 2"]
+  D011 --> D012["D012 · Guscio, parole e reddito"]
+  D012 --> D015["D015 · Home: bancomat e cruscotto"]
+  D014 --> D015
+  D015 --> D013["D013 · Verifica della fetta — STOP 2"]
 ```
 
 **D001 è prima di tutto, e non è un caso.** Le regole devono esistere prima del codice che
@@ -93,12 +95,20 @@ configurato dopo che c'erano già 156 file.
 | [D010](D010-dominio-income.md)       | Dominio: income                                                       | 102 codice + 302 test | **Chiusa** |
 | [D014](D014-dominio-bancomat.md)     | Dominio: bancomat — deposita, preleva, commissione                    | 65 codice + 548 test  | **Chiusa** |
 | [D011](D011-runtime-e-store.md)      | Runtime e store                                                       | 379 codice + 774 test | **Chiusa** |
-| [D012](D012-ui-e-i18n.md)            | UI e i18n — home ATM, carta 3D                                        | ~1.150                | Aperta     |
+| [D012](D012-ui-e-i18n.md)            | Il guscio, le parole e il reddito                                     | ~430 + 150 test       | Aperta     |
+| [D015](D015-home-bancomat.md)        | La home: bancomat, carta e cruscotto                                  | ~720                  | Aperta     |
 | [D013](D013-verifica-della-fetta.md) | Verifica della fetta — STOP 2                                         | ~250 di test          | Aperta     |
 
-D014 ha il numero più alto perché è nata dopo, con gli ADR 0017–0020. Nel grafo sopra si vede dove
-sta davvero: accanto a D010, prima di D011. **La numerazione è cronologica, l'ordine è il grafo** —
-rinumerare romperebbe i riferimenti nei commit e nella tracciabilità.
+D014 e D015 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015 il
+2026-08-19 spezzando D012. Nel grafo sopra si vede dove stanno davvero — D014 accanto a D010, D015
+fra D012 e D013. **La numerazione è cronologica, l'ordine è il grafo**: rinumerare romperebbe i
+riferimenti nei commit e nella tracciabilità.
+
+**Perché D012 è stata spezzata.** Valeva ~1.150 righe, più del kernel intero, e il numero era una
+misura fatta sui mockup — non una stima. Una delega di quella dimensione non è verificabile a metà
+strada: la definizione di fatto arriva tutta insieme alla fine. Il taglio passa fra i due mockup,
+che non sono due schermate ma due momenti — gli **stati** e il reddito da una parte, la **home**
+col bancomat dall'altra.
 
 Il kernel — D003, D004, D005, D006, D007, D008 — è **finito**, e sta in **535 righe**: Clock 20,
 Rng 55, Bus 67, Registry 126, Ledger 197, Balance 70. Il budget iniziale era ~500, poi ~560 quando

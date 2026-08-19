@@ -250,13 +250,15 @@ che riparte vuoto. Il primo `boundedList` salvato resta il caveau della fetta 02
 
 - **Il guscio esiste già**: `App.vue`, `main.ts` e `index.html`, 81 righe in tutto di cui ~20 di
   CSS. Rende i sette stati del ciclo di vita e il mirror, senza una parola di prosa. Sono **dentro**
-  il conto delle ~1.150 righe di D012, non in più: quella delega aggiunge la navigazione, le viste e
-  le etichette, non riparte da zero.
+  il budget di D012, non in più: quella delega aggiunge la navigazione, le etichette e le viste, non
+  riparte da zero. (D012 è stata **spezzata** dopo la chiusura di D011: la home col bancomat è
+  [D015](D015-home-bancomat.md).)
 - **Lo store espone stato e comandi, non selettori.** `status`, `failure`, `balances`, `history`,
   `savedAt`, più `start`, `newGame`, `close`, `buyUpgrade`, `deposit`, `withdraw`. I **numeri** per
   la UI — `incomePerSecond`, `upgradeCost`, `canBuyUpgrade`, `atmFee`, `previewOf` — non ci sono
-  ancora, ed è deliberato: si aggiungono quando esiste il componente che li consuma, e li aggiunge
-  D012 chiamando le regole pure (un `.vue` non può importarle, R05).
+  ancora, ed è deliberato: si aggiungono quando esiste il componente che li consuma, chiamando le
+  regole pure (un `.vue` non può importarle, R05). Quelli del reddito sono di D012, quelli del
+  bancomat di [D015](D015-home-bancomat.md).
 - **`modifiers` non esce da `createGame`.** Serve a `incomePerSecond`, quindi D012 lo esporrà: è una
   riga in `createGame.ts`, e vale la pena aggiungerla insieme al selettore che la usa.
 - **Un codice d'errore nuovo vuole la sua chiave**: `error.game.load_failed` (INV-07), oltre ai

@@ -1,7 +1,7 @@
 # D013 — Verifica della fetta (STOP 2)
 
 - **Stato:** Aperta
-- **Dipende da:** D012 (cioè tutto)
+- **Dipende da:** D015 (cioè tutto)
 - **Sblocca:** la decisione sulla fetta 02
 - **ADR vincolanti:** 0014
 - **Budget:** ~250 righe di test
@@ -53,7 +53,7 @@ Da fare a mano, oltre ai test, perché è la cosa che i test non vedono:
 - [ ] `docs/tracciabilita.md`: nessuna riga ha un meccanismo che non esiste
 - [ ] `docs/roadmap-fette.md`: la fetta 01 è marcata conclusa; il registro YAGNI è aggiornato con
       ciò che è stato tentato e rimandato **durante** il lavoro
-- [ ] tutte le deleghe da D001 a D012 sono `Chiusa`, con il commit annotato
+- [ ] tutte le deleghe della fetta — da D001 a D012, più D014 e D015 — sono `Chiusa`, con il commit annotato
 - [ ] gli ADR imposti dal codice sono `Accettata`; quelli ancora non imposti restano `Proposta`,
       e si dice quali
 - [ ] `README.md` sta in 20 righe

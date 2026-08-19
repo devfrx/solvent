@@ -1,100 +1,106 @@
-# D012 — UI e i18n
+# D012 — Il guscio, le parole e il reddito
 
-- **Stato:** Aperta
+- **Stato:** Aperta — **spezzata il 2026-08-19**, vedi _Perché è stata spezzata_
 - **Dipende da:** D011
-- **Sblocca:** D013
+- **Sblocca:** D015
 - **ADR vincolanti:** 0001, 0007, 0011
 - **Regole:** R05, R12
-- **Budget:** **~1.150 righe** — rimisurato il 2026-08-19, vedi _Il budget, rimisurato_
+- **Budget:** ~430 righe di sorgente + ~150 di test di regola
 
 ## Obiettivo
 
-Mostrare la fetta a schermo, e dimostrare che un componente può essere utile senza sapere nulla di
-economia.
+Vestire il ciclo di vita e far comprare l'upgrade, in due lingue. È la delega che dimostra che un
+componente può essere utile senza sapere nulla di economia — e che un fallimento si spiega invece
+di spegnere un pulsante.
+
+Riferimento visivo: **[fetta-01-primo-stipendio.html](../design/mockups/fetta-01-primo-stipendio.html)**.
+Quel mockup è la specifica di questa delega, e non per caso: la sua intestazione dice di sé che
+_mostra gli stati, che sono la parte che conta_. Lo stile è approvato
+([P2](../prodotto/preferenze.md#p2--lo-stile-visivo-del-mockup-è-approvato)).
+
+## Perché è stata spezzata
+
+D012 valeva **~1.150 righe** — più del kernel intero (535) — e il numero è una misura fatta sui
+mockup, non una stima. Una delega di quella dimensione viola la regola che il progetto si è dato
+per prima: _una fetta verticale alla volta, finita e verde_. Non perché sia difficile, ma perché a
+metà strada non è verificabile: la definizione di fatto arriva tutta insieme alla fine, e fino a
+quel momento nessuno sa se regge.
+
+Il taglio passa dove passano i **due mockup**, che non sono due schermate ma due momenti:
+
+| Delega                            | Cosa copre                                                             | Mockup                                                                           |
+| --------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **D012** — questa                 | gli **stati** del ciclo di vita, le parole, il saldo e l'upgrade       | [fetta-01-primo-stipendio.html](../design/mockups/fetta-01-primo-stipendio.html) |
+| **[D015](D015-home-bancomat.md)** | la **home completa**: carta 3D, bancomat, cruscotto, ultime operazioni | [home-atm.html](../design/mockups/home-atm.html)                                 |
+
+Dopo D012 il gioco è già una cosa che si può guardare: parte, dice cosa sta facendo, mostra il
+saldo che sale e lascia comprare l'upgrade — in italiano e in inglese. È il "primo stipendio" del
+titolo del mockup. Dopo D015 la fetta 01 è completa.
+
+**Il meccanismo dell'i18n nasce tutto qui**, non a metà: il test di parità, le chiavi di ogni
+`Reason` e di ogni codice d'errore — anche quelli che solo D015 mostrerà. Una lingua che si
+completa in due tempi è il difetto A13, e il test di parità esiste per togliere il "poi traduco".
 
 ## Da produrre
 
 `src/renderer/`
 
-Riferimento visivo: [home-atm.html](../design/mockups/home-atm.html) e
-[fetta-01-primo-stipendio.html](../design/mockups/fetta-01-primo-stipendio.html). Lo stile è
-approvato ([P2](../prodotto/preferenze.md#p2--lo-stile-visivo-del-mockup-è-approvato)).
+Il guscio **esiste già** da [D011](D011-runtime-e-store.md): `App.vue`, `main.ts` e `index.html`
+rendono i sette stati e i saldi, senza una parola di prosa. Questa delega li veste; non li ricrea.
 
-| File                              | Contenuto                                                                                                           |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `App.vue`                         | il guscio: caricamento, errore, gioco. Navigazione con **Home** e **Statistiche**                                   |
-| `views/HomeView.vue`              | bancomat sopra (carta, conto, contanti, deposita, preleva), cruscotto sotto (**max 6 riquadri**), ultime operazioni |
-| `views/StatsView.vue`             | dove vanno le statistiche che non stanno nei sei. Esiste dal primo giorno                                           |
-| `components/StatTile.vue`         | il riquadro del cruscotto — è ciò che il test conta                                                                 |
-| `components/BankCard3d.vue`       | la carta 3D ruotabile, fronte e retro                                                                               |
-| `components/CashPanel.vue`        | contanti e capienza del caveau                                                                                      |
-| `components/WithdrawDialog.vue`   | importo, anteprima della commissione, conferma                                                                      |
-| `components/IncomePanel.vue`      | l'upgrade, il costo, il pulsante, l'esito                                                                           |
-| `i18n/index.ts`, `it.ts`, `en.ts` | i due dizionari                                                                                                     |
+| File                              | Contenuto                                                                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `App.vue`                         | il guscio vestito: caricamento con il tempo recuperato, errore con **due scelte**, gioco. Navigazione Home e Statistiche |
+| `views/HomeView.vue`              | saldo, reddito al secondo, e il pannello dell'upgrade. La zona del bancomat e il cruscotto sono di D015                  |
+| `views/StatsView.vue`             | dove vanno le statistiche che non stanno nella home. Esiste dal primo giorno                                             |
+| `components/IncomePanel.vue`      | l'upgrade: nome, descrizione, livello, costo, pulsante, esito                                                            |
+| `i18n/index.ts`, `it.ts`, `en.ts` | i due dizionari, **completi** — le chiavi di D015 comprese                                                               |
 
-## La carta 3D — vincoli
+Più due cose nel runtime, piccole e necessarie:
 
-Vedi [P5](../prodotto/preferenze.md#p5--la-carta-è-un-oggetto-3d-ruotabile).
+- **i selettori del reddito nello store**: `incomePerSecond`, `upgradeCost`, `canBuyUpgrade`. Un
+  `.vue` non può importare `domains/*/rules` (R05), quindi li chiama lo store e il componente
+  riceve il numero già pronto.
+- **`modifiers` esce da `createGame`**: serve a `incomePerSecond`, ed è una riga.
 
-- CSS 3D puro: `perspective` sul contenitore, `transform-style: preserve-3d` sulla carta,
-  `backface-visibility: hidden` sulle facce. **Nessuna libreria** — non passerebbe l'ADR 0015.
-- Rotazione al trascinamento; al rilascio torna alla posizione di riposo o resta girata.
-- Il retro porta informazione vera: plafond usato, limite, punteggio di credito. Girare la carta
-  è un'azione utile, non un giocattolo.
-- `prefers-reduced-motion`: la rotazione resta, l'animazione di ritorno no.
-- Zero logica: nessun `Decimal` manipolato, nessun calcolo. Riceve valori già formattati.
+## Le chiavi che il mockup dichiara
 
-## Il budget, rimisurato
+Sono scritte in giallo sotto ogni schermata del mockup, ed è il modo in cui quel documento
+funziona: ogni testo visibile ha già il suo nome.
 
-Diceva **~150 righe** qui e **~230** nell'[indice](README.md): due numeri diversi per la stessa
-delega, nati **lo stesso giorno** — il commit di STOP 1 — e mai più toccati. Nessuno dei due era una
-misura: i mockup esistevano già in quel commit, e nessuno dei due li aveva guardati.
+    app.loading.catchup      app.loading.away_for
+    app.error.retry          app.error.new_game
+    balance.panel.title      balance.panel.rate
+    common.buy               common.level
+    income.upgrade.overtime.name    income.upgrade.overtime.desc
 
-Rimisurato partendo da ciò che c'è: i due [mockup](../design/mockups/home-atm.html) sono la
-specifica, e il codice che li riproduce non può essere molto più corto di loro.
-
-| Voce             | Righe | Da dove viene la cifra                                                                                                                                                                                                               |
-| ---------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| CSS              | ~465  | `home-atm.html` ne ha 407 non vuote, in tre blocchi: 116 di base e impaginazione, 126 per la carta 3D, 165 per i pannelli. `fetta-01` aggiunge 14 selettori suoi, ~60 righe. **Il CSS non si comprime componentizzando: si sposta.** |
-| Markup           | ~330  | 340 righe di `<body>` nei due mockup, meno ~90 di ripetizione che diventa `v-for` (sei riquadri → uno, tre operazioni → una) e di intestazione contata due volte, più ~80 per ciò che i mockup **non** mostrano                      |
-| `<script setup>` | ~190  | otto componenti più `i18n/index.ts`. Il grosso sta in `BankCard3d` (trascinamento e `prefers-reduced-motion`) e `WithdrawDialog` (importo, anteprima, conferma)                                                                      |
-| i due dizionari  | ~165  | **16 chiavi sono già obbligatorie oggi** — 4 `Reason` e 12 codici d'errore, contati nel sorgente — più ~50 di etichette. Sessantasei chiavi per due lingue, con l'annidamento                                                        |
-
-Le ~80 righe di markup che i mockup non mostrano hanno un nome, e sono la parte che una stima a
-occhio dimentica sempre: i tre stati del guscio (caricamento, errore con due scelte, gioco),
-`StatsView.vue` che non è disegnata da nessuna parte, il **deposito** accanto al prelievo, e i
-motivi mostrati al posto dei pulsanti spenti — che è un invariante di questa delega, non un extra.
-
-**Cosa se ne fa chi la esegue.** Quattrocentosessantacinque righe di CSS sono esattamente la
-grandezza del difetto **A14** — 1.067 righe di CSS morto — e questa delega è dove quel difetto è
-nato l'altra volta. Il numero non è un permesso: è la soglia oltre la quale conviene fermarsi e
-chiedersi cosa non serve. Il _Fuori scope_ qui sopra è la prima difesa; la seconda è che il CSS
-resti attaccato al componente che lo usa, così che togliere il componente tolga anche il suo stile.
-
-Con questa cifra D012 diventa **la delega più grande del progetto**, più del kernel intero (535
-righe). Se vada spezzata in due — il guscio e l'i18n da una parte, la carta 3D e i pannelli
-dall'altra — è una domanda che si risponde quando la si prende in mano, non adesso: è una decisione
-sulla forma della roadmap, e va presa da chi la esegue insieme a chi decide.
+Più, per obbligo di INV-07, **ogni** `Reason` e **ogni** codice d'errore che esiste nel sorgente —
+sono quattro e tredici, e si contano con un `grep`, non a memoria. Fra questi ce ne sono che solo
+D015 mostrerà (`error.ledger.capacity_exceeded`) e uno nato con D011
+(`error.game.load_failed`): entrano lo stesso, perché il test di parità li pretende.
 
 ## Invarianti
 
 - I componenti **leggono selettori e inviano comandi**. Nessun calcolo economico, nessun `Decimal`
   manipolato, nessun RNG, nessuna orchestrazione.
 - Nessuna stringa destinata all'utente nel codice. Tutto per chiave (R12).
-- Il fallimento dell'acquisto si mostra traducendo il `code` del `Result`, non con una frase
-  scritta nel componente. È il motivo per cui i codici di errore sono chiavi i18n.
-- **La commissione si vede prima della conferma** (ADR 0018), e la calcola la stessa funzione pura
-  che il comando userà per eseguire — importata da `domains/atm/rules`, non riscritta. È l'unico
-  import da un dominio che un `.vue` non può avere (R05): quindi la chiama lo **store**, e il
-  componente riceve il numero già pronto.
+- Il fallimento dell'acquisto si mostra traducendo il `code` del `Result`, non con una frase scritta
+  nel componente — e il messaggio porta `required` e `available`, che l'errore già contiene. È il
+  motivo per cui i codici di errore sono chiavi i18n.
 - Un pulsante non si spegne senza spiegazione. Se un'azione non è possibile, si mostra il motivo.
 - La formattazione del denaro passa da `toDisplayNumber` — l'unico posto autorizzato a convertire,
   e siamo al confine di presentazione, dove è legittimo (ADR 0006).
-- `it` ed `en` hanno esattamente le stesse chiavi, verificato da un test in entrambe le direzioni.
+- `it` ed `en` hanno esattamente le stesse chiavi, verificato in **entrambe** le direzioni.
 - Lo stato di errore del caricamento è una schermata reale con due scelte, non un `console.error`.
+- Lo stato `errore` ha **due cause** e una schermata sola: un caricamento fallito, dove la via
+  d'uscita è `newGame()`, e un **salvataggio finale** fallito, dove la partita è ancora in memoria e
+  la finestra è rimasta aperta apposta (D011, correzione 13). La seconda oggi non ha un pulsante, e
+  questa è la delega che glielo dà.
 
 ## Fuori scope
 
+- **Tutto ciò che è nel mockup del bancomat**: carta 3D, conto, contanti, deposita e preleva,
+  cruscotto, ultime operazioni. È [D015](D015-home-bancomat.md).
 - Tema chiaro/scuro. Il difetto A14 era 1.067 righe di CSS morto nate esattamente qui.
 - Animazioni, suoni, transizioni.
 - Un design system, o qualunque componente riutilizzabile costruito prima del secondo uso.
@@ -104,16 +110,17 @@ sulla forma della roadmap, e va presa da chi la esegue insieme a chi decide.
 ## Definizione di fatto
 
 - [ ] `tests/i18n/parity.test.ts`: le chiavi di `it` ed `en` coincidono, in entrambe le direzioni
-- [ ] test: ogni valore di `Reason` e ogni `code` di errore ha una chiave in **entrambe** le lingue
-      — è la parte che la parità da sola non copre
-- [ ] `tests/rules/home-tiles.test.ts`: `HomeView.vue` non contiene più di **sei** `StatTile`.
-      Verificato aggiungendone un settimo e vedendo il test diventare rosso
-- [ ] `tests/rules/no-logic-in-vue.test.ts`: nessun `.vue` importa `domains/*/rules` o `kernel/*`,
-      e nessuno contiene `Math.random`
+- [ ] test: ogni valore di `Reason` e ogni `code` di errore **letto dal sorgente**, non da una lista
+      scritta a mano, ha una chiave in entrambe le lingue — è la parte che la parità da sola non
+      copre, ed è anche ciò che la tiene viva quando nasce un codice nuovo
+- [ ] `tests/rules/no-logic-in-vue.test.ts`: nessun `.vue` importa `domains/*/rules` o `kernel/*`, e
+      nessuno contiene `Math.random`
 - [ ] `tests/rules/no-literal-in-template.test.ts`: nessun nodo di testo letterale nei template
       (euristica dichiarata ⚠️ in [tracciabilita.md](../tracciabilita.md))
+- [ ] test: `canBuyUpgrade` letto dal selettore e l'esito del comando danno la stessa risposta —
+      la coppia che, quando diverge, spegne un pulsante che avrebbe funzionato
 - [ ] verifica manuale: il pulsante con fondi insufficienti mostra un messaggio tradotto e
-      comprensibile, non un codice
+      comprensibile, con le due cifre, non un codice
 - [ ] verifica manuale: cambiando lingua da codice, tutta la UI cambia
 
 ## Trappole note
@@ -125,3 +132,8 @@ sulla forma della roadmap, e va presa da chi la esegue insieme a chi decide.
   Il test di parità toglie il "poi".
 - Il `t()` con una chiave costruita dinamicamente sfugge a ogni controllo. Se serve, la lista dei
   valori possibili deve essere un tipo unito, così il compilatore la conosce.
+- **Il test dei codici d'errore va scritto leggendo il sorgente**, non ricopiando i tredici codici:
+  una lista a mano è già scaduta il giorno in cui nasce il quattordicesimo, e ne sono nati tre in
+  tre deleghe.
+- **`verify:release` è verde da D011 e deve restarlo.** Da qui in avanti un renderer che non
+  compila è una regressione, non un'attesa.

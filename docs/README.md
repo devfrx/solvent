@@ -83,7 +83,9 @@ la carta. Con D014 è nato il **secondo**, e il ciclo si chiude: `atm` sposta de
 carta trattenendo una commissione, e non ha stato — è un dominio di soli comandi. Con D011 il gioco
 **gira**: il bootstrap monta i sistemi, il loop avanza a passo fisso con l'accumulatore, lo store
 rispecchia il Bus senza calcolare, e la finestra salva prima di chiudersi. La prossima delega è
-[D012 — UI e i18n](delega/D012-ui-e-i18n.md).
+[D012 — Il guscio, le parole e il reddito](delega/D012-ui-e-i18n.md), che il 2026-08-19 è stata
+**spezzata** in due: la home col bancomat è diventata
+[D015](delega/D015-home-bancomat.md).
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati

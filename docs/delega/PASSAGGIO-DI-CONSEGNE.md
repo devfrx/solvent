@@ -23,27 +23,27 @@ leggi che tengono il gioco bilanciato stanno in [prodotto/visione.md](../prodott
 
 ## Dove siamo, esattamente
 
-|                          |                                                         |
-| ------------------------ | ------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile, dipendenze, architettura   |
-| D001 — tooling e gate    | **chiusa**, commit `e275f59`                            |
-| D002 — contratti         | **chiusa**, commit `288367e`                            |
-| D003 — kernel: Clock     | **chiusa**, commit `f398a47`                            |
-| D004 — kernel: Rng       | **chiusa**, commit `a87d8cf`                            |
-| D005 — kernel: Bus       | **chiusa**, commit `e9cf441`                            |
-| D006 — kernel: Registry  | **chiusa**, commit `39b8520`                            |
-| D007 — kernel: Ledger    | **chiusa**, commit `f9a0c59`                            |
-| D008 — balance           | **chiusa**, commit `e01e885`                            |
-| D009 — persistenza main  | **chiusa**, commit `256f622`                            |
-| D010 — dominio income    | **chiusa**, commit `b98f025`                            |
-| D014 — dominio bancomat  | **chiusa**, commit `a0b3b9f`                            |
-| D011 — runtime e store   | **chiusa**, commit `dbf821c`                            |
-| Kernel                   | **finito** — 535 righe, da D003 a D008                  |
-| Persistenza nel main     | **finita** — 241 righe in `src/main/` e `src/preload/`  |
-| Codice di dominio        | **`income` 102 righe, `atm` 65** — i due della fetta 01 |
-| `npm run verify`         | **verde** — 382 test su 45 file                         |
-| `npm run verify:release` | **verde** — da D011 compila anche il renderer           |
-| Prossimo passo           | **[D012 — UI e i18n](D012-ui-e-i18n.md)**               |
+|                          |                                                                   |
+| ------------------------ | ----------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile, dipendenze, architettura             |
+| D001 — tooling e gate    | **chiusa**, commit `e275f59`                                      |
+| D002 — contratti         | **chiusa**, commit `288367e`                                      |
+| D003 — kernel: Clock     | **chiusa**, commit `f398a47`                                      |
+| D004 — kernel: Rng       | **chiusa**, commit `a87d8cf`                                      |
+| D005 — kernel: Bus       | **chiusa**, commit `e9cf441`                                      |
+| D006 — kernel: Registry  | **chiusa**, commit `39b8520`                                      |
+| D007 — kernel: Ledger    | **chiusa**, commit `f9a0c59`                                      |
+| D008 — balance           | **chiusa**, commit `e01e885`                                      |
+| D009 — persistenza main  | **chiusa**, commit `256f622`                                      |
+| D010 — dominio income    | **chiusa**, commit `b98f025`                                      |
+| D014 — dominio bancomat  | **chiusa**, commit `a0b3b9f`                                      |
+| D011 — runtime e store   | **chiusa**, commit `dbf821c`                                      |
+| Kernel                   | **finito** — 535 righe, da D003 a D008                            |
+| Persistenza nel main     | **finita** — 241 righe in `src/main/` e `src/preload/`            |
+| Codice di dominio        | **`income` 102 righe, `atm` 65** — i due della fetta 01           |
+| `npm run verify`         | **verde** — 382 test su 45 file                                   |
+| `npm run verify:release` | **verde** — da D011 compila anche il renderer                     |
+| Prossimo passo           | **[D012 — Il guscio, le parole e il reddito](D012-ui-e-i18n.md)** |
 
 I contratti sono in `src/core/contracts/`, Clock, Rng, Bus, Registry e Ledger in
 `src/core/kernel/`, i numeri di gioco in `src/core/balance/`, lo schema del salvataggio e i tre
@@ -65,29 +65,29 @@ Quindici cose che il testo di quelle deleghe **non** dice ancora, e che chi le e
 sapere prima di iniziare. Sono qui perché una delega chiusa è un documento storico: nessuno la
 rilegge.
 
-**D014 e D011 sono chiuse** e non sono più in questa tabella. Restano D012 e D013, e quasi tutto
+**D014 e D011 sono chiuse** e non sono più in questa tabella. Restano D012, D015 e D013, e quasi tutto
 ciò che le riguarda viene dalle correzioni di D011 — che ha toccato il Clock, il Ledger, il
 contratto di salvataggio e una regola di lint.
 
-| Delega | Cosa è cambiato                                                                                                                                                                                                                                                                                                                                                                         |
-| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D012   | **Tre codici d'errore di dominio sono nuovi** e vogliono la loro chiave i18n, come ogni `code` (INV-07): `error.income.already_upgraded` da D010, più `error.atm.amount_not_positive` e `error.atm.fee_exceeds_amount`, che da D014 esistono davvero. Anche `reason.atm.deposit` e `reason.atm.withdraw` sono chiavi                                                                    |
-| D012   | **Il riquadro "cosa succede" del mockup del bancomat è una chiamata sola**: `previewOf(operation, amount)` ritorna i tre movimenti da mostrare, che sono gli **stessi** che il comando applicherà. La UI non ricalcola niente, e se l'anteprima è un errore mostra il codice invece di spegnere il pulsante                                                                             |
-| D012   | **Il budget di D012 era sbagliato in due modi diversi**: `~150` nella delega, `~230` nell'indice, entrambi dal commit di STOP 1 e mai misurati. Rimisurato sui mockup: **~1.150 righe**, di cui ~465 di CSS — che è la grandezza del difetto A14. La ripartizione sta nella delega, sotto _Il budget, rimisurato_                                                                       |
-| D012   | **`Ledger.balances()` esiste**: tutti i saldi insieme, nella forma che `money.posted` porta. Lo store lo usa dopo un caricamento, che non emette niente perché caricare non è un movimento economico (D011, correzione 4)                                                                                                                                                               |
-| D012   | **Il Clock conosce i millisecondi**: `MILLISECONDS_PER_SECOND`, il tipo `Milliseconds` e `ticksToMilliseconds`. Sono l'unità del confine col browser e non escono da lì (D011, correzione 2)                                                                                                                                                                                            |
-| D012   | **`error.game.load_failed` è un codice nuovo** e vuole la sua chiave (INV-07): lo produce `createGame().load` quando il kernel rifiuta un salvataggio manomesso                                                                                                                                                                                                                         |
-| D012   | **Lo store non ha selettori, e non è una dimenticanza**: espone stato e comandi. `incomePerSecond`, `upgradeCost`, `canBuyUpgrade`, `atmFee` e `previewOf` si aggiungono quando esiste il componente che li consuma — un `.vue` non può importare le regole (R05), quindi li chiama lo store                                                                                            |
-| D012   | **Il guscio esiste già** — `App.vue`, `main.ts`, `index.html`, 81 righe — e rende i sette stati del ciclo di vita senza una parola di prosa. D012 lo riempie invece di crearlo, e quelle righe sono **dentro** il conto delle ~1.150                                                                                                                                                    |
-| D012   | **Lo stato `failed` ha due cause e una sola schermata**: caricamento fallito, dove la via d'uscita è `newGame()`, e **salvataggio finale** fallito, dove la partita è ancora in memoria e la finestra è rimasta aperta apposta. La seconda non ha ancora un pulsante                                                                                                                    |
-| tutte  | **Il codice si scrive in inglese.** Identificatori — variabili, parametri, funzioni, tipi, costanti, chiavi di oggetto, nomi di file — in inglese; prosa — commenti, messaggi degli errori lanciati, descrizioni dei test — in italiano. È la regola C08 di [convenzioni.md](../convenzioni.md), imposta da `tests/rules/english-identifiers`, che è ⚠️ parziale e lo dichiara          |
-| tutte  | **Alcuni nomi sono cambiati con quel refactor.** L'helper dei test è `tests/helpers/sources.ts` e espone `read`, `withoutComments`, `sourceFiles`, `importsOf`. Cinque test di regola sono stati rinominati (`bus-synchronous`, `main-save-only`, `registry-no-special-cases`, `doc-links`, `ledger-capacity`). L'unica API pubblica che cambia nome è `seedCasuale` → **`randomSeed`** |
-| tutte  | **Un importo di gioco non può nascere dentro un dominio, e adesso c'è un meccanismo.** `no-magic-numbers` guarda i **numeri**, ma `Money` si costruisce da una **stringa**: `fromString('2.50')` sotto `domains/` passava lint e test. Lo ferma `tests/rules/domains-no-money-literals` (D014, correzione 2)                                                                            |
-| tutte  | **INV-10 non è più un `grep`, è un test**: `tests/rules/domains-no-internal-pools` deriva da `POOLS` i conti che un dominio non può nominare — sono **quattro**, `house` compreso — e toglie i commenti prima di guardare                                                                                                                                                               |
-| tutte  | **`english-identifiers` ha un punto cieco che produce falsi positivi**, e ora lo dichiara: una classe di caratteri che elenca le virgolette dentro un `/regex/` manda fuori fase la sua scansione. L'aggiramento è costruire la classe come stringa e passarla a `new RegExp`                                                                                                           |
-| tutte  | **R06 guarda il lato sinistro dell'assegnamento.** Il selettore prendeva anche il destro, e rispecchiare un `.balances` era una violazione: nessuno se n'era accorto perché fino a D011 nessun codice leggeva un saldo per rispecchiarlo                                                                                                                                                |
-| tutte  | **`runtime/host.ts` è l'unico file che tocca il browser**, ed è l'unico senza test. Tutto ciò che sta sopra riceve `now`, `schedule`, la visibilità e la chiusura per costruzione, e per questo gira in `node` senza jsdom. jsdom entra con i test di componente, cioè con D012                                                                                                         |
-| tutte  | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                                                                                                                                                                                                   |
+| Delega    | Cosa è cambiato                                                                                                                                                                                                                                                                                                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D012      | **Tre codici d'errore di dominio sono nuovi** e vogliono la loro chiave i18n, come ogni `code` (INV-07): `error.income.already_upgraded` da D010, più `error.atm.amount_not_positive` e `error.atm.fee_exceeds_amount`, che da D014 esistono davvero. Anche `reason.atm.deposit` e `reason.atm.withdraw` sono chiavi                                                                    |
+| D015      | **Il riquadro "cosa succede" del mockup del bancomat è una chiamata sola**: `previewOf(operation, amount)` ritorna i tre movimenti da mostrare, che sono gli **stessi** che il comando applicherà. La UI non ricalcola niente, e se l'anteprima è un errore mostra il codice invece di spegnere il pulsante                                                                             |
+| D012      | **D012 è stata spezzata il 2026-08-19**, e il perché sta nella delega sotto _Perché è stata spezzata_: valeva ~1.150 righe, più del kernel intero, e a metà strada non era verificabile. Il taglio passa fra i due mockup — gli **stati** e il reddito qui, la **home** col bancomat in [D015](D015-home-bancomat.md)                                                                   |
+| D012+D015 | **`Ledger.balances()` esiste**: tutti i saldi insieme, nella forma che `money.posted` porta. Lo store lo usa dopo un caricamento, che non emette niente perché caricare non è un movimento economico (D011, correzione 4)                                                                                                                                                               |
+| D012      | **Il Clock conosce i millisecondi**: `MILLISECONDS_PER_SECOND`, il tipo `Milliseconds` e `ticksToMilliseconds`. Sono l'unità del confine col browser e non escono da lì (D011, correzione 2)                                                                                                                                                                                            |
+| D012      | **`error.game.load_failed` è un codice nuovo** e vuole la sua chiave (INV-07): lo produce `createGame().load` quando il kernel rifiuta un salvataggio manomesso                                                                                                                                                                                                                         |
+| D012+D015 | **Lo store non ha selettori, e non è una dimenticanza**: espone stato e comandi. `incomePerSecond`, `upgradeCost`, `canBuyUpgrade`, `atmFee` e `previewOf` si aggiungono quando esiste il componente che li consuma — un `.vue` non può importare le regole (R05), quindi li chiama lo store                                                                                            |
+| D012      | **Il guscio esiste già** — `App.vue`, `main.ts`, `index.html`, 81 righe — e rende i sette stati del ciclo di vita senza una parola di prosa. D012 lo riempie invece di crearlo, e quelle righe sono **dentro** il conto delle ~1.150                                                                                                                                                    |
+| D012      | **Lo stato `failed` ha due cause e una sola schermata**: caricamento fallito, dove la via d'uscita è `newGame()`, e **salvataggio finale** fallito, dove la partita è ancora in memoria e la finestra è rimasta aperta apposta. La seconda non ha ancora un pulsante                                                                                                                    |
+| tutte     | **Il codice si scrive in inglese.** Identificatori — variabili, parametri, funzioni, tipi, costanti, chiavi di oggetto, nomi di file — in inglese; prosa — commenti, messaggi degli errori lanciati, descrizioni dei test — in italiano. È la regola C08 di [convenzioni.md](../convenzioni.md), imposta da `tests/rules/english-identifiers`, che è ⚠️ parziale e lo dichiara          |
+| tutte     | **Alcuni nomi sono cambiati con quel refactor.** L'helper dei test è `tests/helpers/sources.ts` e espone `read`, `withoutComments`, `sourceFiles`, `importsOf`. Cinque test di regola sono stati rinominati (`bus-synchronous`, `main-save-only`, `registry-no-special-cases`, `doc-links`, `ledger-capacity`). L'unica API pubblica che cambia nome è `seedCasuale` → **`randomSeed`** |
+| tutte     | **Un importo di gioco non può nascere dentro un dominio, e adesso c'è un meccanismo.** `no-magic-numbers` guarda i **numeri**, ma `Money` si costruisce da una **stringa**: `fromString('2.50')` sotto `domains/` passava lint e test. Lo ferma `tests/rules/domains-no-money-literals` (D014, correzione 2)                                                                            |
+| tutte     | **INV-10 non è più un `grep`, è un test**: `tests/rules/domains-no-internal-pools` deriva da `POOLS` i conti che un dominio non può nominare — sono **quattro**, `house` compreso — e toglie i commenti prima di guardare                                                                                                                                                               |
+| tutte     | **`english-identifiers` ha un punto cieco che produce falsi positivi**, e ora lo dichiara: una classe di caratteri che elenca le virgolette dentro un `/regex/` manda fuori fase la sua scansione. L'aggiramento è costruire la classe come stringa e passarla a `new RegExp`                                                                                                           |
+| tutte     | **R06 guarda il lato sinistro dell'assegnamento.** Il selettore prendeva anche il destro, e rispecchiare un `.balances` era una violazione: nessuno se n'era accorto perché fino a D011 nessun codice leggeva un saldo per rispecchiarlo                                                                                                                                                |
+| tutte     | **`runtime/host.ts` è l'unico file che tocca il browser**, ed è l'unico senza test. Tutto ciò che sta sopra riceve `now`, `schedule`, la visibilità e la chiusura per costruzione, e per questo gira in `node` senza jsdom. jsdom entra con i test di componente, cioè con D012                                                                                                         |
+| tutte     | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                                                                                                                                                                                                   |
 
 ### Quanto ci si può fidare di questi documenti
 
@@ -145,37 +145,44 @@ Non serve leggere tutti i 20 ADR. Servono quando stai per contraddirne uno: allo
 
 ## Il prossimo passo, in concreto
 
-**[D012 — UI e i18n](D012-ui-e-i18n.md).** Mostrare la fetta a schermo: il bancomat sopra con la
-carta 3D, il cruscotto sotto con al massimo **sei** riquadri, le ultime operazioni, la vista
-statistiche, e i due dizionari. Il riferimento visivo è approvato e sta nei
-[mockup](../design/mockups/home-atm.html).
+**[D012 — Il guscio, le parole e il reddito](D012-ui-e-i18n.md).** ~430 righe di sorgente più ~150
+di test di regola. Vestire i quattro stati che il ciclo di vita già produce, dare al gioco le sue
+parole in due lingue, e far comprare l'upgrade.
 
-**È la delega più grande del progetto: ~1.150 righe**, più del kernel intero. Il numero è stato
-rimisurato il 2026-08-19 partendo dai mockup — prima erano due numeri diversi, `~150` nella delega e
-`~230` nell'indice, nati lo stesso giorno e mai controllati. La ripartizione sta nella delega, sotto
-_Il budget, rimisurato_: ~465 di CSS, ~330 di markup, ~190 di script, ~165 per i due dizionari.
+Specifica visiva: **[fetta-01-primo-stipendio.html](../design/mockups/fetta-01-primo-stipendio.html)**,
+il mockup che di sé dice _mostra gli stati, che sono la parte che conta_. Ogni testo visibile lì
+dentro ha già la sua chiave i18n scritta sotto, in giallo.
 
-Quelle 465 righe di CSS sono esattamente la grandezza del difetto **A14** — 1.067 righe di CSS
-morto — e questa è la delega dove quel difetto nacque l'altra volta. Il numero non è un permesso:
-è la soglia oltre la quale conviene fermarsi e chiedersi cosa non serve.
+Dopo D012 il gioco è una cosa che si guarda: parte, dice cosa sta facendo, mostra il saldo che sale
+e lascia comprare l'upgrade — in italiano e in inglese.
 
-**Se D012 vada spezzata in due** — il guscio e l'i18n da una parte, la carta 3D e i pannelli
-dall'altra — è la prima domanda da fare, ed è una decisione sulla forma della roadmap: va presa
-insieme, non in autonomia.
+**D012 è stata spezzata il 2026-08-19.** Valeva ~1.150 righe, più del kernel intero, e il numero era
+una misura fatta sui mockup, non una stima. Una delega di quella dimensione non è verificabile a
+metà strada: la definizione di fatto arriva tutta insieme alla fine. Il taglio passa fra i due
+mockup, che non sono due schermate ma due momenti:
+
+| Delega                        | Cosa copre                                                    | Righe |
+| ----------------------------- | ------------------------------------------------------------- | ----- |
+| [D012](D012-ui-e-i18n.md)     | gli **stati**, le parole, il saldo, l'upgrade                 | ~430  |
+| [D015](D015-home-bancomat.md) | la **home**: carta 3D, bancomat, cruscotto, ultime operazioni | ~720  |
+
+**Tutto l'i18n sta in D012**, chiavi del bancomat comprese. Una lingua che si completa in due tempi
+è il difetto A13, e il test di parità esiste per togliere il "poi traduco".
 
 Tre cose che il testo della delega non dice, e che cambiano da dove si parte:
 
 1. **Il guscio esiste già.** `App.vue`, `main.ts` e `index.html` rendono i sette stati del ciclo di
-   vita e il mirror, senza una parola di prosa: 81 righe, di cui una ventina di CSS. D012 le riempie
-   invece di crearle, e sono già dentro il conto delle ~1.150.
+   vita e il mirror, senza una parola di prosa: 81 righe, di cui una ventina di CSS. D012 le veste
+   invece di crearle.
 2. **Lo store non ha selettori**, e va bene così: si aggiungono con il componente che li consuma. Un
    `.vue` non può importare `domains/*/rules` (R05), quindi a chiamarli è lo store.
 3. **`runtime/host.ts` è l'unico file del progetto senza test**, ed è dichiarato: è il file che _è_
    il browser. `vitest.config.ts` dice che jsdom entra con i test di componente — cioè con D012, che
    è quindi anche il momento in cui quel file può finalmente averne uno.
 
-Poi resta **[D013 — Verifica della fetta](D013-verifica-della-fetta.md)**, che è lo **STOP 2**: ~250
-righe di test, nessun codice nuovo, e la decisione sulla fetta 02.
+Poi **[D015](D015-home-bancomat.md)**, e infine
+**[D013 — Verifica della fetta](D013-verifica-della-fetta.md)**, che è lo **STOP 2**: ~250 righe di
+test, nessun codice nuovo, e la decisione sulla fetta 02.
 
 ## Come si lavora
 
@@ -271,30 +278,26 @@ Riprendi il progetto Solvent in questa repo ed esegui la delega D012.
 Leggi in quest'ordine, e non altro prima di aver finito:
 
 1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, prossimo passo
-2. `docs/delega/D012-ui-e-i18n.md` — la delega, **sezione "Il budget, rimisurato" per prima**
-3. La tabella "Cosa è già cambiato nelle deleghe ancora aperte" qui sopra: **nove righe**
+2. `docs/delega/D012-ui-e-i18n.md` — la delega, **sezione "Perché è stata spezzata" per prima**
+3. La tabella "Cosa è già cambiato nelle deleghe ancora aperte" qui sopra: **otto righe**
    riguardano D012, e sono cose che il testo della delega non dice
 4. `docs/delega/D011-runtime-e-store.md`, sezione "Cosa deve sapere chi prende D012" — il guscio,
-   lo store e ciò che manca di proposito
-5. I due mockup in `docs/design/mockups/` — sono la specifica, e il budget è misurato su di loro
+   lo store, e ciò che manca di proposito
+5. `docs/design/mockups/fetta-01-primo-stipendio.html` — è la specifica, e ogni testo visibile ha
+   già la sua chiave i18n scritta sotto
 6. `docs/convenzioni.md` — nomi, commit, e la lingua del codice (C08)
 
 Stato: STOP 1 approvato, da D001 a D011 e D014 chiuse, kernel finito (535 righe), persistenza nel
 main finita, i due domini della fetta 01 finiti, runtime e store finiti (379 righe).
 `npm run verify` verde con 382 test su 45 file, e **`npm run verify:release` è verde**: da D011
-compila anche il renderer, e da qui in avanti non deve più tornare rosso.
+compila anche il renderer, e da qui in avanti un renderer che non compila è una regressione.
 
-D012 è **la delega più grande del progetto: ~1.150 righe**, più del kernel intero. Il numero è una
-misura fatta sui mockup, non una stima, e ~465 di quelle righe sono CSS — la stessa grandezza del
-difetto A14, che è nato esattamente in questa delega l'altra volta.
-
-**Prima domanda, prima di scrivere codice: D012 va spezzata in due?** Il guscio e l'i18n da una
-parte, la carta 3D e i pannelli dall'altra. È una decisione sulla forma della roadmap: presentami
-2 opzioni e aspetta.
+D012 era ~1.150 righe ed è stata **spezzata il 2026-08-19**: la home col bancomat è D015. Quella
+che esegui adesso vale ~430 righe più ~150 di test di regola. Non riportarci dentro il bancomat.
 
 Come voglio che lavori:
 
-- Un ramo per la delega: `git checkout -b d012-ui-e-i18n`.
+- Un ramo per la delega: `git checkout -b d012-guscio-parole-reddito`.
 - Esegui D012 così com'è scritta. Se qualcosa si rivela sbagliato, correggilo e **scrivilo** nella
   sezione delle correzioni in fondo alla delega — non aggirarlo in silenzio. Ogni delega chiusa
   finora ne ha da cinque a quattordici: se la tua esce senza, o era perfetta o non l'hai letta.
@@ -306,17 +309,23 @@ Come voglio che lavori:
 - La documentazione toccata dal cambiamento si aggiorna nello stesso commit.
 - Commit: Conventional Commits con lo scope uguale all'ID — `feat(D012): …`.
 
-Due cose che il codice ti dà già e che non vanno riscritte:
+Tre cose che il codice ti dà già e che non vanno riscritte:
 
-- **`previewOf(operation, amount)`** ritorna i tre movimenti del riquadro "cosa succede", e sono
-  gli **stessi** che il comando applica. La UI non ricalcola la commissione.
-- **Il guscio esiste**: `App.vue`, `main.ts`, `index.html`. Rende i sette stati del ciclo di vita
-  senza una parola di prosa. Riempilo, non ricrearlo.
+- **Il guscio esiste**: `App.vue`, `main.ts`, `index.html` rendono i sette stati del ciclo di vita
+  senza una parola di prosa. Vestilo, non ricrearlo.
+- **Lo store espone stato e comandi**: `status`, `failure`, `balances`, `history`, `savedAt`, più
+  `start`, `newGame`, `close`, `buyUpgrade`, `deposit`, `withdraw`.
+- **I numeri si leggono dalle regole pure** — `incomePerSecond`, `upgradeCost`, `canBuyUpgrade` —
+  e li chiama lo store, perché un `.vue` non può importarle (R05).
+
+Il test delle chiavi va scritto **leggendo il sorgente**, non ricopiando i tredici codici d'errore:
+una lista a mano è già scaduta il giorno in cui nasce il quattordicesimo, e ne sono nati tre in tre
+deleghe.
 
 Per vedere il gioco girare: `npm run dev`. Se dice _Electron uninstall_, completa il binario con
 `node node_modules/electron/install.js`.
 
-Quando D012 è chiusa, fermati: marcala `Chiusa` con il commit, aggiorna il passaggio di consegne
-e `tracciabilita.md` se hai cambiato un meccanismo, e mostrami l'output dei gate prima di passare
-alla successiva — che è D013, cioè lo STOP 2.
+Quando D012 è chiusa, fermati: marcala `Chiusa` con il commit, aggiorna il passaggio di consegne e
+`tracciabilita.md` se hai cambiato un meccanismo, e mostrami l'output dei gate prima di passare
+alla successiva — che è D015, la home col bancomat.
 ```
