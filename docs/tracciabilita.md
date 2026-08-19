@@ -66,6 +66,7 @@ Regole di configurazione e di processo, con la stessa dignità:
 | C04 | `.gitignore` copre gli artefatti, `*.tsbuildinfo` incluso | 👤    | `.gitignore`                                    |
 | C05 | Nessun entitlement o permesso non usato                   | 👤    | `electron-builder.yml`                          |
 | C06 | Ogni `eslint-disable` porta la propria motivazione        | ✅    | `tests/rules/eslint-disable`                    |
+| C07 | Ogni collegamento fra documenti risolve, ancore incluse   | ✅    | `tests/rules/link-documenti`                    |
 | P01 | Una fetta verticale alla volta, nessun `TODO` nel codice  | ✅    | `docs/roadmap-fette.md` + `tests/rules/no-todo` |
 
 ## Invarianti derivati
