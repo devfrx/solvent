@@ -91,6 +91,7 @@ solvent/
 │  │     ├─ SaveFile.ts           # lettura/scrittura atomica su disco
 │  │     ├─ schema.ts             # validazione ESEGUIBILE del SaveEnvelope
 │  │     ├─ migrations.ts         # unico posto al mondo
+│  │     ├─ channels.ts           # i nomi dei tre canali - condivisi col preload
 │  │     └─ ipc.ts                # save / load / reset, tipizzati
 │  ├─ preload/
 │  │  └─ index.ts                 # espone solo il contratto di persistenza
@@ -142,7 +143,7 @@ solvent/
    ├─ contracts/       result · money · pools · ledger · bounded · events · save · commands
    ├─ kernel/          clock · rng · bus · registry · ledger
    ├─ domains/         income (seed fisso)
-   ├─ save/            roundtrip
+   ├─ save/            schema - roundtrip - kernel-roundtrip - migrations - ipc - preload
    ├─ balance/         modifiers · targets
    ├─ i18n/            parity
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate

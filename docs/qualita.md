@@ -9,13 +9,13 @@ Questo documento dice quali sono, cosa garantisce ciascuno, e cosa nessuno di es
 
 | #   | Comando                | Cosa garantisce                                                                                   | Tempo reale       |
 | --- | ---------------------- | ------------------------------------------------------------------------------------------------- | ----------------- |
-| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, INV-13 + nessun codice morto (C01) | ~9 s              |
-| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                         | ~11 s             |
+| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, INV-13 + nessun codice morto (C01) | ~11 s             |
+| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                         | ~7 s              |
 | G3  | `npm run format:check` | il codice è formattato (C02)                                                                      | ~5 s              |
 | G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint          | ~7 s              |
 | G5  | `npm run build`        | l'applicazione si compila davvero, main e renderer                                                | decine di secondi |
 
-Misurati a D008 chiusa su Windows, con 204 test — le reti aggiunte dopo, INV-03 e C08, ne portano 213 e non spostano i tempi. Sono tempi **di parete**, quindi comprendono
+Rimisurati a D009 chiusa su Windows, con 266 test. Sono tempi **di parete**, quindi comprendono
 l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre `npm run`. La parte di
 lavoro vero è meno della metà del totale.
 
@@ -26,7 +26,8 @@ Due comandi, non uno, ed è deliberato:
 
 **Perché separati.** Il tempo atteso è parte della specifica: un gate lento viene aggirato. I
 quattro veloci stanno **sotto il minuto** — venticinque secondi a D006, trentuno a D007, fra
-ventisette e trenta a D008 su due misure consecutive — e si eseguono a ogni modifica; la compilazione costa un ordine di grandezza in più e serve prima di
+ventisette e trenta a D008, ventotto e ventinove a D009 su due misure consecutive — e si
+eseguono a ogni modifica; la compilazione costa un ordine di grandezza in più e serve prima di
 un rilascio, non prima di un salvataggio. Se `verify` supera il minuto, è un problema da risolvere, non da
 tollerare, e il rimedio è già censito nel [registro YAGNI](roadmap-fette.md): togliere l'avvio di
 `npm` ripetuto, non togliere un gate.
@@ -36,9 +37,12 @@ test, e ci è rimasto fino a D006 con 150. Un tempo dichiarato e mai più misura
 categoria di bugia di un `TODO`. Da D006 a D007 sono cresciuti tutti e quattro i gate, non solo i
 test: è l'andamento normale, e va guardato ogni volta invece che una volta sola. Da D007 a D008
 non si sono mossi — la variazione fra due esecuzioni della stessa catena è ormai più grande della
-crescita fra due deleghe, ed è per questo che qui c'è un intervallo e non una cifra.
+crescita fra due deleghe, ed è per questo che qui c'è un intervallo e non una cifra. Da D008 a
+D009 la stessa cosa, con 62 test in più: `lint` è persino sceso, il che dice quanto valga una
+misura sola.
 
-`verify:release` non è verde finché non esiste sorgente: diventa eseguibile con D011.
+`verify:release` non è ancora verde: da D009 `build` compila `out/main/index.js` e
+`out/preload/index.cjs` senza errori e si ferma sul renderer, che manca. Diventa verde con D011.
 `tests/rules/gates.test.ts` impedisce che un gate sparisca da una delle due catene (INV-14).
 
 ## Cosa copre ciascun livello di test
@@ -71,6 +75,13 @@ stato vuoto passa sempre e non dimostra niente.
 
 Lo stato di prova deve contenere, come minimo: un saldo con decimali, un sistema con stato, lo
 stato dell'Rng con almeno uno stream avanzato, e una lista limitata con almeno un elemento.
+
+Da D009 il giro esiste, in `tests/save/kernel-roundtrip`, e c'è un caso che verifica che lo stato
+di partenza sia davvero non banale — cinque conti su sei mossi, due stream avanzati di quantità
+diverse, un sistema con stato. **La lista limitata manca**, e non per dimenticanza: nel payload
+della versione 1 non c'è nessun array, e la voce ha un grilletto nel
+[registro YAGNI](roadmap-fette.md). Entra con il caveau della fetta 02, insieme al primo
+`boundedList` che finisce davvero nel salvataggio.
 
 ## Definizione di fatto
 

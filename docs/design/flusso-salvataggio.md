@@ -2,10 +2,11 @@
 
 Il confine più importante del progetto, e quello che nella versione precedente era una finzione.
 
-Questo è un disegno **vincolante**, non una descrizione: dei pezzi qui sotto esistono solo i
-contratti (`core/contracts/save.ts`, [D002](../delega/D002-contratti.md)) e il lato renderer del
-Registry e del Ledger. Lo schema, il file su disco, le migrazioni e l'IPC **non esistono ancora**:
-li scrive [D009](../delega/D009-persistenza-main.md), e devono corrispondere a questo.
+Questo era un disegno **vincolante**, e da [D009](../delega/D009-persistenza-main.md) descrive
+codice che esiste: lo schema `zod`, la scrittura atomica, le migrazioni e i tre canali IPC stanno
+in `src/main/save/`, e `tests/save/` li attraversa. Resta vincolante per una cosa sola, ed è la
+riga del reset: il lato renderer — `resetAll(scope)` dal Registry — nasce con
+[D011](../delega/D011-runtime-e-store.md).
 
 Decisioni rilevanti: [ADR 0004](../adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md),
 [ADR 0006](../adr/0006-decimal-end-to-end-per-il-denaro.md),
@@ -133,12 +134,17 @@ appena installato il gioco.
 
 Una migrazione:
 
-- prende la busta della versione N e ritorna quella della N+1. Mai due salti in una funzione.
+- prende il **payload** della versione N e ritorna quello della N+1. Mai due salti in una
+  funzione: la firma è `(payload: unknown) => unknown`, quindi il numero di versione lo scrive il
+  runner e una migrazione non ha dove sbagliarlo. Fino a D009 questa riga diceva "prende la busta
+  e ritorna la busta", che lasciava il salto a chi scrive la migrazione.
 - è **pura**: nessuna lettura di file, nessuna data corrente, nessun caso "se il campo esiste".
 - ha un test con un salvataggio reale della versione N, tenuto in `tests/save/fixtures/`.
 
 La versione 1 non ha migrazioni: non c'è nulla da cui migrare. La prima migrazione nasce con la
-versione 2 (vedi il registro YAGNI in [roadmap-fette.md](../roadmap-fette.md)).
+versione 2 (vedi il registro YAGNI in [roadmap-fette.md](../roadmap-fette.md)). Il **runner** che
+le applica, invece, esiste già: prende la mappa e la versione di arrivo per parametro, così la
+catena si prova adesso con migrazioni finte invece che il giorno in cui serve.
 
 ## Reset
 

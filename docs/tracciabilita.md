@@ -28,7 +28,7 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 | A05 denaro scritto da più punti        | R06    | 0003 | i saldi vivono in una `Map` privata nella closure del Ledger                 | `tests/kernel/ledger` + lint di rete                      | 🔒    | D007       |
 | A06 persistenza a mano in 3 file       | R07    | 0002 | unione discriminata `System`: con `save`, `load` e `reset` sono obbligatori  | `npm run typecheck`                                       | 🔒    | D006       |
 | A07 `version: 3` nel renderer          | R08    | 0004 | il tipo `SavePayload` **non ha** un campo versione                           | `npm run typecheck`                                       | 🔒    | D002, D009 |
-| A08 schema "advisory" e stale          | R08    | 0004 | lo schema è `zod`, quindi **eseguito**: non può divergere senza rompere      | `tests/save/schema`                                       | ✅    | D009       |
+| A08 schema "advisory" e stale          | R08    | 0004 | lo schema è `zod`, quindi **eseguito**: non può divergere senza rompere      | `tests/save/schema` + `tests/save/kernel-roundtrip`       | ✅    | D009       |
 | A09 logica di dominio nei `.vue`       | R05    | 0001 | ESLint su `**/*.vue` vieta `domains/*/rules` e `kernel/*`                    | `npm run lint` + `tests/rules/no-logic-in-vue`            | ✅    | D001, D012 |
 | A10 liste storiche illimitate          | R09    | 0010 | `boundedList<T>(max)` è l'unico costruttore; `max` obbligatorio              | `npm run typecheck` + `tests/contracts/bounded`           | 🔒    | D002       |
 | A11 pipeline mista `number`/`Decimal`  | R11    | 0006 | `Money = Decimal` è una classe + lint sulle conversioni sotto `domains/**`   | `npm run typecheck` + `npm run lint`                      | 🔒    | D002       |
@@ -92,6 +92,7 @@ segnala che un confine si sta spostando.
 | INV-13 | Il renderer non può usare le API di Node                                          | ADR 0001 | `tsconfig.web.json` senza tipi `node` — 🔒, non compila           |
 | INV-14 | Nessun gate sparisce dalla catena `verify`                                        | ADR 0013 | `tests/rules/gates`                                               |
 | INV-15 | Il Bus è sincrono: nessuna attesa, nessuna coda dentro `emit`                     | ADR 0016 | `tests/rules/bus-synchronous` — la firma `void` da sola non basta |
+| INV-16 | Il preload espone tre funzioni, non `ipcRenderer`                                 | ADR 0004 | `tests/save/preload` — guarda l'oggetto esposto, non il sorgente  |
 
 ## Le regole di lint si verificano da sole
 

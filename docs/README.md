@@ -71,12 +71,14 @@ agganciata al difetto misurato che la giustifica.
 la simulazione nel renderer. Le decisioni prese in autonomia — pool con affordance, transazioni
 atomiche, partita doppia — sono elencate nel [compendio](adr/README.md#decisioni-prese-in-autonomia-contestabili).
 
-**Da D001 a [D008](delega/D008-balance.md) sono chiuse, e il kernel è finito.** Le regole del
-progetto sono eseguibili, i contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger,
-l'ambito di reset, `boundedList`, gli eventi, il salvataggio, i comandi — e il kernel ha Clock,
-Rng, Bus, Registry, Ledger e Balance. Il denaro ha la sua unica porta, a partita doppia; i numeri
-di gioco hanno un posto solo e un bersaglio verificato. Il codice di dominio non è ancora iniziato:
-la prossima delega è [D009 — Persistenza nel main](delega/D009-persistenza-main.md).
+**Da D001 a [D009](delega/D009-persistenza-main.md) sono chiuse.** Le regole del progetto sono
+eseguibili, i contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger, l'ambito di reset,
+`boundedList`, gli eventi, il salvataggio, i comandi — e il kernel ha Clock, Rng, Bus, Registry,
+Ledger e Balance. Il denaro ha la sua unica porta, a partita doppia; i numeri di gioco hanno un
+posto solo e un bersaglio verificato. Con D009 il progetto è uscito da `core/` per la prima volta:
+`src/main/` valida il salvataggio con uno schema **eseguito**, lo scrive in modo atomico ed espone
+tre canali IPC, e `src/preload/` espone tre funzioni e nient'altro. Il codice di dominio non è
+ancora iniziato: la prossima delega è [D010 — Dominio: income](delega/D010-dominio-income.md).
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati
@@ -89,4 +91,5 @@ delega per delega, non per decreto. Con D002 sono passati
 [0017](adr/0017-il-denaro-e-plurale.md),
 [0019](adr/0019-transazioni-atomiche-nel-ledger.md),
 [0020](adr/0020-partita-doppia.md) e il nuovo
-[0021](adr/0021-una-sola-primitiva-per-il-denaro.md).
+[0021](adr/0021-una-sola-primitiva-per-il-denaro.md), con D009
+[0004](adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md).

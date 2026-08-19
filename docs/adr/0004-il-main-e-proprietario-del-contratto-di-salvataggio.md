@@ -1,6 +1,7 @@
 # ADR 0004 — Il processo main è proprietario del contratto di salvataggio
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — D009: `main/save/schema.ts` eseguito a ogni giro, la scrittura
+  atomica in `main/save/SaveFile.ts`, le migrazioni in un posto solo e i tre canali IPC
 - **Data:** 2026-08-19
 
 ## Contesto
