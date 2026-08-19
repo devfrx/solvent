@@ -99,7 +99,9 @@ il lint non riconosce.
     // eslint-disable-next-line no-restricted-properties -- unico punto autorizzato: ADR 0005
     const bits = Math.random()
 
-Un `eslint-disable` senza quella riga è un difetto in review, alla pari di un test rosso.
+Un `eslint-disable` senza quella riga non è un difetto in review: è un test rosso.
+`tests/rules/eslint-disable.test.ts` cerca in `src/` ogni riga che spegne una regola e pretende
+la motivazione (regola C06 in [tracciabilita.md](tracciabilita.md)).
 
 ## Commenti
 

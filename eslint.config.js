@@ -117,10 +117,9 @@ export default ts.config(
       ]
     }
   },
-  {
-    files: ['src/core/kernel/Rng.ts'],
-    rules: { 'no-restricted-properties': 'off' }
-  },
+  // Nessuna eccezione di file per R03: dentro Rng.ts la regola resta accesa, e l'unica riga
+  // autorizzata porta la sua motivazione (convenzioni.md). Spegnerla sul file renderebbe invisibile
+  // un secondo Math.random aggiunto piu tardi - che e' esattamente come nasce il difetto A03.
 
   // ----------------------------------------------- R06 — denaro · R10 — un solo stile di esito
   {

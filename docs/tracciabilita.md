@@ -23,7 +23,7 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 | -------------------------------------- | ------ | ---- | ---------------------------------------------------------------------------- | ----------------------------------------------- | ----- | ---------- |
 | A01 5 liste di sistemi parallele       | R02    | 0002 | solo il `Registry` itera i sistemi; nessun'altra lista esiste                | `tests/rules/registry-completeness`             | ✅    | D006       |
 | A02 74 archi store→store, 3 cicli      | R01    | 0001 | `no-restricted-imports` su `src/renderer/stores/**`                          | `npm run lint`                                  | ✅    | D001       |
-| A03 176 `Math.random` diretti          | R03    | 0005 | `no-restricted-properties` globale, override per il solo `Rng.ts`            | `npm run lint` + `tests/kernel/rng`             | ✅    | D001, D004 |
+| A03 176 `Math.random` diretti          | R03    | 0005 | `no-restricted-properties` globale; l'unica esenzione è una riga motivata    | `npm run lint` + `tests/kernel/rng`             | ✅    | D001, D004 |
 | A04 tick rate in 5 posti               | R04    | 0009 | `TICKS_PER_SECOND` solo in `Clock.ts`; tipi branded `Ticks`/`Seconds`        | `npm run typecheck` + `tests/rules/tick-rate`   | 🔒    | D003       |
 | A05 denaro scritto da più punti        | R06    | 0003 | i saldi vivono in una `Map` privata nella closure del Ledger                 | `tests/kernel/ledger` + lint di rete            | 🔒    | D007       |
 | A06 persistenza a mano in 3 file       | R07    | 0002 | unione discriminata `System`: con `save`, `load` e `reset` sono obbligatori  | `npm run typecheck`                             | 🔒    | D006       |
@@ -45,7 +45,7 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 | --- | ---------------------------------------------- | ------- | ---------------------------------------------------------- |
 | R01 | Nessuno store importa un altro store           | ✅      | `eslint.config.js`                                         |
 | R02 | Nessuna lista di sistemi scritta a mano        | ✅      | struttura + `tests/rules/registry-completeness`            |
-| R03 | `Math.random` solo in `Rng.ts`                 | ✅      | `eslint.config.js`                                         |
+| R03 | `Math.random` solo in `Rng.ts`                 | ✅      | `eslint.config.js` — nessuna eccezione di file             |
 | R04 | Nessun numero magico di tempo                  | 🔒      | `Clock.ts` + `eslint.config.js` + `tests/rules/tick-rate`  |
 | R05 | Nessuna logica di dominio nei `.vue`           | ✅      | `eslint.config.js` + `tests/rules/no-logic-in-vue`         |
 | R06 | Nessun denaro fuori dal Ledger                 | 🔒      | `Ledger.ts` (closure) + `eslint.config.js`                 |
@@ -65,6 +65,7 @@ Regole di configurazione e di processo, con la stessa dignità:
 | C03 | Un solo nome per il prodotto, ovunque                     | ✅    | `tests/rules/product-identity`                  |
 | C04 | `.gitignore` copre gli artefatti, `*.tsbuildinfo` incluso | 👤    | `.gitignore`                                    |
 | C05 | Nessun entitlement o permesso non usato                   | 👤    | `electron-builder.yml`                          |
+| C06 | Ogni `eslint-disable` porta la propria motivazione        | ✅    | `tests/rules/eslint-disable`                    |
 | P01 | Una fetta verticale alla volta, nessun `TODO` nel codice  | ✅    | `docs/roadmap-fette.md` + `tests/rules/no-todo` |
 
 ## Invarianti derivati

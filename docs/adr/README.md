@@ -24,10 +24,13 @@ NNNN` e se ne scrive uno nuovo. La storia delle decisioni è parte del valore �
 Una decisione diventa _Accettata_ nel commit che introduce il meccanismo che la impone — mai
 prima, altrimenti sarebbe solo una buona intenzione.
 
-Con [D002](../delega/D002-contratti.md) passano ad _Accettata_ **0006** e **0007**: il loro
-meccanismo è tutto lì dentro. Le altre restano _Proposta_ perché il meccanismo è a metà —
-**0004** e **0010** si chiudono con D009 (lo schema del main), **0017** con D007 (il Ledger che
-legge `POOLS`). Metà meccanismo non è una decisione in vigore.
+Sono passate ad _Accettata_: **0006** e **0007** con [D002](../delega/D002-contratti.md),
+**0005** con [D004](../delega/D004-kernel-rng.md). Il loro meccanismo è tutto dentro quella delega.
+
+Le altre restano _Proposta_ perché il meccanismo è a metà: **0004** e **0010** si chiudono con D009
+(lo schema del main), **0017** con D007 (il Ledger che legge `POOLS`), **0009** con D011 — i tipi
+branded ci sono, il passo fisso con accumulatore è nel loop. Metà meccanismo non è una decisione in
+vigore.
 
 ## Le decisioni
 
@@ -37,7 +40,7 @@ legge `POOLS`). Metà meccanismo non è una decisione in vigore.
 | [0002](0002-registry-unica-lista-di-sistemi.md)                     | Il Registry è l'unica lista di sistemi                 | Proposta      | come si aggiunge un sistema, chi itera                                  | A01, A06        |
 | [0003](0003-ledger-unica-porta-del-denaro.md)                       | Il Ledger è l'unica porta del denaro                   | Proposta      | chi può cambiare un saldo                                               | A05             |
 | [0004](0004-il-main-e-proprietario-del-contratto-di-salvataggio.md) | Il main possiede il contratto di salvataggio           | Proposta      | chi scrive la versione, dove vivono le migrazioni                       | A07, A08        |
-| [0005](0005-rng-seedato-con-stream-per-dominio.md)                  | PRNG seedato con stream per dominio                    | Proposta      | ogni sorgente di casualità del gioco                                    | A03             |
+| [0005](0005-rng-seedato-con-stream-per-dominio.md)                  | PRNG seedato con stream per dominio                    | **Accettata** | ogni sorgente di casualità del gioco                                    | A03             |
 | [0006](0006-decimal-end-to-end-per-il-denaro.md)                    | Il denaro è `Decimal` end-to-end                       | **Accettata** | il tipo di ogni valore monetario                                        | A11             |
 | [0007](0007-result-come-unico-stile-di-esito.md)                    | `Result<T,E>` come unico stile di esito                | **Accettata** | la firma di ogni operazione che può fallire                             | A12             |
 | [0008](0008-nome-e-identita-del-prodotto.md)                        | Un solo nome, deciso prima del primo file              | Proposta      | `appId`, percorso salvataggi, chiavi di registro                        | A15             |

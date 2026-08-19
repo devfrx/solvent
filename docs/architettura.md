@@ -138,6 +138,7 @@ solvent/
    ├─ balance/         targets
    ├─ i18n/            parity
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
+                       eslint-disable
                        no-logic-in-vue · no-literal-in-template · registry-completeness
 ```
 
