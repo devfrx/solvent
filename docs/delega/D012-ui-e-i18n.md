@@ -1,6 +1,6 @@
 # D012 — Il guscio, le parole e il reddito
 
-- **Stato:** **Chiusa** — 2026-08-20, ramo `d012-guscio-parole-reddito`
+- **Stato:** **Chiusa** — 2026-08-20, commit `fb45d71`, ramo `d012-guscio-parole-reddito`
 - **Dipende da:** D011
 - **Sblocca:** D015
 - **ADR vincolanti:** 0001, 0007, 0011
