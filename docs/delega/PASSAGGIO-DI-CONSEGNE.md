@@ -34,7 +34,7 @@ leggi che tengono il gioco bilanciato stanno in [prodotto/visione.md](../prodott
 | D006 — kernel: Registry | **chiusa**, commit `39b8520`                          |
 | D007 — kernel: Ledger   | **chiusa**, commit `f9a0c59`                          |
 | D008 — balance          | **chiusa**, commit `e01e885`                          |
-| D009 — persistenza main | **chiusa**, commit `DA-ANNOTARE`                      |
+| D009 — persistenza main | **chiusa**, commit `256f622`                          |
 | Kernel                  | **finito** — 535 righe, da D003 a D008                |
 | Persistenza nel main    | **finita** — 257 righe, `src/main/` e `src/preload/`  |
 | Codice di dominio       | **zero righe**                                        |

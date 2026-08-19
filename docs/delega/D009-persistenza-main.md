@@ -1,6 +1,6 @@
 # D009 — Persistenza nel processo main
 
-- **Stato:** **Chiusa** — 2026-08-19, commit `DA-ANNOTARE`, ramo `d009-persistenza-main`
+- **Stato:** **Chiusa** — 2026-08-19, commit `256f622`, ramo `d009-persistenza-main`
 - **Dipende da:** D002, D006
 - **Sblocca:** D011
 - **ADR vincolanti:** 0004, 0006, 0007, 0010, 0022
