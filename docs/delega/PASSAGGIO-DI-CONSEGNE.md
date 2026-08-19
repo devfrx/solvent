@@ -16,6 +16,11 @@ tracciabili ma illimitati. Ogni dominio — mercato nero, prestiti, casinò, imm
 diverso di viverla. Senza quella tensione, tredici domini sono tredici pulsanti che alzano lo
 stesso numero.
 
+Non c'è un'attività principale: è un **ecosistema** in quattro ere, e ogni era rende insufficiente
+la strategia della precedente con un muro che il denaro non compra — il caveau, il punteggio di
+credito, l'attenzione, il calore accumulato. Le ere, la profondità di ogni dominio e le cinque
+leggi che tengono il gioco bilanciato stanno in [prodotto/visione.md](../prodotto/visione.md).
+
 ## Dove siamo, esattamente
 
 |                         |                                                             |
@@ -182,16 +187,22 @@ finito. `npm run verify:release` aggiunge la compilazione, e diventerà verde co
 
 ## Le decisioni contestabili
 
-Quattro, prese in autonomia, e con D007 sono tutte **in vigore**: il Ledger le scrive. Cambiarle
-non costa più zero — costa il Ledger e i suoi test, che è ancora poco ma non è più niente. Il
-prossimo momento buono per contestarle è prima di D014, il primo dominio che le usa.
+Sei, prese in autonomia. Le prime quattro sono **in vigore** da D007: il Ledger le scrive.
+Cambiarle non costa più zero — costa il Ledger e i suoi test, che è ancora poco ma non è più
+niente. Il prossimo momento buono per contestarle è prima di D014, il primo dominio che le usa.
 
-| Cosa                                              | ADR                                                     | Alternativa scartata                                                   |
-| ------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Ogni transazione somma a zero (partita doppia)    | [0020](../adr/0020-partita-doppia.md)                   | movimenti singoli con categoria                                        |
-| Il Ledger espone transazioni, non movimenti       | [0019](../adr/0019-transazioni-atomiche-nel-ledger.md)  | due `post()` con rollback nel chiamante                                |
-| I pool dichiarano le proprie affordance come dati | [0017](../adr/0017-il-denaro-e-plurale.md)              | un saldo unico con etichette nella UI                                  |
-| `post()` non esiste: una primitiva sola           | [0021](../adr/0021-una-sola-primitiva-per-il-denaro.md) | zucchero a due movimenti, che però rimette `world` e `sink` nei domini |
+Le ultime due sono del 2026-08-19, nascono dalla revisione della visione e **non costano ancora
+niente**: nessuna riga di codice le applica, e nessuna delega aperta cambia per colpa loro —
+D009 compresa.
+
+| Cosa                                              | ADR                                                              | Alternativa scartata                                                   |
+| ------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Ogni transazione somma a zero (partita doppia)    | [0020](../adr/0020-partita-doppia.md)                            | movimenti singoli con categoria                                        |
+| Il Ledger espone transazioni, non movimenti       | [0019](../adr/0019-transazioni-atomiche-nel-ledger.md)           | due `post()` con rollback nel chiamante                                |
+| I pool dichiarano le proprie affordance come dati | [0017](../adr/0017-il-denaro-e-plurale.md)                       | un saldo unico con etichette nella UI                                  |
+| `post()` non esiste: una primitiva sola           | [0021](../adr/0021-una-sola-primitiva-per-il-denaro.md)          | zucchero a due movimenti, che però rimette `world` e `sink` nei domini |
+| Il Ledger avrà conti dinamici, non solo sei pool  | [0022](../adr/0022-il-ledger-ha-conti-non-solo-pool.md)          | il budget di un'attività tenuto come stato del dominio                 |
+| Il tempo di gioco è un dominio, non il kernel     | [0023](../adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md) | un `now` nel `SystemContext`, che aggiunge una chiave al salvataggio   |
 
 Sono contestabili anche i **numeri** scelti da D008 — il moltiplicatore ×1,5 dell'upgrade, le otto
 ore di tetto al recupero, l'intervallo 700–740 del primo minuto — ma sono di un'altra categoria:

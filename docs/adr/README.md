@@ -59,6 +59,8 @@ nel loop. Metà meccanismo non è una decisione in vigore.
 | [0019](0019-transazioni-atomiche-nel-ledger.md)                     | Il Ledger applica transazioni atomiche                 | **Accettata** | la primitiva di ogni movimento di denaro                                | —               |
 | [0020](0020-partita-doppia.md)                                      | Ogni transazione bilancia a zero                       | **Accettata** | come si scrive ogni riga di economia, e come si misura il bilanciamento | —               |
 | [0021](0021-una-sola-primitiva-per-il-denaro.md)                    | Una sola primitiva per il denaro: `post()` non esiste  | **Accettata** | come un dominio chiede un movimento di denaro                           | —               |
+| [0022](0022-il-ledger-ha-conti-non-solo-pool.md)                    | Il Ledger ha conti, non solo pool                      | Proposta      | dove vive il denaro di un'entità creata dal giocatore                   | A05             |
+| [0023](0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)           | Il tempo di gioco è un sistema di dominio              | Proposta      | chi sa che giorno è, e come lo sanno gli altri                          | —               |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è
@@ -66,6 +68,13 @@ esattamente il valore di quel passaggio, e sarebbe costato una migrazione del sa
 dopo. Il 0021 nasce invece dallo **scriverlo**, quel Ledger: la contraddizione fra il `post()` del
 0019 e la somma zero del 0020 era visibile sulla carta, ma quale delle due dovesse cedere si è
 visto solo con il codice davanti.
+
+Il **0022** e il **0023** nascono dalla stessa mossa, ripetuta: la visione è stata riletta chiedendo
+cosa vuol dire _profondo_ dominio per dominio, e sono uscite due cose che la prima lettura non
+aveva visto — che i conti del libro mastro non possono essere sei e fissi, e che serve un solo
+posto che sappia che giorno è. Entrambe sono **decise e non costruite**: il grilletto è nel
+[registro YAGNI](../roadmap-fette.md), e prenderle oggi costa un documento, mentre prenderle dopo
+tre domini costerebbe tre domini.
 
 I codici `A01`–`A17` sono i difetti misurati nell'audit del progetto precedente, elencati in
 [../rischi.md](../rischi.md). La catena completa difetto → regola → meccanismo → test sta in
@@ -90,25 +99,33 @@ Prese seguendo la direttiva _"la soluzione più coerente, professionale, meno pi
 Non bloccano, ma sono strutturali: se una non convince, il momento di dirlo è adesso — dopo tre
 domini costerebbe una migrazione.
 
-| Cosa                                              | ADR                                              | Alternativa scartata                                                                          |
-| ------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| Ogni transazione bilancia a zero                  | [0020](0020-partita-doppia.md)                   | movimenti singoli con categoria: più corto, ma la categoria è un'etichetta che nulla verifica |
-| Il Ledger espone transazioni, non movimenti       | [0019](0019-transazioni-atomiche-nel-ledger.md)  | due `post()` con rollback nel chiamante: rimette la logica del denaro fuori dal Ledger        |
-| I pool dichiarano le proprie affordance come dati | [0017](0017-il-denaro-e-plurale.md)              | un saldo unico con etichette nella UI                                                         |
-| `post()` non esiste: una primitiva sola           | [0021](0021-una-sola-primitiva-per-il-denaro.md) | zucchero a due movimenti, che però rimetterebbe `world` e `sink` nei domini (INV-10)          |
+| Cosa                                              | ADR                                                       | Alternativa scartata                                                                          |
+| ------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Ogni transazione bilancia a zero                  | [0020](0020-partita-doppia.md)                            | movimenti singoli con categoria: più corto, ma la categoria è un'etichetta che nulla verifica |
+| Il Ledger espone transazioni, non movimenti       | [0019](0019-transazioni-atomiche-nel-ledger.md)           | due `post()` con rollback nel chiamante: rimette la logica del denaro fuori dal Ledger        |
+| I pool dichiarano le proprie affordance come dati | [0017](0017-il-denaro-e-plurale.md)                       | un saldo unico con etichette nella UI                                                         |
+| `post()` non esiste: una primitiva sola           | [0021](0021-una-sola-primitiva-per-il-denaro.md)          | zucchero a due movimenti, che però rimetterebbe `world` e `sink` nei domini (INV-10)          |
+| Il Ledger avrà conti dinamici, non solo sei pool  | [0022](0022-il-ledger-ha-conti-non-solo-pool.md)          | il budget di un'attività come stato del dominio: costa zero oggi e rende falsa la regola 6    |
+| Il tempo di gioco è un dominio, non il kernel     | [0023](0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md) | un `now` nel `SystemContext`: più diretto, ma aggiunge una chiave a `SavePayload`             |
 
 Le prime tre sono ora **in vigore**: D007 le ha scritte. Cambiarle non costa più zero — costa il
 Ledger e i suoi test, che è ancora poco, ma non è più niente. Il momento buono per contestarle era
 prima di D007; il secondo momento buono è prima di D014, che sarà il primo dominio a usarle.
+
+Le ultime due non sono in vigore e **non costano ancora niente**: nessuna riga di codice le
+applica. Contestarle oggi costa la modifica di un documento. Il momento in cui smetteranno di
+essere gratuite è il blocco B per il tempo e il blocco D per i conti — la sequenza sta in
+[roadmap-fette.md](../roadmap-fette.md).
 
 ## Decisioni deliberatamente rimandate
 
 Non sono dimenticanze: sono decisioni che oggi non hanno abbastanza informazione per essere prese
 bene, e che rimandare non costa nulla. Sono elencate con il **momento in cui vanno prese**.
 
-| Decisione                                                              | Si prende quando                                          | Perché non ora                                                |
-| ---------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------- |
-| Un tool per il codice morto non visto da TS (CSS, export inutilizzati) | all'inizio della seconda fetta                            | oggi la superficie è troppo piccola perché il problema esista |
-| Simulazione in un Web Worker                                           | se e quando un profilo mostra il tick che blocca il frame | ottimizzazione senza una misura è indovinare                  |
-| Canale di distribuzione e firma del binario                            | prima del primo rilascio pubblico                         | mettere un `publish` finto ora è come è nato `example.com`    |
-| Strategia di telemetria / analytics                                    | quando esiste un giocatore che non siamo noi              | —                                                             |
+| Decisione                                                              | Si prende quando                                          | Perché non ora                                                                                                                                                                                      |
+| ---------------------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Un tool per il codice morto non visto da TS (CSS, export inutilizzati) | all'inizio della seconda fetta                            | oggi la superficie è troppo piccola perché il problema esista                                                                                                                                       |
+| Simulazione in un Web Worker                                           | se e quando un profilo mostra il tick che blocca il frame | ottimizzazione senza una misura è indovinare                                                                                                                                                        |
+| Canale di distribuzione e firma del binario                            | prima del primo rilascio pubblico                         | mettere un `publish` finto ora è come è nato `example.com`                                                                                                                                          |
+| Strategia di telemetria / analytics                                    | quando esiste un giocatore che non siamo noi              | —                                                                                                                                                                                                   |
+| Cosa matura mentre il gioco è chiuso, e per quanto                     | alla prima fetta con affitti o mercato (blocco B o C)     | il tetto di otto ore della fetta 03 è stato scelto per un gioco senza scadenze né mercati che corrono. Con gli affitti e la crypto quel numero va ridiscusso, e non prima di avere entrambi davanti |

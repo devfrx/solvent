@@ -20,9 +20,6 @@ Regola: una fetta non inizia finché la precedente non ha i gate verdi (ADR 0014
 | 05     | **Prestiti e punteggio di credito**                                                                                                             | il primo sistema che legge lo storico dei movimenti; il primo debito, quindi il primo saldo che può essere negativo per volontà del giocatore                                | non iniziata                                                                                   |
 | 06     | **Prestige e ere**                                                                                                                              | `ResetScope` su molti sistemi contemporaneamente: ognuno decide cosa conserva, nel proprio file. Il difetto A09 nasceva qui                                                  | non iniziata                                                                                   |
 
-Oltre la 06 non c'è pianificazione, di proposito: pianificare la fetta 09 oggi significa progettare
-per un kernel che non esiste ancora.
-
 ### Perché quest'ordine
 
 Non è l'ordine di quanto sono belli i domini: è l'ordine di quanto mettono alla prova il kernel.
@@ -35,13 +32,31 @@ Ogni fetta è scelta per essere la **prima** che rompe qualcosa, se qualcosa è 
 - **04 prima dei domini più ricchi** perché il calore è il primo sistema che vive di eventi altrui:
   se il contratto del Bus è sbagliato, si scopre qui — quando cambiarlo costa poco.
 
-### I domini della visione non ancora programmati
+**L'ordine di costruzione non è l'ordine di gioco.** Il prestige è era 4 per il giocatore e fetta
+06 per noi, perché è la prima cosa che stressa `ResetScope` su molti sistemi insieme. Le due
+sequenze rispondono a domande diverse e non vanno allineate.
 
-Mercato azionario, crypto, immobiliare, negozio, aste di box, casinò, impresa, depositi vincolati,
-albero delle abilità, eventi periodici.
+## Oltre la fetta 06
 
-Le meccaniche sono descritte in [prodotto/visione.md](prodotto/visione.md). Nessuna di esse entra
-prima che la fetta 06 sia verde. Sono descritte, non pianificate: la differenza è deliberata.
+**L'ordine è dichiarato, il disegno no.** È una regola cambiata: fino al 2026-08-19 questo
+documento diceva che oltre la 06 non ci fosse pianificazione di alcun tipo, e la ragione era buona
+— pianificare la fetta 09 in dettaglio significa progettare per un kernel che non esiste ancora.
+Resta vera per il **disegno**. Non è mai stata vera per l'**ordine**: sapere quale dominio viene
+dopo non costa niente e serve a decidere cosa non costruire adesso.
+
+Le ere sono descritte in [prodotto/visione.md](prodotto/visione.md). Qui c'è solo la sequenza di
+lavoro che ne discende, e cosa ciascun blocco è la prima cosa a mettere alla prova.
+
+| Blocco                                               | Prima cosa che mette alla prova                                             |
+| ---------------------------------------------------- | --------------------------------------------------------------------------- |
+| **A** — negozio, aste di box, oggetti nel caveau     | la prima collezione di entità create dal giocatore; il primo inventario     |
+| **B** — calendario, depositi vincolati, affitti      | le **scadenze**: il primo dominio che ha bisogno di sapere che giorno è     |
+| **C** — immobiliare con distretti, mercato azionario | le prime serie storiche vere in `boundedList`; le prime correlazioni        |
+| **D** — impresa con più attività, crypto, casinò     | i **conti dinamici**: il primo denaro che appartiene a un'entità di gioco   |
+| **E** — indagini, eventi, albero delle abilità       | il primo sistema che **cambia le regole** di altri domini invece dei numeri |
+
+Ogni blocco si spezza in fette vere quando ci si arriva, una alla volta, con i gate verdi in mezzo
+(ADR 0014). Un blocco **non** è una fetta: è un segnaposto con dentro l'ordine.
 
 ## Registro YAGNI — cosa non è stato costruito, e il grilletto che lo farà entrare
 
@@ -51,18 +66,31 @@ condizione, non entra — nemmeno se sembra ovvia.
 
 ### Nel kernel
 
-| Cosa manca                                        | Perché è stato tentato      | Grilletto                                                                                     |
-| ------------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------- |
-| `Rng.int()`, `pick()`, `chance()`                 | ogni PRNG li ha             | il primo sistema che ne ha bisogno davvero (fetta 05)                                         |
-| `Bus.once()`, sottoscrizioni con wildcard         | comodi                      | un caso d'uso reale, non uno immaginato                                                       |
-| Pool oltre `cash` e `card` (fiches, investimenti) | il gioco le avrà            | il dominio che le usa. La _forma_ c'è dalla fetta 01 (ADR 0017), i valori no                  |
-| Proprietà dei pool: capienza, interessi, spread   | sono già nel tipo           | il dominio che le rende vere — capienza in fetta 02, interessi con i depositi                 |
-| Categorie oltre le quattro di oggi                | la telemetria le vorrà      | la prima schermata che le mostra                                                              |
-| `stats()` implementato nei sistemi                | è nel tipo                  | la prima schermata di statistiche. Il tipo lo prevede opzionale apposta                       |
-| Migrazioni del salvataggio                        | servono sempre, prima o poi | la **versione 2** della busta. La versione 1 non ha migrazioni: non ha nulla da cui migrare   |
-| Priorità o cancellazione nel Bus                  | i bus "seri" ce l'hanno     | un ordine di handler che conta davvero, misurato                                              |
-| Fasi di `ORDER` oltre `ECONOMY` e `INCOME`        | il gioco ne avrà            | il primo sistema che non sta in nessuna delle due. Il passo 100 lascia posto senza rinumerare |
-| Un `Logger` nel kernel                            | ovvio                       | quando servirà diagnosticare qualcosa che gli errori tipizzati non spiegano                   |
+| Cosa manca                                      | Perché è stato tentato         | Grilletto                                                                                                                     |
+| ----------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `Rng.int()`, `pick()`, `chance()`               | ogni PRNG li ha                | il primo sistema che ne ha bisogno davvero (fetta 05)                                                                         |
+| `Bus.once()`, sottoscrizioni con wildcard       | comodi                         | un caso d'uso reale, non uno immaginato                                                                                       |
+| Pool oltre `cash` e `card` (fiches, crypto)     | il gioco le avrà               | il dominio che le usa — casinò e crypto, blocco D. La _forma_ c'è dalla fetta 01 (ADR 0017)                                   |
+| Proprietà dei pool: capienza, interessi, spread | sono già nel tipo              | il dominio che le rende vere — capienza in fetta 02, interessi con i depositi                                                 |
+| **Conti dinamici nel Ledger** (ADR 0022)        | la visione li richiede         | il primo dominio con un budget per entità: l'**impresa**, blocco D. Prima costerebbe astrazione senza uso                     |
+| **Chiusura di un conto con saldo non zero**     | sembra una comodità            | mai: è vietata per costruzione. Sta qui perché qualcuno la chiederà                                                           |
+| Categorie oltre le quattro di oggi              | la telemetria le vorrà         | la prima schermata che le mostra                                                                                              |
+| `stats()` implementato nei sistemi              | è nel tipo                     | la prima schermata di statistiche. Il tipo lo prevede opzionale apposta                                                       |
+| Migrazioni del salvataggio                      | servono sempre, prima o poi    | la **versione 2** della busta — che arriverà con i conti dinamici. La versione 1 non ha nulla da cui migrare                  |
+| Priorità o cancellazione nel Bus                | i bus "seri" ce l'hanno        | un ordine di handler che conta davvero, misurato                                                                              |
+| Fasi di `ORDER` oltre `ECONOMY` e `INCOME`      | il gioco ne avrà               | il primo sistema che non sta in nessuna delle due. Il candidato noto è `TIME: 50`, con il calendario (ADR 0023)               |
+| **`now: Ticks` nel `SystemContext`**            | è la forma più diretta         | un dominio che ha bisogno dell'ora **esatta** e non del cambio di giorno. Nessuno dei domini della visione ce l'ha (ADR 0023) |
+| Uno `Scheduler` nel kernel                      | le scadenze sembrano chiederlo | due o tre domini con scadenze già scritti, e una forma comune **osservata** fra loro                                          |
+| Un `Logger` nel kernel                          | ovvio                          | quando servirà diagnosticare qualcosa che gli errori tipizzati non spiegano                                                   |
+
+### Nei contratti e nei domini
+
+| Cosa manca                                                         | Grilletto                                                                                                                                  |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Un contratto condiviso per le **collezioni di entità**             | il **terzo** dominio che tiene un array di entità con id e ciclo di vita. Con due si copia, con tre si estrae                              |
+| Un generatore di **id deterministici** per le entità del giocatore | la prima entità creata dal giocatore (blocco A). Deve venire dall'Rng o da un contatore salvato, mai da `Date.now()`                       |
+| Un tipo per le **scadenze** (tick assoluto + cosa succede)         | il secondo dominio che ne ha una. Il primo se la scrive in casa, ed è giusto così                                                          |
+| `Reason` spezzata per dominio invece che un'unione unica           | quando il file dei contratti diventa un punto di conflitto misurato, non prima. Oggi è il prezzo giusto per avere le chiavi i18n tipizzate |
 
 ### Nell'applicazione
 
