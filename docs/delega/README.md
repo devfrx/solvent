@@ -30,7 +30,7 @@ Ogni delega dichiara un ordine di grandezza. Non è un limite contrattuale: è u
 Se la delega del Registry dichiara ~140 righe e ne stai scrivendo 400, non hai sforato un budget:
 stai risolvendo un problema diverso da quello descritto. Fermati e dillo, invece di continuare.
 
-Il kernel intero — D003 fino a D008 — sta in ~555 righe (il dettaglio, e come ci è arrivato, è
+Il kernel intero — D003 fino a D008 — sta in 535 righe (il dettaglio, e come ci è arrivato, è
 [nell'indice](#indice)). È una specifica, non una speranza.
 
 ## Ciclo di vita
@@ -88,7 +88,7 @@ configurato dopo che c'erano già 156 file.
 | [D005](D005-kernel-bus.md)           | Kernel: Bus                                                           | 67 codice + 303 test  | **Chiusa** |
 | [D006](D006-kernel-registry.md)      | Kernel: Registry                                                      | 124 codice + 406 test | **Chiusa** |
 | [D007](D007-kernel-ledger.md)        | Kernel: Ledger — pool, transazioni atomiche, partita doppia           | 197 codice + 420 test | **Chiusa** |
-| [D008](D008-balance.md)              | Balance: costanti, modificatori, bersagli                             | ~90                   | Aperta     |
+| [D008](D008-balance.md)              | Balance: costanti, modificatori, bersagli                             | 70 codice + 154 test  | **Chiusa** |
 | [D009](D009-persistenza-main.md)     | Persistenza nel processo main                                         | ~180                  | Aperta     |
 | [D010](D010-dominio-income.md)       | Dominio: income                                                       | ~90                   | Aperta     |
 | [D014](D014-dominio-bancomat.md)     | Dominio: bancomat — deposita, preleva, commissione                    | ~80                   | Aperta     |
@@ -100,9 +100,9 @@ D014 ha il numero più alto perché è nata dopo, con gli ADR 0017–0020. Nel g
 sta davvero: accanto a D010, prima di D011. **La numerazione è cronologica, l'ordine è il grafo** —
 rinumerare romperebbe i riferimenti nei commit e nella tracciabilità.
 
-Il kernel — D003, D004, D005, D006, D007, D008 — sta in **~555 righe**: 465 già scritte (Clock 20,
-Rng 55, Bus 67, Registry 126, Ledger 197) più ~90 stimate per il Balance. Il budget iniziale era
-~500, poi ~560 quando gli ADR 0017/0019/0020 hanno fatto crescere il Ledger, poi ~530 perché le
-prime quattro deleghe erano uscite sotto la stima. Il Ledger ha ripreso quei 25 e qualcosa in più:
-il perché sta [nella sua nota di chiusura](D007-kernel-ledger.md#nota-di-chiusura). Nessuna delle
-quattro cifre è stata subita: ognuna è dichiarata dov'è cambiata.
+Il kernel — D003, D004, D005, D006, D007, D008 — è **finito**, e sta in **535 righe**: Clock 20,
+Rng 55, Bus 67, Registry 126, Ledger 197, Balance 70. Il budget iniziale era ~500, poi ~560 quando
+gli ADR 0017/0019/0020 hanno fatto crescere il Ledger, poi ~530 perché le prime quattro deleghe
+erano uscite sotto la stima, poi ~555 quando il Ledger ha ripreso quei 25 e qualcosa in più. Il
+Balance è rientrato di venti. Nessuna delle cinque cifre è stata subita: ognuna è dichiarata dov'è
+cambiata, e l'ultima è una misura, non una stima.

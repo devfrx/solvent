@@ -143,7 +143,7 @@ solvent/
    ├─ kernel/          clock · rng · bus · registry · ledger
    ├─ domains/         income (seed fisso)
    ├─ save/            roundtrip
-   ├─ balance/         targets
+   ├─ balance/         modifiers · targets
    ├─ i18n/            parity
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
                        eslint-disable · bus-sincrono

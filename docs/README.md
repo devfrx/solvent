@@ -71,12 +71,12 @@ agganciata al difetto misurato che la giustifica.
 la simulazione nel renderer. Le decisioni prese in autonomia — pool con affordance, transazioni
 atomiche, partita doppia — sono elencate nel [compendio](adr/README.md#decisioni-prese-in-autonomia-contestabili).
 
-**Da D001 a [D007](delega/D007-kernel-ledger.md) sono chiuse.** Le regole del progetto sono
-eseguibili, i contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger, l'ambito di reset,
-`boundedList`, gli eventi, il salvataggio, i comandi — e del kernel ci sono Clock, Rng, Bus,
-Registry e Ledger. Il denaro ha la sua unica porta, a partita doppia. Il codice di dominio non è
-ancora iniziato: la prossima delega è [D008 — Balance](delega/D008-balance.md), dopo la quale il
-kernel è finito.
+**Da D001 a [D008](delega/D008-balance.md) sono chiuse, e il kernel è finito.** Le regole del
+progetto sono eseguibili, i contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger,
+l'ambito di reset, `boundedList`, gli eventi, il salvataggio, i comandi — e il kernel ha Clock,
+Rng, Bus, Registry, Ledger e Balance. Il denaro ha la sua unica porta, a partita doppia; i numeri
+di gioco hanno un posto solo e un bersaglio verificato. Il codice di dominio non è ancora iniziato:
+la prossima delega è [D009 — Persistenza nel main](delega/D009-persistenza-main.md).
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati
