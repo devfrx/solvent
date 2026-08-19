@@ -1,6 +1,6 @@
 # ADR 0020 — Ogni transazione bilancia a zero (partita doppia)
 
-- **Stato:** Proposta — **decisa seguendo la direttiva "coerente, professionale, senza debiti"; contestabile**
+- **Stato:** **Accettata** — D007: la somma zero è verificata a ogni transazione, a ogni caricamento e su 1.000 transazioni generate — **decisa seguendo la direttiva "coerente, professionale, senza debiti"; contestabile**
 - **Data:** 2026-08-19
 - **Conseguenza di:** [ADR 0019](0019-transazioni-atomiche-nel-ledger.md)
 

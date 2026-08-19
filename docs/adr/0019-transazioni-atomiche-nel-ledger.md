@@ -1,8 +1,9 @@
 # ADR 0019 — Il Ledger applica transazioni atomiche, non movimenti singoli
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — D007: `transaction` valida tutto prima di applicare, e l'atomicità ha il suo test
 - **Data:** 2026-08-19
 - **Conseguenza di:** [ADR 0017](0017-il-denaro-e-plurale.md)
+- **Superata in parte da:** [ADR 0021](0021-una-sola-primitiva-per-il-denaro.md) — solo il paragrafo su `post()`, che la partita doppia ha reso impossibile
 
 ## Contesto
 

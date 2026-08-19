@@ -1,6 +1,6 @@
 # ADR 0017 — Il denaro è plurale: pool con affordance diverse
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — D007: il Ledger legge `POOLS` come dati, e `accepts` rifiuta con l'elenco dei pool validi
 - **Data:** 2026-08-19
 - **Origine:** preferenza [P4](../prodotto/preferenze.md#p4--contanti-e-carta-sono-due-strumenti-con-scopi-diversi)
 

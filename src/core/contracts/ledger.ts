@@ -35,6 +35,20 @@ export interface Transaction {
   readonly postings: readonly Posting[]
 }
 
+/**
+ * Ciò che una transazione dichiara oltre alle proprie righe.
+ *
+ * ADR 0017 — `accepts` è l'affordance vista dal Ledger: un'azione che si paga solo con la carta lo
+ * dice qui, e un movimento su un pool del giocatore fuori dall'elenco viene rifiutato con
+ * `error.ledger.pool_not_accepted`, che porta l'elenco con sé. Assente significa che l'azione non
+ * pone vincoli di strumento — non che li pone e li ha dimenticati: chi non dichiara nulla accetta
+ * tutto, ed è la forma giusta per il reddito, che non è una scelta del giocatore.
+ */
+export interface TransactionMeta {
+  readonly reason: Reason
+  readonly accepts?: readonly Pool[]
+}
+
 /** I saldi di tutti i conti, giocatore e non. La somma è sempre zero (ADR 0020). */
 export type Balances = Readonly<Record<Pool, Money>>
 

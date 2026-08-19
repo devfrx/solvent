@@ -1,7 +1,8 @@
 # ADR 0003 — Il Ledger è l'unica porta del denaro
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — D007: i saldi nella closure di `kernel/Ledger.ts`, e il lint di rete su R06
 - **Data:** 2026-08-19
+- **Aggiornata da:** [ADR 0019](0019-transazioni-atomiche-nel-ledger.md) e [ADR 0021](0021-una-sola-primitiva-per-il-denaro.md) — la firma qui sotto è cambiata due volte, il principio no
 
 ## Contesto
 

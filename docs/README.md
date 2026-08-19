@@ -71,11 +71,12 @@ agganciata al difetto misurato che la giustifica.
 la simulazione nel renderer. Le decisioni prese in autonomia — pool con affordance, transazioni
 atomiche, partita doppia — sono elencate nel [compendio](adr/README.md#decisioni-prese-in-autonomia-contestabili).
 
-**Da D001 a [D006](delega/D006-kernel-registry.md) sono chiuse.** Le regole del progetto sono
-eseguibili, i contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger, `boundedList`, gli
-eventi, il salvataggio, i comandi — e del kernel ci sono Clock, Rng, Bus e Registry. Il codice di
-dominio non è ancora iniziato: la prossima delega è
-[D007 — Ledger](delega/D007-kernel-ledger.md), dopo la quale del kernel resta solo il Balance.
+**Da D001 a [D007](delega/D007-kernel-ledger.md) sono chiuse.** Le regole del progetto sono
+eseguibili, i contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger, l'ambito di reset,
+`boundedList`, gli eventi, il salvataggio, i comandi — e del kernel ci sono Clock, Rng, Bus,
+Registry e Ledger. Il denaro ha la sua unica porta, a partita doppia. Il codice di dominio non è
+ancora iniziato: la prossima delega è [D008 — Balance](delega/D008-balance.md), dopo la quale il
+kernel è finito.
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati
@@ -83,4 +84,9 @@ delega per delega, non per decreto. Con D002 sono passati
 [0007](adr/0007-result-come-unico-stile-di-esito.md), con D004
 [0005](adr/0005-rng-seedato-con-stream-per-dominio.md), con D005
 [0016](adr/0016-il-bus-e-sincrono-e-fire-and-forget.md), con D006
-[0002](adr/0002-registry-unica-lista-di-sistemi.md).
+[0002](adr/0002-registry-unica-lista-di-sistemi.md), con D007
+[0003](adr/0003-ledger-unica-porta-del-denaro.md),
+[0017](adr/0017-il-denaro-e-plurale.md),
+[0019](adr/0019-transazioni-atomiche-nel-ledger.md),
+[0020](adr/0020-partita-doppia.md) e il nuovo
+[0021](adr/0021-una-sola-primitiva-per-il-denaro.md).

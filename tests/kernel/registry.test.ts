@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
+import type { ResetScope } from '@core/contracts/lifecycle'
+
 import { createBus } from '@core/kernel/Bus'
 import { clock, ticks } from '@core/kernel/Clock'
-import type { ResetScope, SystemContext } from '@core/kernel/Registry'
+import { createLedger } from '@core/kernel/Ledger'
+import type { SystemContext } from '@core/kernel/Registry'
 import { createRegistry, defineSystem, DuplicateSystemError, ORDER } from '@core/kernel/Registry'
 import { createRng } from '@core/kernel/Rng'
 
@@ -15,7 +18,10 @@ import { createRng } from '@core/kernel/Rng'
  * i test lo verificano registrando **una volta** e chiedendo tutte e cinque le cose.
  */
 
-const contesto = (): SystemContext => ({ clock, rng: createRng(1), bus: createBus() })
+const contesto = (): SystemContext => {
+  const bus = createBus()
+  return { clock, rng: createRng(1), bus, ledger: createLedger(bus) }
+}
 
 const UN_TICK = ticks(1)
 

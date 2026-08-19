@@ -113,7 +113,7 @@ per cui questo passaggio valeva la pena.
 
 2. **Un movimento può essere rifiutato per lo strumento sbagliato, non solo per fondi.** "Questo
    contatto non accetta la carta" è un esito previsto e traducibile, non un pulsante spento senza
-   spiegazione. `PostError` cresce di un caso da subito.
+   spiegazione. `LedgerError` cresce di un caso da subito.
 
 3. **`GameEvents` sarà la superficie di integrazione principale, non un dettaglio.** Il calore
    sale per colpa del black market, del casinò e di certi acquisti. Se ognuno importasse il
