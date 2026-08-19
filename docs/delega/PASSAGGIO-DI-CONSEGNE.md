@@ -55,32 +55,29 @@ sono ancora state eseguite.
 
 ### Cosa è già cambiato nelle deleghe ancora aperte
 
-Venti cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve
+Tredici cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve
 sapere prima di iniziare. Sono qui perché una delega chiusa è un documento storico: nessuno la
 rilegge.
 
-| Delega     | Cosa è cambiato                                                                                                                                                                                                                                                                                                                                                                                              |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| D014       | **`post()` non esiste**: la primitiva è una sola. Si chiama `transaction` con i movimenti costruiti da `income`, `spend` o `transfer` ([ADR 0021](../adr/0021-una-sola-primitiva-per-il-denaro.md))                                                                                                                                                                                                          |
-| D014       | **La commissione del bancomat va in `balance/constants.ts`**, non nel dominio: `no-magic-numbers` sotto `domains/**` le impedisce di vivere altrove. D008 non l'ha inventata perché la sua delega elencava altri tre numeri                                                                                                                                                                                  |
-| D014       | **`transfer` trattiene la commissione, non la aggiunge**: `transfer('card', 'cash', 500, 2.50)` fa uscire 500 dalla carta e arrivare 497,50 in contanti. Stessa forma per lo spread delle fiches e la percentuale del black market                                                                                                                                                                           |
-| D011, D014 | **Un handler di `money.posted` non può postare denaro**: la guardia contro l'annidamento resta alzata durante l'emissione. Chi reagisce muovendo denaro lo fa nel proprio `tick`                                                                                                                                                                                                                             |
-| D011, D014 | **`SystemContext` ha quattro campi** — `clock`, `rng`, `bus`, `ledger` — e **`ResetScope` si importa da `@core/contracts/lifecycle`**, non più dal Registry                                                                                                                                                                                                                                                  |
-| D014       | La **ragione** sta sulla `Transaction`, la **categoria** sul `Posting`. Un prelievo è un evento solo con tre righe                                                                                                                                                                                                                                                                                           |
-| D014       | Un'azione che accetta solo certi strumenti lo dichiara in `TransactionMeta.accepts`. Assente = nessun vincolo, e vincola solo i pool del giocatore                                                                                                                                                                                                                                                           |
-| D011       | **La persistenza esiste e ha una superficie precisa.** `window.solvent` con `save`, `load` e `reset`; `load()` ritorna `{ present: false }` quando il file non c'è, e non è un errore; `save(payload)` ritorna l'istante scritto. Il `declare global` che aggancia `SaveApi` a `window` è di D011. L'elenco completo è in fondo a [D009](D009-persistenza-main.md), sotto _Cosa deve sapere chi prende D011_ |
-| D011       | **Il `reset` del main non è il `reset` del Registry.** Il primo cancella il file di salvataggio, il secondo azzera i sistemi con un `ResetScope`. Un prestige chiama il secondo e non il primo                                                                                                                                                                                                               |
-| D011, D014 | **`Bus.emit` può lanciare**: `EventCycleError` sui cicli, o l'errore di un handler (`AggregateError` se sono più d'uno). Un `tick` che emette non è un'operazione che non fallisce mai                                                                                                                                                                                                                       |
-| D011       | **Anche il Ledger lancia**: `UnbalancedTransactionError` e `NestedTransactionError` dicono che il codice è scritto male, `UnbalancedSaveError` che il salvataggio è manomesso. E **`RECOVERY_CAP` è in tick**, non in secondi: il loop lo confronta con i tick interi da recuperare, senza conversioni proprie                                                                                               |
-| D011       | Il loop deve decidere cosa fa quando `emit` o il Ledger lanciano. Fermare la simulazione è la risposta giusta: dicono che qualcosa è scritto male, non che il giocatore ha sbagliato. **`loadAll` ritorna `Result<LoadReport, RegistryError>`**, e quel caso va nello stato `Errore`, non ignorato                                                                                                           |
-| D011, D014 | **Un dominio espone una factory, non un sistema già costruito**: `createIncome(ledger, modifiers)` ritorna il sistema da registrare e i comandi già legati al contesto ([ADR 0024](../adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md)). Il bootstrap costruisce le istanze condivise e le distribuisce, e ne discende una freccia `renderer/runtime → core/balance`              |
-| D011, D014 | **Un comando ritorna lo stato nuovo invece di scriverlo.** Chi possiede lo stato lo assegna solo se il `Result` è `ok`: "prima il denaro, poi lo stato" smette di essere una cosa da ricordare                                                                                                                                                                                                               |
-| D011       | **`tests/rules/registry-completeness` torna secco quando nasce `createGame.ts`**: finché quel file non esiste il test dichiara l'attesa, dal giorno dopo conta le registrazioni e ne pretende una per dominio                                                                                                                                                                                                |
-| D014       | **Il secondo dominio con stato fa scattare un grilletto**: `income` valida a mano ciò che riceve nel `load`, perché `SystemsSave` è opaco per lo schema del main. Con due copie di quelle tre righe la domanda "serve un meccanismo condiviso?" va risposta — voce nel [registro YAGNI](../roadmap-fette.md)                                                                                                 |
-| D012       | **`error.income.already_upgraded` è un codice nuovo** e vuole la sua chiave i18n, come ogni `code` (INV-07)                                                                                                                                                                                                                                                                                                  |
-| tutte      | **Il codice si scrive in inglese.** Identificatori — variabili, parametri, funzioni, tipi, costanti, chiavi di oggetto, nomi di file — in inglese; prosa — commenti, messaggi degli errori lanciati, descrizioni dei test — in italiano. È la regola C08 di [convenzioni.md](../convenzioni.md), imposta da `tests/rules/english-identifiers`, che è ⚠️ parziale e lo dichiara                               |
-| tutte      | **Alcuni nomi sono cambiati con quel refactor.** L'helper dei test è `tests/helpers/sources.ts` e espone `read`, `withoutComments`, `sourceFiles`, `importsOf`. Cinque test di regola sono stati rinominati (`bus-synchronous`, `main-save-only`, `registry-no-special-cases`, `doc-links`, `ledger-capacity`). L'unica API pubblica che cambia nome è `seedCasuale` → **`randomSeed`**                      |
-| tutte      | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                                                                                                                                                                                                                        |
+**D014 non è più in questa tabella**: la sua delega è stata preparata il 2026-08-19 e le sedici
+cose che la riguardavano — le sei che stavano qui e altre dieci — vivono dentro di lei, nella
+sezione _Cosa è cambiato_. Si esegue com'è.
+
+| Delega | Cosa è cambiato                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| D011   | **Un handler di `money.posted` non può postare denaro**: la guardia contro l'annidamento resta alzata durante l'emissione. Chi reagisce muovendo denaro lo fa nel proprio `tick`                                                                                                                                                                                                                             |
+| D011   | **`SystemContext` ha quattro campi** — `clock`, `rng`, `bus`, `ledger` — e **`ResetScope` si importa da `@core/contracts/lifecycle`**, non più dal Registry                                                                                                                                                                                                                                                  |
+| D011   | **La persistenza esiste e ha una superficie precisa.** `window.solvent` con `save`, `load` e `reset`; `load()` ritorna `{ present: false }` quando il file non c'è, e non è un errore; `save(payload)` ritorna l'istante scritto. Il `declare global` che aggancia `SaveApi` a `window` è di D011. L'elenco completo è in fondo a [D009](D009-persistenza-main.md), sotto _Cosa deve sapere chi prende D011_ |
+| D011   | **Il `reset` del main non è il `reset` del Registry.** Il primo cancella il file di salvataggio, il secondo azzera i sistemi con un `ResetScope`. Un prestige chiama il secondo e non il primo                                                                                                                                                                                                               |
+| D011   | **`Bus.emit` può lanciare**: `EventCycleError` sui cicli, o l'errore di un handler (`AggregateError` se sono più d'uno). Un `tick` che emette non è un'operazione che non fallisce mai                                                                                                                                                                                                                       |
+| D011   | **Anche il Ledger lancia**: `UnbalancedTransactionError` e `NestedTransactionError` dicono che il codice è scritto male, `UnbalancedSaveError` che il salvataggio è manomesso. E **`RECOVERY_CAP` è in tick**, non in secondi: il loop lo confronta con i tick interi da recuperare, senza conversioni proprie                                                                                               |
+| D011   | Il loop deve decidere cosa fa quando `emit` o il Ledger lanciano. Fermare la simulazione è la risposta giusta: dicono che qualcosa è scritto male, non che il giocatore ha sbagliato. **`loadAll` ritorna `Result<LoadReport, RegistryError>`**, e quel caso va nello stato `Errore`, non ignorato                                                                                                           |
+| D011   | **Un dominio espone una factory, non un sistema già costruito**: `createIncome(ledger, modifiers)` ritorna il sistema da registrare e i comandi già legati al contesto ([ADR 0024](../adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md)). Il bootstrap costruisce le istanze condivise e le distribuisce, e ne discende una freccia `renderer/runtime → core/balance`              |
+| D011   | **`tests/rules/registry-completeness` torna secco quando nasce `createGame.ts`**: finché quel file non esiste il test dichiara l'attesa, dal giorno dopo conta le registrazioni e ne pretende una per dominio                                                                                                                                                                                                |
+| D012   | **Tre codici d'errore di dominio sono nuovi** e vogliono la loro chiave i18n, come ogni `code` (INV-07): `error.income.already_upgraded` da D010, più `error.atm.amount_not_positive` e `error.atm.fee_exceeds_amount`, dichiarati nella delega di D014                                                                                                                                                      |
+| tutte  | **Il codice si scrive in inglese.** Identificatori — variabili, parametri, funzioni, tipi, costanti, chiavi di oggetto, nomi di file — in inglese; prosa — commenti, messaggi degli errori lanciati, descrizioni dei test — in italiano. È la regola C08 di [convenzioni.md](../convenzioni.md), imposta da `tests/rules/english-identifiers`, che è ⚠️ parziale e lo dichiara                               |
+| tutte  | **Alcuni nomi sono cambiati con quel refactor.** L'helper dei test è `tests/helpers/sources.ts` e espone `read`, `withoutComments`, `sourceFiles`, `importsOf`. Cinque test di regola sono stati rinominati (`bus-synchronous`, `main-save-only`, `registry-no-special-cases`, `doc-links`, `ledger-capacity`). L'unica API pubblica che cambia nome è `seedCasuale` → **`randomSeed`**                      |
+| tutte  | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                                                                                                                                                                                                                        |
 
 ### Quanto ci si può fidare di questi documenti
 
@@ -139,31 +136,32 @@ Non serve leggere tutti i 20 ADR. Servono quando stai per contraddirne uno: allo
 ## Il prossimo passo, in concreto
 
 **[D014 — Dominio: bancomat](D014-dominio-bancomat.md).** Il gesto centrale del gioco:
-`src/core/domains/atm/` con `types.ts`, `rules.ts` puro, `commands.ts` con `deposita` e `preleva`,
-`system.ts` con stato. **~80 righe**: è la delega più piccola rimasta, ed è quella che rende la
+`src/core/domains/atm/` con `rules.ts` puro e `commands.ts`, più una riga in
+`balance/constants.ts`. **~110 righe**: è la delega più piccola rimasta, ed è quella che rende la
 dualità contanti/carta una scelta invece che un'etichetta.
 
 Il grafo lo mette accanto a D010, prima di D011: ha il numero più alto solo perché è nato dopo.
 
-Sette cose da sapere prima di iniziare, tutte già nella tabella qui sopra:
+Il testo della delega è stato **preparato il 2026-08-19**: contiene già le sedici cose cambiate da
+quando fu scritta, i tre codici d'errore per esteso e il budget rimisurato. Si esegue com'è, e la
+sezione _Cosa è cambiato_ si legge per prima.
 
-1. **`post()` non esiste.** La primitiva è `transaction`, e per il bancomat il costruttore è
-   `transfer` ([ADR 0021](../adr/0021-una-sola-primitiva-per-il-denaro.md)).
-2. **`transfer` trattiene la commissione, non la aggiunge:** `transfer('card', 'cash', 500, 2.50)`
-   fa uscire 500 dalla carta e arrivare 497,50 in contanti, e 2,50 finiscono in `fees`.
-3. **La commissione va in `balance/constants.ts`**, non nel dominio: `no-magic-numbers` sotto
-   `domains/**` glielo impedisce, ed è stato provato — `.div(10)` scritto a mano è rosso.
-4. **Il dominio espone una factory** (`createAtm(ledger, …)`), non un sistema già costruito
-   ([ADR 0024](../adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md)).
-   D010 ha la forma già scritta, comando compreso.
-5. **Un comando ritorna lo stato nuovo invece di scriverlo.** È ciò che rende "prima il denaro, poi
-   lo stato" impossibile da sbagliare anziché da ricordare.
-6. **Il secondo dominio con stato fa scattare un grilletto:** `income` valida a mano ciò che riceve
-   nel `load`, perché lo schema del main non può guardarci dentro. Con due copie di quelle tre
-   righe, la domanda "serve un meccanismo condiviso?" va risposta — la voce è nel
-   [registro YAGNI](../roadmap-fette.md).
-7. **`accepts` si dichiara in una costante esportata**, non in un literal dentro la chiamata: è
-   l'unico modo perché un test possa metterla davanti a un pool non accettato.
+Due cose sono decise **dentro** la delega, in autonomia, e sono **contestabili**. Costano zero
+adesso perché nessuna riga di codice le applica, e il momento per dire che non convincono è prima
+che qualcuno scriva quel codice:
+
+1. **Il bancomat non ha stato**, quindi non ha un `system.ts`. Le soglie sono fuori scopo per
+   dichiarazione della delega stessa, e le "ultime operazioni" del mockup contengono anche lo
+   stipendio: sono il flusso di `money.posted`, cioè un mirror dello store, non lo stato di un
+   dominio.
+2. **La commissione è un importo fisso** — `ATM_FEE = 2,50 €` — e non una percentuale. Non è una
+   scelta di gusto: la definizione di fatto pretende il caso "commissione superiore all'importo",
+   che una percentuale non produce mai.
+
+E una trappola nuova, trovata preparando: **`accepts` non si dichiara in un trasferimento.** Il
+Ledger controlla ogni movimento su un pool del giocatore, quindi `accepts: ['card']` su un prelievo
+farebbe rifiutare il movimento in **arrivo** sui contanti. È il contrario del caso dell'upgrade di
+D010, dove il pool del giocatore era uno solo.
 
 Poi si prosegue col grafo in [delega/README.md](README.md): D011 e D012 il runtime e la UI, D013 la
 verifica finale — che è lo **STOP 2**, dove ci si ferma di nuovo.
@@ -245,7 +243,7 @@ Riprendi il progetto Solvent in questa repo ed esegui la delega D014.
 Leggi in quest'ordine, e non altro prima di aver finito:
 
 1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, prossimo passo
-2. `docs/delega/D014-dominio-bancomat.md` — la delega
+2. `docs/delega/D014-dominio-bancomat.md` — la delega, **sezione "Cosa è cambiato" per prima**
 3. `docs/delega/D010-dominio-income.md`, sezione "Cosa deve sapere chi prende D014" — il primo
    dominio è già scritto, e la forma di un dominio è decisa lì
 4. `docs/convenzioni.md` — nomi, commit, e la lingua del codice (C08)
@@ -253,9 +251,16 @@ Leggi in quest'ordine, e non altro prima di aver finito:
 Stato: STOP 1 approvato, da D001 a D010 chiuse, kernel finito (535 righe), persistenza nel main
 finita, primo dominio (`income`) finito, `npm run verify` verde con 295 test su 38 file.
 
-Il testo di D014 non è stato riscritto dopo che fu redatto: le sette cose cambiate da allora sono
-nel passaggio di consegne, nella tabella "Cosa è già cambiato nelle deleghe ancora aperte", e vanno
-lette **prima** della delega stessa.
+La delega è stata **preparata il 2026-08-19**: contiene già le sedici cose cambiate da quando fu
+scritta, i tre codici d'errore per esteso e il budget rimisurato (~110 righe). Si esegue com'è.
+
+Due decisioni prese in autonomia ti aspettano dentro, e sono **contestabili** — stanno sotto "Le
+due decisioni prese qui":
+
+- il bancomat **non ha stato**, quindi niente `types.ts` e niente `system.ts`;
+- la commissione è un **importo fisso** (`ATM_FEE = 2,50 €`), non una percentuale.
+
+Se non ti convincono, dillo **prima** di scrivere codice: dopo costa il dominio e i suoi test.
 
 Come voglio che lavori:
 
