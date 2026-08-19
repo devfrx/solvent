@@ -38,17 +38,18 @@ alcune di quelle correzioni riguardano proprio deleghe che non sono ancora state
 
 ### Cosa è già cambiato nelle deleghe ancora aperte
 
-Sei cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve sapere
+Sette cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve sapere
 prima di iniziare. Sono qui perché una delega chiusa è un documento storico: nessuno la rilegge.
 
-| Delega           | Cosa è cambiato                                                                                                                                                                                        |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| D007             | `POOLS` è già in `contracts/pools.ts`. Il Ledger lo **usa**, non lo definisce                                                                                                                          |
-| D007, D010, D014 | La **ragione** sta sulla `Transaction`, la **categoria** sul `Posting`. Un prelievo è un evento solo con tre righe                                                                                     |
-| D009             | `SavePayload` ha tre chiavi: `ledger`, `rng`, `systems`. Le prime due sono tipizzate a fondo, lo stato dei sistemi è opaco (`Record<string, unknown>`), perché il contratto non può conoscere i domini |
-| D006, D007, D011 | **`Bus.emit` può lanciare**: `EventCycleError` sui cicli, o l'errore di un handler (`AggregateError` se sono più d'uno). Un `tick` che emette non è un'operazione che non fallisce mai                 |
-| D011             | Il loop deve decidere cosa fa quando `emit` lancia. Fermare la simulazione è la risposta giusta: entrambi gli errori dicono che un sistema è scritto male, non che il giocatore ha fatto qualcosa      |
-| tutte            | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                  |
+| Delega           | Cosa è cambiato                                                                                                                                                                                                 |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D007             | `POOLS` è già in `contracts/pools.ts`. Il Ledger lo **usa**, non lo definisce                                                                                                                                   |
+| D007, D010, D014 | La **ragione** sta sulla `Transaction`, la **categoria** sul `Posting`. Un prelievo è un evento solo con tre righe                                                                                              |
+| D009             | `SavePayload` ha tre chiavi: `ledger`, `rng`, `systems`. Le prime due sono tipizzate a fondo, lo stato dei sistemi è opaco (`Record<string, unknown>`), perché il contratto non può conoscere i domini          |
+| D006, D007, D011 | **`Bus.emit` può lanciare**: `EventCycleError` sui cicli, o l'errore di un handler (`AggregateError` se sono più d'uno). Un `tick` che emette non è un'operazione che non fallisce mai                          |
+| D011             | Il loop deve decidere cosa fa quando `emit` lancia. Fermare la simulazione è la risposta giusta: entrambi gli errori dicono che un sistema è scritto male, non che il giocatore ha fatto qualcosa               |
+| D007             | `post(posting)` come è elencato **non può esistere**: una transazione a un movimento non somma a zero, e D007 stessa dice che una transazione che non bilancia lancia. O sparisce, o è zucchero a due movimenti |
+| tutte            | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                           |
 
 ## Le sei cose da non fare
 
