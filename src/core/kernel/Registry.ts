@@ -34,7 +34,12 @@ import type { Rng } from '@core/kernel/Rng'
  * registro YAGNI di docs/roadmap-fette.md: il primo sistema che non sta in nessuna delle due.
  */
 export const ORDER = {
-  /** L'infrastruttura economica: chi sposta denaro fra i pool su richiesta. Fetta 01: `atm`. */
+  /**
+   * L'infrastruttura economica: chi sposta denaro fra i pool su richiesta. Nella fetta 01 lo slot
+   * resta **vuoto**: `atm` è un dominio di soli comandi, non ha stato e non ticchetta, quindi non
+   * è un sistema e non si registra (D014). Lo occuperà quando le soglie giornaliere gli daranno
+   * il primo stato.
+   */
   ECONOMY: 100,
   /** Chi produce denaro col passare del tempo. Fetta 01: `income`. */
   INCOME: 200

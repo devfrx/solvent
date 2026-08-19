@@ -79,8 +79,9 @@ posto solo e un bersaglio verificato. Con D009 il progetto è uscito da `core/` 
 `src/main/` valida il salvataggio con uno schema **eseguito**, lo scrive in modo atomico ed espone
 tre canali IPC, e `src/preload/` espone tre funzioni e nient'altro. Con D010 è nato il **primo
 dominio**: `income` produce reddito in contanti a ogni tick e vende un upgrade che si paga solo con
-la carta. La prossima delega è
-[D014 — Dominio: bancomat](delega/D014-dominio-bancomat.md).
+la carta. Con D014 è nato il **secondo**, e il ciclo si chiude: `atm` sposta denaro fra contanti e
+carta trattenendo una commissione, e non ha stato — è un dominio di soli comandi. La prossima
+delega è [D011 — Runtime e store](delega/D011-runtime-e-store.md).
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati

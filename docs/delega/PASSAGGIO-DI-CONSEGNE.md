@@ -23,45 +23,47 @@ leggi che tengono il gioco bilanciato stanno in [prodotto/visione.md](../prodott
 
 ## Dove siamo, esattamente
 
-|                         |                                                          |
-| ----------------------- | -------------------------------------------------------- |
-| STOP 1                  | **approvato** — nome, stile, dipendenze, architettura    |
-| D001 — tooling e gate   | **chiusa**, commit `e275f59`                             |
-| D002 — contratti        | **chiusa**, commit `288367e`                             |
-| D003 — kernel: Clock    | **chiusa**, commit `f398a47`                             |
-| D004 — kernel: Rng      | **chiusa**, commit `a87d8cf`                             |
-| D005 — kernel: Bus      | **chiusa**, commit `e9cf441`                             |
-| D006 — kernel: Registry | **chiusa**, commit `39b8520`                             |
-| D007 — kernel: Ledger   | **chiusa**, commit `f9a0c59`                             |
-| D008 — balance          | **chiusa**, commit `e01e885`                             |
-| D009 — persistenza main | **chiusa**, commit `256f622`                             |
-| D010 — dominio income   | **chiusa**, commit `b98f025`                             |
-| Kernel                  | **finito** — 535 righe, da D003 a D008                   |
-| Persistenza nel main    | **finita** — 241 righe in `src/main/` e `src/preload/`   |
-| Codice di dominio       | **`income`, 102 righe** — il primo                       |
-| `npm run verify`        | **verde** — 295 test su 38 file                          |
-| Prossimo passo          | **[D014 — Dominio: bancomat](D014-dominio-bancomat.md)** |
+|                         |                                                         |
+| ----------------------- | ------------------------------------------------------- |
+| STOP 1                  | **approvato** — nome, stile, dipendenze, architettura   |
+| D001 — tooling e gate   | **chiusa**, commit `e275f59`                            |
+| D002 — contratti        | **chiusa**, commit `288367e`                            |
+| D003 — kernel: Clock    | **chiusa**, commit `f398a47`                            |
+| D004 — kernel: Rng      | **chiusa**, commit `a87d8cf`                            |
+| D005 — kernel: Bus      | **chiusa**, commit `e9cf441`                            |
+| D006 — kernel: Registry | **chiusa**, commit `39b8520`                            |
+| D007 — kernel: Ledger   | **chiusa**, commit `f9a0c59`                            |
+| D008 — balance          | **chiusa**, commit `e01e885`                            |
+| D009 — persistenza main | **chiusa**, commit `256f622`                            |
+| D010 — dominio income   | **chiusa**, commit `b98f025`                            |
+| D014 — dominio bancomat | **chiusa**, commit `a0b3b9f`                            |
+| Kernel                  | **finito** — 535 righe, da D003 a D008                  |
+| Persistenza nel main    | **finita** — 241 righe in `src/main/` e `src/preload/`  |
+| Codice di dominio       | **`income` 102 righe, `atm` 65** — i due della fetta 01 |
+| `npm run verify`        | **verde** — 334 test su 42 file                         |
+| Prossimo passo          | **[D011 — Runtime e store](D011-runtime-e-store.md)**   |
 
 I contratti sono in `src/core/contracts/`, Clock, Rng, Bus, Registry e Ledger in
 `src/core/kernel/`, i numeri di gioco in `src/core/balance/`, lo schema del salvataggio e i tre
-canali IPC in `src/main/save/`, il primo dominio in `src/core/domains/income/`. Ogni delega chiusa ha in fondo le
+canali IPC in `src/main/save/`, i due domini in `src/core/domains/`. Ogni delega chiusa ha in fondo le
 **correzioni** rispetto a com'era scritta: [D002](D002-contratti.md) ne ha sette,
 [D003](D003-kernel-clock.md) cinque, [D004](D004-kernel-rng.md) sei,
 [D005](D005-kernel-bus.md) cinque, [D006](D006-kernel-registry.md) sei,
 [D007](D007-kernel-ledger.md) nove, [D008](D008-balance.md) otto,
-[D009](D009-persistenza-main.md) dieci, [D010](D010-dominio-income.md) dieci. Leggile prima di fidarti del
+[D009](D009-persistenza-main.md) dieci, [D010](D010-dominio-income.md) dieci,
+[D014](D014-dominio-bancomat.md) undici. Leggile prima di fidarti del
 testo di una delega ancora aperta — alcune di quelle correzioni riguardano proprio deleghe che non
 sono ancora state eseguite.
 
 ### Cosa è già cambiato nelle deleghe ancora aperte
 
-Tredici cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve
+Diciassette cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve
 sapere prima di iniziare. Sono qui perché una delega chiusa è un documento storico: nessuno la
 rilegge.
 
-**D014 non è più in questa tabella**: la sua delega è stata preparata il 2026-08-19 e le sedici
-cose che la riguardavano — le sei che stavano qui e altre dieci — vivono dentro di lei, nella
-sezione _Cosa è cambiato_. Si esegue com'è.
+**D014 è chiusa** e non è più in questa tabella. Le sue undici correzioni contano anche per chi
+prende le deleghe che restano: due hanno prodotto meccanismi nuovi, e le ultime righe della tabella
+qui sotto vengono da lì.
 
 | Delega | Cosa è cambiato                                                                                                                                                                                                                                                                                                                                                                                              |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -74,9 +76,14 @@ sezione _Cosa è cambiato_. Si esegue com'è.
 | D011   | Il loop deve decidere cosa fa quando `emit` o il Ledger lanciano. Fermare la simulazione è la risposta giusta: dicono che qualcosa è scritto male, non che il giocatore ha sbagliato. **`loadAll` ritorna `Result<LoadReport, RegistryError>`**, e quel caso va nello stato `Errore`, non ignorato                                                                                                           |
 | D011   | **Un dominio espone una factory, non un sistema già costruito**: `createIncome(ledger, modifiers)` ritorna il sistema da registrare e i comandi già legati al contesto ([ADR 0024](../adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md)). Il bootstrap costruisce le istanze condivise e le distribuisce, e ne discende una freccia `renderer/runtime → core/balance`              |
 | D011   | **`tests/rules/registry-completeness` torna secco quando nasce `createGame.ts`**: finché quel file non esiste il test dichiara l'attesa, dal giorno dopo conta le registrazioni e ne pretende una per dominio                                                                                                                                                                                                |
-| D012   | **Tre codici d'errore di dominio sono nuovi** e vogliono la loro chiave i18n, come ogni `code` (INV-07): `error.income.already_upgraded` da D010, più `error.atm.amount_not_positive` e `error.atm.fee_exceeds_amount`, dichiarati nella delega di D014                                                                                                                                                      |
+| D011   | **`atm` non si registra.** `createAtm(ledger)` ritorna due comandi — `deposit` e `withdraw`, entrambi `CommandHandler<Money, Balances, AtmError>` — e nessun sistema: il bancomat non ha stato. `registry-completeness` conta **un** dominio registrato, non due                                                                                                                                             |
+| D012   | **Tre codici d'errore di dominio sono nuovi** e vogliono la loro chiave i18n, come ogni `code` (INV-07): `error.income.already_upgraded` da D010, più `error.atm.amount_not_positive` e `error.atm.fee_exceeds_amount`, che da D014 esistono davvero. Anche `reason.atm.deposit` e `reason.atm.withdraw` sono chiavi                                                                                         |
+| D012   | **Il riquadro "cosa succede" del mockup del bancomat è una chiamata sola**: `previewOf(operation, amount)` ritorna i tre movimenti da mostrare, che sono gli **stessi** che il comando applicherà. La UI non ricalcola niente, e se l'anteprima è un errore mostra il codice invece di spegnere il pulsante                                                                                                  |
 | tutte  | **Il codice si scrive in inglese.** Identificatori — variabili, parametri, funzioni, tipi, costanti, chiavi di oggetto, nomi di file — in inglese; prosa — commenti, messaggi degli errori lanciati, descrizioni dei test — in italiano. È la regola C08 di [convenzioni.md](../convenzioni.md), imposta da `tests/rules/english-identifiers`, che è ⚠️ parziale e lo dichiara                               |
 | tutte  | **Alcuni nomi sono cambiati con quel refactor.** L'helper dei test è `tests/helpers/sources.ts` e espone `read`, `withoutComments`, `sourceFiles`, `importsOf`. Cinque test di regola sono stati rinominati (`bus-synchronous`, `main-save-only`, `registry-no-special-cases`, `doc-links`, `ledger-capacity`). L'unica API pubblica che cambia nome è `seedCasuale` → **`randomSeed`**                      |
+| tutte  | **Un importo di gioco non può nascere dentro un dominio, e adesso c'è un meccanismo.** `no-magic-numbers` guarda i **numeri**, ma `Money` si costruisce da una **stringa**: `fromString('2.50')` sotto `domains/` passava lint e test. Lo ferma `tests/rules/domains-no-money-literals` (D014, correzione 2)                                                                                                 |
+| tutte  | **INV-10 non è più un `grep`, è un test**: `tests/rules/domains-no-internal-pools` deriva da `POOLS` i conti che un dominio non può nominare — sono **quattro**, `house` compreso — e toglie i commenti prima di guardare                                                                                                                                                                                    |
+| tutte  | **`english-identifiers` ha un punto cieco che produce falsi positivi**, e ora lo dichiara: una classe di caratteri che elenca le virgolette dentro un `/regex/` manda fuori fase la sua scansione. L'aggiramento è costruire la classe come stringa e passarla a `new RegExp`                                                                                                                                |
 | tutte  | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                                                                                                                                                                                                                        |
 
 ### Quanto ci si può fidare di questi documenti
@@ -135,36 +142,22 @@ Non serve leggere tutti i 20 ADR. Servono quando stai per contraddirne uno: allo
 
 ## Il prossimo passo, in concreto
 
-**[D014 — Dominio: bancomat](D014-dominio-bancomat.md).** Il gesto centrale del gioco:
-`src/core/domains/atm/` con `rules.ts` puro e `commands.ts`, più una riga in
-`balance/constants.ts`. **~110 righe**: è la delega più piccola rimasta, ed è quella che rende la
-dualità contanti/carta una scelta invece che un'etichetta.
+**[D011 — Runtime e store](D011-runtime-e-store.md).** Collegare il kernel puro a Vue senza che il
+kernel se ne accorga: `src/renderer/runtime/createGame.ts` costruisce il contesto e registra i
+sistemi, `loop.ts` fa il passo fisso con l'accumulatore e il recupero, e `stores/game.ts` è
+l'unico store della fetta — un mirror che riceve dal Bus e **non calcola niente**. **~120 righe**.
 
-Il grafo lo mette accanto a D010, prima di D011: ha il numero più alto solo perché è nato dopo.
+È la delega che chiude le finestre lasciate aperte da tre deleghe prima di lei, e sono elencate una
+per una nella tabella _Cosa è già cambiato_ qui sopra: nove righe la riguardano. Le due più facili
+da sbagliare: `registry-completeness` diventa un confronto secco il giorno in cui `createGame.ts`
+esiste — e conta **un** dominio registrato, `income`, perché `atm` non è un sistema; e il `Ledger`
+costruito nel bootstrap deve essere lo **stesso** che va nel `SystemContext` e nelle due factory,
+perché due istanze sono due partite e nessun tipo lo impedisce.
 
-Il testo della delega è stato **preparato il 2026-08-19**: contiene già le sedici cose cambiate da
-quando fu scritta, i tre codici d'errore per esteso e il budget rimisurato. Si esegue com'è, e la
-sezione _Cosa è cambiato_ si legge per prima.
+Con D011 `npm run verify:release` torna verde: è il renderer che oggi manca alla compilazione.
 
-Due cose sono decise **dentro** la delega, in autonomia, e sono **contestabili**. Costano zero
-adesso perché nessuna riga di codice le applica, e il momento per dire che non convincono è prima
-che qualcuno scriva quel codice:
-
-1. **Il bancomat non ha stato**, quindi non ha un `system.ts`. Le soglie sono fuori scopo per
-   dichiarazione della delega stessa, e le "ultime operazioni" del mockup contengono anche lo
-   stipendio: sono il flusso di `money.posted`, cioè un mirror dello store, non lo stato di un
-   dominio.
-2. **La commissione è un importo fisso** — `ATM_FEE = 2,50 €` — e non una percentuale. Non è una
-   scelta di gusto: la definizione di fatto pretende il caso "commissione superiore all'importo",
-   che una percentuale non produce mai.
-
-E una trappola nuova, trovata preparando: **`accepts` non si dichiara in un trasferimento.** Il
-Ledger controlla ogni movimento su un pool del giocatore, quindi `accepts: ['card']` su un prelievo
-farebbe rifiutare il movimento in **arrivo** sui contanti. È il contrario del caso dell'upgrade di
-D010, dove il pool del giocatore era uno solo.
-
-Poi si prosegue col grafo in [delega/README.md](README.md): D011 e D012 il runtime e la UI, D013 la
-verifica finale — che è lo **STOP 2**, dove ci si ferma di nuovo.
+Poi si prosegue col grafo in [delega/README.md](README.md): D012 la UI e l'i18n, D013 la verifica
+finale — che è lo **STOP 2**, dove ci si ferma di nuovo.
 
 ## Come si lavora
 
@@ -204,82 +197,89 @@ Diventa verde con D011.
 
 ## Le decisioni contestabili
 
-Otto, prese in autonomia. Le prime quattro sono **in vigore** da D007: il Ledger le scrive.
-Cambiarle non costa più zero — costa il Ledger e i suoi test, che è ancora poco ma non è più
-niente. Il prossimo momento buono per contestarle è prima di D014, il primo dominio che le usa.
+Dieci, prese in autonomia. Le prime quattro sono **in vigore** da D007 e sono state usate da due
+domini: cambiarle costa il Ledger, i suoi test e i due domini. D014 era il momento buono per
+contestarle ed è passato — nessuna delle quattro si è rivelata scomoda usandole.
 
 La quinta e la sesta sono del 2026-08-19, nascono dalla revisione della visione e **non costano
 ancora niente**: nessuna riga di codice le applica.
 
-La settima è **in vigore da D009**, ed è stata sollevata prima di scrivere il main come una
-decisione contestabile: costa il main, il preload e i loro test.
+La settima è **in vigore da D009**: costa il main, il preload e i loro test.
 
-L'ottava è **in vigore da D010** ed è la più giovane: costa il primo dominio e il bootstrap che
-D011 non ha ancora scritto. È il momento più economico per contestarla, e non lo resterà a lungo —
-D014 la userà per il secondo dominio.
+L'ottava è **in vigore da D010** e ora anche da D014, che l'ha usata nella sua forma più scarna —
+`createAtm(ledger)`, una dipendenza sola. Costa i due domini e il bootstrap che D011 non ha ancora
+scritto.
 
-| Cosa                                                            | ADR                                                                                                                       | Alternativa scartata                                                                                     |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Ogni transazione somma a zero (partita doppia)                  | [0020](../adr/0020-partita-doppia.md)                                                                                     | movimenti singoli con categoria                                                                          |
-| Il Ledger espone transazioni, non movimenti                     | [0019](../adr/0019-transazioni-atomiche-nel-ledger.md)                                                                    | due `post()` con rollback nel chiamante                                                                  |
-| I pool dichiarano le proprie affordance come dati               | [0017](../adr/0017-il-denaro-e-plurale.md)                                                                                | un saldo unico con etichette nella UI                                                                    |
-| `post()` non esiste: una primitiva sola                         | [0021](../adr/0021-una-sola-primitiva-per-il-denaro.md)                                                                   | zucchero a due movimenti, che però rimette `world` e `sink` nei domini                                   |
-| Il Ledger avrà conti dinamici, non solo sei pool                | [0022](../adr/0022-il-ledger-ha-conti-non-solo-pool.md)                                                                   | il budget di un'attività tenuto come stato del dominio                                                   |
-| Il tempo di gioco è un dominio, non il kernel                   | [0023](../adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)                                                          | un `now` nel `SystemContext`, che aggiunge una chiave al salvataggio                                     |
-| I tipi d'esito del salvataggio stanno in `contracts/save.ts`    | [D009](D009-persistenza-main.md#il-contratto-cresce) — non ha un ADR: è una conseguenza di INV-03, non una decisione a sé | allargare INV-03 a tutto `contracts/`, cioè un allowlist di un file che diventa un denylist da mantenere |
-| Un sistema riceve per costruzione ciò che il contesto non porta | [0024](../adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md)                                     | un singleton in `balance/`: nessun parametro in più, e una dipendenza che sparisce dalle firme           |
+La nona e la decima sono **in vigore da D014**, e fino a ieri non costavano niente. Adesso costano
+il dominio e i suoi test — che sono poco, ma non più zero. La nona è quella che cambia una forma
+del progetto: `atm` è il primo dominio senza `system.ts`.
 
-Sono contestabili anche i **numeri** scelti da D008 — il moltiplicatore ×1,5 dell'upgrade, le otto
-ore di tetto al recupero, l'intervallo 700–740 del primo minuto — ma sono di un'altra categoria:
-cambiarli costa una riga in `balance/constants.ts` e un test che diventa rosso apposta. Reddito
+| Cosa                                                                | ADR                                                                                                                       | Alternativa scartata                                                                                                                               |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ogni transazione somma a zero (partita doppia)                      | [0020](../adr/0020-partita-doppia.md)                                                                                     | movimenti singoli con categoria                                                                                                                    |
+| Il Ledger espone transazioni, non movimenti                         | [0019](../adr/0019-transazioni-atomiche-nel-ledger.md)                                                                    | due `post()` con rollback nel chiamante                                                                                                            |
+| I pool dichiarano le proprie affordance come dati                   | [0017](../adr/0017-il-denaro-e-plurale.md)                                                                                | un saldo unico con etichette nella UI                                                                                                              |
+| `post()` non esiste: una primitiva sola                             | [0021](../adr/0021-una-sola-primitiva-per-il-denaro.md)                                                                   | zucchero a due movimenti, che però rimette `world` e `sink` nei domini                                                                             |
+| Il Ledger avrà conti dinamici, non solo sei pool                    | [0022](../adr/0022-il-ledger-ha-conti-non-solo-pool.md)                                                                   | il budget di un'attività tenuto come stato del dominio                                                                                             |
+| Il tempo di gioco è un dominio, non il kernel                       | [0023](../adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)                                                          | un `now` nel `SystemContext`, che aggiunge una chiave al salvataggio                                                                               |
+| I tipi d'esito del salvataggio stanno in `contracts/save.ts`        | [D009](D009-persistenza-main.md#il-contratto-cresce) — non ha un ADR: è una conseguenza di INV-03, non una decisione a sé | allargare INV-03 a tutto `contracts/`, cioè un allowlist di un file che diventa un denylist da mantenere                                           |
+| Un sistema riceve per costruzione ciò che il contesto non porta     | [0024](../adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md)                                     | un singleton in `balance/`: nessun parametro in più, e una dipendenza che sparisce dalle firme                                                     |
+| Un dominio senza stato non ha un `system.ts` e non si registra      | [D014](D014-dominio-bancomat.md) — decisione 1                                                                            | inventargli uno stato per riempire il file: un contatore che nessuna schermata mostra, più una migrazione il giorno in cui la forma giusta si vede |
+| La commissione del bancomat è un importo fisso, non una percentuale | [D014](D014-dominio-bancomat.md) — decisione 2                                                                            | una percentuale, che però non produce **mai** il caso "commissione superiore all'importo" — e quel caso è metà del valore della fetta              |
+
+Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
+recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE` scelti
+da D014. Sono di un'altra categoria: cambiarli costa una riga in `balance/constants.ts` e un test
+che diventa rosso apposta. Reddito
 base e costo dell'upgrade vengono invece dai [mockup](../design/mockups/), quindi erano già
 approvati.
 
 ## Prompt pronto per una sessione nuova
 
 ```markdown
-Riprendi il progetto Solvent in questa repo ed esegui la delega D014.
+Riprendi il progetto Solvent in questa repo ed esegui la delega D011.
 
 Leggi in quest'ordine, e non altro prima di aver finito:
 
 1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, prossimo passo
-2. `docs/delega/D014-dominio-bancomat.md` — la delega, **sezione "Cosa è cambiato" per prima**
-3. `docs/delega/D010-dominio-income.md`, sezione "Cosa deve sapere chi prende D014" — il primo
-   dominio è già scritto, e la forma di un dominio è decisa lì
-4. `docs/convenzioni.md` — nomi, commit, e la lingua del codice (C08)
+2. `docs/delega/D011-runtime-e-store.md` — la delega
+3. La tabella "Cosa è già cambiato nelle deleghe ancora aperte" qui sopra: **nove righe**
+   riguardano D011, e sono cose che il testo della delega non dice
+4. `docs/delega/D010-dominio-income.md` e `docs/delega/D014-dominio-bancomat.md`, sezioni "Cosa
+   deve sapere chi prende D011" — i due domini che il bootstrap deve montare
+5. `docs/design/ciclo-di-vita.md` e `docs/design/flusso-tick.md` — gli stati e il passo fisso
+6. `docs/convenzioni.md` — nomi, commit, e la lingua del codice (C08)
 
-Stato: STOP 1 approvato, da D001 a D010 chiuse, kernel finito (535 righe), persistenza nel main
-finita, primo dominio (`income`) finito, `npm run verify` verde con 295 test su 38 file.
+Stato: STOP 1 approvato, da D001 a D010 e D014 chiuse, kernel finito (535 righe), persistenza nel
+main finita, i due domini della fetta 01 finiti (`income` 102 righe, `atm` 65), `npm run verify`
+verde con 334 test su 42 file.
 
-La delega è stata **preparata il 2026-08-19**: contiene già le sedici cose cambiate da quando fu
-scritta, i tre codici d'errore per esteso e il budget rimisurato (~110 righe). Si esegue com'è.
+Le due trappole più facili da sbagliare:
 
-Due decisioni prese in autonomia ti aspettano dentro, e sono **contestabili** — stanno sotto "Le
-due decisioni prese qui":
-
-- il bancomat **non ha stato**, quindi niente `types.ts` e niente `system.ts`;
-- la commissione è un **importo fisso** (`ATM_FEE = 2,50 €`), non una percentuale.
-
-Se non ti convincono, dillo **prima** di scrivere codice: dopo costa il dominio e i suoi test.
+- `tests/rules/registry-completeness` **torna secco** il giorno in cui `createGame.ts` esiste, e
+  conta **un** dominio registrato — `income`. `atm` non è un sistema: non ha stato e non ticchetta.
+- Il `Ledger` costruito nel bootstrap deve essere lo **stesso** che finisce nel `SystemContext` e
+  quello passato a `createIncome` e `createAtm`. Due istanze sono due partite, e nessun tipo lo
+  impedisce.
 
 Come voglio che lavori:
 
-- Un ramo per la delega: `git checkout -b d014-dominio-bancomat`.
-- Esegui D014 così com'è scritta. Se qualcosa si rivela sbagliato, correggilo e **scrivilo** nella
+- Un ramo per la delega: `git checkout -b d011-runtime-e-store`.
+- Esegui D011 così com'è scritta. Se qualcosa si rivela sbagliato, correggilo e **scrivilo** nella
   sezione delle correzioni in fondo alla delega — non aggirarlo in silenzio. Ogni delega chiusa
-  finora ne ha da cinque a dieci: se la tua esce senza, o era perfetta o non l'hai letta.
+  finora ne ha da cinque a undici: se la tua esce senza, o era perfetta o non l'hai letta.
 - Fermati e presentami **2 opzioni** solo sulle decisioni strutturali. Il resto fallo.
 - Identificatori in inglese, prosa in italiano (C08).
 - Niente `TODO`, niente `any`, niente scorciatoie presentate come soluzioni.
 - Un test che non hai mai visto fallire non è una rete: rompilo di proposito una volta.
 - Nessun claim di completamento senza l'output reale di `npm run verify`.
 - La documentazione toccata dal cambiamento si aggiorna nello stesso commit.
-- Commit: Conventional Commits con lo scope uguale all'ID — `feat(D014): …`.
+- Commit: Conventional Commits con lo scope uguale all'ID — `feat(D011): …`.
 
-Aspettati che `npm run verify:release` resti rosso: `build` compila main e preload e si ferma sul
-renderer, che nasce con D011. Non è una regressione e non va sistemata.
+Con D011 `npm run verify:release` deve tornare **verde**: oggi `build` compila main e preload e si
+ferma sul renderer, che nasce qui. È l'unica delega in cui quel gate cambia colore.
 
-Quando D014 è chiusa, fermati: marcala `Chiusa` con il commit, aggiorna il passaggio di consegne
+Quando D011 è chiusa, fermati: marcala `Chiusa` con il commit, aggiorna il passaggio di consegne
 e `tracciabilita.md` se hai cambiato un meccanismo, e mostrami l'output dei gate prima di passare
 alla successiva.
 ```
