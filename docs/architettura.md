@@ -38,6 +38,7 @@ flowchart TD
   ST  --> DOM
   RT  --> DOM
   RT  --> KER
+  RT  --> BAL
   DOM --> BAL
   DOM --> KER
   BAL --> KER
@@ -128,7 +129,8 @@ solvent/
 │  │     └─ income/
 │  │        ├─ types.ts
 │  │        ├─ rules.ts           # funzioni pure, nessun effetto
-│  │        └─ system.ts          # defineSystem(...)
+│  │        ├─ commands.ts        # l'acquisto dell'upgrade, ritorna Result
+│  │        └─ system.ts          # createIncome(ledger, modifiers) - ADR 0024
 │  └─ renderer/
 │     ├─ index.html
 │     ├─ main.ts
@@ -149,7 +151,7 @@ solvent/
    ├─ helpers/         sources (lettura dei sorgenti per i test di regola)
    ├─ contracts/       result · money · pools · ledger · bounded · events · save · commands
    ├─ kernel/          clock · rng · bus · registry · ledger
-   ├─ domains/         income (seed fisso)
+   ├─ domains/         income/ rules - commands - system
    ├─ save/            schema - roundtrip - kernel-roundtrip - migrations - ipc - preload
    ├─ balance/         modifiers · targets
    ├─ i18n/            parity

@@ -1,23 +1,30 @@
 import { describe, expect, it } from 'vitest'
 
-import { BALANCE } from '@core/balance/constants'
+import { toString } from '@core/contracts/money'
+
 import { createModifiers } from '@core/balance/modifiers'
 import { TARGET_IDS, TARGETS } from '@core/balance/targets'
 import { createBus } from '@core/kernel/Bus'
-import { clock, seconds } from '@core/kernel/Clock'
-import { createLedger, income } from '@core/kernel/Ledger'
+import { clock, seconds, ticks } from '@core/kernel/Clock'
+import { createLedger } from '@core/kernel/Ledger'
+import { createRegistry, type SystemContext } from '@core/kernel/Registry'
+import { createRng } from '@core/kernel/Rng'
+
+import { incomePerSecond, upgradeModifier } from '../../src/core/domains/income/rules'
+import { createIncome } from '../../src/core/domains/income/system'
 
 /**
  * I bersagli di bilanciamento sono **dati**, e questo è il test che li rende tali: senza,
  * `targets.ts` sarebbe un file di documentazione, cioè esattamente ciò che non deve essere.
  *
- * Il primo minuto di gioco è simulato con i pezzi veri — il Clock che converte il tasso, il
- * registro dei modificatori che compone, il Ledger che applica — e non con una moltiplicazione
- * scritta qui. Il sistema `income` non esiste ancora (è D010): quando esisterà, il loop qui sotto
- * diventa una riga di `tickAll` e il bersaglio resta lo stesso.
+ * Il primo minuto è simulato con i pezzi veri e con il sistema vero: il Registry itera, `income`
+ * chiede, il Ledger applica. Fino a D010 il loop era scritto qui a mano perché il sistema non
+ * esisteva; adesso esiste, e un bersaglio verificato su una simulazione scritta a parte
+ * verificherebbe la simulazione.
  */
 
 const ONE_MINUTE = seconds(60)
+const ONE_TICK = ticks(1)
 
 describe('i bersagli di bilanciamento', () => {
   it('sono intervalli, non valori singoli', () => {
@@ -27,16 +34,17 @@ describe('i bersagli di bilanciamento', () => {
   })
 
   it('il reddito del primo minuto cade dentro income_per_minute_at_start', () => {
-    const ledger = createLedger(createBus())
+    const bus = createBus()
+    const ledger = createLedger(bus)
     const modifiers = createModifiers()
-    const perTick = clock.perSecondToPerTick(BALANCE.INCOME_BASE_PER_SECOND)
-    const tickCount = clock.secondsToTicks(ONE_MINUTE)
+    const registry = createRegistry()
+    registry.register(createIncome(ledger, modifiers).system)
+    const ctx: SystemContext = { clock, rng: createRng(1), bus, ledger }
 
-    for (let tick = 0; tick < tickCount; tick += 1) {
-      ledger.transaction(income('cash', modifiers.compose('income.all', perTick)), {
-        reason: 'reason.income.tick'
-      })
-    }
+    // Un tick alla volta, come li chiama il loop: se il tasso al tick perdesse un centesimo per
+    // arrotondamento, sessanta secondi lo renderebbero visibile e un tick solo da 600 no.
+    const tickCount = clock.secondsToTicks(ONE_MINUTE)
+    for (let elapsed = 0; elapsed < tickCount; elapsed += 1) registry.tickAll(ctx, ONE_TICK)
 
     const earned = ledger.balance('cash')
     const target = TARGETS.income_per_minute_at_start
@@ -44,18 +52,27 @@ describe('i bersagli di bilanciamento', () => {
     expect(earned.lessThanOrEqualTo(target.max)).toBe(true)
   })
 
+  it('non perde un centesimo per strada: un minuto vale sessanta volte il reddito al secondo', () => {
+    const bus = createBus()
+    const ledger = createLedger(bus)
+    const modifiers = createModifiers()
+    const registry = createRegistry()
+    registry.register(createIncome(ledger, modifiers).system)
+    const ctx: SystemContext = { clock, rng: createRng(1), bus, ledger }
+
+    const tickCount = clock.secondsToTicks(ONE_MINUTE)
+    for (let elapsed = 0; elapsed < tickCount; elapsed += 1) registry.tickAll(ctx, ONE_TICK)
+
+    expect(toString(ledger.balance('cash'))).toBe(
+      toString(incomePerSecond(modifiers).mul(ONE_MINUTE))
+    )
+  })
+
   it('con l upgrade attivo il reddito esce dall intervallo di partenza', () => {
     const modifiers = createModifiers()
-    modifiers.register({
-      id: 'income.upgrade.overtime',
-      target: 'income.all',
-      kind: 'mult',
-      value: BALANCE.UPGRADE_MULTIPLIER
-    })
-    const perTick = clock.perSecondToPerTick(BALANCE.INCOME_BASE_PER_SECOND)
-    const tickCount = clock.secondsToTicks(ONE_MINUTE)
+    modifiers.register(upgradeModifier())
 
-    const perMinute = modifiers.compose('income.all', perTick).mul(tickCount)
+    const perMinute = incomePerSecond(modifiers).mul(ONE_MINUTE)
 
     // Se ci restasse dentro, l'upgrade non sarebbe percepibile e l'intervallo sarebbe troppo largo.
     expect(perMinute.greaterThan(TARGETS.income_per_minute_at_start.max)).toBe(true)
