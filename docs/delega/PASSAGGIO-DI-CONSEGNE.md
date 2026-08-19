@@ -24,7 +24,7 @@ stesso numero.
 | D001 — tooling e gate | **chiusa**, commit `e275f59`                          |
 | D002 — contratti      | **chiusa**, commit `288367e`                          |
 | D003 — kernel: Clock  | **chiusa**, commit `f398a47`                          |
-| D004 — kernel: Rng    | **chiusa**, ramo `d004-kernel-rng`                    |
+| D004 — kernel: Rng    | **chiusa**, commit `a87d8cf`                          |
 | Codice di dominio     | **zero righe**. Ci sono i contratti, il Clock e l’Rng |
 | `npm run verify`      | **verde** — 103 test su 17 file                       |
 | Prossimo passo        | **[D005 — Bus](D005-kernel-bus.md)**                  |

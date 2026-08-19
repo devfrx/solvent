@@ -1,6 +1,6 @@
 # D004 — Kernel: Rng
 
-- **Stato:** **Chiusa** — 2026-08-19, ramo `d004-kernel-rng`
+- **Stato:** **Chiusa** — 2026-08-19, commit `a87d8cf`, ramo `d004-kernel-rng`
 - **Dipende da:** D002
 - **Sblocca:** D006
 - **ADR vincolanti:** 0005
