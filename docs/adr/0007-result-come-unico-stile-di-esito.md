@@ -1,6 +1,6 @@
 # ADR 0007 — `Result<T, E>` come unico stile di esito
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — D002: `contracts/result.ts`, `CommandHandler` e il lint su `success`
 - **Data:** 2026-08-19
 
 ## Contesto

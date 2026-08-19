@@ -57,7 +57,7 @@ condizione, non entra — nemmeno se sembra ovvia.
 | `Bus.once()`, sottoscrizioni con wildcard         | comodi                      | un caso d'uso reale, non uno immaginato                                                     |
 | Pool oltre `cash` e `card` (fiches, investimenti) | il gioco le avrà            | il dominio che le usa. La _forma_ c'è dalla fetta 01 (ADR 0017), i valori no                |
 | Proprietà dei pool: capienza, interessi, spread   | sono già nel tipo           | il dominio che le rende vere — capienza in fetta 02, interessi con i depositi               |
-| Categorie oltre `income` e `purchase`             | la telemetria le vorrà      | la prima schermata che le mostra                                                            |
+| Categorie oltre le quattro di oggi                | la telemetria le vorrà      | la prima schermata che le mostra                                                            |
 | `stats()` implementato nei sistemi                | è nel tipo                  | la prima schermata di statistiche. Il tipo lo prevede opzionale apposta                     |
 | Migrazioni del salvataggio                        | servono sempre, prima o poi | la **versione 2** della busta. La versione 1 non ha migrazioni: non ha nulla da cui migrare |
 | Priorità o cancellazione nel Bus                  | i bus "seri" ce l'hanno     | un ordine di handler che conta davvero, misurato                                            |

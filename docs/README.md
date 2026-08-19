@@ -67,10 +67,12 @@ agganciata al difetto misurato che la giustifica.
 la simulazione nel renderer. Le decisioni prese in autonomia — pool con affordance, transazioni
 atomiche, partita doppia — sono elencate nel [compendio](adr/README.md#decisioni-prese-in-autonomia-contestabili).
 
-**[D001](delega/D001-tooling-e-gate.md) è chiusa.** Le regole del progetto esistono e sono
-eseguibili: `npm run verify` incatena typecheck, lint, format e test, ed è verde con 33 test.
-Il codice di dominio non è ancora iniziato — la prossima delega è
-[D002 — Contratti](delega/D002-contratti.md).
+**[D001](delega/D001-tooling-e-gate.md) e [D002](delega/D002-contratti.md) sono chiuse.** Le
+regole del progetto sono eseguibili e i contratti esistono: `Result`, `Money`, i pool, i tipi del
+Ledger, `boundedList`, gli eventi, il salvataggio, i comandi. Il codice di dominio non è ancora
+iniziato — la prossima delega è [D003 — Kernel: Clock](delega/D003-kernel-clock.md).
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
-delega per delega, non per decreto.
+delega per delega, non per decreto. Con D002 sono passati
+[0006](adr/0006-decimal-end-to-end-per-il-denaro.md) e
+[0007](adr/0007-result-come-unico-stile-di-esito.md).

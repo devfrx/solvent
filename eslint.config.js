@@ -25,6 +25,32 @@ const R10_ESITO = {
   message: 'R10 — un solo stile di esito: Result<T, E> (ADR 0007).'
 }
 
+const R11_CONVERSIONI = {
+  group: ['@core/contracts/money', '**/contracts/money'],
+  importNames: ['fromNumber', 'toDisplayNumber'],
+  message:
+    'R11 — le conversioni da/verso number stanno al confine di presentazione, non dentro una catena economica (ADR 0006).'
+}
+
+const INV02_PATHS = [
+  { name: 'vue', message: 'INV-02 — core/ non importa Vue (ADR 0001).' },
+  { name: 'pinia', message: 'INV-02 — core/ non importa Pinia (ADR 0001).' },
+  { name: 'electron', message: 'INV-02 — core/ non importa Electron (ADR 0001).' },
+  { name: 'vue-i18n', message: 'INV-02 — core/ non importa vue-i18n (ADR 0011).' },
+  { name: 'zod', message: 'INV-02 — zod vive nel main, non in core/ (ADR 0004).' }
+]
+
+const INV02_PATTERNS = [
+  {
+    group: ['node:*', 'fs', 'path', 'os', 'child_process'],
+    message: 'INV-02 — core/ è puro: nessun I/O (ADR 0001).'
+  },
+  {
+    group: ['@renderer/**', '**/renderer/**', '**/main/**'],
+    message: 'INV-02 — core/ non conosce né il renderer né il main (ADR 0001).'
+  }
+]
+
 export default ts.config(
   {
     ignores: ['node_modules/**', 'dist/**', 'out/**', '.vite/**', 'docs/**']
@@ -156,27 +182,21 @@ export default ts.config(
   {
     files: ['src/core/**/*.ts'],
     rules: {
+      'no-restricted-imports': ['error', { paths: INV02_PATHS, patterns: INV02_PATTERNS }]
+    }
+  },
+
+  // ------------------------------------- R11 — le conversioni del denaro non entrano nei domini
+  //
+  // Il blocco ripete INV-02: in flat config `no-restricted-imports` non si somma, l'ultima
+  // configurazione che vince sostituisce le precedenti. Senza le due costanti qui dentro, questo
+  // blocco spegnerebbe INV-02 sotto `domains/` senza che nulla lo dica.
+  {
+    files: ['src/core/domains/**/*.ts'],
+    rules: {
       'no-restricted-imports': [
         'error',
-        {
-          paths: [
-            { name: 'vue', message: 'INV-02 — core/ non importa Vue (ADR 0001).' },
-            { name: 'pinia', message: 'INV-02 — core/ non importa Pinia (ADR 0001).' },
-            { name: 'electron', message: 'INV-02 — core/ non importa Electron (ADR 0001).' },
-            { name: 'vue-i18n', message: 'INV-02 — core/ non importa vue-i18n (ADR 0011).' },
-            { name: 'zod', message: 'INV-02 — zod vive nel main, non in core/ (ADR 0004).' }
-          ],
-          patterns: [
-            {
-              group: ['node:*', 'fs', 'path', 'os', 'child_process'],
-              message: 'INV-02 — core/ è puro: nessun I/O (ADR 0001).'
-            },
-            {
-              group: ['@renderer/**', '**/renderer/**', '**/main/**'],
-              message: 'INV-02 — core/ non conosce né il renderer né il main (ADR 0001).'
-            }
-          ]
-        }
+        { paths: INV02_PATHS, patterns: [...INV02_PATTERNS, R11_CONVERSIONI] }
       ]
     }
   },

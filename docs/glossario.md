@@ -30,17 +30,17 @@ Non si dice mai "frame" per intendere "tick": il frame è la UI, il tick è la s
 
 ## Denaro
 
-| Termine                     | Significato                                                                                    |
-| --------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Money**                   | `Decimal`. Mai `number`, in nessun punto di nessuna catena economica                           |
-| **Pool**                    | un contenitore di denaro con un saldo e le proprie **affordance**. Non è un'etichetta della UI |
-| **Affordance**              | cosa un pool permette e a che prezzo: tracciabilità, capienza, interessi, dove è accettato     |
-| **Saldo** _(`balance`)_     | il valore corrente di un pool. Si legge dal Ledger, non si assegna mai                         |
-| **Movimento** _(`posting`)_ | una riga: pool, importo (negativo = uscita), ragione, categoria                                |
-| **Transazione**             | un insieme di movimenti applicato **tutto o niente**, che somma a zero                         |
-| **Partita doppia**          | l'invariante: la somma di tutti i conti, giocatore e non, è sempre zero                        |
-| **Ragione** _(`reason`)_    | _perché_ è avvenuto un movimento. Chiave i18n tipizzata, non stringa libera                    |
-| **Categoria**               | il raggruppamento per la telemetria economica: `income`, `purchase`, `fee`, …                  |
+| Termine                     | Significato                                                                                                               |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Money**                   | `Decimal`. Mai `number`, in nessun punto di nessuna catena economica                                                      |
+| **Pool**                    | un contenitore di denaro con un saldo e le proprie **affordance**. Non è un'etichetta della UI                            |
+| **Affordance**              | cosa un pool permette e a che prezzo: tracciabilità, capienza, interessi, dove è accettato                                |
+| **Saldo** _(`balance`)_     | il valore corrente di un pool. Si legge dal Ledger, non si assegna mai                                                    |
+| **Movimento** _(`posting`)_ | una riga: pool, importo (negativo = uscita), categoria                                                                    |
+| **Transazione**             | un insieme di movimenti applicato **tutto o niente**, che somma a zero. Porta **una** ragione: è un evento economico solo |
+| **Partita doppia**          | l'invariante: la somma di tutti i conti, giocatore e non, è sempre zero                                                   |
+| **Ragione** _(`reason`)_    | _perché_ è avvenuta una transazione. Chiave i18n tipizzata, non stringa libera                                            |
+| **Categoria**               | il raggruppamento per la telemetria economica di **un movimento**: `income`, `purchase`, `transfer`, `fee`                |
 
 ### I pool
 
