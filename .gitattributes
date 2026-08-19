@@ -1,0 +1,11 @@
+# Il fine riga è LF ovunque, anche su Windows.
+# Senza questa riga git normalizzerebbe in CRLF nella copia di lavoro, mentre Prettier è
+# configurato con `endOfLine: "lf"`: un clone appena fatto nascerebbe con il gate `format:check`
+# rosso, e il primo gesto di chiunque sarebbe disattivarlo (ADR 0013, difetto A16).
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.icns binary
+*.woff2 binary

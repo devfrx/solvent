@@ -1,0 +1,30 @@
+# Identità del prodotto — ADR 0008. Un solo nome, nessun metadato del template.
+# Nessun blocco `publish`: si aggiunge quando esisterà un canale di distribuzione reale.
+# Nessun entitlement: il gioco non usa permessi di sistema.
+appId: com.solvent.game
+productName: Solvent
+
+directories:
+  buildResources: build
+
+files:
+  - '!docs/**'
+  - '!tests/**'
+  - '!src/**'
+  - '!**/*.tsbuildinfo'
+  - '!electron.vite.config.ts'
+  - '!vitest.config.ts'
+  - '!eslint.config.js'
+  - '!tsconfig*.json'
+  - '!.prettierrc.json'
+  - '!.prettierignore'
+  - '!.editorconfig'
+
+win:
+  target:
+    - nsis
+
+nsis:
+  artifactName: ${productName}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  createDesktopShortcut: always
