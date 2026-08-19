@@ -35,6 +35,18 @@ sette, [D003](D003-kernel-clock.md) cinque, [D004](D004-kernel-rng.md) sei. Legg
 fidarti del testo di una delega ancora aperta — alcune di quelle correzioni riguardano proprio
 deleghe che non sono ancora state eseguite.
 
+### Cosa è già cambiato nelle deleghe ancora aperte
+
+Quattro cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve sapere
+prima di iniziare. Sono qui perché una delega chiusa è un documento storico: nessuno la rilegge.
+
+| Delega           | Cosa è cambiato                                                                                                                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| D007             | `POOLS` è già in `contracts/pools.ts`. Il Ledger lo **usa**, non lo definisce                                                                                                                          |
+| D007, D010, D014 | La **ragione** sta sulla `Transaction`, la **categoria** sul `Posting`. Un prelievo è un evento solo con tre righe                                                                                     |
+| D009             | `SavePayload` ha tre chiavi: `ledger`, `rng`, `systems`. Le prime due sono tipizzate a fondo, lo stato dei sistemi è opaco (`Record<string, unknown>`), perché il contratto non può conoscere i domini |
+| tutte            | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                  |
+
 ## Le sei cose da non fare
 
 Sono le regole che, violate, riportano il progetto a com'era. Tutte hanno un meccanismo che le
@@ -98,8 +110,9 @@ verifica finale — che è lo **STOP 2**, dove ci si ferma di nuovo.
   `feat(D005): bus sincrono`. Un ramo per delega: `d005-kernel-bus`.
 - **Quando una delega è finita:** marcala `Chiusa` con il commit, aggiorna
   [tracciabilita.md](../tracciabilita.md) se hai cambiato un meccanismo, e scrivi le **correzioni
-  rispetto a com'era scritta la delega** — vedi [D001](D001-tooling-e-gate.md) come esempio: aveva
-  quattro cose sbagliate, e sono scritte lì invece che nascoste.
+  rispetto a com'era scritta la delega** — ogni delega chiusa finora ne ha da quattro a sette, e
+  sono scritte lì invece che nascoste. Se una delega esce senza correzioni, o era perfetta o non
+  è stata letta con attenzione.
 
 ## Come verificare di non aver rotto niente
 
