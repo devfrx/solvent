@@ -1,6 +1,6 @@
 # D005 — Kernel: Bus
 
-- **Stato:** **Chiusa** — 2026-08-19, ramo `d005-kernel-bus`
+- **Stato:** **Chiusa** — 2026-08-19, commit `e9cf441`, ramo `d005-kernel-bus`
 - **Dipende da:** D002
 - **Sblocca:** D006, D007
 - **ADR vincolanti:** 0016

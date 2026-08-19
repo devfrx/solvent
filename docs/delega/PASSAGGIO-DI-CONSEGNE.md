@@ -25,7 +25,7 @@ stesso numero.
 | D002 — contratti      | **chiusa**, commit `288367e`                                  |
 | D003 — kernel: Clock  | **chiusa**, commit `f398a47`                                  |
 | D004 — kernel: Rng    | **chiusa**, commit `a87d8cf`                                  |
-| D005 — kernel: Bus    | **chiusa**, commit `PENDING`                                  |
+| D005 — kernel: Bus    | **chiusa**, commit `e9cf441`                                  |
 | Codice di dominio     | **zero righe**. Ci sono i contratti, il Clock, l’Rng e il Bus |
 | `npm run verify`      | **verde** — 123 test su 19 file                               |
 | Prossimo passo        | **[D006 — Registry](D006-kernel-registry.md)**                |
