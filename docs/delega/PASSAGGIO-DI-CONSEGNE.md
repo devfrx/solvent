@@ -221,22 +221,44 @@ approvati.
 ## Prompt pronto per una sessione nuova
 
 ```markdown
-Riprendi il progetto Solvent in questa repo.
+Riprendi il progetto Solvent in questa repo ed esegui la delega D009.
 
-Leggi prima `docs/delega/PASSAGGIO-DI-CONSEGNE.md`: contiene lo stato, le regole e il prossimo
-passo. Poi `docs/README.md` per la mappa della documentazione.
+Leggi in quest'ordine, e non altro prima di aver finito:
 
-Stato: STOP 1 approvato, da D001 a D008 chiuse, kernel finito, `npm run verify` verde, zero
-codice di dominio. Il prossimo passo è **D009 — Persistenza nel main**.
+1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, prossimo passo
+2. `docs/delega/D009-persistenza-main.md` — la delega, **sezione "Cosa è cambiato" per prima**
+3. `docs/design/flusso-salvataggio.md` — il disegno vincolante a cui il codice deve corrispondere
+4. `docs/convenzioni.md` — nomi, commit, e la lingua del codice (C08)
+
+Stato: STOP 1 approvato, da D001 a D008 chiuse, kernel finito (535 righe), `npm run verify`
+verde con 213 test su 29 file, zero codice di dominio, `src/main/` e `src/preload/` non esistono.
+
+La delega è stata **preparata il 2026-08-19**: contiene già le otto cose cambiate da quando fu
+scritta, i tipi d'esito per esteso e il budget rimisurato (~280 righe). Si esegue com'è.
+
+Una decisione presa in autonomia ti aspetta all'inizio, ed è **contestabile**: i tipi d'esito del
+salvataggio — `SaveError`, `SaveResult`, `LoadedSave`, `SaveApi` — nascono in
+`core/contracts/save.ts` invece di allargare INV-03. Sta scritta nella delega, sotto "Il
+contratto cresce". Se non ti convince, dillo **prima** di scrivere codice: dopo costa il main.
 
 Come voglio che lavori:
 
-- Esegui la delega D009 così com'è scritta. Se qualcosa nella delega si rivela sbagliato,
-  correggilo e **scrivilo** nella sezione delle correzioni — non aggirarlo in silenzio.
-- Fermati e presentami 2 opzioni solo sulle decisioni strutturali. Il resto fallo.
+- Un ramo per la delega: `git checkout -b d009-persistenza-main`.
+- Esegui D009 così com'è scritta. Se qualcosa si rivela sbagliato, correggilo e **scrivilo** nella
+  sezione delle correzioni in fondo alla delega — non aggirarlo in silenzio. Ogni delega chiusa
+  finora ne ha da cinque a nove: se la tua esce senza, o era perfetta o non l'hai letta.
+- Fermati e presentami **2 opzioni** solo sulle decisioni strutturali. Il resto fallo.
+- Identificatori in inglese, prosa in italiano (C08). Vale dal primo file.
 - Niente `TODO`, niente `any`, niente scorciatoie presentate come soluzioni.
+- Un test che non hai mai visto fallire non è una rete: rompilo di proposito una volta.
 - Nessun claim di completamento senza l'output reale di `npm run verify`.
 - La documentazione toccata dal cambiamento si aggiorna nello stesso commit.
+- Commit: Conventional Commits con lo scope uguale all'ID — `feat(D009): …`.
 
-Quando D009 è chiusa, fermati e mostrami l'output dei gate prima di passare alla successiva.
+Aspettati che `npm run verify:release` resti rosso: `build` vuole anche il renderer, che nasce
+con D011. Non è una regressione e non va sistemata.
+
+Quando D009 è chiusa, fermati: marcala `Chiusa` con il commit, aggiorna il passaggio di consegne
+e `tracciabilita.md` se hai cambiato un meccanismo, e mostrami l'output dei gate prima di passare
+alla successiva.
 ```
