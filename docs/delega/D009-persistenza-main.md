@@ -45,7 +45,7 @@ dichiara autorevole.
 - Migrazioni vere: non esistono per la versione 1 ([roadmap](../roadmap-fette.md)).
 - Salvataggi multipli, slot, backup a rotazione.
 - Cifratura o firma del salvataggio: è un singleplayer offline (vedi [rischi](../rischi.md), parte 3).
-- Salvataggio automatico a intervalli: fetta 04.
+- Salvataggio automatico a intervalli: fetta 03, insieme al progresso offline.
 
 ## Definizione di fatto
 
