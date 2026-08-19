@@ -1,6 +1,6 @@
 # D010 — Dominio: income
 
-- **Stato:** **Chiusa** — 2026-08-19, commit `DA-ANNOTARE`, ramo `d010-dominio-income`
+- **Stato:** **Chiusa** — 2026-08-19, commit `b98f025`, ramo `d010-dominio-income`
 - **Dipende da:** D008
 - **Sblocca:** D011
 - **ADR vincolanti:** 0002, 0003, 0007, 0017, 0020 — più il nuovo **0024**, nato qui
