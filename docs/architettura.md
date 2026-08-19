@@ -92,7 +92,7 @@ solvent/
 │  │  ├─ kernel/
 │  │  │  ├─ Clock.ts              # TICKS_PER_SECOND vive SOLO qui
 │  │  │  ├─ Rng.ts                # unico posto dove Math.random e' consentito
-│  │  │  ├─ Bus.ts
+│  │  │  ├─ Bus.ts                # sincrono: niente code, niente storico, niente attese
 │  │  │  ├─ Registry.ts
 │  │  │  ├─ Ledger.ts
 │  │  │  └─ index.ts
@@ -138,7 +138,7 @@ solvent/
    ├─ balance/         targets
    ├─ i18n/            parity
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
-                       eslint-disable
+                       eslint-disable · bus-sincrono
                        no-logic-in-vue · no-literal-in-template · registry-completeness
 ```
 

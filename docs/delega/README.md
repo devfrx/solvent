@@ -84,7 +84,7 @@ configurato dopo che c'erano già 156 file.
 | [D002](D002-contratti.md)            | Contratti: `Result`, `Money`, `bounded`, eventi, salvataggio, comandi | 113 codice + 417 test | **Chiusa** |
 | [D003](D003-kernel-clock.md)         | Kernel: Clock                                                         | 20 codice + 116 test  | **Chiusa** |
 | [D004](D004-kernel-rng.md)           | Kernel: Rng                                                           | 55 codice + 172 test  | **Chiusa** |
-| [D005](D005-kernel-bus.md)           | Kernel: Bus                                                           | ~50                   | Aperta     |
+| [D005](D005-kernel-bus.md)           | Kernel: Bus                                                           | 71 codice + 303 test  | **Chiusa** |
 | [D006](D006-kernel-registry.md)      | Kernel: Registry                                                      | ~140                  | Aperta     |
 | [D007](D007-kernel-ledger.md)        | Kernel: Ledger — pool, transazioni atomiche, partita doppia           | ~170                  | Aperta     |
 | [D008](D008-balance.md)              | Balance: costanti, modificatori, bersagli                             | ~90                   | Aperta     |
