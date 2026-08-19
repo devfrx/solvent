@@ -5,8 +5,8 @@ Il confine più importante del progetto, e quello che nella versione precedente 
 Questo era un disegno **vincolante**, e da [D009](../delega/D009-persistenza-main.md) descrive
 codice che esiste: lo schema `zod`, la scrittura atomica, le migrazioni e i tre canali IPC stanno
 in `src/main/save/`, e `tests/save/` li attraversa. Resta vincolante per una cosa sola, ed è la
-riga del reset: il lato renderer — `resetAll(scope)` dal Registry — nasce con
-[D011](../delega/D011-runtime-e-store.md).
+riga del reset: il lato renderer — `resetAll(scope)` dal Registry — esiste da
+[D011](../delega/D011-runtime-e-store.md), dentro `createGame().reset(scope)`.
 
 Decisioni rilevanti: [ADR 0004](../adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md),
 [ADR 0006](../adr/0006-decimal-end-to-end-per-il-denaro.md),

@@ -80,6 +80,17 @@ describe('regole che devono scattare', () => {
     expect(has(f, 'R06')).toBe(true)
   })
 
+  it('R06 — anche su un saldo annidato, non solo sul nome nudo', async () => {
+    const f = await lint(
+      'src/renderer/stores/game.ts',
+      `export function f(o: { state: { balances: number } }): void {
+  o.state.balances = 1
+}
+`
+    )
+    expect(has(f, 'R06')).toBe(true)
+  })
+
   it('R10 — un literal con chiave success al posto di Result', async () => {
     const f = await lint('src/core/domains/income/rules.ts', `export const r = { success: true }\n`)
     expect(has(f, 'R10')).toBe(true)
@@ -171,6 +182,20 @@ describe('eccezioni dichiarate — devono NON scattare', () => {
     const f = await lint(
       'src/core/kernel/Ledger.ts',
       `export function f(o: { balance: number }): void {\n  o.balance = 1\n}\n`
+    )
+    expect(has(f, 'R06')).toBe(false)
+  })
+
+  it('R06 non scatta su una **lettura**: rispecchiare un saldo non è cambiarlo', async () => {
+    // Il selettore prendeva anche il lato destro dell'assegnamento, e nessuno se n'era accorto
+    // perché fino a D011 nessun codice leggeva un `.balances` per rispecchiarlo. Lo store è il
+    // primo mirror del progetto, ed è esattamente ciò che R06 deve **permettere**.
+    const f = await lint(
+      'src/renderer/stores/game.ts',
+      `export function f(o: { balances: number }, target: { value: number }): void {
+  target.value = o.balances
+}
+`
     )
     expect(has(f, 'R06')).toBe(false)
   })

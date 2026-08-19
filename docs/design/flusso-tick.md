@@ -2,9 +2,11 @@
 
 Cosa succede fra un frame del browser e un cambiamento di saldo. È il disegno **vincolante** del
 loop della fetta 01. Il Ledger esiste da [D007](../delega/D007-kernel-ledger.md) e il sistema
-`income` da [D010](../delega/D010-dominio-income.md); il **loop** che li fa girare non esiste
-ancora e arriva con [D011](../delega/D011-runtime-e-store.md). Quando arriverà dovrà corrispondere
-a questo disegno, e se il loop cambia questo file cambia nello stesso commit.
+`income` da [D010](../delega/D010-dominio-income.md); il **loop** che li fa girare esiste da
+[D011](../delega/D011-runtime-e-store.md), in `src/renderer/runtime/loop.ts`. La regola
+dell'accumulatore è una funzione pura, `stepOf`, ed è la **stessa** che decide i tick arretrati
+all'avvio: non esiste una formula offline separata. Se il loop cambia, questo file cambia nello
+stesso commit.
 
 Decisioni rilevanti: [ADR 0009](../adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md) (passo
 fisso), [ADR 0002](../adr/0002-registry-unica-lista-di-sistemi.md) (chi itera),

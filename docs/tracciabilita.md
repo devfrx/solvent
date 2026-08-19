@@ -41,20 +41,20 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 
 ## Le 12 regole, per ID
 
-| ID  | Regola                                         | Forza   | Dove è configurata                                                          |
-| --- | ---------------------------------------------- | ------- | --------------------------------------------------------------------------- |
-| R01 | Nessuno store importa un altro store           | ✅      | `eslint.config.js`                                                          |
-| R02 | Nessuna lista di sistemi scritta a mano        | ✅      | `Registry.ts` + `tests/rules/registry-completeness` e `-no-special-cases`   |
-| R03 | `Math.random` solo in `Rng.ts`                 | ✅      | `eslint.config.js` — nessuna eccezione di file                              |
-| R04 | Nessun numero magico: di tempo e di denaro     | 🔒      | `Clock.ts` + `eslint.config.js` + `tick-rate` e `domains-no-money-literals` |
-| R05 | Nessuna logica di dominio nei `.vue`           | ✅      | `eslint.config.js` + `tests/rules/no-logic-in-vue`                          |
-| R06 | Nessun denaro fuori dal Ledger                 | 🔒      | `Ledger.ts` (closure) + `eslint.config.js`                                  |
-| R07 | Se un sistema ha stato, ha save/load/reset     | 🔒      | `Registry.ts` (tipo)                                                        |
-| R08 | Il contratto di salvataggio appartiene al main | 🔒      | `contracts/save.ts` + `main/save/schema.ts`                                 |
-| R09 | Ogni lista storica ha un limite dichiarato     | 🔒      | `contracts/bounded.ts`                                                      |
-| R10 | Un solo stile di esito                         | ⚠️      | `contracts/commands.ts` + `eslint.config.js`                                |
-| R11 | Denaro `Decimal` end-to-end                    | 🔒      | `contracts/money.ts` + `eslint.config.js`                                   |
-| R12 | Nessuna stringa utente hardcoded               | ✅ / ⚠️ | `tests/i18n/parity` + `tests/rules/no-literal-in-template`                  |
+| ID  | Regola                                         | Forza   | Dove è configurata                                                                                      |
+| --- | ---------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------- |
+| R01 | Nessuno store importa un altro store           | ✅      | `eslint.config.js`                                                                                      |
+| R02 | Nessuna lista di sistemi scritta a mano        | ✅      | `Registry.ts` + `tests/rules/registry-completeness` e `-no-special-cases`                               |
+| R03 | `Math.random` solo in `Rng.ts`                 | ✅      | `eslint.config.js` — nessuna eccezione di file                                                          |
+| R04 | Nessun numero magico: di tempo e di denaro     | 🔒      | `Clock.ts` + `eslint.config.js` + `tick-rate` e `domains-no-money-literals`                             |
+| R05 | Nessuna logica di dominio nei `.vue`           | ✅      | `eslint.config.js` + `tests/rules/no-logic-in-vue`                                                      |
+| R06 | Nessun denaro fuori dal Ledger                 | 🔒      | `Ledger.ts` (closure) + `eslint.config.js` — il selettore guarda il **lato sinistro** dell'assegnamento |
+| R07 | Se un sistema ha stato, ha save/load/reset     | 🔒      | `Registry.ts` (tipo)                                                                                    |
+| R08 | Il contratto di salvataggio appartiene al main | 🔒      | `contracts/save.ts` + `main/save/schema.ts`                                                             |
+| R09 | Ogni lista storica ha un limite dichiarato     | 🔒      | `contracts/bounded.ts`                                                                                  |
+| R10 | Un solo stile di esito                         | ⚠️      | `contracts/commands.ts` + `eslint.config.js`                                                            |
+| R11 | Denaro `Decimal` end-to-end                    | 🔒      | `contracts/money.ts` + `eslint.config.js`                                                               |
+| R12 | Nessuna stringa utente hardcoded               | ✅ / ⚠️ | `tests/i18n/parity` + `tests/rules/no-literal-in-template`                                              |
 
 Regole di configurazione e di processo, con la stessa dignità:
 
@@ -114,8 +114,12 @@ che invecchia male:
    `.vue` con una regex: non vede una stringa assemblata a runtime.
 3. **C04 e C05** dipendono dalla review. Sono le due sole righe 👤 del progetto, ed è deliberato:
    meccanizzarle costerebbe più di quanto valgano. Se diventano tre, è un segnale.
-4. **R02 finché il bootstrap non esiste.** `tests/rules/registry-completeness` confronta le cartelle
-   di dominio con le registrazioni in `createGame.ts`, e quel file nasce con D011 — dopo D010 e
-   D014. Nella finestra in cui i sistemi esistono e il bootstrap no, il test dichiara l'attesa
-   invece di confrontare: dal giorno in cui il file c'è, il confronto è secco. È la stessa forma di
-   `tests/rules/gates` per `typecheck:web`, ed è un buco dichiarato, non nascosto.
+4. **`runtime/host.ts` non ha test.** È l'unico file del progetto senza, ed è una conseguenza
+   dichiarata del confine: quel file **è** il browser — `window`, `document`,
+   `requestAnimationFrame`, `performance` — e tutto ciò che sta sopra lo riceve per costruzione,
+   quindi gira in `node` senza jsdom. Che gli eventi giusti siano agganciati lo dice la lettura,
+   non un test. Il grilletto è già scritto: `vitest.config.ts` dichiara che jsdom entra con i test
+   di componente, cioè con D012.
+
+   La riga che stava qui — _R02 finché il bootstrap non esiste_ — **è chiusa**: `createGame.ts`
+   esiste da D011, e `registry-completeness` fa un confronto secco.

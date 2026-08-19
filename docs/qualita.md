@@ -41,8 +41,9 @@ crescita fra due deleghe, ed è per questo che qui c'è un intervallo e non una 
 D009 la stessa cosa, con 62 test in più: `lint` è persino sceso, il che dice quanto valga una
 misura sola.
 
-`verify:release` non è ancora verde: da D009 `build` compila `out/main/index.js` e
-`out/preload/index.cjs` senza errori e si ferma sul renderer, che manca. Diventa verde con D011.
+`verify:release` è **verde** da D011: `build` compila `out/main/index.js`, `out/preload/index.cjs`
+e `out/renderer/`. Da D009 a D010 era rosso e non era una regressione — il renderer non esisteva —
+ma da qui in avanti ogni delega deve tenerlo verde.
 `tests/rules/gates.test.ts` impedisce che un gate sparisca da una delle due catene (INV-14).
 
 ## Cosa copre ciascun livello di test

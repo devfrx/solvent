@@ -1,6 +1,6 @@
 # ADR 0001 — La simulazione gira nel renderer, `core/` è puro
 
-- **Stato:** Proposta (in attesa di approvazione — STOP 1)
+- **Stato:** **Accettata** — D011: la simulazione gira in `src/renderer/runtime/`, e i suoi test girano in `node` senza Vue
 - **Data:** 2026-08-19
 
 ## Contesto

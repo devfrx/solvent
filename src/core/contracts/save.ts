@@ -66,9 +66,17 @@ export type SaveError =
   /** Il **messaggio**, non l'`Error`: un `Error` non sopravvive alla clonazione dell'IPC. */
   | { readonly code: 'error.save.io'; readonly cause: string }
 
-/** Il file assente non è un errore: è una partita nuova (ADR 0004). */
+/**
+ * Il file assente non è un errore: è una partita nuova (ADR 0004).
+ *
+ * `savedAt` esce insieme al payload perché senza di lui il recupero all'avvio non può esistere:
+ * il renderer deve sapere **quanto tempo è passato** per chiedere al Registry i tick arretrati
+ * (docs/design/ciclo-di-vita.md, transizione `Caricamento → Recupero`). Continua a scriverlo solo
+ * il main (R08): qui il renderer lo **legge**, e non c'è una firma che gli permetta di produrlo.
+ */
 export type LoadedSave =
-  { readonly present: false } | { readonly present: true; readonly payload: SavePayload }
+  | { readonly present: false }
+  | { readonly present: true; readonly savedAt: number; readonly payload: SavePayload }
 
 export type SaveResult<T> = Result<T, SaveError>
 
