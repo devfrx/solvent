@@ -26,7 +26,8 @@ prima, altrimenti sarebbe solo una buona intenzione.
 
 Sono passate ad _Accettata_: **0006** e **0007** con [D002](../delega/D002-contratti.md),
 **0005** con [D004](../delega/D004-kernel-rng.md), **0016** con
-[D005](../delega/D005-kernel-bus.md). Il loro meccanismo è tutto dentro quella delega.
+[D005](../delega/D005-kernel-bus.md), **0002** con
+[D006](../delega/D006-kernel-registry.md). Il loro meccanismo è tutto dentro quella delega.
 
 Le altre restano _Proposta_ perché il meccanismo è a metà: **0004** e **0010** si chiudono con D009
 (lo schema del main), **0017** con D007 (il Ledger che legge `POOLS`), **0009** con D011 — i tipi
@@ -38,7 +39,7 @@ vigore.
 | #                                                                   | Titolo                                                 | Stato         | Cosa vincola                                                            | Difetto coperto |
 | ------------------------------------------------------------------- | ------------------------------------------------------ | ------------- | ----------------------------------------------------------------------- | --------------- |
 | [0001](0001-simulazione-nel-renderer-core-puro.md)                  | La simulazione gira nel renderer, `core/` è puro       | Proposta      | dove vive la logica, cosa può importare `core/`                         | A02             |
-| [0002](0002-registry-unica-lista-di-sistemi.md)                     | Il Registry è l'unica lista di sistemi                 | Proposta      | come si aggiunge un sistema, chi itera                                  | A01, A06        |
+| [0002](0002-registry-unica-lista-di-sistemi.md)                     | Il Registry è l'unica lista di sistemi                 | **Accettata** | come si aggiunge un sistema, chi itera                                  | A01, A06        |
 | [0003](0003-ledger-unica-porta-del-denaro.md)                       | Il Ledger è l'unica porta del denaro                   | Proposta      | chi può cambiare un saldo                                               | A05             |
 | [0004](0004-il-main-e-proprietario-del-contratto-di-salvataggio.md) | Il main possiede il contratto di salvataggio           | Proposta      | chi scrive la versione, dove vivono le migrazioni                       | A07, A08        |
 | [0005](0005-rng-seedato-con-stream-per-dominio.md)                  | PRNG seedato con stream per dominio                    | **Accettata** | ogni sorgente di casualità del gioco                                    | A03             |

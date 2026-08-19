@@ -19,6 +19,14 @@ export function fileSorgente(radice: string, estensioni = ['.ts', '.vue']): stri
 
 export const leggi = (percorso: string): string => readFileSync(percorso, 'utf8')
 
+/**
+ * Toglie i commenti da un sorgente. Serve ai test di regola che cercano una forma vietata: un
+ * commento che spiega **perché** quella forma è vietata la nomina senza usarla, e senza questo
+ * la regola costringerebbe a non poter spiegare se stessa.
+ */
+export const senzaCommenti = (sorgente: string): string =>
+  sorgente.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+
 /** Gli specificatori di ogni `import ... from '...'` e `export ... from '...'` in un sorgente. */
 export function importDi(sorgente: string): string[] {
   const specificatori: string[] = []

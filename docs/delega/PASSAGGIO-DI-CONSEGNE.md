@@ -18,27 +18,29 @@ stesso numero.
 
 ## Dove siamo, esattamente
 
-|                       |                                                               |
-| --------------------- | ------------------------------------------------------------- |
-| STOP 1                | **approvato** — nome, stile, dipendenze, architettura         |
-| D001 — tooling e gate | **chiusa**, commit `e275f59`                                  |
-| D002 — contratti      | **chiusa**, commit `288367e`                                  |
-| D003 — kernel: Clock  | **chiusa**, commit `f398a47`                                  |
-| D004 — kernel: Rng    | **chiusa**, commit `a87d8cf`                                  |
-| D005 — kernel: Bus    | **chiusa**, commit `e9cf441`                                  |
-| Codice di dominio     | **zero righe**. Ci sono i contratti, il Clock, l’Rng e il Bus |
-| `npm run verify`      | **verde** — 123 test su 19 file                               |
-| Prossimo passo        | **[D006 — Registry](D006-kernel-registry.md)**                |
+|                         |                                                          |
+| ----------------------- | -------------------------------------------------------- |
+| STOP 1                  | **approvato** — nome, stile, dipendenze, architettura    |
+| D001 — tooling e gate   | **chiusa**, commit `e275f59`                             |
+| D002 — contratti        | **chiusa**, commit `288367e`                             |
+| D003 — kernel: Clock    | **chiusa**, commit `f398a47`                             |
+| D004 — kernel: Rng      | **chiusa**, commit `a87d8cf`                             |
+| D005 — kernel: Bus      | **chiusa**, commit `e9cf441`                             |
+| D006 — kernel: Registry | **chiusa**, commit `39b8520`                             |
+| Codice di dominio       | **zero righe**. Del kernel mancano solo Ledger e Balance |
+| `npm run verify`        | **verde** — 150 test su 22 file                          |
+| Prossimo passo          | **[D007 — Ledger](D007-kernel-ledger.md)**               |
 
-I contratti sono in `src/core/contracts/`, il Clock, l'Rng e il Bus in `src/core/kernel/`. Ogni
+I contratti sono in `src/core/contracts/`, Clock, Rng, Bus e Registry in `src/core/kernel/`. Ogni
 delega chiusa ha in fondo le **correzioni** rispetto a com'era scritta: [D002](D002-contratti.md)
 ne ha sette, [D003](D003-kernel-clock.md) cinque, [D004](D004-kernel-rng.md) sei,
-[D005](D005-kernel-bus.md) cinque. Leggile prima di fidarti del testo di una delega ancora aperta —
-alcune di quelle correzioni riguardano proprio deleghe che non sono ancora state eseguite.
+[D005](D005-kernel-bus.md) cinque, [D006](D006-kernel-registry.md) sei. Leggile prima di fidarti
+del testo di una delega ancora aperta — alcune di quelle correzioni riguardano proprio deleghe che
+non sono ancora state eseguite.
 
 ### Cosa è già cambiato nelle deleghe ancora aperte
 
-Sette cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve sapere
+Nove cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve sapere
 prima di iniziare. Sono qui perché una delega chiusa è un documento storico: nessuno la rilegge.
 
 | Delega           | Cosa è cambiato                                                                                                                                                                                                 |
@@ -49,6 +51,8 @@ prima di iniziare. Sono qui perché una delega chiusa è un documento storico: n
 | D006, D007, D011 | **`Bus.emit` può lanciare**: `EventCycleError` sui cicli, o l'errore di un handler (`AggregateError` se sono più d'uno). Un `tick` che emette non è un'operazione che non fallisce mai                          |
 | D011             | Il loop deve decidere cosa fa quando `emit` lancia. Fermare la simulazione è la risposta giusta: entrambi gli errori dicono che un sistema è scritto male, non che il giocatore ha fatto qualcosa               |
 | D007             | `post(posting)` come è elencato **non può esistere**: una transazione a un movimento non somma a zero, e D007 stessa dice che una transazione che non bilancia lancia. O sparisce, o è zucchero a due movimenti |
+| D007             | **`SystemContext` non ha ancora il `ledger`**: ha Clock, Rng e Bus. Aggiungerlo è il primo gesto di D007 — il grafo mette il Registry prima del Ledger, non c'era altro modo                                    |
+| D011             | **`loadAll` ritorna `Result<LoadReport, RegistryError>`**, e l'errore accade davvero: un `load` che lancia su un salvataggio manomesso. Quel caso va nello stato `Errore`, non ignorato                         |
 | tutte            | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                           |
 
 ## Le sei cose da non fare
@@ -82,24 +86,24 @@ Non serve leggere tutti i 20 ADR. Servono quando stai per contraddirne uno: allo
 
 ## Il prossimo passo, in concreto
 
-**[D006 — Registry](D006-kernel-registry.md).** `src/core/kernel/Registry.ts`: `ORDER`, i tipi
-`Stateless` / `Stateful<S>`, `SystemContext`, e le cinque operazioni che iterano **la stessa**
-lista. ~140 righe: è il pezzo più grande del kernel, ed è giusto così. Clock, Rng e Bus sono tutti
-e tre pronti, quindi non manca più niente.
+**[D007 — Ledger](D007-kernel-ledger.md).** `src/core/kernel/Ledger.ts`: i saldi in una `Map`
+privata nella closure, `transaction` come primitiva atomica, i costruttori che nascondono i conti
+non-giocatore, `save`/`load`/`reset`. ~170 righe: è la delega più grande del kernel, e ha **sei**
+ADR vincolanti — più di ogni altra.
 
 Tre cose da sapere prima di iniziare:
 
-1. **È la delega del difetto A01**, quello delle cinque liste di sistemi parallele. La difesa non è
-   la disciplina: è che `tickAll`, `saveAll`, `loadAll`, `resetAll` e `statsAll` iterino lo stesso
-   array e nessuna contenga un `if` su un `id`. Il primo `if (system.id === …)` è il momento di
-   fermarsi.
-2. **`SystemContext` è la firma che tutto il dominio erediterà.** Clock, Rng, Bus e Ledger arrivano
-   per parametro, mai come singleton — è nel [glossario](../glossario.md). Il Ledger non esiste
-   ancora (D007): decidere ora come entra nel contesto è la scelta che costa di più cambiare dopo.
-3. **`emit` può lanciare** (vedi la tabella sopra). `tickAll` deve sapere cosa fa se un sistema
-   emette e l'emissione fallisce: è una decisione da prendere in D006, non da scoprire in D011.
+1. **È la delega dell'invariante più forte del progetto.** La somma di tutti i conti è zero: dopo
+   ogni transazione, dopo un caricamento, dopo un reset (INV-08). Va provata su molte transazioni
+   generate, non su tre scritte a mano — un invariante verificato su casi scelti da chi lo ha
+   scritto è un invariante che si verifica da solo.
+2. **`post(posting)` come è elencato non può esistere** (vedi la tabella sopra): va deciso se
+   sparisce o se diventa zucchero a due movimenti. È la prima cosa da sistemare, non l'ultima.
+3. **Il primo gesto è aggiungere `ledger` a `SystemContext`** in `Registry.ts`, e aggiornare il
+   [glossario](../glossario.md) nello stesso commit — la riga che dice "oggi ne ha tre" smette di
+   essere vera lì.
 
-Poi si prosegue col grafo in [delega/README.md](README.md): D006 → D008 chiudono il kernel, D009 la
+Poi si prosegue col grafo in [delega/README.md](README.md): D007 e D008 chiudono il kernel, D009 la
 persistenza, D010 e D014 i domini, D011 e D012 il runtime e la UI, D013 la verifica finale — che è
 lo **STOP 2**, dove ci si ferma di nuovo.
 
@@ -114,7 +118,7 @@ lo **STOP 2**, dove ci si ferma di nuovo.
   una volta: costa trenta secondi. È così che si è scoperto che il primo caso di prova per R04 era
   sbagliato, e che la regola sembrava funzionare senza funzionare.
 - **Commit:** Conventional Commits con lo scope uguale all'ID della delega —
-  `feat(D006): registry con ordine dichiarato`. Un ramo per delega: `d006-kernel-registry`.
+  `feat(D007): il ledger a partita doppia`. Un ramo per delega: `d007-kernel-ledger`.
 - **Quando una delega è finita:** marcala `Chiusa` con il commit, aggiorna
   [tracciabilita.md](../tracciabilita.md) se hai cambiato un meccanismo, e scrivi le **correzioni
   rispetto a com'era scritta la delega** — ogni delega chiusa finora ne ha da quattro a sette, e
@@ -149,17 +153,17 @@ Riprendi il progetto Solvent in questa repo.
 Leggi prima `docs/delega/PASSAGGIO-DI-CONSEGNE.md`: contiene lo stato, le regole e il prossimo
 passo. Poi `docs/README.md` per la mappa della documentazione.
 
-Stato: STOP 1 approvato, D001, D002, D003, D004 e D005 chiuse, `npm run verify` verde, zero codice
-di dominio. Il prossimo passo è **D006 — Kernel: Registry**.
+Stato: STOP 1 approvato, D001, D002, D003, D004, D005 e D006 chiuse, `npm run verify` verde, zero codice
+di dominio. Il prossimo passo è **D007 — Kernel: Ledger**.
 
 Come voglio che lavori:
 
-- Esegui la delega D006 così com'è scritta. Se qualcosa nella delega si rivela sbagliato,
+- Esegui la delega D007 così com'è scritta. Se qualcosa nella delega si rivela sbagliato,
   correggilo e **scrivilo** nella sezione delle correzioni — non aggirarlo in silenzio.
 - Fermati e presentami 2 opzioni solo sulle decisioni strutturali. Il resto fallo.
 - Niente `TODO`, niente `any`, niente scorciatoie presentate come soluzioni.
 - Nessun claim di completamento senza l'output reale di `npm run verify`.
 - La documentazione toccata dal cambiamento si aggiorna nello stesso commit.
 
-Quando D006 è chiusa, fermati e mostrami l'output dei gate prima di passare alla successiva.
+Quando D007 è chiusa, fermati e mostrami l'output dei gate prima di passare alla successiva.
 ```

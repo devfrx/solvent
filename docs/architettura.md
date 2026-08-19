@@ -146,7 +146,8 @@ solvent/
    ├─ i18n/            parity
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
                        eslint-disable · bus-sincrono
-                       no-logic-in-vue · no-literal-in-template · registry-completeness
+                       registry-completeness · registry-senza-casi-speciali
+                       no-logic-in-vue · no-literal-in-template
 ```
 
 ## Le 12 regole e chi le fa rispettare

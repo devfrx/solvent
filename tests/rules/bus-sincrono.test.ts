@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { leggi } from '../helpers/sorgenti'
+import { leggi, senzaCommenti } from '../helpers/sorgenti'
 
 /**
  * INV-15 · ADR 0016 — il Bus è sincrono.
@@ -12,10 +12,6 @@ import { leggi } from '../helpers/sorgenti'
 
 const ASINCRONIA =
   /\b(?:async|await|Promise|queueMicrotask|setTimeout|setInterval|setImmediate|requestAnimationFrame)\b/
-
-/** Un commento che spiega perché l'asincronia è vietata la nomina senza usarla. */
-const senzaCommenti = (sorgente: string): string =>
-  sorgente.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
 
 const primaOccorrenza = (codice: string): string | null => ASINCRONIA.exec(codice)?.[0] ?? null
 
