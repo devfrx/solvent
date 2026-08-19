@@ -46,6 +46,7 @@ flowchart TD
   DOM --> CON
   SAVE --> CON
   PRE --> CON
+  PRE -->|solo channels.ts| SAVE
 ```
 
 ### Frecce vietate — e chi le impedisce
@@ -59,6 +60,11 @@ flowchart TD
 | `main/* --> kernel/*`, `main/* --> domains/*`     | il main conosce il contratto, non il motore        | ESLint                         |
 
 Il main tocca **solo** `core/contracts/save.ts`. È un arco stretto e voluto.
+
+L'unica freccia dentro il riquadro `main + preload` è `preload --> main/save/channels.ts`, e porta
+tre stringhe: i nomi dei canali IPC. Non passa da `ipc.ts` perché quel file importa `zod`, e un
+preload in **sandbox** non carica pacchetti esterni; non è duplicata perché due costanti che devono
+coincidere, e che nessuno confronta, prima o poi non coincidono più.
 
 ## Albero delle cartelle — la forma della fetta 01
 
