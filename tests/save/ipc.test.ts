@@ -60,11 +60,11 @@ describe('i canali montati', () => {
 
     mountSaveIpc(ipc, recordingStore)
 
-    await handlers.get(SAVE_CHANNELS.save)?.({ any: 'thing' })
+    await handlers.get(SAVE_CHANNELS.save)?.({ level: 2 })
     await handlers.get(SAVE_CHANNELS.load)?.()
     await handlers.get(SAVE_CHANNELS.reset)?.()
 
-    expect(calls).toEqual(['save({"any":"thing"})', 'load()', 'reset()'])
+    expect(calls).toEqual(['save({"level":2})', 'load()', 'reset()'])
   })
 
   it('l’esito torna indietro com’è: il canale non lo reinterpreta', async () => {
