@@ -23,7 +23,7 @@ stesso numero.
 | STOP 1                | **approvato** — nome, stile, dipendenze, architettura                            |
 | D001 — tooling e gate | **chiusa**, commit `e275f59`                                                     |
 | D002 — contratti      | **chiusa**, commit `288367e`                                                     |
-| D003 — kernel: Clock  | **chiusa**, ramo `d003-kernel-clock`                                             |
+| D003 — kernel: Clock  | **chiusa**, commit `f398a47`                                                     |
 | Codice di dominio     | **zero righe**. Ci sono i contratti e il Clock                                   |
 | `npm run verify`      | **verde** — 88 test su 15 file                                                   |
 | Prossimo passo        | **[D004 — Rng](D004-kernel-rng.md)** oppure **[D005 — Bus](D005-kernel-bus.md)** |

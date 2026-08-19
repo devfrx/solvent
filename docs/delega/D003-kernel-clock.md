@@ -1,6 +1,6 @@
 # D003 — Kernel: Clock
 
-- **Stato:** **Chiusa** — 2026-08-19, ramo `d003-kernel-clock`
+- **Stato:** **Chiusa** — 2026-08-19, commit `f398a47`, ramo `d003-kernel-clock`
 - **Dipende da:** D002
 - **Sblocca:** D006
 - **ADR vincolanti:** 0009
