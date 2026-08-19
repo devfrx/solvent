@@ -71,7 +71,10 @@ export const createSaveStore = (file: SaveFile, now: () => number = Date.now): S
     const payload = parsePayload(migrated.value.payload)
     if (!payload.ok) return payload
 
-    return { ok: true, value: { present: true, payload: payload.value } }
+    return {
+      ok: true,
+      value: { present: true, savedAt: header.value.savedAt, payload: payload.value }
+    }
   },
 
   /**

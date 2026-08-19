@@ -160,6 +160,12 @@ export interface Ledger {
     meta: TransactionMeta
   ) => Result<Balances, LedgerError>
   readonly balance: (pool: Pool) => Money
+  /**
+   * Tutti i saldi insieme, nella stessa forma che `transaction` ritorna e che `money.posted`
+   * porta. Serve a chi tiene un mirror: dopo un `load` i saldi sono cambiati e **nessun evento**
+   * lo dice, perché caricare non è un movimento economico (D011).
+   */
+  readonly balances: () => Balances
   readonly save: () => LedgerSave
   readonly load: (state: LedgerSave) => void
   readonly reset: (scope: ResetScope) => void
@@ -297,6 +303,8 @@ export const createLedger = (bus: Bus): Ledger => {
     },
 
     balance: read,
+
+    balances: () => perPool(read),
 
     // INV-04 — oltre il confine di persistenza il denaro è una stringa decimale. I conti
     // non-giocatore entrano nel salvataggio: senza, la somma non farebbe zero al ricaricamento.

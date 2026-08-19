@@ -14,9 +14,12 @@ import ts from 'typescript-eslint'
  * Mappa completa in docs/tracciabilita.md.
  */
 
+// `.left` non e' un dettaglio: senza, il selettore prende anche il lato **destro**, e leggere un
+// saldo per rispecchiarlo diventa una violazione. Nessuno se n'era accorto perche' fino a D011
+// nessuno leggeva un `.balances` in un assegnamento (D011, correzione 3).
 const R06_SALDO = {
   selector:
-    'AssignmentExpression > MemberExpression[property.name=/^(balance|balances|cash|money)$/]',
+    'AssignmentExpression > MemberExpression.left[property.name=/^(balance|balances|cash|money)$/]',
   message: 'R06 — un saldo si cambia solo con Ledger.transaction (ADR 0003).'
 }
 

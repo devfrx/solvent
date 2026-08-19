@@ -32,16 +32,18 @@ Sono passate ad _Accettata_: **0006** e **0007** con [D002](../delega/D002-contr
 [D009](../delega/D009-persistenza-main.md) e il nuovo **0024** con
 [D010](../delega/D010-dominio-income.md).
 
+**0001** e **0009** con [D011](../delega/D011-runtime-e-store.md): la simulazione gira davvero nel
+renderer, e il passo fisso con accumulatore esiste.
+
 Le altre restano _Proposta_ perché il meccanismo è a metà: **0010** aspetta il primo `boundedList`
-che entra davvero nel salvataggio — nel payload della versione 1 non c'è nessun array — e **0009**
-aspetta D011, perché i tipi branded ci sono ma il passo fisso con accumulatore è nel loop. Metà
-meccanismo non è una decisione in vigore.
+che entra davvero nel salvataggio — la lista delle ultime operazioni ha il suo limite, ma è un
+mirror che riparte vuoto e non attraversa il disco. Metà meccanismo non è una decisione in vigore.
 
 ## Le decisioni
 
 | #                                                                              | Titolo                                                         | Stato         | Cosa vincola                                                            | Difetto coperto |
 | ------------------------------------------------------------------------------ | -------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------- | --------------- |
-| [0001](0001-simulazione-nel-renderer-core-puro.md)                             | La simulazione gira nel renderer, `core/` è puro               | Proposta      | dove vive la logica, cosa può importare `core/`                         | A02             |
+| [0001](0001-simulazione-nel-renderer-core-puro.md)                             | La simulazione gira nel renderer, `core/` è puro               | **Accettata** | dove vive la logica, cosa può importare `core/`                         | A02             |
 | [0002](0002-registry-unica-lista-di-sistemi.md)                                | Il Registry è l'unica lista di sistemi                         | **Accettata** | come si aggiunge un sistema, chi itera                                  | A01, A06        |
 | [0003](0003-ledger-unica-porta-del-denaro.md)                                  | Il Ledger è l'unica porta del denaro                           | **Accettata** | chi può cambiare un saldo                                               | A05             |
 | [0004](0004-il-main-e-proprietario-del-contratto-di-salvataggio.md)            | Il main possiede il contratto di salvataggio                   | **Accettata** | chi scrive la versione, dove vivono le migrazioni                       | A07, A08        |
@@ -49,7 +51,7 @@ meccanismo non è una decisione in vigore.
 | [0006](0006-decimal-end-to-end-per-il-denaro.md)                               | Il denaro è `Decimal` end-to-end                               | **Accettata** | il tipo di ogni valore monetario                                        | A11             |
 | [0007](0007-result-come-unico-stile-di-esito.md)                               | `Result<T,E>` come unico stile di esito                        | **Accettata** | la firma di ogni operazione che può fallire                             | A12             |
 | [0008](0008-nome-e-identita-del-prodotto.md)                                   | Un solo nome, deciso prima del primo file                      | Proposta      | `appId`, percorso salvataggi, chiavi di registro                        | A15             |
-| [0009](0009-passo-fisso-e-tipi-branded-per-il-tempo.md)                        | Passo fisso a 10 tick/s, tempo con tipi branded                | Proposta      | la firma di ogni `tick`, il progresso offline                           | A04             |
+| [0009](0009-passo-fisso-e-tipi-branded-per-il-tempo.md)                        | Passo fisso a 10 tick/s, tempo con tipi branded                | **Accettata** | la firma di ogni `tick`, il progresso offline                           | A04             |
 | [0010](0010-liste-storiche-limitate-alla-definizione.md)                       | Una lista storica nasce già con il suo limite                  | Proposta      | la dimensione massima del salvataggio                                   | A10             |
 | [0011](0011-i18n-obbligatoria-con-parita-verificata.md)                        | i18n dal primo giorno, parità verificata da un test            | Proposta      | ogni stringa mostrata all'utente                                        | A13             |
 | [0012](0012-controlli-sul-codice-morto-sempre-accesi.md)                       | `noUnusedLocals` / `noUnusedParameters` sempre accesi          | Proposta      | la sopravvivenza del codice morto                                       | A14             |

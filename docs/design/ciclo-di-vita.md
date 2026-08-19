@@ -4,9 +4,11 @@ Gli stati in cui l'applicazione può trovarsi, e le transizioni ammesse. Serve a
 domande che altrimenti ognuno risolve a modo suo: _il loop gira mentre carico? cosa succede se
 chiudo durante un salvataggio? il tick avanza a finestra ridotta a icona?_
 
-È un disegno **vincolante**: la macchina a stati qui sotto **non esiste ancora** come codice, e
-nasce con [D011](../delega/D011-runtime-e-store.md). Chi la scrive deve farla corrispondere a
-questo, e se cambia questo file cambia nello stesso commit.
+Era un disegno **vincolante**, e da [D011](../delega/D011-runtime-e-store.md) descrive codice che
+esiste: la macchina a stati vive in `src/renderer/stores/game.ts`, con i nomi degli stati in
+inglese come ogni identificatore (C08) — `startup`, `loading`, `recovering`, `playing`,
+`suspended`, `failed`, `closing`. La corrispondenza è uno a uno, e se il codice ne aggiunge uno
+questo diagramma cambia nello stesso commit.
 
 ```mermaid
 stateDiagram-v2

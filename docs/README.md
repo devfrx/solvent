@@ -40,9 +40,9 @@ discussione riparte dalle alternative già scartate. Poi [convenzioni.md](conven
 **Devi aggiungere un sistema** → una cartella sotto `src/core/domains/` con dentro `system.ts` che
 chiama `defineSystem`, e una riga di `register` nel bootstrap. Nient'altro, mai (ADR 0002). Il tipo
 è in `src/core/kernel/Registry.ts`; se il sistema ha `save`, il compilatore pretende anche `load` e
-`reset`. Il bootstrap nasce con [delega/D011](delega/D011-runtime-e-store.md): finché non esiste,
-il conteggio di `tests/rules/registry-completeness` è zero a zero e diventa rosso appena nasce la
-prima cartella senza la sua riga.
+`reset`. Il bootstrap è `src/renderer/runtime/createGame.ts`, e `tests/rules/registry-completeness`
+confronta i `system.ts` con le registrazioni: una in meno è rosso. Un dominio può non essere un
+sistema — `atm` non ha stato e non ticchetta, quindi non si registra.
 
 **Devi decidere se una cosa si fa adesso** → [roadmap-fette.md](roadmap-fette.md), sezione
 registro YAGNI. Se è lì, guarda il grilletto.
@@ -80,8 +80,10 @@ posto solo e un bersaglio verificato. Con D009 il progetto è uscito da `core/` 
 tre canali IPC, e `src/preload/` espone tre funzioni e nient'altro. Con D010 è nato il **primo
 dominio**: `income` produce reddito in contanti a ogni tick e vende un upgrade che si paga solo con
 la carta. Con D014 è nato il **secondo**, e il ciclo si chiude: `atm` sposta denaro fra contanti e
-carta trattenendo una commissione, e non ha stato — è un dominio di soli comandi. La prossima
-delega è [D011 — Runtime e store](delega/D011-runtime-e-store.md).
+carta trattenendo una commissione, e non ha stato — è un dominio di soli comandi. Con D011 il gioco
+**gira**: il bootstrap monta i sistemi, il loop avanza a passo fisso con l'accumulatore, lo store
+rispecchia il Bus senza calcolare, e la finestra salva prima di chiudersi. La prossima delega è
+[D012 — UI e i18n](delega/D012-ui-e-i18n.md).
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati

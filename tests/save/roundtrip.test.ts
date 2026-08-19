@@ -51,7 +51,17 @@ describe('il giro completo', () => {
     expect(saved).toEqual({ ok: true, value: SAVED_AT })
 
     const loaded = await store.load()
-    expect(loaded).toEqual({ ok: true, value: { present: true, payload: PAYLOAD } })
+    expect(loaded).toEqual({
+      ok: true,
+      value: { present: true, savedAt: SAVED_AT, payload: PAYLOAD }
+    })
+  })
+
+  it('l’istante del salvataggio torna indietro insieme al payload', () => {
+    // Senza, il renderer non può sapere quanto tempo è passato, e la transizione
+    // `Caricamento → Recupero` di docs/design/ciclo-di-vita.md non sarebbe scrivibile (D011).
+    // A scriverlo resta il main: qui esce, non entra.
+    expect(PAYLOAD).not.toHaveProperty('savedAt')
   })
 
   it('la versione e l’istante li scrive il main, e stanno solo nella busta (R08)', async () => {

@@ -4,9 +4,12 @@ import { fromString, toString } from '@core/contracts/money'
 
 import {
   clock,
+  MILLISECONDS_PER_SECOND,
+  milliseconds,
   seconds,
   ticks,
   TICKS_PER_SECOND,
+  type Milliseconds,
   type Seconds,
   type Ticks
 } from '@core/kernel/Clock'
@@ -47,11 +50,24 @@ describe('Clock', () => {
     expect(0.7 / 10).toBe(0.06999999999999999)
   })
 
-  it('non ha stato: espone quattro conversioni e nient’altro', () => {
+  it('un tick dura cento millisecondi, che è l’unità in cui il browser misura', () => {
+    expect(clock.ticksToMilliseconds(ticks(1))).toBe(100)
+    expect(clock.ticksToMilliseconds(ticks(10))).toBe(1000)
+    expect(MILLISECONDS_PER_SECOND).toBe(1000)
+  })
+
+  it('il tetto di recupero in millisecondi è un numero, non una stima', () => {
+    // Otto ore di tick (D008) sono 28.800.000 millisecondi: se questa riga cambia, è cambiato
+    // il tetto o il passo, e in entrambi i casi qualcuno deve accorgersene.
+    expect(clock.ticksToMilliseconds(ticks(288_000))).toBe(28_800_000)
+  })
+
+  it('non ha stato: espone cinque conversioni e nient’altro', () => {
     expect(Object.keys(clock).sort()).toEqual([
       'perSecondToPerTick',
       'perTickToPerSecond',
       'secondsToTicks',
+      'ticksToMilliseconds',
       'ticksToSeconds'
     ])
   })
@@ -75,6 +91,16 @@ describe('le unità del tempo', () => {
     // @ts-expect-error — R04: la conversione esiste apposta, non si salta
     const result = clock.ticksToSeconds(seconds(3))
     expect(result).toBe(0.3)
+  })
+
+  it('i millisecondi non sono né tick né secondi', () => {
+    const duration = milliseconds(100)
+    // @ts-expect-error — R04: cento millisecondi non sono cento tick, e il compilatore lo sa
+    const wrong: Ticks = duration
+    expect(wrong).toBe(100)
+
+    const marked: Milliseconds = clock.ticksToMilliseconds(ticks(1))
+    expect(marked).toBe(100)
   })
 
   it('a runtime sono numeri e basta: il marchio non esiste', () => {

@@ -1,6 +1,6 @@
 # ADR 0009 — Passo fisso a 10 tick/s, tempo con tipi branded
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — D011: `runtime/loop.ts`, l'accumulatore e i `Milliseconds` del Clock
 - **Data:** 2026-08-19
 - **Copre il difetto:** A04 (tick rate riscritto in 5 posti diversi)
 
