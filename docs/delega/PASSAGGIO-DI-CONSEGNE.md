@@ -27,7 +27,7 @@ stesso numero.
 | D004 — kernel: Rng      | **chiusa**, commit `a87d8cf`                          |
 | D005 — kernel: Bus      | **chiusa**, commit `e9cf441`                          |
 | D006 — kernel: Registry | **chiusa**, commit `39b8520`                          |
-| D007 — kernel: Ledger   | **chiusa**, commit `DA-ANNOTARE`                      |
+| D007 — kernel: Ledger   | **chiusa**, commit `f9a0c59`                          |
 | Codice di dominio       | **zero righe**. Del kernel manca solo il Balance      |
 | `npm run verify`        | **verde** — 187 test su 25 file                       |
 | Prossimo passo          | **[D008 — Balance](D008-balance.md)**                 |

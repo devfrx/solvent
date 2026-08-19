@@ -1,6 +1,6 @@
 # D007 — Kernel: Ledger
 
-- **Stato:** **Chiusa** — 2026-08-19, commit `DA-ANNOTARE`, ramo `d007-kernel-ledger`
+- **Stato:** **Chiusa** — 2026-08-19, commit `f9a0c59`, ramo `d007-kernel-ledger`
 - **Dipende da:** D002, D005
 - **Sblocca:** D008, D014
 - **ADR vincolanti:** 0003, 0006, 0007, **0017**, **0019**, **0020** — e ne nasce uno, il **0021**
