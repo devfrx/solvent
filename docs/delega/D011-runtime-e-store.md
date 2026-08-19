@@ -40,8 +40,8 @@ Collegare il kernel puro a Vue senza che il kernel se ne accorga.
 
 ## Fuori scope
 
-- Salvataggio automatico a intervalli: fetta 04.
-- Progresso offline oltre il tetto: fetta 04.
+- Salvataggio automatico a intervalli: fetta 03, insieme al progresso offline.
+- Progresso offline oltre il tetto: fetta 03, che è la fetta in cui il tetto nasce.
 - Web Worker: grilletto = un profilo che mostri il tick che blocca il frame.
 - Devtools o pannelli di debug che leggano stato privato.
 
