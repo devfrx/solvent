@@ -93,7 +93,7 @@ configurato dopo che c'erano già 156 file.
 | [D010](D010-dominio-income.md)       | Dominio: income                                                       | 102 codice + 302 test | **Chiusa** |
 | [D014](D014-dominio-bancomat.md)     | Dominio: bancomat — deposita, preleva, commissione                    | 65 codice + 548 test  | **Chiusa** |
 | [D011](D011-runtime-e-store.md)      | Runtime e store                                                       | ~120                  | Aperta     |
-| [D012](D012-ui-e-i18n.md)            | UI e i18n — home ATM, carta 3D                                        | ~230                  | Aperta     |
+| [D012](D012-ui-e-i18n.md)            | UI e i18n — home ATM, carta 3D                                        | ~1.150                | Aperta     |
 | [D013](D013-verifica-della-fetta.md) | Verifica della fetta — STOP 2                                         | ~250 di test          | Aperta     |
 
 D014 ha il numero più alto perché è nata dopo, con gli ADR 0017–0020. Nel grafo sopra si vede dove

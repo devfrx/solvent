@@ -57,7 +57,7 @@ sono ancora state eseguite.
 
 ### Cosa è già cambiato nelle deleghe ancora aperte
 
-Diciassette cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve
+Diciotto cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve
 sapere prima di iniziare. Sono qui perché una delega chiusa è un documento storico: nessuno la
 rilegge.
 
@@ -79,6 +79,7 @@ qui sotto vengono da lì.
 | D011   | **`atm` non si registra.** `createAtm(ledger)` ritorna due comandi — `deposit` e `withdraw`, entrambi `CommandHandler<Money, Balances, AtmError>` — e nessun sistema: il bancomat non ha stato. `registry-completeness` conta **un** dominio registrato, non due                                                                                                                                             |
 | D012   | **Tre codici d'errore di dominio sono nuovi** e vogliono la loro chiave i18n, come ogni `code` (INV-07): `error.income.already_upgraded` da D010, più `error.atm.amount_not_positive` e `error.atm.fee_exceeds_amount`, che da D014 esistono davvero. Anche `reason.atm.deposit` e `reason.atm.withdraw` sono chiavi                                                                                         |
 | D012   | **Il riquadro "cosa succede" del mockup del bancomat è una chiamata sola**: `previewOf(operation, amount)` ritorna i tre movimenti da mostrare, che sono gli **stessi** che il comando applicherà. La UI non ricalcola niente, e se l'anteprima è un errore mostra il codice invece di spegnere il pulsante                                                                                                  |
+| D012   | **Il budget di D012 era sbagliato in due modi diversi**: `~150` nella delega, `~230` nell'indice, entrambi dal commit di STOP 1 e mai misurati. Rimisurato sui mockup: **~1.150 righe**, di cui ~465 di CSS — che è la grandezza del difetto A14. La ripartizione sta nella delega, sotto _Il budget, rimisurato_                                                                                            |
 | tutte  | **Il codice si scrive in inglese.** Identificatori — variabili, parametri, funzioni, tipi, costanti, chiavi di oggetto, nomi di file — in inglese; prosa — commenti, messaggi degli errori lanciati, descrizioni dei test — in italiano. È la regola C08 di [convenzioni.md](../convenzioni.md), imposta da `tests/rules/english-identifiers`, che è ⚠️ parziale e lo dichiara                               |
 | tutte  | **Alcuni nomi sono cambiati con quel refactor.** L'helper dei test è `tests/helpers/sources.ts` e espone `read`, `withoutComments`, `sourceFiles`, `importsOf`. Cinque test di regola sono stati rinominati (`bus-synchronous`, `main-save-only`, `registry-no-special-cases`, `doc-links`, `ledger-capacity`). L'unica API pubblica che cambia nome è `seedCasuale` → **`randomSeed`**                      |
 | tutte  | **Un importo di gioco non può nascere dentro un dominio, e adesso c'è un meccanismo.** `no-magic-numbers` guarda i **numeri**, ma `Money` si costruisce da una **stringa**: `fromString('2.50')` sotto `domains/` passava lint e test. Lo ferma `tests/rules/domains-no-money-literals` (D014, correzione 2)                                                                                                 |

@@ -5,7 +5,7 @@
 - **Sblocca:** D013
 - **ADR vincolanti:** 0001, 0007, 0011
 - **Regole:** R05, R12
-- **Budget:** ~150 righe
+- **Budget:** **~1.150 righe** — rimisurato il 2026-08-19, vedi _Il budget, rimisurato_
 
 ## Obiettivo
 
@@ -43,6 +43,38 @@ Vedi [P5](../prodotto/preferenze.md#p5--la-carta-è-un-oggetto-3d-ruotabile).
   è un'azione utile, non un giocattolo.
 - `prefers-reduced-motion`: la rotazione resta, l'animazione di ritorno no.
 - Zero logica: nessun `Decimal` manipolato, nessun calcolo. Riceve valori già formattati.
+
+## Il budget, rimisurato
+
+Diceva **~150 righe** qui e **~230** nell'[indice](README.md): due numeri diversi per la stessa
+delega, nati **lo stesso giorno** — il commit di STOP 1 — e mai più toccati. Nessuno dei due era una
+misura: i mockup esistevano già in quel commit, e nessuno dei due li aveva guardati.
+
+Rimisurato partendo da ciò che c'è: i due [mockup](../design/mockups/home-atm.html) sono la
+specifica, e il codice che li riproduce non può essere molto più corto di loro.
+
+| Voce             | Righe | Da dove viene la cifra                                                                                                                                                                                                               |
+| ---------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CSS              | ~465  | `home-atm.html` ne ha 407 non vuote, in tre blocchi: 116 di base e impaginazione, 126 per la carta 3D, 165 per i pannelli. `fetta-01` aggiunge 14 selettori suoi, ~60 righe. **Il CSS non si comprime componentizzando: si sposta.** |
+| Markup           | ~330  | 340 righe di `<body>` nei due mockup, meno ~90 di ripetizione che diventa `v-for` (sei riquadri → uno, tre operazioni → una) e di intestazione contata due volte, più ~80 per ciò che i mockup **non** mostrano                      |
+| `<script setup>` | ~190  | otto componenti più `i18n/index.ts`. Il grosso sta in `BankCard3d` (trascinamento e `prefers-reduced-motion`) e `WithdrawDialog` (importo, anteprima, conferma)                                                                      |
+| i due dizionari  | ~165  | **16 chiavi sono già obbligatorie oggi** — 4 `Reason` e 12 codici d'errore, contati nel sorgente — più ~50 di etichette. Sessantasei chiavi per due lingue, con l'annidamento                                                        |
+
+Le ~80 righe di markup che i mockup non mostrano hanno un nome, e sono la parte che una stima a
+occhio dimentica sempre: i tre stati del guscio (caricamento, errore con due scelte, gioco),
+`StatsView.vue` che non è disegnata da nessuna parte, il **deposito** accanto al prelievo, e i
+motivi mostrati al posto dei pulsanti spenti — che è un invariante di questa delega, non un extra.
+
+**Cosa se ne fa chi la esegue.** Quattrocentosessantacinque righe di CSS sono esattamente la
+grandezza del difetto **A14** — 1.067 righe di CSS morto — e questa delega è dove quel difetto è
+nato l'altra volta. Il numero non è un permesso: è la soglia oltre la quale conviene fermarsi e
+chiedersi cosa non serve. Il _Fuori scope_ qui sopra è la prima difesa; la seconda è che il CSS
+resti attaccato al componente che lo usa, così che togliere il componente tolga anche il suo stile.
+
+Con questa cifra D012 diventa **la delega più grande del progetto**, più del kernel intero (535
+righe). Se vada spezzata in due — il guscio e l'i18n da una parte, la carta 3D e i pannelli
+dall'altra — è una domanda che si risponde quando la si prende in mano, non adesso: è una decisione
+sulla forma della roadmap, e va presa da chi la esegue insieme a chi decide.
 
 ## Invarianti
 
