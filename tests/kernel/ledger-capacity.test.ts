@@ -14,70 +14,70 @@ import { createLedger, income } from '@core/kernel/Ledger'
  * quello vero, i dati no. È l'unico file di test del progetto che sostituisce un modulo, ed è
  * per questo che sta da solo — negli altri `POOLS` deve restare quello di produzione.
  */
-vi.mock('@core/contracts/pools', async (originale) => {
-  const vero = await originale<typeof import('@core/contracts/pools')>()
-  const { fromString: denaro } = await import('@core/contracts/money')
+vi.mock('@core/contracts/pools', async (original) => {
+  const actual = await original<typeof import('@core/contracts/pools')>()
+  const { fromString: money } = await import('@core/contracts/money')
   return {
-    ...vero,
-    POOLS: { ...vero.POOLS, cash: { ...vero.POOLS.cash, capacity: denaro('1000') } }
+    ...actual,
+    POOLS: { ...actual.POOLS, cash: { ...actual.POOLS.cash, capacity: money('1000') } }
   }
 })
 
-const denaro = fromString
+const money = fromString
 
 describe('la capienza di un pool', () => {
   it('accetta ciò che ci sta esattamente', () => {
     const ledger = createLedger(createBus())
 
-    const esito = ledger.transaction(income('cash', denaro('1000')), {
+    const result = ledger.transaction(income('cash', money('1000')), {
       reason: 'reason.income.tick'
     })
 
-    expect(esito.ok).toBe(true)
+    expect(result.ok).toBe(true)
     expect(ledger.balance('cash').toString()).toBe('1000')
   })
 
   it('rifiuta ciò che la supererebbe, e dice quanto ci starebbe ancora', () => {
     const ledger = createLedger(createBus())
-    ledger.transaction(income('cash', denaro('700')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('700')), { reason: 'reason.income.tick' })
 
-    const esito = ledger.transaction(income('cash', denaro('400')), {
+    const result = ledger.transaction(income('cash', money('400')), {
       reason: 'reason.income.tick'
     })
 
-    expect(esito.ok).toBe(false)
-    if (esito.ok) return
-    expect(esito.error.code).toBe('error.ledger.capacity_exceeded')
-    if (esito.error.code !== 'error.ledger.capacity_exceeded') return
-    expect(esito.error.pool).toBe('cash')
-    expect(esito.error.capacity.toString()).toBe('1000')
-    expect(esito.error.fits.toString()).toBe('300')
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.code).toBe('error.ledger.capacity_exceeded')
+    if (result.error.code !== 'error.ledger.capacity_exceeded') return
+    expect(result.error.pool).toBe('cash')
+    expect(result.error.capacity.toString()).toBe('1000')
+    expect(result.error.fits.toString()).toBe('300')
   })
 
   it('il rifiuto non muove niente, nemmeno il conto sorgente', () => {
     const bus = createBus()
     const ledger = createLedger(bus)
-    let emessi = 0
+    let emitted = 0
     bus.on('money.posted', () => {
-      emessi += 1
+      emitted += 1
     })
-    ledger.transaction(income('cash', denaro('700')), { reason: 'reason.income.tick' })
-    emessi = 0
+    ledger.transaction(income('cash', money('700')), { reason: 'reason.income.tick' })
+    emitted = 0
 
-    ledger.transaction(income('cash', denaro('400')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('400')), { reason: 'reason.income.tick' })
 
     expect(ledger.balance('cash').toString()).toBe('700')
     expect(ledger.balance('world').toString()).toBe('-700')
-    expect(emessi).toBe(0)
+    expect(emitted).toBe(0)
   })
 
   it('un pool senza capienza non ha tetto', () => {
     const ledger = createLedger(createBus())
 
-    const esito = ledger.transaction(income('card', denaro('999999999')), {
+    const result = ledger.transaction(income('card', money('999999999')), {
       reason: 'reason.income.tick'
     })
 
-    expect(esito.ok).toBe(true)
+    expect(result.ok).toBe(true)
   })
 })

@@ -138,7 +138,7 @@ solvent/
 │        ├─ it.ts
 │        └─ en.ts
 └─ tests/
-   ├─ helpers/         sorgenti (lettura dei sorgenti per i test di regola)
+   ├─ helpers/         sources (lettura dei sorgenti per i test di regola)
    ├─ contracts/       result · money · pools · ledger · bounded · events · save · commands
    ├─ kernel/          clock · rng · bus · registry · ledger
    ├─ domains/         income (seed fisso)
@@ -146,9 +146,9 @@ solvent/
    ├─ balance/         modifiers · targets
    ├─ i18n/            parity
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
-                       eslint-disable · bus-sincrono · main-solo-save
-                       registry-completeness · registry-senza-casi-speciali
-                       link-documenti
+                       eslint-disable · bus-synchronous · main-save-only
+                       registry-completeness · registry-no-special-cases
+                       doc-links · english-identifiers
                        no-logic-in-vue · no-literal-in-template
 ```
 

@@ -61,7 +61,7 @@ Il cursore non è solo contabilità: lo stato interno di mulberry32 avanza di un
 da `(seme, cursore)` si ricava **senza rigiocare la sequenza**. Il caricamento è istantaneo anche
 dopo un milione di estrazioni.
 
-**5. `seedCasuale()` è separata da `createRng`.** Il costruttore prende un seme e basta: così
+**5. `randomSeed()` è separata da `createRng`.** Il costruttore prende un seme e basta: così
 `createRng` è completamente deterministico, test inclusi. Un seme di default nascosto nel
 costruttore sarebbe una sorgente di casualità in più — piccola, invisibile, e nel posto peggiore.
 

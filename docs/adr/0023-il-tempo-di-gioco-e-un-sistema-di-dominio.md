@@ -15,7 +15,7 @@ La [visione](../prodotto/visione.md) chiede una cosa che oggi nessuno sa fare: *
 L'affitto scade a fine mese. La rata del prestito ha una data. Il deposito vincolato matura fra
 novanta giorni. L'asta chiude alle sette. Il contratto d'affitto dura un anno e poi va rinnovato.
 
-Un sistema riceve `tick(ctx, quanti)`: quanti tick sono passati, non a che punto siamo. Per sapere
+Un sistema riceve `tick(ctx, elapsed)`: quanti tick sono passati, non a che punto siamo. Per sapere
 "che giorno è" oggi ogni dominio dovrebbe accumulare un contatore proprio, salvarlo, ricaricarlo e
 azzerarlo nel modo giusto. Otto domini, otto contatori, otto occasioni di divergere — e la prima
 volta che due sistemi non sono d'accordo su che giorno sia, il difetto non è trovabile: è

@@ -9,22 +9,22 @@ import { describe, expect, it } from 'vitest'
  * sostituiti. Se aggiungi un sesto posto in cui il nome compare, aggiornalo qui nello stesso commit.
  */
 
-const NOME = 'solvent'
-const NOME_VISIBILE = 'Solvent'
+const NAME = 'solvent'
+const DISPLAY_NAME = 'Solvent'
 const APP_ID = 'com.solvent.game'
 
 const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as Record<string, unknown>
 const builder = readFileSync('electron-builder.yml', 'utf8')
 
-const AVANZI_DEL_TEMPLATE = ['example.com', 'com.electron.app', 'electronjs.org', 'electron-app']
+const TEMPLATE_LEFTOVERS = ['example.com', 'com.electron.app', 'electronjs.org', 'electron-app']
 
 describe('identità del prodotto', () => {
   it('package.json name', () => {
-    expect(pkg['name']).toBe(NOME)
+    expect(pkg['name']).toBe(NAME)
   })
 
   it('package.json productName', () => {
-    expect(pkg['productName']).toBe(NOME_VISIBILE)
+    expect(pkg['productName']).toBe(DISPLAY_NAME)
   })
 
   it('electron-builder appId', () => {
@@ -32,17 +32,17 @@ describe('identità del prodotto', () => {
   })
 
   it('electron-builder productName', () => {
-    expect(builder).toMatch(new RegExp(`^productName:\\s*${NOME_VISIBILE}\\s*$`, 'm'))
+    expect(builder).toMatch(new RegExp(`^productName:\\s*${DISPLAY_NAME}\\s*$`, 'm'))
   })
 
   it("l'appId contiene il nome del pacchetto", () => {
-    expect(APP_ID.split('.')).toContain(NOME)
+    expect(APP_ID.split('.')).toContain(NAME)
   })
 
   it('nessun metadato del template è sopravvissuto', () => {
-    const testo = `${JSON.stringify(pkg)}\n${builder}`
-    for (const avanzo of AVANZI_DEL_TEMPLATE) {
-      expect(testo).not.toContain(avanzo)
+    const text = `${JSON.stringify(pkg)}\n${builder}`
+    for (const leftover of TEMPLATE_LEFTOVERS) {
+      expect(text).not.toContain(leftover)
     }
   })
 

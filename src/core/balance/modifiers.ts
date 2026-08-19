@@ -68,33 +68,33 @@ export interface Modifiers {
 export const createModifiers = (): Modifiers => {
   // Per `id`, non per bersaglio: l'unicità è globale, quindi il controllo sul duplicato è una
   // lettura sola e `remove` non ha bisogno di sapere su cosa agiva la sorgente.
-  const registrati = new Map<string, Modifier>()
+  const registered = new Map<string, Modifier>()
 
-  const perId = (a: Modifier, b: Modifier): number => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+  const byId = (a: Modifier, b: Modifier): number => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
 
-  const sorgentiDi = (target: ModifierTarget): Modifier[] =>
-    [...registrati.values()].filter((sorgente) => sorgente.target === target).sort(perId)
+  const sourcesOf = (target: ModifierTarget): Modifier[] =>
+    [...registered.values()].filter((source) => source.target === target).sort(byId)
 
   return {
     register: (modifier) => {
-      if (registrati.has(modifier.id)) throw new DuplicateModifierError(modifier.id)
-      registrati.set(modifier.id, modifier)
+      if (registered.has(modifier.id)) throw new DuplicateModifierError(modifier.id)
+      registered.set(modifier.id, modifier)
     },
 
     remove: (id) => {
-      registrati.delete(id)
+      registered.delete(id)
     },
 
-    sourcesFor: sorgentiDi,
+    sourcesFor: sourcesOf,
 
     compose: (target, base) => {
-      const sorgenti = sorgentiDi(target)
-      const sommato = sorgenti
-        .filter((sorgente) => sorgente.kind === 'add')
-        .reduce((totale, sorgente) => totale.plus(sorgente.value), base)
-      return sorgenti
-        .filter((sorgente) => sorgente.kind === 'mult')
-        .reduce((totale, sorgente) => totale.mul(sorgente.value), sommato)
+      const sources = sourcesOf(target)
+      const added = sources
+        .filter((source) => source.kind === 'add')
+        .reduce((total, source) => total.plus(source.value), base)
+      return sources
+        .filter((source) => source.kind === 'mult')
+        .reduce((total, source) => total.mul(source.value), added)
     }
   }
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { fileSorgente, importDi, leggi } from '../helpers/sorgenti'
+import { importsOf, read, sourceFiles } from '../helpers/sources'
 
 /**
  * INV-03 — il main e il preload importano da `core/` **solo** `contracts/save.ts` (ADR 0004).
@@ -16,31 +16,31 @@ import { fileSorgente, importDi, leggi } from '../helpers/sorgenti'
  * primo import di troppo. La regola esiste prima del codice che governa, che è la lezione di D001.
  */
 
-const DA_CORE = /(^@core\/|\/core\/)/
-const AMMESSO = /(^@core|\/core)\/contracts\/save$/
+const FROM_CORE = /(^@core\/|\/core\/)/
+const ALLOWED = /(^@core|\/core)\/contracts\/save$/
 
-const sorgenti = [...fileSorgente('src/main'), ...fileSorgente('src/preload')]
+const sources = [...sourceFiles('src/main'), ...sourceFiles('src/preload')]
 
 describe('cosa il main conosce di core/', () => {
   it('i due riconoscitori distinguono i casi che contano', () => {
-    expect(DA_CORE.test('@core/contracts/save')).toBe(true)
-    expect(DA_CORE.test('../../core/contracts/save')).toBe(true)
-    expect(DA_CORE.test('electron')).toBe(false)
-    expect(DA_CORE.test('./SaveFile')).toBe(false)
+    expect(FROM_CORE.test('@core/contracts/save')).toBe(true)
+    expect(FROM_CORE.test('../../core/contracts/save')).toBe(true)
+    expect(FROM_CORE.test('electron')).toBe(false)
+    expect(FROM_CORE.test('./SaveFile')).toBe(false)
 
-    expect(AMMESSO.test('@core/contracts/save')).toBe(true)
-    expect(AMMESSO.test('../../core/contracts/save')).toBe(true)
-    expect(AMMESSO.test('@core/contracts/money')).toBe(false)
-    expect(AMMESSO.test('@core/kernel/Ledger')).toBe(false)
+    expect(ALLOWED.test('@core/contracts/save')).toBe(true)
+    expect(ALLOWED.test('../../core/contracts/save')).toBe(true)
+    expect(ALLOWED.test('@core/contracts/money')).toBe(false)
+    expect(ALLOWED.test('@core/kernel/Ledger')).toBe(false)
   })
 
   it('è solo contracts/save.ts, in ogni file del main e del preload', () => {
-    const vietati = sorgenti.flatMap((file) =>
-      importDi(leggi(file))
-        .filter((specificatore) => DA_CORE.test(specificatore) && !AMMESSO.test(specificatore))
-        .map((specificatore) => `${file} → ${specificatore}`)
+    const forbidden = sources.flatMap((file) =>
+      importsOf(read(file))
+        .filter((specifier) => FROM_CORE.test(specifier) && !ALLOWED.test(specifier))
+        .map((specifier) => `${file} → ${specifier}`)
     )
 
-    expect(vietati).toEqual([])
+    expect(forbidden).toEqual([])
   })
 })

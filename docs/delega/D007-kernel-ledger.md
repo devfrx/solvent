@@ -198,7 +198,7 @@ Le reti sono state rotte di proposito, una alla volta, e sono diventate rosse tu
 | tolta la guardia contro l'annidamento              | la transazione dentro una transazione                        |
 | l'evento parte prima che i saldi cambino           | l'handler che legge i saldi nuovi                            |
 | tolto il controllo sui fondi                       | l'atomicità, i fondi insufficienti, il rifiuto che non muove |
-| tolto il controllo sulla capienza                  | i 2 casi in `tests/kernel/ledger-capienza`                   |
+| tolto il controllo sulla capienza                  | i 2 casi in `tests/kernel/ledger-capacity`                   |
 | tolto il controllo sui pool accettati              | il pool non accettato                                        |
 | tolto il controllo sugli importi non finiti        | l'importo non finito                                         |
 | tolta la guardia sulle grandezze dei costruttori   | l'importo negativo                                           |

@@ -21,15 +21,15 @@ describe('Result', () => {
   })
 
   it('l’unione discriminata separa i due rami', () => {
-    const esiti: Result<number, string>[] = [ok(1), err('rotto')]
-    const letti = esiti.map((e) => (e.ok ? `valore ${e.value}` : `errore ${e.error}`))
-    expect(letti).toEqual(['valore 1', 'errore rotto'])
+    const results: Result<number, string>[] = [ok(1), err('rotto')]
+    const read = results.map((e) => (e.ok ? `valore ${e.value}` : `errore ${e.error}`))
+    expect(read).toEqual(['valore 1', 'errore rotto'])
   })
 
   it('leggere il valore senza aver guardato `ok` non compila', () => {
-    const esito: Result<number, string> = ok(1)
+    const result: Result<number, string> = ok(1)
     // @ts-expect-error — `value` non esiste sul ramo di errore: va prima ristretto con `ok`
-    const valore: number = esito.value
-    expect(valore).toBe(1)
+    const value: number = result.value
+    expect(value).toBe(1)
   })
 })

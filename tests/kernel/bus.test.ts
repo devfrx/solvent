@@ -23,23 +23,23 @@ const POSTED: GameEvents['money.posted'] = {
 describe('Bus', () => {
   it('gli handler girano nell ordine di registrazione', () => {
     const bus = createBus()
-    const traccia: string[] = []
+    const trace: string[] = []
 
-    bus.on('money.posted', () => traccia.push('primo'))
-    bus.on('money.posted', () => traccia.push('secondo'))
+    bus.on('money.posted', () => trace.push('first'))
+    bus.on('money.posted', () => trace.push('second'))
     bus.emit('money.posted', POSTED)
 
-    expect(traccia).toEqual(['primo', 'secondo'])
+    expect(trace).toEqual(['first', 'second'])
   })
 
   it('ogni handler riceve il payload emesso', () => {
     const bus = createBus()
-    const ricevuti: GameEvents['money.posted'][] = []
+    const received: GameEvents['money.posted'][] = []
 
-    bus.on('money.posted', (payload) => ricevuti.push(payload))
+    bus.on('money.posted', (payload) => received.push(payload))
     bus.emit('money.posted', POSTED)
 
-    expect(ricevuti).toEqual([POSTED])
+    expect(received).toEqual([POSTED])
   })
 
   it('emettere un evento che nessuno ascolta non lancia', () => {
@@ -55,14 +55,14 @@ describe('Bus', () => {
 describe('disiscriversi', () => {
   it('toglie solo il proprio handler', () => {
     const bus = createBus()
-    const traccia: string[] = []
+    const trace: string[] = []
 
-    const stop = bus.on('money.posted', () => traccia.push('primo'))
-    bus.on('money.posted', () => traccia.push('secondo'))
+    const stop = bus.on('money.posted', () => trace.push('first'))
+    bus.on('money.posted', () => trace.push('second'))
     stop()
     bus.emit('money.posted', POSTED)
 
-    expect(traccia).toEqual(['secondo'])
+    expect(trace).toEqual(['second'])
   })
 
   /**
@@ -72,9 +72,9 @@ describe('disiscriversi', () => {
    */
   it('chiamare due volte la stessa Unsubscribe non tocca un iscritto omonimo', () => {
     const bus = createBus()
-    const traccia: string[] = []
+    const trace: string[] = []
     const handler = (): void => {
-      traccia.push('vivo')
+      trace.push('alive')
     }
 
     const stop = bus.on('money.posted', handler)
@@ -83,67 +83,67 @@ describe('disiscriversi', () => {
     stop()
     bus.emit('money.posted', POSTED)
 
-    expect(traccia).toEqual(['vivo'])
+    expect(trace).toEqual(['alive'])
   })
 
   it('dentro un handler non salta gli handler successivi', () => {
     const bus = createBus()
-    const traccia: string[] = []
+    const trace: string[] = []
 
     const stop: Unsubscribe = bus.on('money.posted', () => {
-      traccia.push('primo')
+      trace.push('first')
       stop()
     })
-    bus.on('money.posted', () => traccia.push('secondo'))
-    bus.on('money.posted', () => traccia.push('terzo'))
+    bus.on('money.posted', () => trace.push('second'))
+    bus.on('money.posted', () => trace.push('third'))
     bus.emit('money.posted', POSTED)
 
-    expect(traccia).toEqual(['primo', 'secondo', 'terzo'])
+    expect(trace).toEqual(['first', 'second', 'third'])
   })
 
   it('un handler tolto durante un emit non riceve quell emissione', () => {
     const bus = createBus()
-    const traccia: string[] = []
-    const secondo: { stop?: Unsubscribe } = {}
+    const trace: string[] = []
+    const second: { stop?: Unsubscribe } = {}
 
     bus.on('money.posted', () => {
-      traccia.push('primo')
-      secondo.stop?.()
+      trace.push('first')
+      second.stop?.()
     })
-    secondo.stop = bus.on('money.posted', () => traccia.push('secondo'))
-    bus.on('money.posted', () => traccia.push('terzo'))
+    second.stop = bus.on('money.posted', () => trace.push('second'))
+    bus.on('money.posted', () => trace.push('third'))
     bus.emit('money.posted', POSTED)
 
-    expect(traccia).toEqual(['primo', 'terzo'])
+    expect(trace).toEqual(['first', 'third'])
   })
 
   it('iscriversi dentro un handler non fa girare il nuovo handler in quell emissione', () => {
     const bus = createBus()
-    const traccia: string[] = []
+    const trace: string[] = []
 
     const stop: Unsubscribe = bus.on('money.posted', () => {
-      traccia.push('primo')
+      trace.push('first')
       stop()
-      bus.on('money.posted', () => traccia.push('tardivo'))
+      bus.on('money.posted', () => trace.push('late'))
     })
     bus.emit('money.posted', POSTED)
 
-    expect(traccia).toEqual(['primo'])
+    expect(trace).toEqual(['first'])
   })
 })
 
 describe('un handler che lancia', () => {
   it('non impedisce agli altri di girare, e l errore emerge', () => {
     const bus = createBus()
-    const traccia: string[] = []
+    const trace: string[] = []
 
     bus.on('money.posted', () => {
       throw new Error('crollo')
     })
-    bus.on('money.posted', () => traccia.push('secondo'))
+    bus.on('money.posted', () => trace.push('second'))
 
     expect(() => bus.emit('money.posted', POSTED)).toThrow('crollo')
-    expect(traccia).toEqual(['secondo'])
+    expect(trace).toEqual(['second'])
   })
 
   it('se lanciano in due, emergono tutti e due', () => {
@@ -156,16 +156,16 @@ describe('un handler che lancia', () => {
       throw new Error('secondo crollo')
     })
 
-    let catturato: unknown
+    let caught: unknown
     try {
       bus.emit('money.posted', POSTED)
-    } catch (errore) {
-      catturato = errore
+    } catch (error) {
+      caught = error
     }
 
-    expect(catturato).toBeInstanceOf(AggregateError)
-    const errori: readonly unknown[] = catturato instanceof AggregateError ? catturato.errors : []
-    expect(errori.map(String)).toEqual(['Error: primo crollo', 'Error: secondo crollo'])
+    expect(caught).toBeInstanceOf(AggregateError)
+    const errors: readonly unknown[] = caught instanceof AggregateError ? caught.errors : []
+    expect(errors.map(String)).toEqual(['Error: primo crollo', 'Error: secondo crollo'])
   })
 
   /** Senza il ripristino della profondità, un'emissione più tardi sarebbe scambiata per un ciclo. */
@@ -175,7 +175,7 @@ describe('un handler che lancia', () => {
       throw new Error('crollo')
     })
 
-    for (let giro = 0; giro < MAX_EMIT_DEPTH * 2; giro += 1) {
+    for (let round = 0; round < MAX_EMIT_DEPTH * 2; round += 1) {
       expect(() => bus.emit('money.posted', POSTED)).toThrow('crollo')
     }
   })
@@ -184,36 +184,36 @@ describe('un handler che lancia', () => {
 describe('la guardia sulle emissioni annidate', () => {
   it('annidare sotto la soglia è consentito', () => {
     const bus = createBus()
-    const traccia: string[] = []
-    let restanti = MAX_EMIT_DEPTH - 1
+    const trace: string[] = []
+    let remaining = MAX_EMIT_DEPTH - 1
 
     bus.on('money.posted', () => {
-      traccia.push('giro')
-      if (restanti > 0) {
-        restanti -= 1
+      trace.push('round')
+      if (remaining > 0) {
+        remaining -= 1
         bus.emit('money.posted', POSTED)
       }
     })
     bus.emit('money.posted', POSTED)
 
-    expect(traccia).toHaveLength(MAX_EMIT_DEPTH)
+    expect(trace).toHaveLength(MAX_EMIT_DEPTH)
   })
 
   it('un ciclo lancia, e il messaggio porta la catena che lo ha causato', () => {
     const bus = createBus()
     bus.on('money.posted', () => bus.emit('money.posted', POSTED))
 
-    let catturato: unknown
+    let caught: unknown
     try {
       bus.emit('money.posted', POSTED)
-    } catch (errore) {
-      catturato = errore
+    } catch (error) {
+      caught = error
     }
 
-    expect(catturato).toBeInstanceOf(EventCycleError)
-    const messaggio = catturato instanceof Error ? catturato.message : ''
-    expect(messaggio).toContain('money.posted → money.posted')
-    expect(messaggio.split(' → ')).toHaveLength(MAX_EMIT_DEPTH + 1)
+    expect(caught).toBeInstanceOf(EventCycleError)
+    const message = caught instanceof Error ? caught.message : ''
+    expect(message).toContain('money.posted → money.posted')
+    expect(message.split(' → ')).toHaveLength(MAX_EMIT_DEPTH + 1)
   })
 
   /**
@@ -222,50 +222,50 @@ describe('la guardia sulle emissioni annidate', () => {
    */
   it('ferma la cascata invece di lasciar girare gli altri handler', () => {
     const bus = createBus()
-    const traccia: string[] = []
+    const trace: string[] = []
 
     bus.on('money.posted', () => bus.emit('money.posted', POSTED))
-    bus.on('money.posted', () => traccia.push('dopo'))
+    bus.on('money.posted', () => trace.push('after'))
 
     expect(() => bus.emit('money.posted', POSTED)).toThrow(EventCycleError)
-    expect(traccia).toEqual([])
+    expect(trace).toEqual([])
   })
 
   it('dopo un ciclo il Bus resta usabile', () => {
     const bus = createBus()
-    const traccia: string[] = []
+    const trace: string[] = []
 
     const stop = bus.on('money.posted', () => bus.emit('money.posted', POSTED))
     expect(() => bus.emit('money.posted', POSTED)).toThrow(EventCycleError)
 
     stop()
-    bus.on('money.posted', () => traccia.push('sano'))
+    bus.on('money.posted', () => trace.push('healthy'))
     bus.emit('money.posted', POSTED)
 
-    expect(traccia).toEqual(['sano'])
+    expect(trace).toEqual(['healthy'])
   })
 })
 
 describe('il tipo del Bus', () => {
   it('un evento non dichiarato in GameEvents non compila', () => {
     const bus = createBus()
-    const traccia: string[] = []
-    bus.on('money.posted', () => traccia.push('reale'))
+    const trace: string[] = []
+    bus.on('money.posted', () => trace.push('real'))
 
     // @ts-expect-error — il calore entra con la fetta 04, insieme al sistema che lo emette
     bus.emit('heat.raised', POSTED)
 
-    expect(traccia).toEqual([])
+    expect(trace).toEqual([])
   })
 
   it('un payload della forma sbagliata non compila', () => {
     const bus = createBus()
-    const traccia: string[] = []
-    bus.on('money.posted', () => traccia.push('reale'))
+    const trace: string[] = []
+    bus.on('money.posted', () => trace.push('real'))
 
     // @ts-expect-error — money.posted porta una transazione e i saldi, non un numero
     bus.emit('money.posted', 42)
 
-    expect(traccia).toEqual(['reale'])
+    expect(trace).toEqual(['real'])
   })
 })

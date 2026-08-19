@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { fileSorgente, leggi } from '../helpers/sorgenti'
+import { read, sourceFiles } from '../helpers/sources'
 
 /**
  * C06 — un `eslint-disable` senza motivazione non esiste.
@@ -11,23 +11,25 @@ import { fileSorgente, leggi } from '../helpers/sorgenti'
  * la prima delega a usarne uno davvero — è un test.
  */
 
-const DISABILITAZIONE = /eslint-disable/
-const MOTIVAZIONE = / -- \S/
+const DISABLE = /eslint-disable/
+const REASON = / -- \S/
 
-const righeSenzaMotivo = (sorgente: string): string[] =>
-  sorgente.split('\n').filter((riga) => DISABILITAZIONE.test(riga) && !MOTIVAZIONE.test(riga))
+const linesWithoutReason = (source: string): string[] =>
+  source.split('\n').filter((line) => DISABLE.test(line) && !REASON.test(line))
 
-const sorgenti = fileSorgente('src')
+const sources = sourceFiles('src')
 
 describe('ogni eslint-disable porta la sua motivazione', () => {
   it('il rilevatore distingue la forma ammessa da quella muta', () => {
-    expect(righeSenzaMotivo('// eslint-disable-next-line no-console -- ADR 0005')).toEqual([])
-    expect(righeSenzaMotivo('// eslint-disable-next-line no-console')).toHaveLength(1)
-    expect(righeSenzaMotivo('const a = 1')).toEqual([])
+    expect(linesWithoutReason('// eslint-disable-next-line no-console -- ADR 0005')).toEqual([])
+    expect(linesWithoutReason('// eslint-disable-next-line no-console')).toHaveLength(1)
+    expect(linesWithoutReason('const a = 1')).toEqual([])
   })
 
   it('in src/ non ce n’è nemmeno uno muto', () => {
-    const mute = sorgenti.flatMap((f) => righeSenzaMotivo(leggi(f)).map((riga) => `${f}: ${riga}`))
-    expect(mute).toEqual([])
+    const silent = sources.flatMap((f) =>
+      linesWithoutReason(read(f)).map((line) => `${f}: ${line}`)
+    )
+    expect(silent).toEqual([])
   })
 })

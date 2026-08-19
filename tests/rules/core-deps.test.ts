@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { fileSorgente, importDi, leggi } from '../helpers/sorgenti'
+import { importsOf, read, sourceFiles } from '../helpers/sources'
 
 /**
  * INV-01 — `src/core/**` dipende solo da `decimal.js` (ADR 0015).
@@ -10,39 +10,39 @@ import { fileSorgente, importDi, leggi } from '../helpers/sorgenti'
  * Il denylist speculare (vue, pinia, electron, I/O) è INV-02, in eslint.config.js.
  */
 
-const AMMESSE = new Set(['decimal.js'])
+const ALLOWED = new Set(['decimal.js'])
 
-const esterna = (specificatore: string): boolean =>
-  !specificatore.startsWith('.') && !specificatore.startsWith('@core/')
+const isExternal = (specifier: string): boolean =>
+  !specifier.startsWith('.') && !specifier.startsWith('@core/')
 
 /** Da 'decimal.js' e da 'decimal.js/foo' si risale allo stesso pacchetto. */
-const pacchettoDi = (specificatore: string): string => {
-  const parti = specificatore.split('/')
-  return specificatore.startsWith('@') ? parti.slice(0, 2).join('/') : (parti[0] ?? specificatore)
+const packageOf = (specifier: string): string => {
+  const parts = specifier.split('/')
+  return specifier.startsWith('@') ? parts.slice(0, 2).join('/') : (parts[0] ?? specifier)
 }
 
-const sorgenti = fileSorgente('src/core')
+const sources = sourceFiles('src/core')
 
 describe('le dipendenze esterne di core/', () => {
   it("l'estrattore di import funziona", () => {
-    const codice = `import Decimal from 'decimal.js'\nimport { x } from './locale'\nexport { y } from '@core/contracts/result'\n`
-    expect(importDi(codice)).toEqual(['decimal.js', './locale', '@core/contracts/result'])
+    const code = `import Decimal from 'decimal.js'\nimport { x } from './locale'\nexport { y } from '@core/contracts/result'\n`
+    expect(importsOf(code)).toEqual(['decimal.js', './locale', '@core/contracts/result'])
   })
 
   it('il riconoscitore di pacchetto funziona', () => {
-    expect(pacchettoDi('decimal.js')).toBe('decimal.js')
-    expect(pacchettoDi('@vue/reactivity')).toBe('@vue/reactivity')
-    expect(pacchettoDi('node:fs')).toBe('node:fs')
+    expect(packageOf('decimal.js')).toBe('decimal.js')
+    expect(packageOf('@vue/reactivity')).toBe('@vue/reactivity')
+    expect(packageOf('node:fs')).toBe('node:fs')
   })
 
   it('sono solo quelle ammesse', () => {
-    const trovate = new Set(
-      sorgenti
-        .flatMap((f) => importDi(leggi(f)))
-        .filter(esterna)
-        .map(pacchettoDi)
+    const found = new Set(
+      sources
+        .flatMap((f) => importsOf(read(f)))
+        .filter(isExternal)
+        .map(packageOf)
     )
-    const vietate = [...trovate].filter((p) => !AMMESSE.has(p))
-    expect(vietate).toEqual([])
+    const forbidden = [...found].filter((p) => !ALLOWED.has(p))
+    expect(forbidden).toEqual([])
   })
 })

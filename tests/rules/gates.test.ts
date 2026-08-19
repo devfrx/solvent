@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
-import { fileSorgente } from '../helpers/sorgenti'
+import { sourceFiles } from '../helpers/sources'
 
 /**
  * I gate non si perdono per strada.
@@ -18,7 +18,7 @@ const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as {
   scripts: Record<string, string>
 }
 
-const script = (nome: string): string => pkg.scripts[nome] ?? ''
+const script = (name: string): string => pkg.scripts[name] ?? ''
 
 describe('la catena dei gate', () => {
   it('verify incatena i quattro gate veloci', () => {
@@ -34,26 +34,26 @@ describe('la catena dei gate', () => {
   })
 
   it('ogni gate citato esiste come script', () => {
-    const citati = [...script('verify').matchAll(/npm run ([\w:]+)/g)].map((m) => m[1] ?? '')
-    for (const nome of citati) {
-      expect(Object.keys(pkg.scripts)).toContain(nome)
+    const referenced = [...script('verify').matchAll(/npm run ([\w:]+)/g)].map((m) => m[1] ?? '')
+    for (const name of referenced) {
+      expect(Object.keys(pkg.scripts)).toContain(name)
     }
   })
 })
 
 describe('typecheck:web entra in catena quando il progetto web esiste', () => {
-  const fileWeb = [...fileSorgente('src/core'), ...fileSorgente('src/renderer')]
+  const webFiles = [...sourceFiles('src/core'), ...sourceFiles('src/renderer')]
 
   it('lo script esiste comunque', () => {
     expect(script('typecheck:web')).toContain('tsconfig.web.json')
   })
 
   it(
-    fileWeb.length === 0
+    webFiles.length === 0
       ? 'nessun file web: resta fuori dalla catena, ed è corretto'
       : 'ci sono file web: DEVE essere nella catena di typecheck',
     () => {
-      if (fileWeb.length === 0) {
+      if (webFiles.length === 0) {
         expect(script('typecheck')).not.toContain('typecheck:web')
         return
       }

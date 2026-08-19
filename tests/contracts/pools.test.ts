@@ -17,13 +17,13 @@ describe('POOLS', () => {
   })
 
   it('i pool del giocatore per la fetta 01 sono contanti e carta', () => {
-    const giocatore = POOL_IDS.filter((id) => POOLS[id].player)
-    expect(giocatore).toEqual(['cash', 'card'])
+    const playerPools = POOL_IDS.filter((id) => POOLS[id].player)
+    expect(playerPools).toEqual(['cash', 'card'])
   })
 
   it('i conti non-giocatore sono i quattro dell’ADR 0020', () => {
-    const contabili = POOL_IDS.filter((id) => !POOLS[id].player)
-    expect(contabili).toEqual(['world', 'sink', 'fees', 'house'])
+    const internalPools = POOL_IDS.filter((id) => !POOLS[id].player)
+    expect(internalPools).toEqual(['world', 'sink', 'fees', 'house'])
   })
 
   it('nella fetta 01 la forma c’è e i valori no: nessuna capienza, nessun interesse', () => {
@@ -35,7 +35,7 @@ describe('POOLS', () => {
 
   it('un pool inventato non è un Pool', () => {
     // @ts-expect-error — ADR 0017: i pool non sono stringhe libere, altrimenti nulla è verificabile
-    const inventato: Pool = 'crypto'
-    expect(inventato).toBe('crypto')
+    const invented: Pool = 'crypto'
+    expect(invented).toBe('crypto')
   })
 })

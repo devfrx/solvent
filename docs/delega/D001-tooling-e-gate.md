@@ -31,7 +31,7 @@ Rendere le regole del progetto **eseguibili** prima che esista una riga di codic
 | `vitest.config.ts`        | ambiente `node` per tutto; jsdom entrerà solo con i test di componente  |
 
 Test prodotti: `tests/rules/lint-rules.test.ts`, `product-identity.test.ts`, `no-todo.test.ts`,
-`core-deps.test.ts`, `gates.test.ts`, più `tests/helpers/sorgenti.ts`.
+`core-deps.test.ts`, `gates.test.ts`, più `tests/helpers/sources.ts`.
 
 ## Le regole imposte, e da cosa
 

@@ -21,7 +21,7 @@ export function boundedList<T>(max: number): BoundedList<T> {
   return { max, items: [] }
 }
 
-/** Aggiunge in coda e scarta i più vecchi. Ritorna una lista nuova: `lista` non viene toccata. */
-export function pushBounded<T>(lista: BoundedList<T>, elemento: T): BoundedList<T> {
-  return { max: lista.max, items: [...lista.items, elemento].slice(-lista.max) }
+/** Aggiunge in coda e scarta i più vecchi. Ritorna una lista nuova: `list` non viene toccata. */
+export function pushBounded<T>(list: BoundedList<T>, item: T): BoundedList<T> {
+  return { max: list.max, items: [...list.items, item].slice(-list.max) }
 }

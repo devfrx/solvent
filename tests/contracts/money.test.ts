@@ -21,8 +21,8 @@ describe('Money', () => {
   })
 
   it('andata e ritorno con la stringa non perde nulla', () => {
-    const grande = '123456789012345678.90123456789'
-    expect(toString(fromString(grande))).toBe(grande)
+    const big = '123456789012345678.90123456789'
+    expect(toString(fromString(big))).toBe(big)
   })
 
   it('0,1 più 0,2 fa esattamente 0,3', () => {
@@ -33,19 +33,19 @@ describe('Money', () => {
 
   it('un number non è assegnabile a Money', () => {
     // @ts-expect-error — R11: Money è Decimal, e una classe non accetta un number (ADR 0006)
-    const denaro: Money = 5
-    expect(denaro).toBe(5)
+    const money: Money = 5
+    expect(money).toBe(5)
   })
 
   it('due Money non si sommano con `+`: la regola è gratis', () => {
     const a = fromString('1')
     const b = fromString('2')
     // @ts-expect-error — R11: `+` non è definito su Decimal, si scrive a.plus(b) (ADR 0006)
-    const sbagliata: unknown = a + b
+    const wrong: unknown = a + b
 
     expect(toString(a.plus(b))).toBe('3')
     // Senza il rifiuto del compilatore, questo sarebbe finito in un saldo.
-    expect(sbagliata).toBe('12')
+    expect(wrong).toBe('12')
   })
 
   it('le conversioni di confine esistono, e sono queste due', () => {

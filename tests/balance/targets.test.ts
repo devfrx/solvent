@@ -17,7 +17,7 @@ import { createLedger, income } from '@core/kernel/Ledger'
  * diventa una riga di `tickAll` e il bersaglio resta lo stesso.
  */
 
-const UN_MINUTO = seconds(60)
+const ONE_MINUTE = seconds(60)
 
 describe('i bersagli di bilanciamento', () => {
   it('sono intervalli, non valori singoli', () => {
@@ -30,18 +30,18 @@ describe('i bersagli di bilanciamento', () => {
     const ledger = createLedger(createBus())
     const modifiers = createModifiers()
     const perTick = clock.perSecondToPerTick(BALANCE.INCOME_BASE_PER_SECOND)
-    const quanti = clock.secondsToTicks(UN_MINUTO)
+    const tickCount = clock.secondsToTicks(ONE_MINUTE)
 
-    for (let tick = 0; tick < quanti; tick += 1) {
+    for (let tick = 0; tick < tickCount; tick += 1) {
       ledger.transaction(income('cash', modifiers.compose('income.all', perTick)), {
         reason: 'reason.income.tick'
       })
     }
 
-    const guadagnato = ledger.balance('cash')
-    const bersaglio = TARGETS.income_per_minute_at_start
-    expect(guadagnato.greaterThanOrEqualTo(bersaglio.min)).toBe(true)
-    expect(guadagnato.lessThanOrEqualTo(bersaglio.max)).toBe(true)
+    const earned = ledger.balance('cash')
+    const target = TARGETS.income_per_minute_at_start
+    expect(earned.greaterThanOrEqualTo(target.min)).toBe(true)
+    expect(earned.lessThanOrEqualTo(target.max)).toBe(true)
   })
 
   it('con l upgrade attivo il reddito esce dall intervallo di partenza', () => {
@@ -53,11 +53,11 @@ describe('i bersagli di bilanciamento', () => {
       value: BALANCE.UPGRADE_MULTIPLIER
     })
     const perTick = clock.perSecondToPerTick(BALANCE.INCOME_BASE_PER_SECOND)
-    const quanti = clock.secondsToTicks(UN_MINUTO)
+    const tickCount = clock.secondsToTicks(ONE_MINUTE)
 
-    const alMinuto = modifiers.compose('income.all', perTick).mul(quanti)
+    const perMinute = modifiers.compose('income.all', perTick).mul(tickCount)
 
     // Se ci restasse dentro, l'upgrade non sarebbe percepibile e l'intervallo sarebbe troppo largo.
-    expect(alMinuto.greaterThan(TARGETS.income_per_minute_at_start.max)).toBe(true)
+    expect(perMinute.greaterThan(TARGETS.income_per_minute_at_start.max)).toBe(true)
   })
 })
