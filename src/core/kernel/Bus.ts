@@ -29,16 +29,16 @@ type Handler<E extends keyof GameEvents> = (payload: GameEvents[E]) => void
  * qualunque `Handler<E>` senza cast. La conversione inversa, al momento della chiamata, è
  * l'unica del file ed è confinata a una riga.
  */
-type HandlerOpaco = (payload: never) => void
+type OpaqueHandler = (payload: never) => void
 
 /**
  * L'iscrizione, non la funzione, è l'unità che si toglie. Due iscrizioni della **stessa** funzione
  * sono due cose distinte: senza questa distinzione una `Unsubscribe` chiamata due volte toglie
  * l'omonima iscritta dopo, ed è un handler che sparisce senza che nessuno l'abbia chiesto.
  */
-interface Iscrizione {
-  readonly handler: HandlerOpaco
-  attiva: boolean
+interface Subscription {
+  readonly handler: OpaqueHandler
+  active: boolean
 }
 
 /**
@@ -47,10 +47,10 @@ interface Iscrizione {
  * overflow non dà.
  */
 export class EventCycleError extends Error {
-  constructor(catena: readonly string[]) {
+  constructor(chain: readonly string[]) {
     super(
       `Bus — ciclo di eventi: superata la profondità massima di ${MAX_EMIT_DEPTH} emissioni ` +
-        `annidate. Catena: ${catena.join(' → ')}`
+        `annidate. Catena: ${chain.join(' → ')}`
     )
     this.name = 'EventCycleError'
   }
@@ -62,59 +62,59 @@ export interface Bus {
 }
 
 export const createBus = (): Bus => {
-  const iscritti = new Map<keyof GameEvents, Iscrizione[]>()
-  const catena: (keyof GameEvents)[] = []
+  const subscribers = new Map<keyof GameEvents, Subscription[]>()
+  const chain: (keyof GameEvents)[] = []
 
   return {
     on: <E extends keyof GameEvents>(event: E, handler: Handler<E>): Unsubscribe => {
-      const lista = iscritti.get(event) ?? []
-      iscritti.set(event, lista)
+      const list = subscribers.get(event) ?? []
+      subscribers.set(event, list)
 
-      const iscrizione: Iscrizione = { handler, attiva: true }
-      lista.push(iscrizione)
+      const subscription: Subscription = { handler, active: true }
+      list.push(subscription)
 
       return () => {
-        if (!iscrizione.attiva) return
-        iscrizione.attiva = false
-        const indice = lista.indexOf(iscrizione)
-        if (indice !== -1) lista.splice(indice, 1)
+        if (!subscription.active) return
+        subscription.active = false
+        const index = list.indexOf(subscription)
+        if (index !== -1) list.splice(index, 1)
       }
     },
 
     emit: <E extends keyof GameEvents>(event: E, payload: GameEvents[E]): void => {
-      catena.push(event)
+      chain.push(event)
       try {
-        if (catena.length > MAX_EMIT_DEPTH) throw new EventCycleError(catena)
+        if (chain.length > MAX_EMIT_DEPTH) throw new EventCycleError(chain)
 
-        const lista = iscritti.get(event)
-        if (lista === undefined) return
+        const list = subscribers.get(event)
+        if (list === undefined) return
 
-        const errori: unknown[] = []
+        const errors: unknown[] = []
 
         // Si itera una copia, e si salta chi si è tolto nel frattempo: l'array vivo cambierebbe
         // sotto i piedi, e la copia da sola richiamerebbe un handler già disiscritto.
-        for (const iscrizione of [...lista]) {
-          if (!iscrizione.attiva) continue
+        for (const subscription of [...list]) {
+          if (!subscription.active) continue
           try {
-            ;(iscrizione.handler as Handler<E>)(payload)
-          } catch (errore) {
+            ;(subscription.handler as Handler<E>)(payload)
+          } catch (error) {
             // Un ciclo interrompe: continuare lo moltiplicherebbe a ogni livello, e la diagnosi
             // finirebbe sepolta sotto centinaia di errori identici.
-            if (errore instanceof EventCycleError) throw errore
-            errori.push(errore)
+            if (error instanceof EventCycleError) throw error
+            errors.push(error)
           }
         }
 
         // Un handler che lancia non ferma gli altri, ma il suo errore non si perde: emerge dopo.
-        if (errori.length === 1) throw errori[0]
-        if (errori.length > 1) {
+        if (errors.length === 1) throw errors[0]
+        if (errors.length > 1) {
           throw new AggregateError(
-            errori,
-            `Bus — ${errori.length} handler hanno lanciato su ${event}.`
+            errors,
+            `Bus — ${errors.length} handler hanno lanciato su ${event}.`
           )
         }
       } finally {
-        catena.pop()
+        chain.pop()
       }
     }
   }

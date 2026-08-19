@@ -28,21 +28,21 @@ export type Seconds = Branded<'Seconds'>
  * I costruttori sono espliciti apposta: marchiare un numero è un gesto che si vede nel diff, non
  * qualcosa che succede da solo.
  */
-export const ticks = (quantità: number): Ticks => quantità as Ticks
+export const ticks = (amount: number): Ticks => amount as Ticks
 
-export const seconds = (quantità: number): Seconds => quantità as Seconds
+export const seconds = (amount: number): Seconds => amount as Seconds
 
 export interface Clock {
-  readonly secondsToTicks: (durata: Seconds) => Ticks
-  readonly ticksToSeconds: (durata: Ticks) => Seconds
+  readonly secondsToTicks: (duration: Seconds) => Ticks
+  readonly ticksToSeconds: (duration: Ticks) => Seconds
   /** Il denaro resta `Decimal` anche qui: un tasso convertito in `number` perderebbe (ADR 0006). */
-  readonly perSecondToPerTick: (tasso: Money) => Money
-  readonly perTickToPerSecond: (tasso: Money) => Money
+  readonly perSecondToPerTick: (rate: Money) => Money
+  readonly perTickToPerSecond: (rate: Money) => Money
 }
 
 export const clock: Clock = {
-  secondsToTicks: (durata) => ticks(durata * TICKS_PER_SECOND),
-  ticksToSeconds: (durata) => seconds(durata / TICKS_PER_SECOND),
-  perSecondToPerTick: (tasso) => tasso.div(TICKS_PER_SECOND),
-  perTickToPerSecond: (tasso) => tasso.mul(TICKS_PER_SECOND)
+  secondsToTicks: (duration) => ticks(duration * TICKS_PER_SECOND),
+  ticksToSeconds: (duration) => seconds(duration / TICKS_PER_SECOND),
+  perSecondToPerTick: (rate) => rate.div(TICKS_PER_SECOND),
+  perTickToPerSecond: (rate) => rate.mul(TICKS_PER_SECOND)
 }

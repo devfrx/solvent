@@ -14,8 +14,8 @@ import { clock, seconds } from '@core/kernel/Clock'
  * lungo la catena (ADR 0006), e la partita doppia lo scoprirebbe come una somma che non fa zero.
  */
 
-const ORE_DI_RECUPERO = 8
-const SECONDI_IN_UN_ORA = 3600
+const RECOVERY_HOURS = 8
+const SECONDS_PER_HOUR = 3600
 
 export const BALANCE = {
   /**
@@ -43,5 +43,5 @@ export const BALANCE = {
    * Il tetto è qui e non nel loop, e si scrive in ore convertite dal Clock: `288000` scritto a
    * mano sarebbe il difetto A04 con un altro nome.
    */
-  RECOVERY_CAP: clock.secondsToTicks(seconds(ORE_DI_RECUPERO * SECONDI_IN_UN_ORA))
+  RECOVERY_CAP: clock.secondsToTicks(seconds(RECOVERY_HOURS * SECONDS_PER_HOUR))
 } as const

@@ -85,7 +85,7 @@ torna al sistema che lo ha prodotto, ed è lo stesso mestiere che fa il Bus con 
 **5. Il "nessun `if` su un `id`" era una spunta a occhio: ora è un test.** La definizione di fatto
 lo chiedeva come ultima riga della lista, cioè come una cosa che si guarda una volta e mai più —
 che è esattamente la forma di controllo che nel progetto precedente ha lasciato nascere cinque
-liste. `tests/rules/registry-senza-casi-speciali.test.ts` cerca la forma vietata (`id === '…'`,
+liste. `tests/rules/registry-no-special-cases.test.ts` cerca la forma vietata (`id === '…'`,
 `id !== '…'`, `case '…'`) in `Registry.ts` a ogni `npm run verify`, sui commenti tolti — perché il
 commento che spiega il divieto lo nomina senza violarlo.
 
@@ -122,7 +122,7 @@ ha un campo in meno (correzione 2) e `ORDER` due fasi in meno (correzione 3).
 - [x] test: le fasi di `ORDER` sono crescenti, distinte e distanti almeno 100 (correzione 3)
 - [x] `tests/rules/registry-completeness.test.ts`: cartelle di dominio uguali alle registrazioni
       nel bootstrap (correzione 6)
-- [x] `tests/rules/registry-senza-casi-speciali.test.ts`: nessun ramo su un `id` (correzione 5)
+- [x] `tests/rules/registry-no-special-cases.test.ts`: nessun ramo su un `id` (correzione 5)
 
 ## Nota di chiusura
 
@@ -131,14 +131,14 @@ su 19).
 
 Le reti sono state rotte di proposito, e sono diventate rosse tutte:
 
-| Rottura indotta                                           | Cosa è diventato rosso                     |
-| --------------------------------------------------------- | ------------------------------------------ |
-| tolto l'ordinamento: vince l'ordine di registrazione      | 3 casi sull'ordine                         |
-| tolto il pareggio per `id`                                | l'ordine a parità di fase                  |
-| tolto il controllo sull'id duplicato                      | 2 casi su `register`                       |
-| tolto il `try/catch` attorno al `load`                    | il `load` che lancia                       |
-| aggiunto un `systems().filter((s) => s.id !== 'segreto')` | `tests/rules/registry-senza-casi-speciali` |
-| creato `domains/income/system.ts` senza registrarlo       | `tests/rules/registry-completeness`        |
+| Rottura indotta                                           | Cosa è diventato rosso                  |
+| --------------------------------------------------------- | --------------------------------------- |
+| tolto l'ordinamento: vince l'ordine di registrazione      | 3 casi sull'ordine                      |
+| tolto il pareggio per `id`                                | l'ordine a parità di fase               |
+| tolto il controllo sull'id duplicato                      | 2 casi su `register`                    |
+| tolto il `try/catch` attorno al `load`                    | il `load` che lancia                    |
+| aggiunto un `systems().filter((s) => s.id !== 'segreto')` | `tests/rules/registry-no-special-cases` |
+| creato `domains/income/system.ts` senza registrarlo       | `tests/rules/registry-completeness`     |
 
 Le ultime due meritano una nota: sono le uniche due reti che non guardano il comportamento ma la
 **forma**, e sono quelle che difendono da A01. L'ultima ha anche dimostrato che il conteggio

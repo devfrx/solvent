@@ -15,10 +15,10 @@ export type Money = Decimal
 export const ZERO: Money = new Decimal(0)
 
 /** Il denaro attraversa il confine di persistenza come stringa decimale (INV-04). */
-export const fromString = (valore: string): Money => new Decimal(valore)
+export const fromString = (value: string): Money => new Decimal(value)
 
-export const toString = (denaro: Money): string => denaro.toString()
+export const toString = (money: Money): string => money.toString()
 
-export const fromNumber = (valore: number): Money => new Decimal(valore)
+export const fromNumber = (value: number): Money => new Decimal(value)
 
-export const toDisplayNumber = (denaro: Money): number => denaro.toNumber()
+export const toDisplayNumber = (money: Money): number => money.toNumber()

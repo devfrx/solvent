@@ -32,7 +32,7 @@ l'ordine di esecuzione dei tick deve essere leggibile in un solo file.
 - Il `Registry` è l'unico consumatore legittimo di `save`/`load`/`reset`: nessun file scrive
   persistenza a mano.
 - Nessuna delle cinque operazioni contiene un ramo sull'`id` di un sistema. Non è una regola di
-  review: `tests/rules/registry-senza-casi-speciali` cerca la forma vietata in `Registry.ts`.
+  review: `tests/rules/registry-no-special-cases` cerca la forma vietata in `Registry.ts`.
 - `ORDER` dichiara solo le fasi abitate. Ciò che protegge dall'accoppiamento fra sistemi non è il
   numero di fasi ma il **passo di 100** più il pareggio per `id`: insieme rendono l'inserimento di
   una fase nuova una riga sola, senza spostare l'ordine di nessun sistema esistente.

@@ -36,7 +36,7 @@ describe('regole che devono scattare', () => {
   it('R01 — uno store che importa un altro store', async () => {
     const f = await lint(
       'src/renderer/stores/game.ts',
-      `import { x } from './altro'\nexport const y = x\n`
+      `import { x } from './other'\nexport const y = x\n`
     )
     expect(has(f, 'R01')).toBe(true)
   })
@@ -57,13 +57,16 @@ describe('regole che devono scattare', () => {
   })
 
   it('R04 — un numero con un nome è invece consentito', async () => {
-    const f = await lint('src/core/domains/income/rules.ts', `export const SECONDI_IN_ORA = 3600\n`)
+    const f = await lint(
+      'src/core/domains/income/rules.ts',
+      `export const SECONDS_PER_HOUR = 3600\n`
+    )
     expect(has(f, '@typescript-eslint/no-magic-numbers')).toBe(false)
   })
 
   it('R05 — un .vue che importa il kernel', async () => {
     const f = await lint(
-      'src/renderer/components/Pannello.vue',
+      'src/renderer/components/Panel.vue',
       VUE(`import { clock } from '@core/kernel/Clock'\nconsole.log(clock)`)
     )
     expect(has(f, 'R05')).toBe(true)

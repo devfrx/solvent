@@ -49,13 +49,13 @@ import type { Bus } from '@core/kernel/Bus'
  * funzione. Senza questo controllo `income(pool, -12)` sarebbe una transazione perfettamente
  * bilanciata che toglie denaro invece di darlo, e nessun invariante se ne accorgerebbe.
  */
-const grandezza = (importo: Money, cosa: string): Money => {
-  if (!importo.isFinite() || importo.isNegative()) {
+const magnitude = (amount: Money, label: string): Money => {
+  if (!amount.isFinite() || amount.isNegative()) {
     throw new RangeError(
-      `Ledger — ${cosa} è una grandezza: un numero finito e non negativo, ricevuto ${toString(importo)}.`
+      `Ledger — ${label} è una grandezza: un numero finito e non negativo, ricevuto ${toString(amount)}.`
     )
   }
-  return importo
+  return amount
 }
 
 /**
@@ -63,10 +63,10 @@ const grandezza = (importo: Money, cosa: string): Money => {
  * porta lo sbilancio, che è l'unica informazione che serve davvero a trovarlo.
  */
 export class UnbalancedTransactionError extends Error {
-  constructor(reason: Reason, sbilancio: Money) {
+  constructor(reason: Reason, imbalance: Money) {
     super(
       `ADR 0020 — la transazione '${reason}' non somma a zero: sbilancio di ` +
-        `${toString(sbilancio)}. Ogni movimento ha una contropartita, e income, spend e transfer ` +
+        `${toString(imbalance)}. Ogni movimento ha una contropartita, e income, spend e transfer ` +
         `la scrivono da soli.`
     )
     this.name = 'UnbalancedTransactionError'
@@ -80,9 +80,9 @@ export class UnbalancedTransactionError extends Error {
  * non è (ADR 0016). Chi deve muovere denaro lo fa nel proprio `tick`, non dentro un evento.
  */
 export class NestedTransactionError extends Error {
-  constructor(esterna: Reason, interna: Reason) {
+  constructor(outer: Reason, inner: Reason) {
     super(
-      `ADR 0019 — transazione dentro una transazione: '${interna}' è partita mentre '${esterna}' ` +
+      `ADR 0019 — transazione dentro una transazione: '${inner}' è partita mentre '${outer}' ` +
         `era ancora in corso. Significa che qualcuno sta orchestrando denaro fuori dal Ledger.`
     )
     this.name = 'NestedTransactionError'
@@ -95,9 +95,9 @@ export class NestedTransactionError extends Error {
  * si controllasse qui, non lo controllerebbe nessuno.
  */
 export class UnbalancedSaveError extends Error {
-  constructor(sbilancio: Money) {
+  constructor(imbalance: Money) {
     super(
-      `INV-08 — i conti del salvataggio non sommano a zero: sbilancio di ${toString(sbilancio)}. ` +
+      `INV-08 — i conti del salvataggio non sommano a zero: sbilancio di ${toString(imbalance)}. ` +
         `Caricarlo romperebbe l'invariante più forte del progetto, quindi non si carica.`
     )
     this.name = 'UnbalancedSaveError'
@@ -113,19 +113,19 @@ export class UnbalancedSaveError extends Error {
  * l'unico punto in cui un saldo cambia — e resta anche l'unico punto da leggere per sapere quando
  * un saldo può cambiare.
  */
-export const income = (pool: Pool, importo: Money): readonly Posting[] => {
-  const quanto = grandezza(importo, 'un reddito')
+export const income = (pool: Pool, amount: Money): readonly Posting[] => {
+  const value = magnitude(amount, 'un reddito')
   return [
-    { pool: 'world', amount: quanto.neg(), category: 'income' },
-    { pool, amount: quanto, category: 'income' }
+    { pool: 'world', amount: value.neg(), category: 'income' },
+    { pool, amount: value, category: 'income' }
   ]
 }
 
-export const spend = (pool: Pool, importo: Money): readonly Posting[] => {
-  const quanto = grandezza(importo, 'una spesa')
+export const spend = (pool: Pool, amount: Money): readonly Posting[] => {
+  const value = magnitude(amount, 'una spesa')
   return [
-    { pool, amount: quanto.neg(), category: 'purchase' },
-    { pool: 'sink', amount: quanto, category: 'purchase' }
+    { pool, amount: value.neg(), category: 'purchase' },
+    { pool: 'sink', amount: value, category: 'purchase' }
   ]
 }
 
@@ -134,24 +134,19 @@ export const spend = (pool: Pool, importo: Money): readonly Posting[] => {
  * uscire 500 e arrivare 497,50. È la forma del prelievo al bancomat, dello spread delle fiches e
  * della percentuale del black market — un movimento in più, un meccanismo solo (ADR 0020).
  */
-export const transfer = (
-  da: Pool,
-  a: Pool,
-  importo: Money,
-  commissione: Money
-): readonly Posting[] => {
-  const quanto = grandezza(importo, 'un trasferimento')
-  const trattenuta = grandezza(commissione, 'una commissione')
-  if (trattenuta.greaterThan(quanto)) {
+export const transfer = (from: Pool, to: Pool, amount: Money, fee: Money): readonly Posting[] => {
+  const value = magnitude(amount, 'un trasferimento')
+  const withheld = magnitude(fee, 'una commissione')
+  if (withheld.greaterThan(value)) {
     throw new RangeError(
-      `Ledger — la commissione (${toString(trattenuta)}) non può superare il trasferimento ` +
-        `(${toString(quanto)}): il destinatario riceverebbe meno di zero.`
+      `Ledger — la commissione (${toString(withheld)}) non può superare il trasferimento ` +
+        `(${toString(value)}): il destinatario riceverebbe meno di zero.`
     )
   }
   return [
-    { pool: da, amount: quanto.neg(), category: 'transfer' },
-    { pool: a, amount: quanto.minus(trattenuta), category: 'transfer' },
-    { pool: 'fees', amount: trattenuta, category: 'fee' }
+    { pool: from, amount: value.neg(), category: 'transfer' },
+    { pool: to, amount: value.minus(withheld), category: 'transfer' },
+    { pool: 'fees', amount: withheld, category: 'fee' }
   ]
 }
 
@@ -166,31 +161,31 @@ export interface Ledger {
   ) => Result<Balances, LedgerError>
   readonly balance: (pool: Pool) => Money
   readonly save: () => LedgerSave
-  readonly load: (stato: LedgerSave) => void
+  readonly load: (state: LedgerSave) => void
   readonly reset: (scope: ResetScope) => void
 }
 
 export const createLedger = (bus: Bus): Ledger => {
   // A05 — l'unica copia dei saldi che esiste. Non è esportata, non è ritornata da nulla, e non
   // compare in nessun campo del `Ledger`: dall'esterno non c'è niente a cui assegnare.
-  const saldi = new Map<Pool, Money>()
+  const balances = new Map<Pool, Money>()
 
   /** La ragione della transazione in corso, se ce n'è una. È la guardia contro l'annidamento. */
-  let inCorso: Reason | null = null
+  let inProgress: Reason | null = null
 
-  const leggi = (pool: Pool): Money => saldi.get(pool) ?? ZERO
+  const read = (pool: Pool): Money => balances.get(pool) ?? ZERO
 
   /**
    * L'unico cast del file. `Object.fromEntries` perde la chiave tipizzata; `POOL_IDS` è l'elenco
    * completo dei pool, quindi la mappa che ne esce le ha tutte davvero.
    */
-  const perPool = <T>(valore: (pool: Pool) => T): Readonly<Record<Pool, T>> =>
-    Object.fromEntries(POOL_IDS.map((pool) => [pool, valore(pool)])) as Record<Pool, T>
+  const perPool = <T>(value: (pool: Pool) => T): Readonly<Record<Pool, T>> =>
+    Object.fromEntries(POOL_IDS.map((pool) => [pool, value(pool)])) as Record<Pool, T>
 
-  const sommaDi = (importi: Iterable<Money>): Money => {
-    let totale = ZERO
-    for (const importo of importi) totale = totale.plus(importo)
-    return totale
+  const sumOf = (amounts: Iterable<Money>): Money => {
+    let total = ZERO
+    for (const amount of amounts) total = total.plus(amount)
+    return total
   }
 
   /**
@@ -198,7 +193,7 @@ export const createLedger = (bus: Bus): Ledger => {
    * È la separazione su cui poggia l'atomicità: chi applica riceve un risultato già verificato, e
    * non ha più modo di fallire a metà strada.
    */
-  const verifica = (
+  const validate = (
     postings: readonly Posting[],
     meta: TransactionMeta
   ): Result<Map<Pool, Money>, LedgerError> => {
@@ -214,19 +209,19 @@ export const createLedger = (bus: Bus): Ledger => {
       }
     }
 
-    const sbilancio = sommaDi(postings.map((posting) => posting.amount))
-    if (!sbilancio.isZero()) throw new UnbalancedTransactionError(meta.reason, sbilancio)
+    const imbalance = sumOf(postings.map((posting) => posting.amount))
+    if (!imbalance.isZero()) throw new UnbalancedTransactionError(meta.reason, imbalance)
 
     // L'affordance riguarda gli strumenti del giocatore: `world`, `sink` e `fees` non sono
     // strumenti ma contabilità, e non li sceglie il chiamante — li scrivono i costruttori.
-    const accettati = meta.accepts
-    if (accettati !== undefined) {
+    const accepted = meta.accepts
+    if (accepted !== undefined) {
       for (const posting of postings) {
-        if (POOLS[posting.pool].player && !accettati.includes(posting.pool)) {
+        if (POOLS[posting.pool].player && !accepted.includes(posting.pool)) {
           return err({
             code: 'error.ledger.pool_not_accepted',
             pool: posting.pool,
-            accepted: accettati
+            accepted
           })
         }
       }
@@ -234,86 +229,89 @@ export const createLedger = (bus: Bus): Ledger => {
 
     // Si somma per pool prima di guardare i limiti: due movimenti sullo stesso pool nella stessa
     // transazione contano una volta sola, ed è il loro effetto netto a dover stare in piedi.
-    const nuovi = new Map<Pool, Money>()
+    const updated = new Map<Pool, Money>()
     for (const posting of postings) {
-      nuovi.set(posting.pool, (nuovi.get(posting.pool) ?? leggi(posting.pool)).plus(posting.amount))
+      updated.set(
+        posting.pool,
+        (updated.get(posting.pool) ?? read(posting.pool)).plus(posting.amount)
+      )
     }
 
     // In ordine di `POOL_IDS`, non di movimento: la stessa transazione riporta sempre lo stesso
     // errore, e non dipende dall'ordine in cui il chiamante ha scritto le righe.
     for (const pool of POOL_IDS) {
-      const nuovo = nuovi.get(pool)
-      if (nuovo === undefined) continue
+      const next = updated.get(pool)
+      if (next === undefined) continue
       const props = POOLS[pool]
-      const attuale = leggi(pool)
+      const current = read(pool)
 
       // Solo i pool del giocatore hanno un fondo: `world` è normalmente negativo, ed è corretto.
-      if (props.player && nuovo.isNegative()) {
+      if (props.player && next.isNegative()) {
         return err({
           code: 'error.ledger.insufficient_funds',
           pool,
-          required: nuovo.minus(attuale).abs(),
-          available: attuale
+          required: next.minus(current).abs(),
+          available: current
         })
       }
 
-      if (props.capacity !== null && nuovo.greaterThan(props.capacity)) {
+      if (props.capacity !== null && next.greaterThan(props.capacity)) {
         return err({
           code: 'error.ledger.capacity_exceeded',
           pool,
           capacity: props.capacity,
-          fits: props.capacity.minus(attuale)
+          fits: props.capacity.minus(current)
         })
       }
     }
 
-    return ok(nuovi)
+    return ok(updated)
   }
 
   return {
     transaction: (postings, meta) => {
-      if (inCorso !== null) throw new NestedTransactionError(inCorso, meta.reason)
+      if (inProgress !== null) throw new NestedTransactionError(inProgress, meta.reason)
 
-      inCorso = meta.reason
+      inProgress = meta.reason
       try {
-        const verificati = verifica(postings, meta)
-        if (!verificati.ok) return verificati
+        const validated = validate(postings, meta)
+        if (!validated.ok) return validated
 
-        for (const [pool, nuovo] of verificati.value) saldi.set(pool, nuovo)
+        for (const [pool, next] of validated.value) balances.set(pool, next)
 
         // Una copia dei movimenti: la lista resta del chiamante, e ciò che gira nell'evento non
         // può cambiare sotto i piedi di chi lo sta leggendo.
-        const transazione: Transaction = { reason: meta.reason, postings: [...postings] }
-        const balances = perPool(leggi)
+        const applied: Transaction = { reason: meta.reason, postings: [...postings] }
+        const snapshot = perPool(read)
 
         // Una volta sola, e dopo che tutti i saldi sono cambiati: un handler vede sempre uno
         // stato coerente, mai uno stato intermedio che non è mai realmente esistito. Se un
         // handler lancia, l'errore esce di qui — la transazione però è avvenuta, ed è giusto:
         // era già valida e già applicata prima che qualcuno venisse avvisato.
-        bus.emit('money.posted', { transaction: transazione, balances })
+        bus.emit('money.posted', { transaction: applied, balances: snapshot })
 
-        return ok(balances)
+        return ok(snapshot)
       } finally {
-        inCorso = null
+        inProgress = null
       }
     },
 
-    balance: leggi,
+    balance: read,
 
     // INV-04 — oltre il confine di persistenza il denaro è una stringa decimale. I conti
     // non-giocatore entrano nel salvataggio: senza, la somma non farebbe zero al ricaricamento.
-    save: () => ({ balances: perPool((pool) => toString(leggi(pool))) }),
+    save: () => ({ balances: perPool((pool) => toString(read(pool))) }),
 
-    load: (stato) => {
-      const caricati = new Map<Pool, Money>(
-        POOL_IDS.map((pool) => [pool, fromString(stato.balances[pool])])
+    load: (state) => {
+      const loaded = new Map<Pool, Money>(
+        POOL_IDS.map((pool) => [pool, fromString(state.balances[pool])])
       )
-      if (!sommaDi(caricati.values()).isZero()) {
-        throw new UnbalancedSaveError(sommaDi(caricati.values()))
+      if (!sumOf(loaded.values()).isZero()) {
+        throw new UnbalancedSaveError(sumOf(loaded.values()))
       }
 
       // Si scrive solo dopo aver verificato: un salvataggio rifiutato non lascia il Ledger a metà.
-      for (const [pool, saldo] of caricati) saldi.set(pool, saldo)
+      for (const [pool, balance] of loaded) balances.set(pool, balance)
     },
 
     /**
@@ -327,7 +325,7 @@ export const createLedger = (bus: Bus): Ledger => {
      */
     reset: (scope) => {
       if (scope === 'hard') {
-        for (const pool of POOL_IDS) saldi.set(pool, ZERO)
+        for (const pool of POOL_IDS) balances.set(pool, ZERO)
       }
     }
   }

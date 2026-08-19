@@ -18,6 +18,30 @@ quale.
 Un solo `index.ts` che riesporta è ammesso in tutto il progetto: `core/kernel/index.ts`. Ogni
 altro barrel è vietato — nascondono le dipendenze reali e rendono inutile ogni regola di import.
 
+## La lingua del codice
+
+**Gli identificatori sono in inglese. La prosa resta in italiano.**
+
+| Cosa                                                                                                   | Lingua       |
+| ------------------------------------------------------------------------------------------------------ | ------------ |
+| Variabili, parametri, funzioni, tipi, costanti, proprietà, chiavi di oggetto, `SystemId`, nomi di file | **inglese**  |
+| Commenti, documenti, messaggi degli errori lanciati, descrizioni dei test (`describe` / `it`)          | **italiano** |
+
+Fino al 2026-08-19 questa regola non esisteva, e il risultato era prevedibile: tipi e API pubblica
+in inglese, variabili locali e qualche costante in italiano, due identificatori con l'accento
+(`quantità`, `profondità`). Nessuno aveva scelto — e una convenzione che nessuno ha scelto è il
+modo in cui il debito entra senza fare rumore, perché ogni file nuovo decide da capo.
+
+Perché questa divisione e non "tutto in inglese": i cinquanta documenti del progetto sono in
+italiano e ci restano, i commenti spiegano il **perché** e lo spiegano meglio nella lingua di chi
+scrive, e i messaggi degli errori lanciati sono rivolti a chi legge quei commenti — non
+all'utente, che riceve una chiave i18n (R12).
+
+Il meccanismo è `tests/rules/english-identifiers`, ed è **⚠️ parziale e lo dichiara**: una lista
+di parole italiane comuni, non un dizionario. Prende il caso normale e non prende una parola che
+non sia in elenco. Quando la review ne trova una, si aggiunge alla lista nello stesso commit: è
+per questo che è un test e non una riga di questo documento.
+
 ## Nomi di identificatori
 
 | Cosa                       | Forma                            | Esempio                           |

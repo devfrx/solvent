@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { leggi, senzaCommenti } from '../helpers/sorgenti'
+import { read, withoutComments } from '../helpers/sources'
 
 /**
  * INV-15 · ADR 0016 — il Bus è sincrono.
@@ -10,19 +10,19 @@ import { leggi, senzaCommenti } from '../helpers/sorgenti'
  * seed fisso dell'ADR 0005. La firma è un tipo; questo è il meccanismo.
  */
 
-const ASINCRONIA =
+const ASYNC_MARKERS =
   /\b(?:async|await|Promise|queueMicrotask|setTimeout|setInterval|setImmediate|requestAnimationFrame)\b/
 
-const primaOccorrenza = (codice: string): string | null => ASINCRONIA.exec(codice)?.[0] ?? null
+const firstMatch = (code: string): string | null => ASYNC_MARKERS.exec(code)?.[0] ?? null
 
 describe('il Bus è sincrono', () => {
   it('il rilevatore guarda il codice, non i commenti', () => {
-    expect(primaOccorrenza(senzaCommenti('// niente Promise qui\nconst x = 1'))).toBeNull()
-    expect(primaOccorrenza(senzaCommenti('/* niente await */\nconst x = 1'))).toBeNull()
-    expect(primaOccorrenza(senzaCommenti('queueMicrotask(() => {})'))).toBe('queueMicrotask')
+    expect(firstMatch(withoutComments('// niente Promise qui\nconst x = 1'))).toBeNull()
+    expect(firstMatch(withoutComments('/* niente await */\nconst x = 1'))).toBeNull()
+    expect(firstMatch(withoutComments('queueMicrotask(() => {})'))).toBe('queueMicrotask')
   })
 
   it('in Bus.ts non c è niente di asincrono', () => {
-    expect(primaOccorrenza(senzaCommenti(leggi('src/core/kernel/Bus.ts')))).toBeNull()
+    expect(firstMatch(withoutComments(read('src/core/kernel/Bus.ts')))).toBeNull()
   })
 })

@@ -9,12 +9,12 @@ import { SAVE_VERSION, type SaveEnvelope, type SavePayload } from '@core/contrac
  * perché il tipo non ha quel campo. I test `@ts-expect-error` sono la prova che il tipo funziona
  * davvero — falliscono se l'errore di compilazione non c'è.
  */
-const BILANCI = { cash: '0', card: '0', world: '0', sink: '0', fees: '0', house: '0' }
+const BALANCES = { cash: '0', card: '0', world: '0', sink: '0', fees: '0', house: '0' }
 
 describe('SavePayload', () => {
   it('non ha un campo versione', () => {
     const payload: SavePayload = {
-      ledger: { balances: BILANCI },
+      ledger: { balances: BALANCES },
       rng: { seed: 1, cursors: {} },
       systems: {},
       // @ts-expect-error — R08: la versione la scrive il main, il renderer non ha dove metterla
@@ -26,7 +26,7 @@ describe('SavePayload', () => {
   it('non ha un campo versione nemmeno annidato', () => {
     const payload: SavePayload = {
       ledger: {
-        balances: BILANCI,
+        balances: BALANCES,
         // @ts-expect-error — R08: nemmeno di lato, nemmeno "per comodità di debug" (ADR 0004)
         version: 1
       },
@@ -40,7 +40,7 @@ describe('SavePayload', () => {
     const payload: SavePayload = {
       ledger: {
         balances: {
-          ...BILANCI,
+          ...BALANCES,
           // @ts-expect-error — INV-04: mai un number, o la precisione si perde al round-trip
           cash: 0
         }
@@ -53,22 +53,22 @@ describe('SavePayload', () => {
 
   it('lo stato dei sistemi è opaco: il Registry lo consegna a chi lo sa leggere', () => {
     const payload: SavePayload = {
-      ledger: { balances: BILANCI },
+      ledger: { balances: BALANCES },
       rng: { seed: 7, cursors: { income: 3 } },
-      systems: { income: { livello: 2 }, sconosciuto: { qualsiasi: true } }
+      systems: { income: { level: 2 }, unknownSystem: { anything: true } }
     }
-    expect(Object.keys(payload.systems)).toEqual(['income', 'sconosciuto'])
+    expect(Object.keys(payload.systems)).toEqual(['income', 'unknownSystem'])
   })
 })
 
 describe('SaveEnvelope', () => {
   it('la versione e l’istante vivono nella busta, che costruisce solo il main', () => {
-    const busta: SaveEnvelope = {
+    const envelope: SaveEnvelope = {
       version: SAVE_VERSION,
       savedAt: 1_755_600_000_000,
-      payload: { ledger: { balances: BILANCI }, rng: { seed: 1, cursors: {} }, systems: {} }
+      payload: { ledger: { balances: BALANCES }, rng: { seed: 1, cursors: {} }, systems: {} }
     }
-    expect(busta.version).toBe(1)
+    expect(envelope.version).toBe(1)
   })
 
   it('la versione 1 non ha nulla da cui migrare', () => {

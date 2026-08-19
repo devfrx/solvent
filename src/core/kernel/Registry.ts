@@ -15,9 +15,9 @@ import type { Rng } from '@core/kernel/Rng'
  * Aggiungere un sistema voleva dire cinque modifiche coordinate, e quella dimenticata falliva in
  * silenzio: quasi sempre `reset`, che si scopre al primo prestige, mesi dopo.
  *
- * Qui le cinque operazioni iterano lo **stesso array**, e nessuna di esse guarda l'`id` di un
+ * Qui le cinque operazioni iterano lo **stesso** array, e nessuna di esse guarda l'`id` di un
  * sistema per fare qualcosa di diverso. Il primo `if (system.id === …)` è il momento in cui il
- * difetto sta tornando con un altro nome: lo vieta `tests/rules/registry-senza-casi-speciali`.
+ * difetto sta tornando con un altro nome: lo vieta `tests/rules/registry-no-special-cases`.
  *
  * Il Registry non conosce Vue, Pinia, il disco, né alcun dominio.
  */
@@ -65,7 +65,7 @@ export interface SystemContext {
 interface SystemBase {
   readonly id: SystemId
   readonly order: number
-  readonly tick?: (ctx: SystemContext, quanti: Ticks) => void
+  readonly tick?: (ctx: SystemContext, elapsed: Ticks) => void
   readonly stats?: () => SystemStats
 }
 
@@ -82,7 +82,7 @@ export interface Stateless extends SystemBase {
  */
 export interface Stateful<S> extends SystemBase {
   readonly save: () => S
-  readonly load: (stato: S) => void
+  readonly load: (state: S) => void
   readonly reset: (scope: ResetScope) => void
 }
 
@@ -92,13 +92,13 @@ export interface Stateful<S> extends SystemBase {
  * ingresso sono i due estremi che accettano **ogni** `Stateful<S>` senza cast in registrazione; il
  * cast, uno solo, sta in `loadAll`.
  */
-interface StatefulOpaco extends SystemBase {
+interface OpaqueStateful extends SystemBase {
   readonly save: () => unknown
-  readonly load: (stato: never) => void
+  readonly load: (state: never) => void
   readonly reset: (scope: ResetScope) => void
 }
 
-export type AnySystem = Stateless | StatefulOpaco
+export type AnySystem = Stateless | OpaqueStateful
 
 /** L'esito di `loadAll` quando il salvataggio è più vecchio dei sistemi registrati. */
 export interface LoadReport {
@@ -132,65 +132,65 @@ export function defineSystem(system: AnySystem): AnySystem {
 export interface Registry {
   readonly register: (system: AnySystem) => void
   readonly systems: () => readonly AnySystem[]
-  readonly tickAll: (ctx: SystemContext, quanti: Ticks) => void
+  readonly tickAll: (ctx: SystemContext, elapsed: Ticks) => void
   readonly saveAll: () => SystemsSave
-  readonly loadAll: (stato: SystemsSave) => Result<LoadReport, RegistryError>
+  readonly loadAll: (state: SystemsSave) => Result<LoadReport, RegistryError>
   readonly resetAll: (scope: ResetScope) => void
   readonly statsAll: () => Readonly<Record<SystemId, SystemStats>>
 }
 
-const conStato = (system: AnySystem): system is StatefulOpaco => system.save !== undefined
+const isStateful = (system: AnySystem): system is OpaqueStateful => system.save !== undefined
 
 /**
  * A parità di `order` decide l'`id`. Senza il secondo criterio l'ordine dipenderebbe da quello di
  * registrazione, cioè dal bootstrap: due sistemi nella stessa fase gireranno sempre nello stesso
  * ordine, e quell'ordine è leggibile senza aprire `createGame.ts`.
  */
-const perOrdine = (a: AnySystem, b: AnySystem): number =>
+const byOrder = (a: AnySystem, b: AnySystem): number =>
   a.order - b.order || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
 
 export const createRegistry = (): Registry => {
   // L'unica lista. Le cinque operazioni qui sotto iterano questa, e nient'altro.
-  const registrati: AnySystem[] = []
+  const registered: AnySystem[] = []
 
   return {
     register: (system) => {
-      if (registrati.some((registrato) => registrato.id === system.id)) {
+      if (registered.some((existing) => existing.id === system.id)) {
         throw new DuplicateSystemError(system.id)
       }
-      registrati.push(system)
-      registrati.sort(perOrdine)
+      registered.push(system)
+      registered.sort(byOrder)
     },
 
-    systems: () => registrati,
+    systems: () => registered,
 
-    tickAll: (ctx, quanti) => {
-      for (const system of registrati) system.tick?.(ctx, quanti)
+    tickAll: (ctx, elapsed) => {
+      for (const system of registered) system.tick?.(ctx, elapsed)
     },
 
     saveAll: () => {
-      const salvato: Record<SystemId, unknown> = {}
-      for (const system of registrati) {
-        if (conStato(system)) salvato[system.id] = system.save()
+      const saved: Record<SystemId, unknown> = {}
+      for (const system of registered) {
+        if (isStateful(system)) saved[system.id] = system.save()
       }
-      return salvato
+      return saved
     },
 
-    loadAll: (stato) => {
-      const noti = new Set(registrati.filter(conStato).map((system) => system.id))
-      const ignored = Object.keys(stato).filter((id) => !noti.has(id))
+    loadAll: (state) => {
+      const known = new Set(registered.filter(isStateful).map((system) => system.id))
+      const ignored = Object.keys(state).filter((id) => !known.has(id))
 
-      for (const system of registrati) {
-        if (!conStato(system) || !Object.hasOwn(stato, system.id)) continue
+      for (const system of registered) {
+        if (!isStateful(system) || !Object.hasOwn(state, system.id)) continue
         try {
           // L'unico cast del file, ed è il punto in cui uno stato opaco torna al sistema che lo
           // ha prodotto. Che la forma corrisponda non è verificabile qui: `SystemsSave` è opaco
           // anche per lo schema del main, quindi un salvataggio manomesso arriva fin qui. Per
           // questo un `load` che lancia è un esito, non un crollo.
-          ;(system.load as (stato: unknown) => void)(stato[system.id])
+          ;(system.load as (state: unknown) => void)(state[system.id])
         } catch (cause) {
-          const errore: RegistryError = { code: 'error.registry.load_failed', id: system.id, cause }
-          return err(errore)
+          const error: RegistryError = { code: 'error.registry.load_failed', id: system.id, cause }
+          return err(error)
         }
       }
 
@@ -198,18 +198,18 @@ export const createRegistry = (): Registry => {
     },
 
     resetAll: (scope) => {
-      for (const system of registrati) {
-        if (conStato(system)) system.reset(scope)
+      for (const system of registered) {
+        if (isStateful(system)) system.reset(scope)
       }
     },
 
     statsAll: () => {
-      const raccolte: Record<SystemId, SystemStats> = {}
-      for (const system of registrati) {
+      const collected: Record<SystemId, SystemStats> = {}
+      for (const system of registered) {
         const stats = system.stats?.()
-        if (stats !== undefined) raccolte[system.id] = stats
+        if (stats !== undefined) collected[system.id] = stats
       }
-      return raccolte
+      return collected
     }
   }
 }

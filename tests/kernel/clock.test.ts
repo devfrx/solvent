@@ -25,9 +25,9 @@ describe('Clock', () => {
   })
 
   it('andata e ritorno non perde nulla, nemmeno sui frazionari', () => {
-    for (const valore of [0, 1, 0.1, 0.25, 0.3, 3.7, 12.34, 60, 3600]) {
-      const andata = clock.secondsToTicks(seconds(valore))
-      expect(clock.ticksToSeconds(andata)).toBe(valore)
+    for (const value of [0, 1, 0.1, 0.25, 0.3, 3.7, 12.34, 60, 3600]) {
+      const converted = clock.secondsToTicks(seconds(value))
+      expect(clock.ticksToSeconds(converted)).toBe(value)
     }
   })
 
@@ -40,9 +40,9 @@ describe('Clock', () => {
   })
 
   it('il tasso resta esatto dove il float sbaglierebbe', () => {
-    const alTick = clock.perSecondToPerTick(fromString('0.7'))
-    expect(toString(alTick)).toBe('0.07')
-    expect(toString(clock.perTickToPerSecond(alTick))).toBe('0.7')
+    const perTick = clock.perSecondToPerTick(fromString('0.7'))
+    expect(toString(perTick)).toBe('0.07')
+    expect(toString(clock.perTickToPerSecond(perTick))).toBe('0.7')
     // La stessa divisione in virgola mobile: è il motivo per cui il denaro è Decimal (ADR 0006).
     expect(0.7 / 10).toBe(0.06999999999999999)
   })
@@ -60,21 +60,21 @@ describe('Clock', () => {
 describe('le unità del tempo', () => {
   it('un number nudo non è un Ticks', () => {
     // @ts-expect-error — R04: un numero senza unità non entra in un'API temporale (ADR 0009)
-    const quanti: Ticks = 10
-    expect(quanti).toBe(10)
+    const count: Ticks = 10
+    expect(count).toBe(10)
   })
 
   it('Ticks e Seconds non sono intercambiabili', () => {
-    const durata = ticks(30)
+    const duration = ticks(30)
     // @ts-expect-error — R04: trenta tick non sono trenta secondi, e il compilatore lo sa
-    const sbagliata: Seconds = durata
-    expect(sbagliata).toBe(30)
+    const wrong: Seconds = duration
+    expect(wrong).toBe(30)
   })
 
   it('passare dei secondi dove servono dei tick non compila', () => {
     // @ts-expect-error — R04: la conversione esiste apposta, non si salta
-    const esito = clock.ticksToSeconds(seconds(3))
-    expect(esito).toBe(0.3)
+    const result = clock.ticksToSeconds(seconds(3))
+    expect(result).toBe(0.3)
   })
 
   it('a runtime sono numeri e basta: il marchio non esiste', () => {

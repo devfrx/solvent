@@ -1,6 +1,6 @@
 # ADR 0016 — Il Bus è sincrono, fire-and-forget, e non è event sourcing
 
-- **Stato:** **Accettata** — D005: `kernel/Bus.ts`, la guardia sulla profondità e `tests/rules/bus-sincrono`
+- **Stato:** **Accettata** — D005: `kernel/Bus.ts`, la guardia sulla profondità e `tests/rules/bus-synchronous`
 - **Data:** 2026-08-19
 
 ## Contesto
@@ -42,7 +42,7 @@ proprio stato e lo salva (ADR 0002). Gli eventi sono effimeri e non entrano nel 
 - **Vietato** usare il Bus per chiedere dati. Nessun evento in stile richiesta/risposta.
 - Il divieto di asincronia non poggia sulla firma di `emit`: un'attesa dentro l'iterazione
   rispetterebbe il tipo `void` e romperebbe comunque il determinismo. Il meccanismo è INV-15 in
-  [tracciabilità](../tracciabilita.md), cioè `tests/rules/bus-sincrono`.
+  [tracciabilità](../tracciabilita.md), cioè `tests/rules/bus-synchronous`.
 - **`emit` può lanciare**, e chi lo chiama deve saperlo: `EventCycleError` se le emissioni annidate
   superano `MAX_EMIT_DEPTH`, oppure l'errore di un handler (un `AggregateError` se sono più d'uno),
   rilanciato dopo che tutti gli altri handler hanno girato.

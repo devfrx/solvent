@@ -70,7 +70,7 @@ iscritta dopo. Con la rimozione per identità di funzione quel test è rosso.
 dentro un tick, e con esso metà del valore del seed fisso dell'ADR 0005. Senza meccanismo, l'ADR
 0016 non poteva passare ad _Accettata_ onestamente.
 
-Correzione: `tests/rules/bus-sincrono.test.ts` legge `Bus.ts`, toglie i commenti — un commento che
+Correzione: `tests/rules/bus-synchronous.test.ts` legge `Bus.ts`, toglie i commenti — un commento che
 spiega il divieto lo nomina senza usarlo — e pretende che non resti nessuna forma di attesa. Nuova
 riga **INV-15** in [tracciabilità](../tracciabilita.md).
 
@@ -109,7 +109,7 @@ la correzione 3: l'iscrizione con il proprio stato costa più di un array di fun
 - [x] test: la guardia **ferma** la cascata invece di lasciarla proseguire (correzione 1)
 - [x] test: se lanciano due handler, emergono entrambi (correzione 2)
 - [x] test: un handler tolto durante un `emit` non riceve quell'emissione (correzione 3)
-- [x] `tests/rules/bus-sincrono.test.ts`: in `Bus.ts` non c'è niente di asincrono (correzione 4)
+- [x] `tests/rules/bus-synchronous.test.ts`: in `Bus.ts` non c'è niente di asincrono (correzione 4)
 
 ## Nota di chiusura
 
@@ -118,13 +118,13 @@ su 17).
 
 Le reti sono state rotte di proposito, e sono diventate rosse tutte:
 
-| Rottura indotta                                             | Cosa è diventato rosso                                       |
-| ----------------------------------------------------------- | ------------------------------------------------------------ |
-| iterare l'array vivo invece della copia                     | disiscriversi dentro un handler                              |
-| rimuovere per identità di funzione invece che di iscrizione | la `Unsubscribe` chiamata due volte                          |
-| raccogliere `EventCycleError` invece di rilanciarlo subito  | la cascata che non si ferma                                  |
-| togliere il ripristino della profondità nel `finally`       | 2 casi: la profondità sporca e il Bus dopo un ciclo          |
-| un `queueMicrotask` dentro `emit`                           | `tests/rules/bus-sincrono` — "expected 'queueMicrotask' ..." |
+| Rottura indotta                                             | Cosa è diventato rosso                                          |
+| ----------------------------------------------------------- | --------------------------------------------------------------- |
+| iterare l'array vivo invece della copia                     | disiscriversi dentro un handler                                 |
+| rimuovere per identità di funzione invece che di iscrizione | la `Unsubscribe` chiamata due volte                             |
+| raccogliere `EventCycleError` invece di rilanciarlo subito  | la cascata che non si ferma                                     |
+| togliere il ripristino della profondità nel `finally`       | 2 casi: la profondità sporca e il Bus dopo un ciclo             |
+| un `queueMicrotask` dentro `emit`                           | `tests/rules/bus-synchronous` — "expected 'queueMicrotask' ..." |
 
 La quarta riga è quella che vale di più: senza il `finally`, la profondità non torna mai indietro
 dopo un handler che lancia, e dopo `MAX_EMIT_DEPTH` emissioni **normali** il Bus comincerebbe a
