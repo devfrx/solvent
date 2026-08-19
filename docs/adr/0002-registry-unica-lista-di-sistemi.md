@@ -1,6 +1,6 @@
 # ADR 0002 — Il Registry è l'unica lista di sistemi
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — D006: `kernel/Registry.ts`, il tipo `Stateful<S>` e i due test di regola
 - **Data:** 2026-08-19
 
 ## Contesto
@@ -31,3 +31,11 @@ l'ordine di esecuzione dei tick deve essere leggibile in un solo file.
   `src/core/domains/*/system.ts`: se qualcuno crea un sistema e scorda di registrarlo, il test rompe.
 - Il `Registry` è l'unico consumatore legittimo di `save`/`load`/`reset`: nessun file scrive
   persistenza a mano.
+- Nessuna delle cinque operazioni contiene un ramo sull'`id` di un sistema. Non è una regola di
+  review: `tests/rules/registry-senza-casi-speciali` cerca la forma vietata in `Registry.ts`.
+- `ORDER` dichiara solo le fasi abitate. Ciò che protegge dall'accoppiamento fra sistemi non è il
+  numero di fasi ma il **passo di 100** più il pareggio per `id`: insieme rendono l'inserimento di
+  una fase nuova una riga sola, senza spostare l'ordine di nessun sistema esistente.
+- `loadAll` ritorna `Result`: un id sconosciuto è un esito normale (`ok` con l'elenco degli
+  ignorati), un `load` che lancia è un errore tipizzato. Lo stato di un sistema è opaco anche per
+  lo schema del main, quindi un salvataggio manomesso arriva fino al `load`.

@@ -30,8 +30,8 @@ Ogni delega dichiara un ordine di grandezza. Non è un limite contrattuale: è u
 Se la delega del Registry dichiara ~140 righe e ne stai scrivendo 400, non hai sforato un budget:
 stai risolvendo un problema diverso da quello descritto. Fermati e dillo, invece di continuare.
 
-Il kernel intero — D003 fino a D008 — sta in ~560 righe (il dettaglio, e da dove viene la crescita
-rispetto ai ~500 iniziali, è [nell'indice](#indice)). È una specifica, non una speranza.
+Il kernel intero — D003 fino a D008 — sta in ~530 righe (il dettaglio, e come ci è arrivato, è
+[nell'indice](#indice)). È una specifica, non una speranza.
 
 ## Ciclo di vita
 
@@ -86,7 +86,7 @@ configurato dopo che c'erano già 156 file.
 | [D003](D003-kernel-clock.md)         | Kernel: Clock                                                         | 20 codice + 116 test  | **Chiusa** |
 | [D004](D004-kernel-rng.md)           | Kernel: Rng                                                           | 55 codice + 172 test  | **Chiusa** |
 | [D005](D005-kernel-bus.md)           | Kernel: Bus                                                           | 67 codice + 303 test  | **Chiusa** |
-| [D006](D006-kernel-registry.md)      | Kernel: Registry                                                      | ~140                  | Aperta     |
+| [D006](D006-kernel-registry.md)      | Kernel: Registry                                                      | 124 codice + 406 test | **Chiusa** |
 | [D007](D007-kernel-ledger.md)        | Kernel: Ledger — pool, transazioni atomiche, partita doppia           | ~170                  | Aperta     |
 | [D008](D008-balance.md)              | Balance: costanti, modificatori, bersagli                             | ~90                   | Aperta     |
 | [D009](D009-persistenza-main.md)     | Persistenza nel processo main                                         | ~180                  | Aperta     |
@@ -100,5 +100,8 @@ D014 ha il numero più alto perché è nata dopo, con gli ADR 0017–0020. Nel g
 sta davvero: accanto a D010, prima di D011. **La numerazione è cronologica, l'ordine è il grafo** —
 rinumerare romperebbe i riferimenti nei commit e nella tracciabilità.
 
-Il kernel — D003, D004, D005, D006, D007, D008 — sta in **~560 righe**. Il budget iniziale era
-~500: la crescita viene tutta dal Ledger (ADR 0017, 0019, 0020) ed è dichiarata, non subita.
+Il kernel — D003, D004, D005, D006, D007, D008 — sta in **~530 righe**: 266 già scritte (Clock 20,
+Rng 55, Bus 67, Registry 124) più ~260 stimate per Ledger e Balance. Il budget iniziale era ~500,
+poi ~560 quando gli ADR 0017/0019/0020 hanno fatto crescere il Ledger; le prime quattro deleghe
+sono uscite sotto la stima e il conto è tornato in mezzo. Nessuna delle tre cifre è stata subita:
+ognuna è dichiarata dov'è cambiata.

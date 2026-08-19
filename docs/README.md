@@ -37,10 +37,12 @@ Venti minuti.
 **Devi cambiare qualcosa** → cerca la decisione nel [compendio](adr/README.md). Se esiste, la
 discussione riparte dalle alternative già scartate. Poi [convenzioni.md](convenzioni.md).
 
-**Devi aggiungere un sistema** → [delega/D006](delega/D006-kernel-registry.md), per capire cosa il
-Registry si aspetta, e [architettura.md](architettura.md#albero-delle-cartelle--la-forma-della-fetta-01)
-per sapere dove va il file. La procedura in venti righe si scrive quando il Registry esiste
-davvero: prima sarebbe una descrizione di codice non scritto.
+**Devi aggiungere un sistema** → una cartella sotto `src/core/domains/` con dentro `system.ts` che
+chiama `defineSystem`, e una riga di `register` nel bootstrap. Nient'altro, mai (ADR 0002). Il tipo
+è in `src/core/kernel/Registry.ts`; se il sistema ha `save`, il compilatore pretende anche `load` e
+`reset`. Il bootstrap nasce con [delega/D011](delega/D011-runtime-e-store.md): finché non esiste,
+il conteggio di `tests/rules/registry-completeness` è zero a zero e diventa rosso appena nasce la
+prima cartella senza la sua riga.
 
 **Devi decidere se una cosa si fa adesso** → [roadmap-fette.md](roadmap-fette.md), sezione
 registro YAGNI. Se è lì, guarda il grilletto.
@@ -69,16 +71,16 @@ agganciata al difetto misurato che la giustifica.
 la simulazione nel renderer. Le decisioni prese in autonomia — pool con affordance, transazioni
 atomiche, partita doppia — sono elencate nel [compendio](adr/README.md#decisioni-prese-in-autonomia-contestabili).
 
-**D001, [D002](delega/D002-contratti.md), [D003](delega/D003-kernel-clock.md),
-[D004](delega/D004-kernel-rng.md) e [D005](delega/D005-kernel-bus.md) sono chiuse.** Le regole del
-progetto sono eseguibili, i contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger,
-`boundedList`, gli eventi, il salvataggio, i comandi — e del kernel ci sono il Clock, l'Rng e il
-Bus. Il codice di dominio non è ancora iniziato: la prossima delega è
-[D006 — Registry](delega/D006-kernel-registry.md), che ha ora tutte e tre le dipendenze.
+**Da D001 a [D006](delega/D006-kernel-registry.md) sono chiuse.** Le regole del progetto sono
+eseguibili, i contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger, `boundedList`, gli
+eventi, il salvataggio, i comandi — e del kernel ci sono Clock, Rng, Bus e Registry. Il codice di
+dominio non è ancora iniziato: la prossima delega è
+[D007 — Ledger](delega/D007-kernel-ledger.md), dopo la quale del kernel resta solo il Balance.
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati
 [0006](adr/0006-decimal-end-to-end-per-il-denaro.md) e
 [0007](adr/0007-result-come-unico-stile-di-esito.md), con D004
 [0005](adr/0005-rng-seedato-con-stream-per-dominio.md), con D005
-[0016](adr/0016-il-bus-e-sincrono-e-fire-and-forget.md).
+[0016](adr/0016-il-bus-e-sincrono-e-fire-and-forget.md), con D006
+[0002](adr/0002-registry-unica-lista-di-sistemi.md).
