@@ -50,7 +50,7 @@ sono ancora state eseguite.
 
 ### Cosa è già cambiato nelle deleghe ancora aperte
 
-Venti cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve
+Diciassette cose che il testo di quelle deleghe **non** dice ancora, e che chi le esegue deve
 sapere prima di iniziare. Sono qui perché una delega chiusa è un documento storico: nessuno la
 rilegge.
 
@@ -66,10 +66,7 @@ rilegge.
 | D010, D011, D014 | **`SystemContext` ha quattro campi** — `clock`, `rng`, `bus`, `ledger` — e **`ResetScope` si importa da `@core/contracts/lifecycle`**, non più dal Registry                                                                                                                                                                                                                             |
 | D010, D014       | La **ragione** sta sulla `Transaction`, la **categoria** sul `Posting`. Un prelievo è un evento solo con tre righe                                                                                                                                                                                                                                                                      |
 | D010, D014       | Un'azione che accetta solo certi strumenti lo dichiara in `TransactionMeta.accepts`. Assente = nessun vincolo, e vincola solo i pool del giocatore                                                                                                                                                                                                                                      |
-| D009             | `SavePayload` ha tre chiavi: `ledger`, `rng`, `systems`. Le prime due sono tipizzate a fondo, lo stato dei sistemi è opaco (`Record<string, unknown>`), perché il contratto non può conoscere i domini                                                                                                                                                                                  |
-| D009             | `LedgerSave.balances` ha **sei** chiavi, non due: i conti non-giocatore entrano nel salvataggio (ADR 0020), altrimenti al ricaricamento la somma non farebbe zero. Lo schema `zod` le vuole tutte e sei, come stringhe decimali                                                                                                                                                         |
-| D009             | **Il main non verifica la somma zero**, e non deve: lo fa il Ledger quando carica, e lancia `UnbalancedSaveError`. Lo schema controlla la forma; l'invariante è del Ledger, non del contratto                                                                                                                                                                                           |
-| D009             | **Il canale `reset` non porta un `ResetScope`**: quel tipo vive in `contracts/lifecycle.ts` e INV-03 lascia al main il solo `contracts/save.ts`. Il reset del main è "cancella il salvataggio"; l'ambito soft/hard resta del renderer. INV-03 adesso ha la sua rete: `tests/rules/main-save-only`                                                                                       |
+| D009             | **Il testo della delega è stato aggiornato il 2026-08-19.** Le quattro voci che stavano qui sono dentro, insieme ad altre quattro nate dal prepararla: i tipi d'esito in `contracts/save.ts`, `src/main/index.ts` dentro lo scopo, il controllo sul `max` di una lista che ne esce, e il budget rimisurato. Si legge la sezione _Cosa è cambiato_ della delega e non serve altro        |
 | D010, D011, D014 | **`Bus.emit` può lanciare**: `EventCycleError` sui cicli, o l'errore di un handler (`AggregateError` se sono più d'uno). Un `tick` che emette non è un'operazione che non fallisce mai                                                                                                                                                                                                  |
 | D011             | **Anche il Ledger lancia**: `UnbalancedTransactionError` e `NestedTransactionError` dicono che il codice è scritto male, `UnbalancedSaveError` che il salvataggio è manomesso. E **`RECOVERY_CAP` è in tick**, non in secondi: il loop lo confronta con i tick interi da recuperare, senza conversioni proprie                                                                          |
 | D011             | Il loop deve decidere cosa fa quando `emit` o il Ledger lanciano. Fermare la simulazione è la risposta giusta: dicono che qualcosa è scritto male, non che il giocatore ha sbagliato. **`loadAll` ritorna `Result<LoadReport, RegistryError>`**, e quel caso va nello stato `Errore`, non ignorato                                                                                      |
@@ -133,21 +130,30 @@ Non serve leggere tutti i 20 ADR. Servono quando stai per contraddirne uno: allo
 
 ## Il prossimo passo, in concreto
 
-**[D009 — Persistenza nel main](D009-persistenza-main.md).** `src/main/save/`: lo schema `zod`
-della busta, la scrittura atomica su disco, la mappa delle migrazioni (vuota, per la versione 1) e
-i tre canali IPC. Più `src/preload/index.ts`, che espone quei tre e nient'altro. ~180 righe: è la
+**[D009 — Persistenza nel main](D009-persistenza-main.md).** `src/main/`: la finestra con le tre
+difese accese, lo schema `zod` della busta, la scrittura atomica su disco, la mappa delle
+migrazioni (vuota, per la versione 1) e i tre canali IPC. Più `src/preload/index.ts`, che espone
+quei tre e nient'altro, e i tipi d'esito che crescono in `contracts/save.ts`. **~280 righe**: è la
 delega più grande rimasta, ed è la prima che esce da `core/`.
 
-Tre cose da sapere prima di iniziare:
+Il testo della delega è stato **preparato il 2026-08-19**: contiene già tutto ciò che è cambiato
+dopo che fu scritta, in una sezione sua. Si esegue com'è.
+
+Quattro cose da sapere prima di iniziare:
 
 1. **Uno schema che non fallisce mai sta decorando.** Il difetto A08 erano 915 righe di schema
    nate valide e diventate stale perché nessuno le eseguiva. Qui `zod` è **eseguito** a ogni
    caricamento, e i test lo mettono davanti a un payload sbagliato per davvero.
 2. **L'ordine è: valida la busta, migra, valida il payload migrato.** Validare prima di migrare
    fallisce sempre, e chi lo sistema di solito lo sistema togliendo la validazione.
-3. **Il main vede solo `core/contracts/save.ts`** (INV-03, imposto da ESLint). Non conosce il
-   Ledger, non conosce il Registry, e non deve: la somma zero la verifica il Ledger quando carica,
-   non lo schema.
+3. **Il main vede solo `core/contracts/save.ts`.** Non conosce il Ledger, non conosce il Registry,
+   e non deve: la somma zero la verifica il Ledger quando carica, non lo schema. Attenzione al
+   punto in cui questo morde: ESLint vieta `kernel/`, `domains/` e `balance/`, quindi un
+   `contracts/money` passerebbe il lint — a fermarlo è `tests/rules/main-save-only`, ed è quello
+   ad avere ragione.
+4. **`Result` non è importabile dal main**, per la stessa regola. I tipi d'esito del salvataggio
+   nascono dentro `contracts/save.ts`: la delega li scrive per esteso, ed è una decisione presa in
+   autonomia e contestabile.
 
 Poi si prosegue col grafo in [delega/README.md](README.md): D009 la persistenza, D010 e D014 i
 domini, D011 e D012 il runtime e la UI, D013 la verifica finale — che è lo **STOP 2**, dove ci si
