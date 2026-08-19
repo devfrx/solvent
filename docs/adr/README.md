@@ -25,7 +25,8 @@ Una decisione diventa _Accettata_ nel commit che introduce il meccanismo che la 
 prima, altrimenti sarebbe solo una buona intenzione.
 
 Sono passate ad _Accettata_: **0006** e **0007** con [D002](../delega/D002-contratti.md),
-**0005** con [D004](../delega/D004-kernel-rng.md). Il loro meccanismo è tutto dentro quella delega.
+**0005** con [D004](../delega/D004-kernel-rng.md), **0016** con
+[D005](../delega/D005-kernel-bus.md). Il loro meccanismo è tutto dentro quella delega.
 
 Le altre restano _Proposta_ perché il meccanismo è a metà: **0004** e **0010** si chiudono con D009
 (lo schema del main), **0017** con D007 (il Ledger che legge `POOLS`), **0009** con D011 — i tipi
@@ -51,7 +52,7 @@ vigore.
 | [0013](0013-prettier-e-autorita-sulla-formattazione.md)             | Prettier è l'unica autorità sulla formattazione        | Proposta      | il diff di ogni commit                                                  | A16             |
 | [0014](0014-una-fetta-verticale-alla-volta.md)                      | Una fetta verticale alla volta                         | Proposta      | l'ordine di tutto il lavoro futuro                                      | A17             |
 | [0015](0015-criterio-di-ammissione-delle-dipendenze.md)             | Criterio di ammissione delle dipendenze                | Proposta      | ogni `npm install` da qui in avanti                                     | —               |
-| [0016](0016-il-bus-e-sincrono-e-fire-and-forget.md)                 | Il Bus è sincrono, fire-and-forget, non event sourcing | Proposta      | la forma di ogni handler e di ogni sistema                              | —               |
+| [0016](0016-il-bus-e-sincrono-e-fire-and-forget.md)                 | Il Bus è sincrono, fire-and-forget, non event sourcing | **Accettata** | la forma di ogni handler e di ogni sistema                              | —               |
 | [0017](0017-il-denaro-e-plurale.md)                                 | Il denaro è plurale: pool con affordance diverse       | Proposta      | ogni azione che muove denaro, in ogni dominio                           | —               |
 | [0018](0018-la-home-e-un-atm.md)                                    | La home è un ATM, non una dashboard                    | Proposta      | la schermata principale e la navigazione                                | —               |
 | [0019](0019-transazioni-atomiche-nel-ledger.md)                     | Il Ledger applica transazioni atomiche                 | Proposta      | la primitiva di ogni movimento di denaro                                | —               |

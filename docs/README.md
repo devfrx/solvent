@@ -67,14 +67,16 @@ agganciata al difetto misurato che la giustifica.
 la simulazione nel renderer. Le decisioni prese in autonomia — pool con affordance, transazioni
 atomiche, partita doppia — sono elencate nel [compendio](adr/README.md#decisioni-prese-in-autonomia-contestabili).
 
-**D001, [D002](delega/D002-contratti.md), [D003](delega/D003-kernel-clock.md) e
-[D004](delega/D004-kernel-rng.md) sono chiuse.** Le regole del progetto sono eseguibili, i
-contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger, `boundedList`, gli eventi, il
-salvataggio, i comandi — e del kernel ci sono il Clock e l'Rng. Il codice di dominio non è ancora
-iniziato: la prossima delega è [D005 — Bus](delega/D005-kernel-bus.md), l'ultimo pezzo che manca
-prima del Registry.
+**D001, [D002](delega/D002-contratti.md), [D003](delega/D003-kernel-clock.md),
+[D004](delega/D004-kernel-rng.md) e [D005](delega/D005-kernel-bus.md) sono chiuse.** Le regole del
+progetto sono eseguibili, i contratti esistono — `Result`, `Money`, i pool, i tipi del Ledger,
+`boundedList`, gli eventi, il salvataggio, i comandi — e del kernel ci sono il Clock, l'Rng e il
+Bus. Il codice di dominio non è ancora iniziato: la prossima delega è
+[D006 — Registry](delega/D006-kernel-registry.md), che ha ora tutte e tre le dipendenze.
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati
 [0006](adr/0006-decimal-end-to-end-per-il-denaro.md) e
-[0007](adr/0007-result-come-unico-stile-di-esito.md).
+[0007](adr/0007-result-come-unico-stile-di-esito.md), con D004
+[0005](adr/0005-rng-seedato-con-stream-per-dominio.md), con D005
+[0016](adr/0016-il-bus-e-sincrono-e-fire-and-forget.md).

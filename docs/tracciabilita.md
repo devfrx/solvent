@@ -89,6 +89,7 @@ segnala che un confine si sta spostando.
 | INV-12 | Il cruscotto della home non supera i **sei** riquadri                             | ADR 0018 | `tests/rules/home-tiles`                                         |
 | INV-13 | Il renderer non può usare le API di Node                                          | ADR 0001 | `tsconfig.web.json` senza tipi `node` — 🔒, non compila          |
 | INV-14 | Nessun gate sparisce dalla catena `verify`                                        | ADR 0013 | `tests/rules/gates`                                              |
+| INV-15 | Il Bus è sincrono: nessuna attesa, nessuna coda dentro `emit`                     | ADR 0016 | `tests/rules/bus-sincrono` — la firma `void` da sola non basta   |
 
 ## Le regole di lint si verificano da sole
 
