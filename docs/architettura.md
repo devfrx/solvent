@@ -137,8 +137,8 @@ solvent/
    ├─ save/            roundtrip
    ├─ balance/         targets
    ├─ i18n/            parity
-   └─ rules/           no-logic-in-vue · no-literal-in-template · registry-completeness
-                       product-identity · no-todo
+   └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
+                       no-logic-in-vue · no-literal-in-template · registry-completeness
 ```
 
 ## Le 12 regole e chi le fa rispettare

@@ -1,11 +1,11 @@
 # D003 — Kernel: Clock
 
-- **Stato:** Aperta
+- **Stato:** **Chiusa** — 2026-08-19, commit `f398a47`, ramo `d003-kernel-clock`
 - **Dipende da:** D002
 - **Sblocca:** D006
 - **ADR vincolanti:** 0009
 - **Regole:** R04
-- **Budget:** ~40 righe
+- **Budget:** ~40 righe → **consuntivo: 20 righe di codice** (48 con i commenti) + 116 di test
 
 ## Obiettivo
 
@@ -29,6 +29,38 @@ un numero senza unità a un'API temporale.
 - `Clock` non ha stato: non sa che ora è, non sa quanto tempo è passato. Converte e basta.
   Il tempo che scorre è del loop (D011), non del Clock.
 
+## Cinque correzioni rispetto a com'era scritta questa delega
+
+**1. Le quattro conversioni non erano nominate.** Sono `secondsToTicks`, `ticksToSeconds`,
+`perSecondToPerTick` e `perTickToPerSecond`. La quarta serve alla UI (D012), che mostra il reddito
+**al secondo** mentre la simulazione lo calcola **al tick**: senza, quella conversione nascerebbe
+nel componente, cioè fuori dal Clock, cioè il difetto A04 con un nome nuovo.
+
+**2. Le conversioni non arrotondano.** La definizione di fatto chiedeva il round-trip anche sui
+valori frazionari, quindi `secondsToTicks(0,25 s)` fa **2,5 tick**. Vale la pena scriverlo perché
+"tick" suona intero: l'arrotondamento a tick interi è dell'accumulatore del loop (D011), e il
+tempo frazionario che avanza resta lì. Il Clock converte, non decide.
+
+**3. Il `grep` della definizione di fatto è diventato un test.**
+`grep -rn "TICKS_PER_SECOND *=" src/` eseguito una volta non protegge niente: la seconda
+definizione nasce il mese dopo. Ora è `tests/rules/tick-rate.test.ts`, che verifica anche il
+proprio rilevatore — una definizione scatta, un uso no.
+
+**4. Il secondo invariante non ha bisogno di un grep.** "Cercare i letterali `10`, `100`, `600`,
+`3600` in `src/core/domains/**` non restituisce nulla" è già imposto da `no-magic-numbers`, che è
+attivo proprio lì e già verificato in `lint-rules.test.ts`. Aggiungere un grep sarebbe un secondo
+meccanismo più debole sulla stessa regola. L'invariante resta vero; il modo di verificarlo è il
+lint.
+
+**5. Il primo caso di prova sul float era sbagliato, ed è diventato rosso subito.** Per mostrare
+che la virgola mobile perde, il test scriveva `expect(0.3 / 10).not.toBe(0.03)` — ma `0.3 / 10` fa
+esattamente `0.03`, quindi il caso non dimostrava niente. Il valore che perde davvero è
+`0.7 / 10 = 0.06999999999999999`. È lo stesso errore del caso R04 in D001: un test che sembra
+dimostrare qualcosa e non dimostra nulla, e che si scopre solo eseguendolo.
+
+Sul budget: ~40 righe previste, 20 di codice e 48 col commento in testa. Il preventivo contava le
+righe del file, non le istruzioni — è la stessa lettura da fare per le prossime.
+
 ## Fuori scope
 
 - L'accumulatore e il loop: sono in `renderer/runtime/loop.ts` (D011). Il Clock è puro.
@@ -37,10 +69,28 @@ un numero senza unità a un'API temporale.
 
 ## Definizione di fatto
 
-- [ ] test: andata e ritorno `secondsToTicks` / `ticksToSeconds` su valori interi e frazionari
-- [ ] test: `perSecondToPerTick` di 100 al secondo dà 10 al tick, in `Decimal`
-- [ ] test `@ts-expect-error`: un `number` nudo passato dove serve `Ticks` non compila
-- [ ] `grep -rn "TICKS_PER_SECOND *=" src/` restituisce esattamente una riga
+- [x] test: andata e ritorno `secondsToTicks` / `ticksToSeconds` su valori interi e frazionari
+- [x] test: `perSecondToPerTick` di 100 al secondo dà 10 al tick, in `Decimal`
+- [x] test `@ts-expect-error`: un `number` nudo passato dove serve `Ticks` non compila — più il
+      caso che conta di più, `Ticks` passato dove serve `Seconds`
+- [x] la definizione di `TICKS_PER_SECOND` è una sola, e ora lo verifica un test permanente
+      invece di un `grep` eseguito una volta
+
+## Nota di chiusura
+
+`npm run verify` → typecheck, lint, format:check, test: **verdi**, 88 test su 15 file.
+
+Le reti sono state rotte di proposito, e sono diventate rosse tutte:
+
+| Rottura indotta                                 | Cosa è diventato rosso                             |
+| ----------------------------------------------- | -------------------------------------------------- |
+| `Ticks` ridotto a `number`                      | `npm run typecheck` — due `@ts-expect-error` vuoti |
+| un `now()` aggiunto al `clock`                  | `tests/kernel/clock.test.ts`                       |
+| una seconda `TICKS_PER_SECOND` sotto `domains/` | `tests/rules/tick-rate.test.ts`                    |
+
+[ADR 0009](../adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md) **resta Proposta**: i tipi
+branded e la frequenza unica sono qui, ma il passo fisso con accumulatore — l'altra metà della
+decisione — vive nel loop di D011. Metà meccanismo non è una decisione in vigore.
 
 ## Trappole note
 
