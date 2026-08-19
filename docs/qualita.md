@@ -15,7 +15,7 @@ Questo documento dice quali sono, cosa garantisce ciascuno, e cosa nessuno di es
 | G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint          | ~7 s              |
 | G5  | `npm run build`        | l'applicazione si compila davvero, main e renderer                                                | decine di secondi |
 
-Misurati a D008 chiusa su Windows, con 204 test. Sono tempi **di parete**, quindi comprendono
+Misurati a D008 chiusa su Windows, con 204 test — la rete di INV-03 aggiunta subito dopo ne porta 206, e non sposta i tempi. Sono tempi **di parete**, quindi comprendono
 l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre `npm run`. La parte di
 lavoro vero è meno della metà del totale.
 

@@ -146,7 +146,7 @@ solvent/
    ├─ balance/         modifiers · targets
    ├─ i18n/            parity
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
-                       eslint-disable · bus-sincrono
+                       eslint-disable · bus-sincrono · main-solo-save
                        registry-completeness · registry-senza-casi-speciali
                        link-documenti
                        no-logic-in-vue · no-literal-in-template
