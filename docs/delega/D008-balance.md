@@ -1,6 +1,6 @@
 # D008 — Balance: costanti, modificatori, bersagli
 
-- **Stato:** **Chiusa** — 2026-08-19, commit `DA-ANNOTARE`, ramo `d008-balance`
+- **Stato:** **Chiusa** — 2026-08-19, commit `e01e885`, ramo `d008-balance`
 - **Dipende da:** D006, D007
 - **Sblocca:** D010
 - **ADR vincolanti:** 0009 (il tetto di recupero vive qui)

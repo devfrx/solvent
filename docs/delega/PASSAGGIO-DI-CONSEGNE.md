@@ -28,7 +28,7 @@ stesso numero.
 | D005 — kernel: Bus      | **chiusa**, commit `e9cf441`                                |
 | D006 — kernel: Registry | **chiusa**, commit `39b8520`                                |
 | D007 — kernel: Ledger   | **chiusa**, commit `f9a0c59`                                |
-| D008 — balance          | **chiusa**, commit `DA-ANNOTARE`                            |
+| D008 — balance          | **chiusa**, commit `e01e885`                                |
 | Kernel                  | **finito** — 535 righe, da D003 a D008                      |
 | Codice di dominio       | **zero righe**                                              |
 | `npm run verify`        | **verde** — 204 test su 27 file                             |
