@@ -114,3 +114,8 @@ che invecchia male:
    `.vue` con una regex: non vede una stringa assemblata a runtime.
 3. **C04 e C05** dipendono dalla review. Sono le due sole righe 👤 del progetto, ed è deliberato:
    meccanizzarle costerebbe più di quanto valgano. Se diventano tre, è un segnale.
+4. **R02 finché il bootstrap non esiste.** `tests/rules/registry-completeness` confronta le cartelle
+   di dominio con le registrazioni in `createGame.ts`, e quel file nasce con D011 — dopo D010 e
+   D014. Nella finestra in cui i sistemi esistono e il bootstrap no, il test dichiara l'attesa
+   invece di confrontare: dal giorno in cui il file c'è, il confronto è secco. È la stessa forma di
+   `tests/rules/gates` per `typecheck:web`, ed è un buco dichiarato, non nascosto.

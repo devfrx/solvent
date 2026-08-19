@@ -1,11 +1,10 @@
 # Flusso di un tick
 
 Cosa succede fra un frame del browser e un cambiamento di saldo. È il disegno **vincolante** del
-loop della fetta 01. Il Ledger che si vede qui esiste da [D007](../delega/D007-kernel-ledger.md);
-il sistema che lo chiama e il loop che lo fa girare **non esistono ancora**, e arrivano con
-[D010](../delega/D010-dominio-income.md) e [D011](../delega/D011-runtime-e-store.md). Quando
-arriveranno dovranno corrispondere a questo disegno, e se il loop cambia questo file cambia nello
-stesso commit.
+loop della fetta 01. Il Ledger esiste da [D007](../delega/D007-kernel-ledger.md) e il sistema
+`income` da [D010](../delega/D010-dominio-income.md); il **loop** che li fa girare non esiste
+ancora e arriva con [D011](../delega/D011-runtime-e-store.md). Quando arriverà dovrà corrispondere
+a questo disegno, e se il loop cambia questo file cambia nello stesso commit.
 
 Decisioni rilevanti: [ADR 0009](../adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md) (passo
 fisso), [ADR 0002](../adr/0002-registry-unica-lista-di-sistemi.md) (chi itera),
@@ -54,9 +53,8 @@ sequenceDiagram
     L->>R: tickAll(ctx, n)
     Note over R: itera i sistemi ordinati per `order`<br/>è l'unica lista che esiste
     R->>S: tick(ctx, n)
-    S->>S: legge il proprio stato
-    S->>P: guadagnoPerTick(stato, modificatori)
-    Note over P: funzione pura:<br/>nessun ctx, nessun effetto
+    S->>P: incomeOver(clock, modificatori, n)
+    Note over P: funzione pura: nessun ctx, nessun effetto<br/>lo stato non entra: l'upgrade è un modificatore
     P-->>S: Money
     S->>LG: transaction — reason.income.tick, categoria income
     Note over LG: due movimenti: world -X e cash +X<br/>somma zero (ADR 0020)
@@ -74,8 +72,10 @@ Quattro punti che il diagramma rende visibili meglio di qualsiasi paragrafo:
 2. **Il reddito non nasce dal nulla: esce da `world`.** Il sistema non nomina `world` a mano — lo
    fa il costruttore `income()` del Ledger (INV-10). Se un movimento solo bastasse, la somma di
    tutti i conti smetterebbe di essere zero e la partita doppia sarebbe una decorazione.
-3. **Il calcolo è nella funzione pura**, che non riceve il contesto. È testabile da sola con un
-   seed fisso e senza impalcature.
+3. **Il calcolo è nella funzione pura**, che non riceve il contesto — nemmeno il `Clock`, che
+   arriva per argomento come qualunque altro dato. È testabile da sola, senza impalcature. Non
+   riceve lo **stato** del sistema: l'upgrade agisce come modificatore, quindi nel calcolo del
+   reddito lo stato non ha parte (D010, correzione 4).
 4. **Lo store è un lettore, non una fonte.** Riceve dal Bus, non calcola. Se lo store calcolasse,
    il gioco non sarebbe simulabile senza Vue — e cadrebbe l'ADR 0001.
 
@@ -92,7 +92,7 @@ sequenceDiagram
     participant B as Bus
     participant I as i18n
 
-    C->>ST: compraUpgrade()
+    C->>ST: buyUpgrade()
     ST->>CMD: esegue
     CMD->>LG: transaction — reason.income.upgrade, categoria purchase
     Note over LG: due movimenti: card -costo e sink +costo<br/>l'upgrade si paga solo con la carta (D010)
@@ -100,7 +100,8 @@ sequenceDiagram
         LG->>B: emit('money.posted', { transaction, balances })
         LG-->>CMD: Result ok con i saldi nuovi
         CMD->>CMD: registra il modificatore sul bersaglio income.all
-        CMD-->>ST: Result ok
+        CMD-->>ST: Result ok con lo stato NUOVO
+        Note over ST: chi possiede lo stato lo assegna solo qui:<br/>prima il denaro, poi lo stato
     else saldo insufficiente
         Note over LG: nessun saldo si muove, nessun evento (ADR 0019)
         LG-->>CMD: error error.ledger.insufficient_funds — pool, required, available
