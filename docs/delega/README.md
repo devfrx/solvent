@@ -115,8 +115,8 @@ non si è toccata. Il caveau adesso trova il listino invece di doverselo inventa
 [D017](D017-il-caveau.md) c'è scritto cosa esattamente.
 
 **D020 usa lo stesso argomento di D001, ed è la seconda volta che il progetto lo accetta.** Il
-caveau è il **secondo** dominio con stato, e oggi niente obbliga un dominio a controllare il
-salvataggio che riceve. Se la regola nascesse dentro D017, la scriverebbe la stessa persona che
+caveau è il **secondo** dominio con stato, e fino a D020 niente obbligava un dominio a controllare
+il salvataggio che riceve. Se la regola nascesse dentro D017, la scriverebbe la stessa persona che
 scrive il codice da sorvegliare, nello stesso momento: non sorveglierebbe niente. Zero righe di
 sorgente, settanta di test.
 
