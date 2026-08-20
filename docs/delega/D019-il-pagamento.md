@@ -277,25 +277,26 @@ ambiente non passa. Store, Ledger e componenti sono quelli veri.
 
 ### Le reti sono state rotte una alla volta
 
-Sette rotture indotte, una per volta, con il ripristino subito dopo. Ogni test nuovo compare almeno
-una volta in questa tabella.
+Undici rotture indotte, una per volta e con il ripristino subito dopo, raccolte qui in sette righe:
+le ultime quattro rompono il contratto in quattro modi diversi e vanno a segno sullo stesso file.
+Ogni test nuovo compare almeno una volta in questa tabella.
 
-| Rottura indotta                                                  | Cosa è diventato rosso                                          |
-| ---------------------------------------------------------------- | --------------------------------------------------------------- |
-| il prezzo del listino diventa una **copia** (`.plus(0)`)         | i **tre** test di identità — e nessuno di quelli di uguaglianza |
-| `accepts` scritto a mano come «carta e contanti»                 | `domains/income/commands` — 2 casi                              |
-| il listino risponde con la carta per **qualunque** strumento     | `domains/income` — 5 casi · `renderer/store` — 2 casi           |
-| il listino offre i contanti invece della carta                   | `domains/income/rules` — 4 casi                                 |
-| `canBuyUpgrade` guarda metà del prezzo dell'opzione              | `domains/income` — 2 casi · `renderer/store` — 1 caso           |
-| lo store si costruisce il listino da solo, come lista vuota      | `renderer/store` — 2 casi                                       |
-| `PaymentOption` perde `readonly`, prende il calore, apre il pool | `contracts/payment` — quattro `@ts-expect-error` inutilizzate   |
+| Rottura indotta                                                                                                        | Cosa è diventato rosso                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| il prezzo del listino diventa una **copia** (`.plus(0)`)                                                               | i **tre** test di identità — e nessuno di quelli di uguaglianza                             |
+| `accepts` scritto a mano come «carta e contanti»                                                                       | `domains/income/commands` — 2 casi                                                          |
+| il listino risponde con la carta per **qualunque** strumento                                                           | `domains/income` — 5 casi · `renderer/store` — 2 casi                                       |
+| il listino offre i contanti invece della carta                                                                         | `domains/income/rules` — 4 casi                                                             |
+| `canBuyUpgrade` guarda metà del prezzo dell'opzione                                                                    | `domains/income` — 2 casi · `renderer/store` — 1 caso                                       |
+| lo store si costruisce il listino da solo, come lista vuota                                                            | `renderer/store` — 2 casi                                                                   |
+| `PaymentOption` perde `readonly` · prende il calore · apre il pool a una stringa · il listino diventa una tupla di uno | il **typecheck**: tre `@ts-expect-error` inutilizzate, e un `TS2322` sul listino a due voci |
 
 La prima riga è la più utile, ed è la lezione della correzione 14 di
 [D015](D015-home-bancomat.md): un prezzo copiato passa `toEqual` e rompe INV-19 lo stesso. Sono
 tre i test che se ne accorgono, e nessuno dei tre lo farebbe scritto con l'uguaglianza.
 
-L'ultima riga è di un genere diverso: lì il rosso non è un test che fallisce, è il **typecheck** che
-segnala una direttiva `@ts-expect-error` inutilizzata. Un errore atteso che smette di esserlo è
+L'ultima riga è di un genere diverso: lì il rosso non è un test che fallisce, è il **typecheck**.
+Un errore atteso che smette di esserlo — una direttiva `@ts-expect-error` inutilizzata — è
 esattamente la forma in cui un contratto si allarga senza che nessuno se ne accorga.
 
 ### Cosa deve sapere chi prende D017
