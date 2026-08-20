@@ -18,6 +18,14 @@ const INITIAL: IncomeState = { upgraded: false }
 
 export interface Income {
   readonly system: Stateful<IncomeSave>
+  /**
+   * Lo stato, in sola lettura. Serve a chi deve **anticipare** l'esito di un acquisto —
+   * `canBuyUpgrade` lo vuole per argomento — e non è `save()` travestito: `save()` è il contratto
+   * con il disco, e i due nomi restano distinti proprio perché rispondono a domande diverse
+   * (`types.ts`). Il giorno in cui lo stato guadagna un campo che non si salva, questa firma non
+   * cambia e quella sì.
+   */
+  readonly state: () => IncomeState
   readonly buyUpgrade: CommandHandler<void, IncomeState, IncomeError>
 }
 
@@ -85,6 +93,8 @@ export const createIncome = (ledger: Ledger, modifiers: Modifiers): Income => {
         syncUpgradeModifier()
       }
     }),
+
+    state: () => state,
 
     buyUpgrade: () => {
       const bought = purchase(state)

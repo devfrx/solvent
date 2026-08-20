@@ -110,16 +110,26 @@ che invecchia male:
 
 1. **R10 fuori dai comandi.** Il lint vieta i literal con chiave `success`, ma non impedisce a una
    funzione qualsiasi di ritornare `boolean`. Copre la seconda convenzione, non il degrado.
-2. **R12 sulle stringhe costruite dinamicamente.** Il test cerca testo letterale nei template
-   `.vue` con una regex: non vede una stringa assemblata a runtime.
+2. **R12 fuori dai nodi di testo.** `tests/rules/no-literal-in-template` cerca testo letterale
+   nei template `.vue` togliendo tag, commenti e interpolazioni: prende `<p>Compra</p>` e non vede
+   né una stringa assemblata a runtime né un attributo — un `placeholder="Importo"` le sfugge.
+   Quello che la parità **non** poteva vedere, e che ora vede, è un segnaposto perso in una
+   traduzione sola: `tests/i18n/parity` confronta anche i `{nomi}` fra le due lingue.
 3. **C04 e C05** dipendono dalla review. Sono le due sole righe 👤 del progetto, ed è deliberato:
    meccanizzarle costerebbe più di quanto valgano. Se diventano tre, è un segnale.
 4. **`runtime/host.ts` non ha test.** È l'unico file del progetto senza, ed è una conseguenza
    dichiarata del confine: quel file **è** il browser — `window`, `document`,
    `requestAnimationFrame`, `performance` — e tutto ciò che sta sopra lo riceve per costruzione,
    quindi gira in `node` senza jsdom. Che gli eventi giusti siano agganciati lo dice la lettura,
-   non un test. Il grilletto è già scritto: `vitest.config.ts` dichiara che jsdom entra con i test
-   di componente, cioè con D012.
+   non un test.
+
+   La riga che stava qui diceva che il grilletto era D012 — «jsdom entra con i test di
+   componente». **Non è successo**, e la ragione è buona: la definizione di fatto di D012 non
+   chiede di montare un componente, e montarlo costa due dipendenze nuove, cioè un ADR. Le due
+   verifiche a occhio di quella delega sono diventate test per un'altra strada, estraendo
+   `createTranslator(wording)` dal composable — lo stesso confine di `host.ts`, applicato alle
+   parole. Il grilletto vero è ora nel [registro YAGNI](roadmap-fette.md), e non è una data: è il
+   primo componente con stato locale non banale.
 
    La riga che stava qui — _R02 finché il bootstrap non esiste_ — **è chiusa**: `createGame.ts`
    esiste da D011, e `registry-completeness` fa un confronto secco.

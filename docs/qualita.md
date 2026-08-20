@@ -7,17 +7,20 @@ Questo documento dice quali sono, cosa garantisce ciascuno, e cosa nessuno di es
 
 ## I quattro gate veloci, più uno di rilascio
 
-| #   | Comando                | Cosa garantisce                                                                                   | Tempo reale       |
-| --- | ---------------------- | ------------------------------------------------------------------------------------------------- | ----------------- |
-| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, INV-13 + nessun codice morto (C01) | ~11 s             |
-| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                         | ~7 s              |
-| G3  | `npm run format:check` | il codice è formattato (C02)                                                                      | ~5 s              |
-| G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint          | ~7 s              |
-| G5  | `npm run build`        | l'applicazione si compila davvero, main e renderer                                                | decine di secondi |
+| #   | Comando                | Cosa garantisce                                                                                 | Tempo reale       |
+| --- | ---------------------- | ----------------------------------------------------------------------------------------------- | ----------------- |
+| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, R12, INV-13 + codice morto (C01) | ~13 s             |
+| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                       | ~10 s             |
+| G3  | `npm run format:check` | il codice è formattato (C02)                                                                    | ~6 s              |
+| G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint        | ~7 s              |
+| G5  | `npm run build`        | l'applicazione si compila davvero, main e renderer                                              | decine di secondi |
 
-Rimisurati a D009 chiusa su Windows, con 266 test. Sono tempi **di parete**, quindi comprendono
+Rimisurati a D012 chiusa su Windows, con 436 test. Sono tempi **di parete**, quindi comprendono
 l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre `npm run`. La parte di
 lavoro vero è meno della metà del totale.
+
+Da D012 il **typecheck** copre anche R12: `Dictionary` è un `Record` totale sulle chiavi, quindi
+una `Reason` o un codice d'errore senza traduzione non compila, in nessuna delle due lingue.
 
 Due comandi, non uno, ed è deliberato:
 
@@ -26,11 +29,16 @@ Due comandi, non uno, ed è deliberato:
 
 **Perché separati.** Il tempo atteso è parte della specifica: un gate lento viene aggirato. I
 quattro veloci stanno **sotto il minuto** — venticinque secondi a D006, trentuno a D007, fra
-ventisette e trenta a D008, ventotto e ventinove a D009 su due misure consecutive — e si
+ventisette e trenta a D008, ventotto e ventinove a D009, **trentacinque a D012** — e si
 eseguono a ogni modifica; la compilazione costa un ordine di grandezza in più e serve prima di
 un rilascio, non prima di un salvataggio. Se `verify` supera il minuto, è un problema da risolvere, non da
 tollerare, e il rimedio è già censito nel [registro YAGNI](roadmap-fette.md): togliere l'avvio di
 `npm` ripetuto, non togliere un gate.
+
+La crescita da D009 a D012 è quasi tutta di `typecheck` e `lint`, e ha una causa sola: il renderer
+è entrato in tutti e due. `vue-tsc` compila anche i `.vue`, e ESLint ha adesso quattro componenti
+in più da leggere con un parser diverso. I test, con 170 casi in più, sono cresciuti di mezzo
+secondo.
 
 Quella cifra è stata **misurata**, non stimata: a D001 il documento diceva otto secondi con 33
 test, e ci è rimasto fino a D006 con 150. Un tempo dichiarato e mai più misurato è la stessa
@@ -54,7 +62,7 @@ ma da qui in avanti ogni delega deve tenerlo verde.
 | **Dominio**            | `tests/domains/` | le regole pure producono i numeri attesi, con seed fisso                                    | che la UI mostri quei numeri                                    |
 | **Round-trip**         | `tests/save/`    | stato → salva → ricarica → identico. Attraversa payload, busta, validazione                 | che una migrazione futura funzioni                              |
 | **Bilanciamento**      | `tests/balance/` | i numeri stanno negli intervalli dichiarati in `targets.ts`                                 | che il gioco sia divertente                                     |
-| **i18n**               | `tests/i18n/`    | nessuna chiave manca in nessuna lingua                                                      | che le traduzioni siano corrette                                |
+| **i18n**               | `tests/i18n/`    | nessuna chiave manca in nessuna lingua, i segnaposto coincidono, ogni chiave si risolve     | che le traduzioni siano corrette                                |
 | **Regole strutturali** | `tests/rules/`   | Registry completo, nessuna logica nei `.vue`, identità del prodotto coerente, nessun `TODO` | ciò che è dichiarato ⚠️ in [tracciabilita.md](tracciabilita.md) |
 
 **Non esistono test end-to-end sulla UI in questa fetta.** Con due componenti che leggono selettori
