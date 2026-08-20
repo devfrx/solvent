@@ -1,6 +1,8 @@
 # D017 — Il caveau: i contanti hanno una capienza
 
-- **Stato:** Aperta — scritta il 2026-08-20, allo STOP 2, con la fetta 01 conclusa davanti
+- **Stato:** Aperta — scritta il 2026-08-20 allo STOP 2, e **preparata per l'esecuzione** lo
+  stesso giorno: la preparazione ha misurato il costo del cambiamento e ha trovato un difetto
+  nella delega stessa. Vedi _Cosa la preparazione ha verificato_
 - **Dipende da:** D013 (cioè tutta la fetta 01)
 - **Sblocca:** la fetta 02, e con essa l'era 1 della [visione](../prodotto/visione.md)
 - **ADR vincolanti:** [0025](../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md) (nuovo),
@@ -50,12 +52,104 @@ Questa delega è quel giorno. È il cuore del lavoro, non un dettaglio: un idle 
 smette di entrare **senza dirlo** è un idle rotto, e il giocatore deve capire in un colpo d'occhio
 che il caveau è pieno e che i soldi non stanno arrivando.
 
-**Decisione di gioco, contestabile:** quando il caveau è pieno il reddito **non entra e non si
-perde** — la transazione è rifiutata, quindi non è mai esistita. Non si accumula da nessuna parte e
-non si recupera svuotando il caveau. L'alternativa — accreditare fino a riempire e scartare il
-resto — è più gentile e sposta il problema: renderebbe il muro un rallentamento invece di un muro,
-e l'era 1 finisce proprio quando il rallentamento non basta più. La partita doppia decide da sola:
-una transazione parziale non esiste ([ADR 0019](../adr/0019-transazioni-atomiche-nel-ledger.md)).
+**Decisione di gioco:** quando il caveau non tiene tutto, il reddito accredita **quanto ci sta** e
+il resto non entra. Non «tutto o niente».
+
+Questa riga sostituisce quella scritta il giorno prima, che diceva il contrario — «la transazione è
+rifiutata, quindi non è mai esistita» — e la sostituisce perché la preparazione l'ha **misurata
+sbagliata**, non perché suoni meglio. Il motivo sta nel recupero: `recover()` fa **un solo**
+`tickAll` con tutti i tick arretrati, quindi una transazione sola da otto ore di reddito. Il Ledger
+la rifiuta intera, perché una transazione è atomica ([ADR 0019](../adr/0019-transazioni-atomiche-nel-ledger.md)),
+e il giocatore che è stato via torna con **zero** — a caveau vuoto. Non è un muro: è un guasto
+travestito da regola.
+
+Ne discende che `income` non può limitarsi a chiedere e incassare il rifiuto: deve **sapere quanto
+ci sta prima di chiedere**. Il pezzo esiste già ed è puro — `fitsIn(capacity, current, incoming)` —
+e gli manca il fratello che risponde «quanto», invece di «sì o no». Il muro resta un muro: quando
+il caveau è pieno davvero, quanto-ci-sta vale zero e il reddito si ferma del tutto.
+
+## Cosa la preparazione ha verificato
+
+Fatta il 2026-08-20, subito dopo aver scritto la delega, e non è stata una rilettura: il costo del
+cambiamento è stato **misurato** mettendo davvero una capienza a `POOLS.cash` e guardando cosa
+diventa rosso. Sette punti, e il primo ha riscritto il cuore della delega.
+
+**1. Il rifiuto atomico e il recupero si scontrano, e la decisione di gioco era sbagliata.** Con
+`POOLS.cash.capacity = 5000`, `tests/renderer/store` dice `expected '0' to be '345600'`: il
+recupero non incassa «quanto ci sta», incassa **zero**. È il motivo per cui la sezione _Il pezzo che
+nessuno si aspetta_ adesso dice il contrario di quello che diceva ieri. Trovarlo è costato una
+riga cambiata e una esecuzione dei test; trovarlo dopo sarebbe costato un giocatore.
+
+**2. Tre test che diventano rossi sono cartelli piantati apposta, non regressioni.** Il progetto si
+è lasciato dei messaggi per questo giorno, e vanno letti prima di «aggiustarli»:
+
+| Test                      | Cosa dice di sé                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| `tests/contracts/pools`   | «nella fetta 01 la forma c'è e i valori no: nessuna capienza, nessun interesse»    |
+| `tests/domains/atm/rules` | «oggi è illimitata per i pool del giocatore — è una fotografia, non un'assunzione» |
+| `tests/renderer/store`    | «il caveau non ha ancora un tetto, e la schermata lo dice invece di inventarlo»    |
+
+Ognuno va **riscritto** per dire la cosa nuova, non cancellato: una fotografia sostituita da una
+fotografia, non da un buco.
+
+**3. La capienza di partenza ha un raggio d'azione misurato.** Sopra circa **900 €** né
+`tests/balance/targets` — che guadagna 720,00 € in un minuto simulato — né
+`tests/save/game-roundtrip` — che ne guadagna 802,80 giocando — si accorgono di niente. Sotto quella
+soglia vanno cambiati entrambi, ed è una scelta da fare **sapendo** di farla. Il numero non è
+libero: è anche quanto ci mette il giocatore a incontrare il muro la prima volta.
+
+**4. `cashCapacity` nello store è un mirror che non si aggiorna mai.** È uno `shallowRef` letto una
+volta sola alla costruzione (`capacityOf('cash')`), e oggi è corretto perché la capienza non cambia.
+Col caveau che si amplia va riletto a mano, come fa `readIncome()` per il reddito: è la trappola dei
+mirror che il [passaggio di consegne](PASSAGGIO-DI-CONSEGNE.md) mette in cima all'elenco — quello
+che vive in `core/` e che nessun evento annuncia non è reattivo.
+
+**5. L'ADR 0025 toglie l'unico mock di modulo del progetto**, ed è un argomento a favore che non
+era stato previsto scrivendolo. `tests/kernel/ledger-capacity` sostituisce `@core/contracts/pools`
+con `vi.mock`, e il suo commento lo dichiara: «è l'unico file di test del progetto che sostituisce
+un modulo, ed è per questo che sta da solo». Con le capienze passate per parametro quel mock non
+serve più: si passa una funzione. Una decisione strutturale che **cancella** un'eccezione invece di
+aggiungerne una è la stessa forma del fix di radice di [D016](D016-correzioni-audit.md), che
+toglieva codice invece di aggiungerne.
+
+**6. Il caveau non ha un posto ovvio in `ORDER`, e la delega non lo nominava.** Le fasi sono due —
+`ECONOMY: 100` e `INCOME: 200` — e il [registro YAGNI](../roadmap-fette.md) dice che una terza nasce
+col «primo sistema che non sta in nessuna delle due». Il caveau **non ticchetta**, quindi il suo
+`order` decide solo l'ordine di salvataggio e caricamento, non quello del tick: la domanda è più
+piccola di quanto sembri. La proposta è `ECONOMY`, perché il caveau è infrastruttura economica
+esattamente come il bancomat che occuperà lo stesso slot, e perché aprire una fase per un sistema
+che non ticchetta sarebbe l'astrazione speculativa che l'ADR 0014 vieta. Chi esegue decida, e lo
+scriva.
+
+**7. Il meccanismo che obbliga a registrare il sistema c'è ed è secco.**
+`tests/rules/registry-completeness` conta le occorrenze di `.register(` in `createGame.ts` e le
+confronta con i file `src/core/domains/*/system.ts`: creare `vault/system.ts` senza la riga nel
+bootstrap è un test rosso, non una svista da review.
+
+**8. Il bancomat ha bisogno della capienza del caveau, e i due domini non hanno un confine
+imposto.** Un **prelievo** porta denaro _verso_ i contanti, quindi l'anteprima deve sapere se ci
+sta: `previewOf` oggi non lo chiede a nessuno. Le due funzioni che rispondono — `capacityOf` e
+`fitsIn` — vivono in `domains/atm/rules.ts`, dove [D014](D014-dominio-bancomat.md) le ha messe
+perché lì servivano, e col caveau non è più il loro posto.
+
+Nessuna regola lo impedirebbe: sotto `src/core/domains/**` il lint vieta `vue`, `pinia`, `electron`
+(INV-02) e le conversioni di `Money` (R11), e **non** vieta a un dominio di importarne un altro. Un
+`atm` che importa `vault/rules` passerebbe tutti i gate. Sarebbe anche il **primo** accoppiamento
+fra domini del progetto, cioè un precedente — e la visione ne ha diciotto che si contendono le
+stesse risorse.
+
+La proposta è non aprirlo: la capienza arriva a `previewOf` **per argomento**, come già fa con
+`fitsIn(capacity, …)`, e a passarla è chi ha entrambi sotto mano — lo store. Il dominio resta
+ignorante di chi gli risponde, la funzione resta pura e provabile con una capienza finta, e nessun
+dominio impara il nome di un altro. Chi esegue decida, ma sappia che sta scegliendo un precedente,
+non un import.
+
+### Cosa ne discende per il budget
+
+La stima resta **~250 righe di sorgente e ~330 di test**, e non è una svista: il punto 1 aggiunge
+lavoro a `income` e ne toglie altrove — il mock che sparisce (punto 5) e i tre test che si
+riscrivono invece di nascere (punto 2). Se il consuntivo sforerà, sforerà per la ragione dichiarata
+al punto 1, che è la sola parte di questa delega scoperta dopo averla scritta.
 
 ## Cosa trovi già fatto
 
@@ -77,13 +171,15 @@ una transazione parziale non esiste ([ADR 0019](../adr/0019-transazioni-atomiche
 
 ### Dominio
 
-| File                               | Contenuto                                                                   |
-| ---------------------------------- | --------------------------------------------------------------------------- |
-| `src/core/domains/vault/types.ts`  | `VaultState { level }` e `VaultSave`                                        |
-| `src/core/domains/vault/rules.ts`  | `capacityFor(level)`, `expansionCost(level)`, `canExpand(state, available)` |
-| `src/core/domains/vault/system.ts` | `createVault(ledger)`: il sistema con stato, e il comando `expand()`        |
-| `src/core/balance/constants.ts`    | capienza di partenza, curva delle capienze, curva dei costi                 |
-| `src/core/balance/targets.ts`      | l'intervallo in cui il muro deve mordere, e quando                          |
+| File                                | Contenuto                                                                                                                                                                                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/core/domains/vault/types.ts`   | `VaultState { level }` e `VaultSave`                                                                                                                                                                                                                               |
+| `src/core/domains/vault/rules.ts`   | `capacityFor(level)`, `expansionCost(level)`, `canExpand(state, available)` e **`roomIn(capacity, current)`** — quanto ci sta ancora, che è il fratello mancante di `fitsIn` e ciò che permette al reddito di accreditare il parziale (punto 1 della preparazione) |
+| `src/core/domains/vault/system.ts`  | `createVault(ledger)`: il sistema con stato, e il comando `expand()`                                                                                                                                                                                               |
+| `src/core/balance/constants.ts`     | capienza di partenza, curva delle capienze, curva dei costi                                                                                                                                                                                                        |
+| `src/core/balance/targets.ts`       | l'intervallo in cui il muro deve mordere, e quando                                                                                                                                                                                                                 |
+| `src/core/domains/income/system.ts` | il `tick` accredita **quanto ci sta** invece di ignorare il `Result`: è il commento che quel file porta da D010, e questo è il giorno in cui cresce                                                                                                                |
+| `src/core/domains/atm/rules.ts`     | `capacityOf` esce: la capienza vera non sta più in `POOLS`. `fitsIn` resta, e la riceve per argomento                                                                                                                                                              |
 
 Il caveau **ha stato**, quindi ha un `system.ts` e si registra — al contrario di `atm`
 ([D014](D014-dominio-bancomat.md), decisione 1). Non ticchetta: `tick` resta assente, e il tipo lo
@@ -135,8 +231,11 @@ permette.
 - [ ] `npm run verify:release` verde
 - [ ] test: il Ledger rifiuta un accredito che supera la capienza **corrente**, non quella di
       partenza — cioè dopo un ampliamento il tetto è cambiato davvero
-- [ ] test: il `tick` del reddito con il caveau pieno **non muove un centesimo** e lo dice; la
-      somma dei conti resta zero
+- [ ] test: il `tick` del reddito con il caveau **pieno** non muove un centesimo e lo dice; con
+      il caveau **quasi** pieno accredita quanto ci sta, e la somma dei conti resta zero
+- [ ] test: **il recupero dopo otto ore in un caveau più piccolo del maturato accredita quanto ci
+      sta, non zero.** È il caso che la preparazione ha trovato misurando, ed è quello che senza un
+      test tornerebbe da solo: `recover()` fa un `tickAll` solo, quindi una transazione sola
 - [ ] test: la capienza mostrata dalla UI e quella che il Ledger fa rispettare vengono dalla
       **stessa** funzione (INV-18), verificato per identità e non per uguaglianza — è la trappola
       che [D015](D015-home-bancomat.md) ha pagato alla correzione 14
@@ -148,6 +247,10 @@ permette.
       il bancomat lo svuota, il gioco riparte
 - [ ] [ADR 0025](../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md) passa ad `Accettata`
 - [ ] `docs/tracciabilita.md`: INV-18 ha la sua riga e il suo meccanismo
+- [ ] i tre test-fotografia del punto 2 della preparazione sono stati **riscritti**, non
+      cancellati: una fotografia si sostituisce con una fotografia
+- [ ] l'`order` del caveau è dichiarato e motivato in una riga, e se apre una fase nuova di
+      `ORDER` la voce esce dal [registro YAGNI](../roadmap-fette.md)
 - [ ] la riga della fetta 02 nel [registro delle fette](../roadmap-fette.md) è corretta: niente
       `boundedList` salvato qui, e il perché
 

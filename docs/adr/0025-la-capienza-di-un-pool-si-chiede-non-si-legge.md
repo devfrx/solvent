@@ -78,5 +78,13 @@ ampliato: il dato non sparisce, smette di essere l'ultima parola.
 - `capacityOf()` in `domains/atm/rules.ts` diventa il posto sbagliato: risponde leggendo `POOLS`,
   cioè la capienza di partenza, mentre la UI vuole quella vera. Chi esegue [D017](../delega/D017-il-caveau.md)
   lo troverà come primo attrito, ed è dichiarato qui perché non sembri una scoperta.
+- **Sparisce l'unico mock di modulo del progetto**, e non era stato previsto scrivendo questo ADR:
+  l'ha trovato la preparazione di [D017](../delega/D017-il-caveau.md). Oggi
+  `tests/kernel/ledger-capacity` sostituisce `@core/contracts/pools` con `vi.mock`, e il suo
+  commento lo dichiara — «è l'unico file di test del progetto che sostituisce un modulo, ed è per
+  questo che sta da solo». Con le capienze per parametro basta passare una funzione. Una decisione
+  strutturale che **cancella** un'eccezione invece di aggiungerne una è il segnale che il confine
+  scelto era già quello giusto: è la stessa forma del fix di radice di
+  [D016](../delega/D016-correzioni-audit.md), che toglieva codice invece di aggiungerne.
 - Il giorno in cui un secondo pool avrà una capienza variabile — le fiches del casinò, un
   portafoglio crypto — non c'è niente da riaprire: la funzione risponde per `pool`.

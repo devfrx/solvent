@@ -23,34 +23,34 @@ leggi che tengono il gioco bilanciato stanno in [prodotto/visione.md](../prodott
 
 ## Dove siamo, esattamente
 
-|                          |                                                                          |
-| ------------------------ | ------------------------------------------------------------------------ |
-| STOP 1                   | **approvato** — nome, stile, dipendenze, architettura                    |
-| D001 — tooling e gate    | **chiusa**, commit `e275f59`                                             |
-| D002 — contratti         | **chiusa**, commit `288367e`                                             |
-| D003 — kernel: Clock     | **chiusa**, commit `f398a47`                                             |
-| D004 — kernel: Rng       | **chiusa**, commit `a87d8cf`                                             |
-| D005 — kernel: Bus       | **chiusa**, commit `e9cf441`                                             |
-| D006 — kernel: Registry  | **chiusa**, commit `39b8520`                                             |
-| D007 — kernel: Ledger    | **chiusa**, commit `f9a0c59`                                             |
-| D008 — balance           | **chiusa**, commit `e01e885`                                             |
-| D009 — persistenza main  | **chiusa**, commit `256f622`                                             |
-| D010 — dominio income    | **chiusa**, commit `b98f025`                                             |
-| D014 — dominio bancomat  | **chiusa**, commit `a0b3b9f`                                             |
-| D011 — runtime e store   | **chiusa**, commit `dbf821c`                                             |
-| D012 — guscio e parole   | **chiusa**, commit `fb45d71`                                             |
-| D015 — home e bancomat   | **chiusa**, commit `3aa3460`                                             |
-| D016 — correzioni audit  | **chiusa**, commit `c648639`, unita a `main` da D013                     |
-| D013 — verifica, STOP 2  | **chiusa**, commit `c5d534c`                                             |
-| D017 — il caveau         | **aperta** — scritta allo STOP 2, non ancora eseguita                    |
-| Kernel                   | **finito** — 471 righe in `kernel/`, **545 con `balance/`** (D003–D008)  |
-| Persistenza nel main     | **finita** — 246 righe in `src/main/` e `src/preload/`                   |
-| Codice di dominio        | **`income` 104 righe, `atm` 64** — i due della fetta 01                  |
-| Fetta 01                 | **conclusa** — verificata da D013, lo STOP 2, otto passi manuali su otto |
-| Renderer                 | **1.729 righe**, di cui 439 di CSS e 369 sotto `i18n/`                   |
-| `npm run verify`         | **verde** — 503 test su 55 file, 41,4 s                                  |
-| `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 564,89 kB                    |
-| Prossimo passo           | **[D017 — Il caveau](D017-il-caveau.md)**, quando l'utente dà il via     |
+|                          |                                                                              |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile, dipendenze, architettura                        |
+| D001 — tooling e gate    | **chiusa**, commit `e275f59`                                                 |
+| D002 — contratti         | **chiusa**, commit `288367e`                                                 |
+| D003 — kernel: Clock     | **chiusa**, commit `f398a47`                                                 |
+| D004 — kernel: Rng       | **chiusa**, commit `a87d8cf`                                                 |
+| D005 — kernel: Bus       | **chiusa**, commit `e9cf441`                                                 |
+| D006 — kernel: Registry  | **chiusa**, commit `39b8520`                                                 |
+| D007 — kernel: Ledger    | **chiusa**, commit `f9a0c59`                                                 |
+| D008 — balance           | **chiusa**, commit `e01e885`                                                 |
+| D009 — persistenza main  | **chiusa**, commit `256f622`                                                 |
+| D010 — dominio income    | **chiusa**, commit `b98f025`                                                 |
+| D014 — dominio bancomat  | **chiusa**, commit `a0b3b9f`                                                 |
+| D011 — runtime e store   | **chiusa**, commit `dbf821c`                                                 |
+| D012 — guscio e parole   | **chiusa**, commit `fb45d71`                                                 |
+| D015 — home e bancomat   | **chiusa**, commit `3aa3460`                                                 |
+| D016 — correzioni audit  | **chiusa**, commit `c648639`, unita a `main` da D013                         |
+| D013 — verifica, STOP 2  | **chiusa**, commit `c5d534c`                                                 |
+| D017 — il caveau         | **aperta e preparata** — scritta e misurata allo STOP 2, non ancora eseguita |
+| Kernel                   | **finito** — 471 righe in `kernel/`, **545 con `balance/`** (D003–D008)      |
+| Persistenza nel main     | **finita** — 246 righe in `src/main/` e `src/preload/`                       |
+| Codice di dominio        | **`income` 104 righe, `atm` 64** — i due della fetta 01                      |
+| Fetta 01                 | **conclusa** — verificata da D013, lo STOP 2, otto passi manuali su otto     |
+| Renderer                 | **1.729 righe**, di cui 439 di CSS e 369 sotto `i18n/`                       |
+| `npm run verify`         | **verde** — 503 test su 55 file, 41,4 s                                      |
+| `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 564,89 kB                        |
+| Prossimo passo           | **[D017 — Il caveau](D017-il-caveau.md)**, quando l'utente dà il via         |
 
 I conteggi di riga sono **righe di codice, commenti e righe vuote escluse**, ed è lo stesso metodo
 per tutti: la riga che diceva che il kernel «usa un altro metodo» era sbagliata, e a scoprirlo è
@@ -192,7 +192,12 @@ Non serve leggere tutti i 24 ADR. Servono quando stai per contraddirne uno: allo
 
 **Lo STOP 2 è stato riportato, e la fetta 02 ha una delega scritta e non ancora eseguita.**
 La fetta 01 è conclusa e verificata. [D017 — Il caveau](D017-il-caveau.md) è **Aperta**: il testo
-c'è, il codice no, e non parte finché l'utente non dà il via.
+c'è, il codice no, e non parte finché l'utente non dà il via. È stata anche **preparata per
+l'esecuzione**: il costo del cambiamento è stato misurato mettendo davvero una capienza a
+`POOLS.cash` e guardando cosa diventa rosso, e la misura ha trovato un difetto nella delega
+stessa — il recupero dopo un'assenza incassava **zero** invece di quanto ci sta. La decisione
+di gioco è stata riscritta prima che esistesse una riga di codice. Gli otto punti stanno in
+[D017](D017-il-caveau.md), sotto _Cosa la preparazione ha verificato_.
 
 Il rapporto è in fondo a [D013](D013-verifica-della-fetta.md), nei cinque punti che lo STOP 2
 chiede. Non si riparte da zero: si riparte da lì.
