@@ -6,6 +6,7 @@ Mappa di tutto ciò che è scritto, a cosa serve, e quanto ci si può fidare che
 
 | Documento                                                          | Risponde a                                                                          | Tipo            |
 | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | --------------- |
+| [stato.md](stato.md)                                               | quanti sono gli ADR, le deleghe e i documenti, e in che stato — **generato**        | **generato**    |
 | [prodotto/visione.md](prodotto/visione.md)                         | cosa sarà Solvent finito: i domini, cosa li rende profondi, come si collegano       | **vivo**        |
 | [prodotto/preferenze.md](prodotto/preferenze.md)                   | le preferenze permanenti: nome, stile, home ATM, contanti/carta, carta 3D           | **vivo**        |
 | [architettura.md](architettura.md)                                 | com'è fatto il sistema, cosa può importare cosa                                     | **vivo**        |
@@ -28,6 +29,14 @@ Mappa di tutto ciò che è scritto, a cosa serve, e quanto ci si può fidare che
 **Vivo** significa: se una modifica al codice lo contraddice, quel documento cambia nello stesso
 commit. **Append-only**: un ADR superato non si cancella, se ne scrive uno nuovo. **Si chiudono**:
 una delega chiusa è un documento storico, non una fonte di verità sul codice corrente.
+**Generato**: non si scrive a mano, e a scriverlo a mano si diventa rossi — lo produce
+`tests/helpers/projectState.ts` e lo verifica `tests/rules/project-state`.
+
+**Nessun documento ridice ciò che [stato.md](stato.md) conta** (regola C11). Un conteggio scritto
+due volte è un conteggio che prima o poi diverge, ed è successo sei volte in un giorno solo: chi ha
+bisogno di un numero ci punta invece di ricopiarlo. La regola vale sui documenti **vivi**, non su
+ADR e deleghe, che raccontano il momento in cui sono stati scritti e devono restare com'erano
+([D021](delega/D021-un-numero-che-nessuno-conta-non-si-scrive.md)).
 
 ## Da dove cominciare
 
@@ -99,37 +108,21 @@ solo in prosa (C09, C10) e un invariante nuovo (INV-17).
 Con [D013](delega/D013-verifica-della-fetta.md) la fetta 01 è **conclusa**, e il progetto è allo
 **STOP 2**. Nessun codice di gioco nuovo: un terzo round-trip che gioca una partita vera e la fa
 attraversare il disco, un `README.md` alla radice, gli otto passi del percorso manuale eseguiti
-davvero, e cinque ADR che passano ad _Accettata_ dopo aver visto scattare il proprio meccanismo. Ha
-trovato tre cose che nessun gate poteva vedere, e il rapporto è in fondo a quella delega. La
-domanda adesso è se parte la **fetta 02**, e con quale forma.
+davvero, e un gruppo di ADR che passano ad _Accettata_ dopo aver visto scattare il proprio
+meccanismo. Ha trovato tre cose che nessun gate poteva vedere, e il rapporto è in fondo a quella
+delega.
+
+**La fetta 02 è aperta**, e non è più una domanda: ha le sue deleghe scritte e misurate —
+[D019](delega/D019-il-pagamento.md) porta il listino di pagamento,
+[D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md) la regola sotto cui nasce il secondo
+dominio con stato, e [D017](delega/D017-il-caveau.md) il caveau vero.
+[D018](delega/D018-la-scheda-di-dominio.md) corre accanto e non tocca nessuna delle altre. Prima
+di tutte viene [D021](delega/D021-un-numero-che-nessuno-conta-non-si-scrive.md), nata dall'audit
+dello STOP 2: è una regola, e le regole vengono prima del codice che governano. Quali deleghe siano
+aperte adesso lo dice [stato.md](stato.md).
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
-delega per delega, non per decreto. Con D002 sono passati
-[0006](adr/0006-decimal-end-to-end-per-il-denaro.md) e
-[0007](adr/0007-result-come-unico-stile-di-esito.md), con D004
-[0005](adr/0005-rng-seedato-con-stream-per-dominio.md), con D005
-[0016](adr/0016-il-bus-e-sincrono-e-fire-and-forget.md), con D006
-[0002](adr/0002-registry-unica-lista-di-sistemi.md), con D007
-[0003](adr/0003-ledger-unica-porta-del-denaro.md),
-[0017](adr/0017-il-denaro-e-plurale.md),
-[0019](adr/0019-transazioni-atomiche-nel-ledger.md),
-[0020](adr/0020-partita-doppia.md) e il nuovo
-[0021](adr/0021-una-sola-primitiva-per-il-denaro.md), con D009
-[0004](adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md), con D010 il nuovo
-[0024](adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md), con D011
-[0001](adr/0001-simulazione-nel-renderer-core-puro.md) e
-[0009](adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md), con D012
-[0011](adr/0011-i18n-obbligatoria-con-parita-verificata.md), con D015
-[0018](adr/0018-la-home-e-un-atm.md) e con D013
-[0008](adr/0008-nome-e-identita-del-prodotto.md),
-[0012](adr/0012-controlli-sul-codice-morto-sempre-accesi.md),
-[0013](adr/0013-prettier-e-autorita-sulla-formattazione.md),
-[0014](adr/0014-una-fetta-verticale-alla-volta.md) e
-[0015](adr/0015-criterio-di-ammissione-delle-dipendenze.md).
-
-Restano _Proposta_ in tre, e per ognuna è scritto perché:
-[0022](adr/0022-il-ledger-ha-conti-non-solo-pool.md) e
-[0023](adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md) descrivono cose che il progetto non ha
-ancora costruito, e [0010](adr/0010-liste-storiche-limitate-alla-definizione.md) ha **metà**
-meccanismo — il costruttore con il `max` obbligatorio esiste, il validatore che lo fa rispettare non
-ha ancora nessun array da validare.
+delega per delega, non per decreto — e a dire quali sono, in ogni momento, è
+[stato.md](stato.md), che li conta invece di ricordarseli. Quale delega ha imposto quale decisione
+sta nel [compendio](adr/README.md); il **perché** una decisione sia ancora `Proposta` sta scritto
+nell'ADR stesso, che è l'unico posto che può spiegarlo.

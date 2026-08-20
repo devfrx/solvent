@@ -9,23 +9,28 @@ Questo documento dice quali sono, cosa garantisce ciascuno, e cosa nessuno di es
 
 | #   | Comando                | Cosa garantisce                                                                                 | Tempo reale       |
 | --- | ---------------------- | ----------------------------------------------------------------------------------------------- | ----------------- |
-| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, R12, INV-13 + codice morto (C01) | ~16 s             |
-| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                       | ~10 s             |
-| G3  | `npm run format:check` | il codice è formattato (C02)                                                                    | ~6 s              |
+| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, R12, INV-13 + codice morto (C01) | ~13 s             |
+| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                       | ~9 s              |
+| G3  | `npm run format:check` | il codice è formattato (C02)                                                                    | ~7 s              |
 | G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint        | ~7 s              |
 | G5  | `npm run build`        | l'applicazione si compila davvero, main e renderer                                              | decine di secondi |
 
-Rimisurati a [D016](delega/D016-correzioni-audit.md) chiusa su Windows, con 497 test: i quattro
-gate fanno 16 + 10 + 6 + 7, e `verify` sta fra **42 e 45 s** su due esecuzioni. A
-[D013](delega/D013-verifica-della-fetta.md), con 503 test su 55 file, la catena intera misura
-**41,4 s**: sei test in più non si vedono, perché ciò che domina non sono i test. Sono tempi **di
-parete**, quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena
-tre `npm run`.
+**Misurati il 2026-08-20 su Windows**, a [D021](delega/D021-un-numero-che-nessuno-conta-non-si-scrive.md):
+i quattro gate fanno 13 + 9 + 7 + 7, e la catena intera **35,3 s** — che è meno della somma, e va
+bene: `verify` non paga l'avvio di `npm` due volte per lo stesso gate. Sono tempi **di parete**,
+quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre
+`npm run`.
 
-La cifra precedente diceva 26 s davanti a quattro gate che ne sommavano 34, cioè **meno della somma
-delle proprie parti**: era già sbagliata quando è stata scritta, e nessuno l'ha rimisurata. È lo
-stesso difetto che questo paragrafo denuncia due capoversi più sotto, capitato al paragrafo
-stesso — la ragione per cui adesso le due misure stanno una accanto all'altra e si controllano.
+**Questa è l'unica misura del progetto che resta affidata a un occhio, ed è dichiarato.** Un tempo
+dipende dalla macchina, quindi non può stare in [stato.md](stato.md) con gli altri fatti contabili
+(regola C11): nessun gate può verificarlo, e l'unica difesa è la data qui accanto. Se la data è
+vecchia di molte deleghe, il numero è **sospetto per definizione** — è già successo due volte.
+
+Le due cifre che stavano qui — «fra 42 e 45 s» a D016 e «41,4 s» a D013 — erano invecchiate
+insieme, e a trovarle è stato l'audit dello STOP 2 (AUD-006). Prima ancora ce n'era una che diceva
+26 s davanti a quattro gate che ne sommavano 34, cioè **meno della somma delle proprie parti**: era
+già sbagliata quando è stata scritta. Tre volte lo stesso difetto sulla stessa riga è la ragione
+per cui adesso porta una data.
 
 Da D012 il **typecheck** copre anche R12: `Dictionary` è un `Record` totale sulle chiavi, quindi
 una `Reason` o un codice d'errore senza traduzione non compila, in nessuna delle due lingue.

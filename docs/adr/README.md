@@ -57,9 +57,12 @@ assumono uno strumento», e da allora `income` compra il suo upgrade con il pool
 sorgente. Il 0027 dà a quella frase un meccanismo — il **listino** — e lo fa nel momento in cui i
 comandi che spendono stanno per diventare due.
 
-Restano _Proposta_ sei decisioni, e per cinque è corretto: **0022**, **0023**, **0025**, **0026** e
-**0027** descrivono cose che il progetto non ha ancora costruito, e diventeranno un fatto con la
-delega che le userà. La sesta è **0010**, e ha il meccanismo **a metà**: `boundedList<T>(max)` è l'unico costruttore e `max` è
+Quali decisioni siano ancora _Proposta_ lo dice [stato.md](../stato.md), che le conta invece di
+ricordarsele. Qui c'è il **perché**, che è la sola cosa che un conteggio non può dire.
+
+Per quasi tutte è la ragione ovvia: **0022**, **0023**, **0025**, **0026** e **0027** descrivono
+cose che il progetto non ha ancora costruito, e diventeranno un fatto con la delega che le userà.
+L'eccezione è **0010**, che ha il meccanismo **a metà**: `boundedList<T>(max)` è l'unico costruttore e `max` è
 obbligatorio, ma la seconda frase della decisione — «il validatore del salvataggio rifiuta un array
 che supera il `max` dichiarato» — non ha niente da validare, perché nel payload della versione 1
 non c'è nessun array. La lista delle ultime operazioni ha il suo limite ed è un mirror che riparte

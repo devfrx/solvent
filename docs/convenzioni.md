@@ -41,7 +41,7 @@ in inglese, variabili locali e qualche costante in italiano, due identificatori 
 (`quantità`, `profondità`). Nessuno aveva scelto — e una convenzione che nessuno ha scelto è il
 modo in cui il debito entra senza fare rumore, perché ogni file nuovo decide da capo.
 
-Perché questa divisione e non "tutto in inglese": i cinquanta documenti del progetto sono in
+Perché questa divisione e non "tutto in inglese": i documenti del progetto sono in
 italiano e ci restano, i commenti spiegano il **perché** e lo spiegano meglio nella lingua di chi
 scrive, e i messaggi degli errori lanciati sono rivolti a chi legge quei commenti — non
 all'utente, che riceve una chiave i18n (R12).

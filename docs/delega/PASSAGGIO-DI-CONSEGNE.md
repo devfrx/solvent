@@ -30,37 +30,38 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                     |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile, dipendenze, architettura                                                                               |
-| D001 — tooling e gate    | **chiusa**, commit `e275f59`                                                                                                        |
-| D002 — contratti         | **chiusa**, commit `288367e`                                                                                                        |
-| D003 — kernel: Clock     | **chiusa**, commit `f398a47`                                                                                                        |
-| D004 — kernel: Rng       | **chiusa**, commit `a87d8cf`                                                                                                        |
-| D005 — kernel: Bus       | **chiusa**, commit `e9cf441`                                                                                                        |
-| D006 — kernel: Registry  | **chiusa**, commit `39b8520`                                                                                                        |
-| D007 — kernel: Ledger    | **chiusa**, commit `f9a0c59`                                                                                                        |
-| D008 — balance           | **chiusa**, commit `e01e885`                                                                                                        |
-| D009 — persistenza main  | **chiusa**, commit `256f622`                                                                                                        |
-| D010 — dominio income    | **chiusa**, commit `b98f025`                                                                                                        |
-| D014 — dominio bancomat  | **chiusa**, commit `a0b3b9f`                                                                                                        |
-| D011 — runtime e store   | **chiusa**, commit `dbf821c`                                                                                                        |
-| D012 — guscio e parole   | **chiusa**, commit `fb45d71`                                                                                                        |
-| D015 — home e bancomat   | **chiusa**, commit `3aa3460`                                                                                                        |
-| D016 — correzioni audit  | **chiusa**, commit `c648639`, unita a `main` da D013                                                                                |
-| D013 — verifica, STOP 2  | **chiusa**, commit `c5d534c`                                                                                                        |
-| D019 — il pagamento      | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                                                                       |
-| D020 — la validazione    | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                                                                       |
-| D017 — il caveau         | **aperta e preparata** — scritta e misurata allo STOP 2, non ancora eseguita                                                        |
-| D018 — la scheda dominio | **aperta** — solo documenti, non tocca nessuna delle altre                                                                          |
-| Kernel                   | **finito** — 471 righe in `kernel/`, **545 con `balance/`** (D003–D008)                                                             |
-| Persistenza nel main     | **finita** — 246 righe in `src/main/` e `src/preload/`                                                                              |
-| Codice di dominio        | **`income` 104 righe, `atm` 64** — i due della fetta 01                                                                             |
-| Fetta 01                 | **conclusa** — verificata da D013, lo STOP 2, otto passi manuali su otto                                                            |
-| Renderer                 | **1.729 righe**, di cui 439 di CSS e 369 sotto `i18n/`                                                                              |
-| `npm run verify`         | **verde** — 503 test su 55 file, 41,4 s                                                                                             |
-| `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 564,89 kB                                                                               |
-| Prossimo passo           | **[D019](D019-il-pagamento.md)** o **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)** — non si toccano, in qualunque ordine |
+|                             |                                                                                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                      | **approvato** — nome, stile, dipendenze, architettura                                                                               |
+| D001 — tooling e gate       | **chiusa**, commit `e275f59`                                                                                                        |
+| D002 — contratti            | **chiusa**, commit `288367e`                                                                                                        |
+| D003 — kernel: Clock        | **chiusa**, commit `f398a47`                                                                                                        |
+| D004 — kernel: Rng          | **chiusa**, commit `a87d8cf`                                                                                                        |
+| D005 — kernel: Bus          | **chiusa**, commit `e9cf441`                                                                                                        |
+| D006 — kernel: Registry     | **chiusa**, commit `39b8520`                                                                                                        |
+| D007 — kernel: Ledger       | **chiusa**, commit `f9a0c59`                                                                                                        |
+| D008 — balance              | **chiusa**, commit `e01e885`                                                                                                        |
+| D009 — persistenza main     | **chiusa**, commit `256f622`                                                                                                        |
+| D010 — dominio income       | **chiusa**, commit `b98f025`                                                                                                        |
+| D014 — dominio bancomat     | **chiusa**, commit `a0b3b9f`                                                                                                        |
+| D011 — runtime e store      | **chiusa**, commit `dbf821c`                                                                                                        |
+| D012 — guscio e parole      | **chiusa**, commit `fb45d71`                                                                                                        |
+| D015 — home e bancomat      | **chiusa**, commit `3aa3460`                                                                                                        |
+| D016 — correzioni audit     | **chiusa**, commit `c648639`, unita a `main` da D013                                                                                |
+| D013 — verifica, STOP 2     | **chiusa**, commit `c5d534c`                                                                                                        |
+| D021 — l'audit dello STOP 2 | **aperta** — scritta il 2026-08-20 dall'audit di tutta la codebase e di tutti i documenti                                           |
+| D019 — il pagamento         | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                                                                       |
+| D020 — la validazione       | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                                                                       |
+| D017 — il caveau            | **aperta e preparata** — scritta e misurata allo STOP 2, non ancora eseguita                                                        |
+| D018 — la scheda dominio    | **aperta** — solo documenti, non tocca nessuna delle altre                                                                          |
+| Kernel                      | **finito** — 471 righe in `kernel/`, **545 con `balance/`** (D003–D008)                                                             |
+| Persistenza nel main        | **finita** — 246 righe in `src/main/` e `src/preload/`                                                                              |
+| Codice di dominio           | **`income` 104 righe, `atm` 64** — i due della fetta 01                                                                             |
+| Fetta 01                    | **conclusa** — verificata da D013, lo STOP 2, otto passi manuali su otto                                                            |
+| Renderer                    | **1.729 righe**, di cui 439 di CSS e 369 sotto `i18n/`                                                                              |
+| `npm run verify`            | **verde** — 503 test su 55 file, 41,4 s                                                                                             |
+| `npm run verify:release`    | **verde** — il renderer compila: 91 moduli, 564,89 kB                                                                               |
+| Prossimo passo              | **[D019](D019-il-pagamento.md)** o **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)** — non si toccano, in qualunque ordine |
 
 I conteggi di riga sono **righe di codice, commenti e righe vuote escluse**, ed è lo stesso metodo
 per tutti: la riga che diceva che il kernel «usa un altro metodo» era sbagliata, e a scoprirlo è
@@ -110,9 +111,10 @@ una delega chiusa è un documento storico: nessuno la rilegge.
 - **Nessun barrel** (C10) e **nessuna parola vietata nei nomi** (C09): due regole che stavano solo
   in prosa e adesso hanno un test — `tests/rules/no-barrel` e `tests/rules/forbidden-words`.
 
-**Non resta aperta nessuna delega.** [D013](D013-verifica-della-fetta.md) è chiusa, la fetta 01 è
-conclusa, e il progetto è allo **STOP 2**: la domanda sul tavolo è se la fetta 02 parte e con quale
-forma.
+**Le deleghe aperte sono quelle che [stato.md](../stato.md) elenca**, e l'ordine in cui si
+eseguono è il grafo in [README.md](README.md). [D013](D013-verifica-della-fetta.md) è chiusa e la
+fetta 01 è conclusa: il progetto è allo **STOP 2**, e la fetta 02 è già scritta — vedi _Il prossimo
+passo_ in fondo.
 
 Il rapporto dello STOP 2 sta in fondo a quella delega, insieme a undici correzioni. Le quattro cose
 che chi arriva adesso deve sapere, e che nessun'altra pagina dice:
@@ -130,9 +132,12 @@ che chi arriva adesso deve sapere, e che nessun'altra pagina dice:
    funzioni pure» ([convenzioni.md](../convenzioni.md)) è un confine vero, senza ID e senza riga in
    [tracciabilita.md](../tracciabilita.md): la tiene la review, su due file. Il grilletto è il
    terzo `rules.ts`.
-4. **Gli ADR `Proposta` sono tre**, non otto: **0022** e **0023** descrivono cose non costruite,
-   **0010** ha metà meccanismo. Tutti gli altri sono `Accettata`, e ciascuno ha accanto il rosso
-   che l'ha dimostrato.
+4. **Uno stato `Proposta` non è una dimenticanza: è una decisione che il codice non impone
+   ancora.** Quali siano in questo momento lo dice [stato.md](../stato.md), che li conta; il
+   perché di ciascuna sta nel suo ADR. Gli altri sono `Accettata`, e ognuno ha accanto il rosso
+   che l'ha dimostrato. Il numero **non** si scrive qui: è stato sbagliato per un giorno intero
+   prima che [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) togliesse a questa pagina
+   il compito di ricordarlo.
 
 Prima di lei c'è stata [D016](D016-correzioni-audit.md), nata da un **audit della codebase** fatto
 il 2026-08-20: diciassette difetti, di cui uno critico — chiudere la finestra dalla schermata
@@ -158,7 +163,7 @@ Da lì in avanti valgono due cose:
 
 - **I collegamenti non si rompono più in silenzio**: `tests/rules/doc-links` verifica ogni
   link e ogni ancora fra i documenti, ed è un gate come gli altri (regola C07).
-- **I documenti sono di due tipi, e non è un difetto.** Alcuni descrivono ciò che c'è
+- **I documenti non appartengono tutti alla stessa specie, e non è un difetto.** Alcuni descrivono ciò che c'è
   (architettura, tracciabilità, glossario); altri **vincolano** ciò che verrà
   ([design/flusso-tick.md](../design/flusso-tick.md), le deleghe aperte). I secondi parlano di
   codice che non esiste ancora, e lo dichiarano in testa. Se ne trovi uno che non lo dichiara, è
@@ -195,7 +200,7 @@ impone; il meccanismo sta in [tracciabilita.md](../tracciabilita.md).
 | prima di scrivere codice      | la delega che stai eseguendo                      | 5 min |
 | quando dubiti che regga       | [rischi.md](../rischi.md), parti 2 e 3            | 5 min |
 
-Non serve leggere tutti i 27 ADR. Servono quando stai per contraddirne uno: allora leggi
+Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: allora leggi
 **quello**, e riparti dalle alternative già scartate invece che da zero.
 
 ## Il prossimo passo, in concreto
@@ -394,10 +399,10 @@ Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 
 Stato misurato il 2026-08-20: da D001 a D016 tutte `Chiusa` e unite a `main`, più D013.
 `npm run verify` verde — **503 test su 55 file**. `npm run build` verde — 91 moduli, 564,89 kB.
-Il kernel è 471 righe in `kernel/`, 545 con `balance/`. Ventisette ADR, di cui **sei
-`Proposta`**: 0010, 0022, 0023, 0025, 0026, 0027. Per ognuno è scritto perché.
+Il kernel è 471 righe in `kernel/`, 545 con `balance/`. Quanti sono gli ADR e quali di loro sono
+ancora `Proposta` lo dice [stato.md](../stato.md); per ognuno il perché sta nel suo ADR.
 
-Aperte ci sono quattro deleghe, e l'ordine conta:
+Le deleghe aperte le elenca [stato.md](../stato.md). L'ordine conta, ed è questo:
 
 - **D019 — il pagamento** e **D020 — la validazione dello stato salvato**: indipendenti fra
   loro, entrambe prima di D017

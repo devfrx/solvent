@@ -99,7 +99,7 @@ solvent/
 ├─ vitest.config.ts
 ├─ docs/
 │  ├─ architettura.md             # questo file
-│  └─ adr/0001..0024-*.md
+│  └─ adr/NNNN-*.md               # uno per decisione; l'elenco e gli stati stanno in stato.md
 ├─ src/
 │  ├─ main/
 │  │  ├─ index.ts

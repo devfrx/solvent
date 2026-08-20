@@ -68,7 +68,8 @@ mapping (che nessun file contiene), il glossario contiene il linguaggio. Le firm
 codice, non nei documenti — proprio per questo.
 
 **Non è teoria: è già successo.** Un audit di coerenza fatto dopo D005 ha trovato quindici
-disallineamenti su cinquanta documenti. I tre peggiori erano documenti _vivi_ che descrivevano un
+disallineamenti, su tutti i documenti che allora esistevano. I tre peggiori erano documenti _vivi_
+che descrivevano un
 meccanismo diverso da quello nel codice: `architettura.md` raccontava una difesa su `Math.random`
 più debole di quella reale (D004 l'aveva rafforzata senza toccare quel file), `flusso-tick.md`
 mostrava un'API del Ledger superata dagli ADR 0019/0020, `rischi.md` — questo file — elencava fra i
