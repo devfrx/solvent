@@ -3,9 +3,11 @@
 - **Stato:** Aperta — scritta il 2026-08-20 allo STOP 2, e **preparata per l'esecuzione** lo
   stesso giorno: la preparazione ha misurato il costo del cambiamento e ha trovato un difetto
   nella delega stessa. Vedi _Cosa la preparazione ha verificato_
-- **Dipende da:** D013 (cioè tutta la fetta 01) e **[D019](D019-il-pagamento.md)**, che porta il
-  listino: senza, l'ampliamento nascerebbe con un pool scritto nel sorgente e da correggere subito
-  dopo
+- **Dipende da:** D013 (cioè tutta la fetta 01), **[D019](D019-il-pagamento.md)** che porta il
+  listino — senza, l'ampliamento nascerebbe con un pool scritto nel sorgente e da correggere subito
+  dopo — e **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)**, che mette la regola sotto cui
+  il caveau nasce: è il **secondo** dominio con stato, e il suo `load` deve rifiutare un
+  salvataggio che non riconosce
 - **Sblocca:** la fetta 02: il primo muro del gioco, e il primo confine del kernel che si sposta
   dopo la fetta 01
 - **Il dominio è stato studiato prima:** [design/domini/vault.md](../design/domini/vault.md), la

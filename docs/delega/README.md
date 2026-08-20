@@ -83,7 +83,9 @@ flowchart TD
   D015 --> D016["D016 · Le correzioni dell'audit"]
   D016 --> D013["D013 · Verifica della fetta — STOP 2"]
   D013 --> D019["D019 · Il pagamento — fetta 02"]
+  D013 --> D020["D020 · Nessun sistema si fida del salvataggio"]
   D019 --> D017["D017 · Il caveau — fetta 02"]
+  D020 --> D017
   D013 --> D018["D018 · La scheda di dominio"]
 ```
 
@@ -96,6 +98,12 @@ l'[ADR 0017](../adr/0017-il-denaro-e-plurale.md) aveva promesso quel meccanismo 
 nessuno l'aveva costruito, e che il caveau sarebbe stato il **secondo** comando a spendere — cioè
 l'ultimo momento per rispondere senza rifare niente. Se D017 fosse partita il giorno prima, avrebbe
 scelto un pool nel sorgente e D019 avrebbe dovuto disfarlo.
+
+**D020 usa lo stesso argomento di D001, ed è la seconda volta che il progetto lo accetta.** Il
+caveau è il **secondo** dominio con stato, e oggi niente obbliga un dominio a controllare il
+salvataggio che riceve. Se la regola nascesse dentro D017, la scriverebbe la stessa persona che
+scrive il codice da sorvegliare, nello stesso momento: non sorveglierebbe niente. Zero righe di
+sorgente, settanta di test.
 
 **D001 è prima di tutto, e non è un caso.** Le regole devono esistere prima del codice che
 governano. Se il lint arriva dopo, il primo codice nasce fuori regola e la prima cosa che si fa è

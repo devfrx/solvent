@@ -50,6 +50,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | D016 — correzioni audit  | **chiusa**, commit `c648639`, unita a `main` da D013                         |
 | D013 — verifica, STOP 2  | **chiusa**, commit `c5d534c`                                                 |
 | D019 — il pagamento      | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                |
+| D020 — la validazione    | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                |
 | D017 — il caveau         | **aperta e preparata** — scritta e misurata allo STOP 2, non ancora eseguita |
 | Kernel                   | **finito** — 471 righe in `kernel/`, **545 con `balance/`** (D003–D008)      |
 | Persistenza nel main     | **finita** — 246 righe in `src/main/` e `src/preload/`                       |
