@@ -39,7 +39,7 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 | A16 154/156 file non formattati        | C02    | 0013 | `format:check` è un gate, non un suggerimento                                | `npm run format:check`                                    | ✅    | D001       |
 | A17 24 sistemi prima del kernel        | P01    | 0014 | il registro delle fette; nessun `TODO` ammesso nel codice                    | `docs/roadmap-fette.md` + `tests/rules/no-todo`           | ✅    | tutte      |
 
-## Le 12 regole, per ID
+## Le regole, per ID
 
 | ID  | Regola                                         | Forza   | Dove è configurata                                                                                                                          |
 | --- | ---------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
