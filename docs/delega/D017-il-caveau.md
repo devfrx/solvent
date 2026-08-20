@@ -1,6 +1,6 @@
 # D017 — Il caveau: i contanti hanno una capienza
 
-- **Stato:** **Chiusa** — eseguita il 2026-08-21 sul ramo `d017-il-caveau`. Scritta il 2026-08-20
+- **Stato:** **Chiusa** — eseguita il 2026-08-21 sul ramo `d017-il-caveau`, commit `881ff47`. Scritta il 2026-08-20
   allo STOP 2 e **preparata per l'esecuzione** lo stesso giorno: la preparazione ha misurato il costo
   del cambiamento e ha trovato un difetto nella delega stessa. **Ri-preparata il 2026-08-21**, dopo
   che tre deleghe si sono chiuse fra la scrittura e l'esecuzione: la misura è stata rifatta sul
