@@ -65,7 +65,13 @@ export default ts.config(
 
   {
     files: ['**/*.vue'],
-    languageOptions: { parserOptions: { parser: ts.parser } }
+    languageOptions: { parserOptions: { parser: ts.parser } },
+    // `no-undef` non sa cosa sia `PointerEvent`: a saperlo e' TypeScript, che risolve i tipi del
+    // DOM da `lib` (tsconfig.web.json). typescript-eslint spegne questa regola su ogni `.ts` per
+    // la stessa ragione, ma il suo blocco non elenca i `.vue` — questa riga la estende a loro.
+    // Non e' un permesso di nominare il browser: `window` e `document` restano in `host.ts`, e a
+    // dirlo e' il confine, non il lint (D011, correzione 7).
+    rules: { 'no-undef': 'off' }
   },
 
   // ------------------------------------------------------------------ qualità di base

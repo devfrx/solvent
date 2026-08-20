@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
+import PostingRows from '@renderer/components/PostingRows.vue'
 import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
 
@@ -10,12 +11,12 @@ import { useGameStore } from '@renderer/stores/game'
  * altrimenti il settimo si aggiunge alla home e il cruscotto si mangia il bancomat.
  *
  * Oggi mostra ciò che c'è e che nella home non sta: quando la partita è stata scritta su disco, e
- * il registro delle transazioni che il Bus ha annunciato. Le operazioni portano solo la loro
- * **ragione**, che è una chiave i18n tipizzata: gli importi vogliono un selettore che li componga,
- * e quello nasce con il pannello che li mostra (D015).
+ * il registro **intero** delle transazioni — la home ne mostra poche righe, qui ci sono tutte
+ * quelle che la lista limitata conserva. Gli importi sono gli stessi movimenti dell'anteprima del
+ * bancomat, costruiti dalla stessa funzione (D015).
  */
 
-const { history, savedAt } = storeToRefs(useGameStore())
+const { operations, savedAt } = storeToRefs(useGameStore())
 const { text, instant } = useTranslator()
 </script>
 
@@ -29,9 +30,12 @@ const { text, instant } = useTranslator()
 
   <section class="panel">
     <p class="caption">{{ text('stats.operations.title') }}</p>
-    <p v-if="history.items.length === 0" class="empty">{{ text('stats.operations.empty') }}</p>
+    <p v-if="operations.length === 0" class="empty">{{ text('stats.operations.empty') }}</p>
     <ol v-else class="operations">
-      <li v-for="(entry, index) of history.items" :key="index">{{ text(entry.reason) }}</li>
+      <li v-for="(entry, index) of operations" :key="index">
+        <p class="reason">{{ text(entry.reason) }}</p>
+        <PostingRows :postings="entry.postings" />
+      </li>
     </ol>
   </section>
 </template>
@@ -49,13 +53,17 @@ const { text, instant } = useTranslator()
 }
 
 .operations {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   padding: 0;
   list-style: none;
-  font-size: 12px;
-  color: var(--muted);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 10px;
+}
+
+.reason {
+  margin: 0 0 3px;
+  font-size: 12px;
+  font-weight: 600;
 }
 </style>

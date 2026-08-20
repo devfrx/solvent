@@ -1,69 +1,125 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
-import { POOL_IDS, POOLS } from '@core/contracts/pools'
-
+import AtmPanel from '@renderer/components/AtmPanel.vue'
+import BankCard3d from '@renderer/components/BankCard3d.vue'
+import CashPanel from '@renderer/components/CashPanel.vue'
 import IncomePanel from '@renderer/components/IncomePanel.vue'
-import { useTranslator } from '@renderer/i18n'
+import PostingRows from '@renderer/components/PostingRows.vue'
+import StatTile from '@renderer/components/StatTile.vue'
+import { traceabilityKey, useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
 
 /**
- * La home della fetta 01: quanto hai, quanto stai guadagnando, e l'unica cosa che si compra.
+ * ADR 0018 — la home è **bancomat sopra, cruscotto sotto**, e l'ordine non è negoziabile: il
+ * cruscotto si mangia sempre il bancomat, perché le statistiche crescono e il bancomat no.
  *
- * Il bancomat, la carta 3D e il cruscotto sono di D015: qui non c'è niente che li anticipi.
+ * Il tetto di sei riquadri è ciò che tiene, e non è una linea guida: `tests/rules/home-tiles` lo
+ * verifica. Oggi ne bastano **cinque**, perché cinque sono i numeri vivi che questa fetta ha
+ * davvero — il sesto posto resta vuoto apposta. Un riquadro inventato per riempire la griglia è
+ * peggio di uno spazio: occupa il posto che la fetta 02 userà davvero.
  *
- * Il saldo è **due righe** e non una, e non è un vezzo: il reddito entra in contanti e
- * l'upgrade si paga con la carta (D010). Con un numero solo, il messaggio «ti servono 800,00 €,
- * ne hai 0,00 €» contraddirebbe la cifra che il giocatore ha davanti.
+ * I cinque non sono indipendenti, ed è la parte che vale la pena sapere: **guadagnato meno speso
+ * meno commissioni fa esattamente il patrimonio netto**, sempre. Non è una coincidenza — è INV-08,
+ * la somma di tutti i conti che fa zero, guardata dal lato del giocatore.
  */
 
-const { balances, incomePerSecond } = storeToRefs(useGameStore())
-const { text, money, poolName } = useTranslator()
-
-/** ADR 0017 — i conti non-giocatore non compaiono mai nella UI: l'elenco si deriva dai dati. */
-const playerPools = POOL_IDS.filter((pool) => POOLS[pool].player)
+const store = useGameStore()
+const {
+  balances,
+  cardCapacity,
+  atmFee,
+  incomePerSecond,
+  netWorth,
+  earned,
+  spent,
+  feesPaid,
+  recentOperations
+} = storeToRefs(store)
+const { text, money } = useTranslator()
 </script>
 
 <template>
-  <section class="panel">
-    <p class="caption">{{ text('balance.panel.title') }}</p>
-    <dl class="pools">
-      <template v-for="pool of playerPools" :key="pool">
-        <dt>{{ poolName(pool) }}</dt>
-        <dd class="amount">{{ money(balances[pool]) }}</dd>
-      </template>
-    </dl>
-    <p class="rate amount">{{ text('balance.panel.rate', { amount: money(incomePerSecond) }) }}</p>
-  </section>
+  <p class="caption zone">{{ text('home.zone.atm') }}</p>
+
+  <BankCard3d
+    :account="money(balances.card)"
+    :capacity="cardCapacity === null ? text('pool.unlimited') : money(cardCapacity)"
+    :fee="money(atmFee)"
+    :traceability="text(traceabilityKey('card'))"
+  />
+
+  <CashPanel />
+  <AtmPanel />
 
   <IncomePanel />
+
+  <p class="caption zone">{{ text('home.zone.dashboard') }}</p>
+
+  <div class="tiles">
+    <StatTile
+      label="home.tile.income"
+      :value="text('income.per_second', { amount: money(incomePerSecond) })"
+      tone="gain"
+    />
+    <StatTile label="home.tile.net_worth" :value="money(netWorth)" tone="plain" />
+    <StatTile label="home.tile.earned" :value="money(earned)" tone="gain" />
+    <StatTile label="home.tile.spent" :value="money(spent)" tone="plain" />
+    <StatTile label="home.tile.fees" :value="money(feesPaid)" tone="plain" />
+  </div>
+
+  <section class="panel">
+    <p class="caption">{{ text('atm.recent.title') }}</p>
+    <p v-if="recentOperations.length === 0" class="empty">{{ text('stats.operations.empty') }}</p>
+    <ol v-else class="operations">
+      <li v-for="(entry, index) of recentOperations" :key="index">
+        <p class="reason">{{ text(entry.reason) }}</p>
+        <PostingRows :postings="entry.postings" />
+      </li>
+    </ol>
+  </section>
 </template>
 
 <style scoped>
-.pools {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  align-items: baseline;
-  gap: 2px 16px;
-  margin: 8px 0 2px;
+/* Il separatore fra le due zone: dice dove finisce ciò che chiede e comincia ciò che mostra. */
+.zone {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 4px 0 -4px;
 }
 
-dt {
+.zone::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.empty {
+  margin: 8px 0 0;
   font-size: 12px;
   color: var(--muted);
 }
 
-dd {
-  margin: 0;
-  text-align: right;
-  font-size: 26px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
+.operations {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.rate {
-  font-size: 13px;
-  color: var(--accent);
-  margin: 0;
+.reason {
+  margin: 0 0 3px;
+  font-size: 12px;
+  font-weight: 600;
 }
 </style>

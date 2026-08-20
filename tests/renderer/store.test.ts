@@ -4,13 +4,14 @@ import { toRaw } from 'vue'
 
 import type { Balances } from '@core/contracts/ledger'
 import { fromString, toString } from '@core/contracts/money'
+import type { Pool } from '@core/contracts/pools'
 import type { LoadedSave, SavePayload, SaveResult } from '@core/contracts/save'
 
 import { BALANCE } from '@core/balance/constants'
 import { income } from '@core/kernel/Ledger'
 
 import { createGame, type Game } from '../../src/renderer/runtime/createGame'
-import { provideRuntime, useGameStore } from '../../src/renderer/stores/game'
+import { ATM_KINDS, provideRuntime, useGameStore } from '../../src/renderer/stores/game'
 import { createStage, type Stage, type StageOptions } from '../helpers/host'
 
 /**
@@ -306,7 +307,7 @@ describe('i comandi', () => {
       reason: 'reason.income.tick'
     })
 
-    const moved = store.deposit(fromString('500'))
+    const moved = store.confirm('deposit', fromString('500'))
 
     expect(moved.ok).toBe(true)
     expect(toString(store.balances.card)).toBe('497.5')
@@ -315,7 +316,7 @@ describe('i comandi', () => {
   it('un comando rifiutato torna indietro con il suo codice, e niente si muove', async () => {
     const store = await start()
 
-    const refused = store.withdraw(fromString('500'))
+    const refused = store.confirm('withdraw', fromString('500'))
 
     expect(refused.ok).toBe(false)
     if (refused.ok) return
@@ -556,5 +557,162 @@ describe('il tempo passato che la schermata di recupero mostra', () => {
 
     expect(store.status).toBe('recovering')
     expect(store.awayFor).toBe(hidden)
+  })
+})
+
+/** Denaro vero, dalla porta vera: nessun saldo si scrive a mano (R06). */
+const fund = (pool: Pool, amount: string): void => {
+  game.ctx.ledger.transaction(income(pool, fromString(amount)), { reason: 'reason.income.tick' })
+}
+
+describe('i selettori del bancomat', () => {
+  it('la commissione è quella del dominio, non il numero copiato dal mockup', async () => {
+    const store = await start()
+
+    expect(toString(store.atmFee)).toBe(toString(BALANCE.ATM_FEE))
+  })
+
+  it('gli importi rapidi ci sono, e la schermata si apre sul più grande', async () => {
+    const store = await start()
+    const largest = store.atmAmounts.reduce((high, amount) =>
+      amount.greaterThan(high) ? amount : high
+    )
+
+    expect(store.atmAmounts.length).toBeGreaterThan(1)
+    expect(toString(store.atmDefaultAmount)).toBe(toString(largest))
+  })
+
+  it('il caveau non ha ancora un tetto, e la schermata lo dice invece di inventarlo', async () => {
+    // Quando la fetta 02 gli darà un valore, questa riga diventerà rossa: è il punto in cui
+    // qualcuno deve decidere cosa disegna la capienza, invece di scoprirlo a schermo.
+    const store = await start()
+
+    expect(store.cashCapacity).toBeNull()
+    expect(store.cardCapacity).toBeNull()
+  })
+})
+
+describe('l’anteprima del bancomat e il comando', () => {
+  it('mostrano lo stesso elenco di movimenti, in tutte e due le direzioni', async () => {
+    // Non "danno lo stesso numero": è lo **stesso** elenco, costruito una volta sola da
+    // `previewOf` (INV-11). Se anteprima e comando leggessero due tabelle, un giorno «Deposita»
+    // mostrerebbe l'anteprima di un prelievo.
+    const store = await start()
+    fund('cash', '1000')
+    fund('card', '1000')
+
+    for (const kind of ATM_KINDS) {
+      const foreseen = store.preview(kind, fromString('500'))
+      expect(foreseen.ok).toBe(true)
+      if (!foreseen.ok) return
+
+      const done = store.confirm(kind, fromString('500'))
+
+      expect(done.ok).toBe(true)
+      expect(store.operations[0]?.postings).toEqual(foreseen.value)
+    }
+  })
+
+  it('un prelievo di 500 sposta 497,50 sui contanti e 2,50 alle commissioni', async () => {
+    const store = await start()
+    fund('card', '1000')
+
+    store.confirm('withdraw', fromString('500'))
+
+    expect(toString(store.balances.cash)).toBe('497.5')
+    expect(toString(store.balances.card)).toBe('500')
+    expect(toString(store.feesPaid)).toBe('2.5')
+  })
+
+  it('un importo che la commissione si mangia è un no spiegato, non un pulsante spento', async () => {
+    const store = await start()
+    fund('card', '1000')
+
+    const foreseen = store.preview('withdraw', fromString('1'))
+    expect(foreseen.ok).toBe(false)
+    if (foreseen.ok) return
+    expect(foreseen.error.code).toBe('error.atm.fee_exceeds_amount')
+
+    // Il pulsante resta premibile, e premerlo dà lo stesso codice: a rispondere è la stessa
+    // funzione. Un pulsante spento sarebbe un rifiuto senza motivo (ADR 0018).
+    const done = store.confirm('withdraw', fromString('1'))
+
+    expect(done.ok).toBe(false)
+    if (done.ok) return
+    expect(done.error).toEqual(foreseen.error)
+    expect(toString(store.balances.card)).toBe('1000')
+  })
+
+  it('e quel no si raggiunge dallo schermo: il più piccolo degli importi rapidi è quello', async () => {
+    // Senza un importo rapido sotto la commissione, il rifiuto dell'anteprima esisterebbe solo
+    // qui dentro — e un ramo che nessuno può vedere a schermo è un ramo che marcisce.
+    const store = await start()
+    const smallest = store.atmAmounts.reduce((low, amount) => (amount.lessThan(low) ? amount : low))
+
+    expect(store.preview('withdraw', smallest).ok).toBe(false)
+  })
+})
+
+describe('il cruscotto', () => {
+  it('legge le commissioni pagate da un saldo, non da un contatore', async () => {
+    // È la differenza che si vede solo al **caricamento**: un contatore tenuto in memoria
+    // ripartirebbe da zero, un saldo no — la partita doppia l'ha già contato (ADR 0020).
+    const payload = freshPayload()
+    const carried: SavePayload = {
+      ...payload,
+      ledger: { balances: { ...payload.ledger.balances, fees: '40', world: '-40' } }
+    }
+
+    const store = await start({ load: found(carried, SAVED_AT), wallClock: SAVED_AT })
+
+    expect(toString(store.feesPaid)).toBe('40')
+  })
+
+  it('e legge allo stesso modo guadagnato e speso, che nessuno conta', async () => {
+    const store = await start()
+    fund('cash', '2000')
+    fund('card', '1000')
+
+    expect(store.buyUpgrade().ok).toBe(true)
+    expect(store.confirm('withdraw', fromString('100')).ok).toBe(true)
+
+    expect(toString(store.earned)).toBe('3000')
+    expect(toString(store.spent)).toBe(toString(BALANCE.UPGRADE_COST))
+  })
+
+  it('i numeri si tengono fra loro: guadagnato meno speso meno commissioni fa il patrimonio', async () => {
+    // Non è una coincidenza da verificare: è INV-08 — la somma di tutti i conti fa zero —
+    // guardata dal lato del giocatore. Se un giorno non tornasse, il difetto sarebbe nel Ledger.
+    const store = await start()
+    fund('cash', '2000')
+    fund('card', '1000')
+    store.buyUpgrade()
+    store.confirm('withdraw', fromString('100'))
+
+    const held = store.earned.minus(store.spent).minus(store.feesPaid)
+
+    expect(toString(store.netWorth)).toBe(toString(held))
+    expect(toString(store.netWorth)).toBe('2197.5')
+  })
+})
+
+describe('le ultime operazioni', () => {
+  it('arrivano dalla più recente, come un estratto conto', async () => {
+    const store = await start()
+    fund('cash', '100')
+    fund('card', '900')
+    store.confirm('withdraw', fromString('500'))
+
+    expect(store.operations[0]?.reason).toBe('reason.atm.withdraw')
+    expect(store.operations.at(-1)?.reason).toBe('reason.income.tick')
+  })
+
+  it('la home ne mostra poche, la schermata Statistiche tutte quelle che ci sono', async () => {
+    const store = await start()
+    for (let posted = 0; posted < 10; posted += 1) fund('cash', '1')
+
+    expect(store.operations).toHaveLength(10)
+    expect(store.recentOperations.length).toBeLessThan(store.operations.length)
+    expect(store.recentOperations[0]).toBe(store.operations[0])
   })
 })

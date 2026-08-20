@@ -88,7 +88,7 @@ segnala che un confine si sta spostando.
 | INV-09 | Nessuna transazione è mai applicata parzialmente                          | ADR 0019 | `tests/kernel/ledger` (fallimento indotto sull'ultimo movimento)         |
 | INV-10 | Nessun dominio nomina a mano i pool non-giocatore                         | ADR 0020 | `tests/rules/domains-no-internal-pools` — i conti si derivano da `POOLS` |
 | INV-11 | La commissione in anteprima è lo **stesso valore** che il comando applica | ADR 0018 | `tests/domains/atm` — l'anteprima è l'elenco dei movimenti               |
-| INV-12 | Il cruscotto della home non supera i **sei** riquadri                     | ADR 0018 | `tests/rules/home-tiles`                                                 |
+| INV-12 | Il cruscotto della home non supera i **sei** riquadri                     | ADR 0018 | `tests/rules/home-tiles` — ⚠️ conta i tag, e rifiuta un `v-for` su uno   |
 | INV-13 | Il renderer non può usare le API di Node                                  | ADR 0001 | `tsconfig.web.json` senza tipi `node` — 🔒, non compila                  |
 | INV-14 | Nessun gate sparisce dalla catena `verify`                                | ADR 0013 | `tests/rules/gates`                                                      |
 | INV-15 | Il Bus è sincrono: nessuna attesa, nessuna coda dentro `emit`             | ADR 0016 | `tests/rules/bus-synchronous` — la firma `void` da sola non basta        |
@@ -105,8 +105,10 @@ contro una violazione reale è quasi sempre una regola che non funziona.
 
 ## Cosa questa tabella NON copre
 
-Le tre righe oneste, perché una matrice di tracciabilità che si dichiara completa è la prima cosa
-che invecchia male:
+Le cinque righe oneste, perché una matrice di tracciabilità che si dichiara completa è la prima
+cosa che invecchia male. Erano «tre» davanti a un elenco di quattro fin da prima di D015: è
+esattamente il difetto che questo documento avverte di cercare — un numero scritto una volta e mai
+più rimisurato.
 
 1. **R10 fuori dai comandi.** Il lint vieta i literal con chiave `success`, ma non impedisce a una
    funzione qualsiasi di ritornare `boolean`. Copre la seconda convenzione, non il degrado.
@@ -115,9 +117,13 @@ che invecchia male:
    né una stringa assemblata a runtime né un attributo — un `placeholder="Importo"` le sfugge.
    Quello che la parità **non** poteva vedere, e che ora vede, è un segnaposto perso in una
    traduzione sola: `tests/i18n/parity` confronta anche i `{nomi}` fra le due lingue.
-3. **C04 e C05** dipendono dalla review. Sono le due sole righe 👤 del progetto, ed è deliberato:
+3. **INV-12 fuori dai tag.** `tests/rules/home-tiles` conta i `<StatTile>` nel template della home
+   e rifiuta un `v-for` sullo stesso tag — la scorciatoia che trasformerebbe sei riquadri in sedici
+   lasciando il conto a uno. Un `v-for` su un **contenitore** che ne avvolge uno le sfugge ancora:
+   per prenderlo servirebbe rendere il componente, cioè jsdom ([registro YAGNI](roadmap-fette.md)).
+4. **C04 e C05** dipendono dalla review. Sono le due sole righe 👤 del progetto, ed è deliberato:
    meccanizzarle costerebbe più di quanto valgano. Se diventano tre, è un segnale.
-4. **`runtime/host.ts` non ha test.** È l'unico file del progetto senza, ed è una conseguenza
+5. **`runtime/host.ts` non ha test.** È l'unico file del progetto senza, ed è una conseguenza
    dichiarata del confine: quel file **è** il browser — `window`, `document`,
    `requestAnimationFrame`, `performance` — e tutto ciò che sta sopra lo riceve per costruzione,
    quindi gira in `node` senza jsdom. Che gli eventi giusti siano agganciati lo dice la lettura,

@@ -34,6 +34,7 @@ flowchart TD
 
   CMP --> ST
   CMP --> I18N
+  CMP --> CON
   I18N --> CON
   I18N --> DOM
   ST  --> RT
@@ -51,6 +52,12 @@ flowchart TD
   PRE --> CON
   PRE -->|solo channels.ts| SAVE
 ```
+
+`CMP --> CON` è di soli **dati**, e non contraddice R05: un componente che mostra i pool li deriva
+da `POOLS` invece di elencarli a mano, e uno che mostra i movimenti di una transazione ne nomina il
+tipo. Le regole restano fuori portata — `domains/*/rules`, `kernel/*` e `balance/*` sono vietati
+dal lint. La freccia esisteva già da [D012](delega/D012-ui-e-i18n.md) e non era disegnata; a
+disegnarla è [D015](delega/D015-home-bancomat.md), che l'ha usata due volte.
 
 ### Frecce vietate — e chi le impedisce
 
@@ -128,11 +135,14 @@ solvent/
 │  │  │  ├─ save.ts               # SavePayload · SaveEnvelope
 │  │  │  └─ commands.ts           # CommandHandler — ritorna Result
 │  │  └─ domains/
-│  │     └─ income/
-│  │        ├─ types.ts
-│  │        ├─ rules.ts           # funzioni pure, nessun effetto
-│  │        ├─ commands.ts        # l'acquisto dell'upgrade, ritorna Result
-│  │        └─ system.ts          # createIncome(ledger, modifiers) - ADR 0024
+│  │     ├─ income/
+│  │     │  ├─ types.ts
+│  │     │  ├─ rules.ts           # funzioni pure, nessun effetto
+│  │     │  ├─ commands.ts        # l'acquisto dell'upgrade, ritorna Result
+│  │     │  └─ system.ts          # createIncome(ledger, modifiers) - ADR 0024
+│  │     └─ atm/                  # senza system.ts: non ha stato e non ticchetta (D014)
+│  │        ├─ rules.ts           # commissione, importo valido, capienza
+│  │        └─ commands.ts        # previewOf + i due comandi, ritornano Result
 │  └─ renderer/
 │     ├─ index.html
 │     ├─ main.ts
@@ -144,10 +154,17 @@ solvent/
 │     ├─ stores/
 │     │  └─ game.ts               # unico store della fetta: stato, comandi, selettori
 │     ├─ views/
-│     │  ├─ HomeView.vue          # saldo + upgrade; bancomat e cruscotto con D015
+│     │  ├─ HomeView.vue          # bancomat, upgrade, cruscotto, ultime operazioni
 │     │  └─ StatsView.vue
 │     ├─ components/
-│     │  └─ IncomePanel.vue       # + BankCard3d, CashPanel, AtmPanel, StatTile con D015
+│     │  ├─ IncomePanel.vue       # l'upgrade: tre selettori, un comando, un rifiuto tradotto
+│     │  ├─ BankCard3d.vue        # la carta: CSS 3D puro, zero logica
+│     │  ├─ rotation.ts           # la matematica della rotazione, pura e provata a parte
+│     │  ├─ CashPanel.vue         # contanti, capienza, tracciabilita
+│     │  ├─ AtmPanel.vue          # importo, importi rapidi, anteprima, conferma
+│     │  ├─ PostingRows.vue       # i movimenti di una transazione, riga per riga
+│     │  ├─ postings.ts           # quali movimenti il giocatore vede - pura
+│     │  └─ StatTile.vue          # il riquadro del cruscotto: e' cio' che il test conta
 │     └─ i18n/
 │        ├─ index.ts              # chiavi tipizzate, Translator, GameError
 │        ├─ it.ts
@@ -160,8 +177,11 @@ solvent/
    ├─ save/            schema - roundtrip - kernel-roundtrip - migrations - ipc - preload
    ├─ balance/         modifiers · targets
    ├─ i18n/            parity · translator
+   ├─ renderer/        createGame · loop · store · postings · rotation
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
-                       eslint-disable · bus-synchronous · main-save-only
+                       eslint-disable · bus-synchronous · main-save-only · home-tiles
+                       no-logic-in-vue · no-literal-in-template · english-identifiers · doc-links
+                       domains-no-internal-pools · domains-no-money-literals
                        registry-completeness · registry-no-special-cases
                        doc-links · english-identifiers
                        no-logic-in-vue · no-literal-in-template

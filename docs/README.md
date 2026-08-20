@@ -85,9 +85,11 @@ carta trattenendo una commissione, e non ha stato — è un dominio di soli coma
 rispecchia il Bus senza calcolare, e la finestra salva prima di chiudersi. Con D012 il gioco **parla**: il guscio veste i sette stati
 del ciclo di vita, il saldo e l'upgrade hanno una schermata, e ogni parola passa da una chiave in
 due lingue — le chiavi del bancomat comprese, perché una lingua che si completa in due tempi è il
-difetto A13. La prossima delega è
-[D015 — La home: bancomat, carta e cruscotto](delega/D015-home-bancomat.md), nata il 2026-08-19
-dallo spezzamento di [D012](delega/D012-ui-e-i18n.md).
+difetto A13. Con D015 il gioco **si gioca**: la home è un bancomat con la carta che si gira, la
+commissione si vede prima della conferma, il cruscotto dice come sta andando e il giro si chiude —
+si guadagna in contanti, si deposita, si compra con la carta. La prossima delega è
+[D013 — Verifica della fetta](delega/D013-verifica-della-fetta.md), che è lo **STOP 2**: nessun
+codice nuovo, e la decisione sulla fetta 02.
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati
@@ -104,5 +106,6 @@ delega per delega, non per decreto. Con D002 sono passati
 [0004](adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md), con D010 il nuovo
 [0024](adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md), con D011
 [0001](adr/0001-simulazione-nel-renderer-core-puro.md) e
-[0009](adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md), e con D012
-[0011](adr/0011-i18n-obbligatoria-con-parita-verificata.md).
+[0009](adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md), con D012
+[0011](adr/0011-i18n-obbligatoria-con-parita-verificata.md) e con D015
+[0018](adr/0018-la-home-e-un-atm.md).

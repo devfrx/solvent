@@ -1,6 +1,8 @@
 # ADR 0018 — La home è cruscotto **e** bancomat, con il bancomat al primo posto
 
-- **Stato:** Proposta — **rivista il 2026-08-19 su decisione dell'utente**
+- **Stato:** **Accettata** — [D015](../delega/D015-home-bancomat.md): la home è le due zone in
+  quest'ordine, la commissione si vede prima della conferma, e `tests/rules/home-tiles` conta i
+  riquadri. Rivista il 2026-08-19 su decisione dell'utente
 - **Data:** 2026-08-19
 - **Origine:** preferenze [P3](../prodotto/preferenze.md#p3--la-home-è-cruscotto-e-bancomat) e [P5](../prodotto/preferenze.md#p5--la-carta-è-un-oggetto-3d-ruotabile)
 
@@ -53,7 +55,12 @@ premuto è un bancomat scorretto, e questo gioco parla di soldi.
 - Serve la schermata **Statistiche** dal primo giorno, altrimenti il settimo riquadro non ha dove
   andare e il test diventa un ostacolo invece che una guida.
 - `tests/rules/home-tiles.test.ts` conta i riquadri statistici nella vista home e fallisce oltre
-  sei. Regola meccanizzata, non affidata alla review.
+  sei. Regola meccanizzata, non affidata alla review. Esiste da
+  [D015](../delega/D015-home-bancomat.md), ed è **⚠️ parziale**: conta i tag e rifiuta un `v-for`
+  su un riquadro, ma un `v-for` su un contenitore che ne avvolge uno le sfugge.
+- I riquadri sono **cinque**, non sei: il tetto è un tetto, non una quota, e i numeri vivi della
+  fetta 01 sono cinque. Il sesto posto è libero, ed è la forma in cui questo ADR si mostra a chi
+  arriverà con una statistica nuova.
 - I sei riquadri sono una **scelta di design da rifare a ogni fetta**: quando arriva il black
   market, il calore probabilmente merita un posto — e qualcosa deve uscire. Il test costringe a
   quella conversazione invece di permettere di evitarla.
