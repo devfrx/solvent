@@ -3,7 +3,9 @@
 - **Stato:** Aperta — scritta il 2026-08-20 allo STOP 2, e **preparata per l'esecuzione** lo
   stesso giorno: la preparazione ha misurato il costo del cambiamento e ha trovato un difetto
   nella delega stessa. Vedi _Cosa la preparazione ha verificato_
-- **Dipende da:** D013 (cioè tutta la fetta 01)
+- **Dipende da:** D013 (cioè tutta la fetta 01) e **[D019](D019-il-pagamento.md)**, che porta il
+  listino: senza, l'ampliamento nascerebbe con un pool scritto nel sorgente e da correggere subito
+  dopo
 - **Sblocca:** la fetta 02: il primo muro del gioco, e il primo confine del kernel che si sposta
   dopo la fetta 01
 - **Il dominio è stato studiato prima:** [design/domini/vault.md](../design/domini/vault.md), la
@@ -11,11 +13,14 @@
   prendere da sola — l'unità della capienza, il tetto a livelli finiti, la varianza zero — e le
   alternative che sono state scartate, con il perché
 - **ADR vincolanti:** [0025](../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md) (nuovo),
-  0003, 0014, 0017, 0018, 0020, 0024
+  [0027](../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md), 0003, 0014, 0017, 0018,
+  0020, 0024
 - **Regole:** nessuna nuova. Un invariante nuovo: **INV-18**
-- **Budget:** ~250 righe di sorgente e ~330 di test. La stima è alta rispetto al lavoro visibile
-  perché quasi tutto il costo sta in due punti che non si vedono: il ramo del reddito che ora può
-  fallire, e i test del kernel che cambiano firma
+- **Budget:** ~330 righe di sorgente e ~410 di test. La stima è alta rispetto al lavoro visibile
+  perché quasi tutto il costo sta in tre punti che non si vedono: il ramo del reddito che ora può
+  fallire, i test del kernel che cambiano firma, e il **selettore del pagamento** — che D019
+  costruisce per un'opzione sola e che qui incontra il suo primo caso a due. La stima era ~250 e
+  ~330 quando D019 non esisteva
 
 ## Obiettivo
 
@@ -72,6 +77,28 @@ Ne discende che `income` non può limitarsi a chiedere e incassare il rifiuto: d
 ci sta prima di chiedere**. Il pezzo esiste già ed è puro — `fitsIn(capacity, current, incoming)` —
 e gli manca il fratello che risponde «quanto», invece di «sì o no». Il muro resta un muro: quando
 il caveau è pieno davvero, quanto-ci-sta vale zero e il reddito si ferma del tutto.
+
+## L'ampliamento ha un listino, ed è il primo a due voci
+
+[D019](D019-il-pagamento.md) porta il meccanismo — `PaymentOption`, il listino, e la regola che il
+prezzo mostrato e quello addebitato vengono dalla stessa funzione (INV-19). Lo costruisce su
+`income`, che accetta **un** solo strumento: l'ampliamento del caveau è il primo a offrirne due, e
+con esso arriva il selettore vero.
+
+**Contanti o carta, a prezzi diversi.** Il numero non è deciso qui — va in `balance/` e va scelto
+giocando — ma la sua **taratura** ha un vincolo che vale la pena scrivere prima: il calore non
+esiste ancora, quindi lo strumento più economico non paga niente in cambio e vincerebbe sempre. La
+legge della non dominanza cadrebbe al primo confronto.
+
+Il compromesso che regge già oggi è **la commissione del bancomat**. Se la carta costa meno ma il
+giocatore ha solo contanti, deve prima versarli e pagare `ATM_FEE`: conviene solo se lo sconto
+supera la commissione. È una scelta vera, verificabile con un test di bilanciamento, e la fetta 04
+ci aggiungerà il calore senza smontarla.
+
+Ne discende una **cosa da non fare**: dare all'ampliamento due prezzi senza guardare `ATM_FEE`. Con
+la commissione a 2,50 €, uno sconto di 50 € sulla carta rende i contanti inutili — e il caveau
+avrebbe un listino di due voci di cui una non si sceglie mai, che è arredamento con dentro del
+codice.
 
 ## Cosa la preparazione ha verificato
 
@@ -233,18 +260,9 @@ permette.
 - **Interessi sul saldo fermo.** `POOLS.yields` esiste ed è `false` per tutti: resta così.
 - **I conti dinamici** dell'[ADR 0022](../adr/0022-il-ledger-ha-conti-non-solo-pool.md). L'ADR 0025
   è deliberatamente più piccolo: risponde a «quanto ci sta», non a «esiste un conto».
-- **La scelta di con cosa si paga.** La delega chiedeva di decidere se il caveau si amplia con la
-  carta o con i contanti, e con un argomento sbagliato: diceva che pagare in contanti renderebbe
-  l'ampliamento «impossibile proprio quando serve», mentre se il caveau è pieno di contanti il
-  giocatore ha per definizione i soldi per pagare — e **il pagamento stesso libera spazio**.
-  L'argomento cade, ma la domanda esce lo stesso dalla delega: **è una meccanica trasversale**, il
-  giocatore sceglie il pool a ogni transazione, e disegnarla dentro un dominio la farebbe nascere
-  storta. È nel [registro YAGNI](../roadmap-fette.md) con il grilletto già scattato.
-
-  **Cosa fa D017 nel frattempo:** l'ampliamento si paga con la **carta**, come `UPGRADE_PAYMENT` in
-  `income`. Non è la decisione, è la **convenzione corrente**, e va scritta come tale nel codice.
-  Due chiamanti con lo stesso valore fisso sono esattamente ciò che la delega trasversale andrà a
-  sostituire — in un posto solo, e senza doverne scoprire un terzo.
+- **Il meccanismo del pagamento.** Il contratto `PaymentOption`, il listino e la sua lettura sono
+  di [D019](D019-il-pagamento.md), che viene **prima** di questa delega. Qui il caveau lo **usa**,
+  e ne è il primo caso a due voci: vedi _L'ampliamento ha un listino_.
 
 ## Definizione di fatto
 

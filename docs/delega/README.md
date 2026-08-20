@@ -82,12 +82,20 @@ flowchart TD
   D014 --> D015
   D015 --> D016["D016 · Le correzioni dell'audit"]
   D016 --> D013["D013 · Verifica della fetta — STOP 2"]
-  D013 --> D017["D017 · Il caveau — fetta 02"]
+  D013 --> D019["D019 · Il pagamento — fetta 02"]
+  D019 --> D017["D017 · Il caveau — fetta 02"]
   D013 --> D018["D018 · La scheda di dominio"]
 ```
 
 **D017 e D018 non si toccano**, ed è il primo caso del progetto: una scrive codice, l'altra solo
 documenti, e nessuna aspetta l'altra. Il grafo lo mostra facendole partire entrambe da D013.
+
+**D019 si è infilata fra D013 e D017**, ed è nata da una domanda posta al momento giusto: prima di
+eseguire D017 si è ragionato su come si sceglie con cosa si paga. È venuto fuori che
+l'[ADR 0017](../adr/0017-il-denaro-e-plurale.md) aveva promesso quel meccanismo dalla fetta 01 e
+nessuno l'aveva costruito, e che il caveau sarebbe stato il **secondo** comando a spendere — cioè
+l'ultimo momento per rispondere senza rifare niente. Se D017 fosse partita il giorno prima, avrebbe
+scelto un pool nel sorgente e D019 avrebbe dovuto disfarlo.
 
 **D001 è prima di tutto, e non è un caso.** Le regole devono esistere prima del codice che
 governano. Se il lint arriva dopo, il primo codice nasce fuori regola e la prima cosa che si fa è
@@ -114,7 +122,8 @@ configurato dopo che c'erano già 156 file.
 | [D015](D015-home-bancomat.md)        | La home: bancomat, carta e cruscotto                                  | 725 codice + 321 test   | **Chiusa** |
 | [D016](D016-correzioni-audit.md)     | Le correzioni dell'audit del 2026-08-20                               | 186 codice + 326 test   | **Chiusa** |
 | [D013](D013-verifica-della-fetta.md) | Verifica della fetta — STOP 2                                         | 93 test + 17 di README  | **Chiusa** |
-| [D017](D017-il-caveau.md)            | Il caveau: i contanti hanno una capienza — fetta 02                   | ~250 codice + ~330 test | **Aperta** |
+| [D019](D019-il-pagamento.md)         | Il pagamento: il listino di un'azione, e chi lo sceglie               | ~140 codice + ~220 test | **Aperta** |
+| [D017](D017-il-caveau.md)            | Il caveau: i contanti hanno una capienza — fetta 02                   | ~330 codice + ~410 test | **Aperta** |
 | [D018](D018-la-scheda-di-dominio.md) | La scheda di dominio: la forma, e le prime tre compilate              | ~510 di documentazione  | **Aperta** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015

@@ -43,7 +43,7 @@ scheda: vedi _Cosa questo studio ha trovato_.
 | 5   | **Calore**        | **zero**. Tenere denaro dentro non fa notare nessuno                        |
 | 6   | **Attenzione**    | **quasi zero**. Un pulsante ogni tanto, nessuna entità da seguire           |
 | 7   | **Pozza**         | **minima**, forma 1. È l'unico strumento la cui pozza **è** il suo tetto    |
-| 8   | **Pagamento**     | entrambi — ma non lo decide il caveau, vedi _Domande aperte_                |
+| 8   | **Pagamento**     | **entrambi**, a prezzi diversi. È il primo listino a due voci del gioco     |
 | 9   | **Requisito**     | **nessuno**. È il primo strumento del gioco                                 |
 
 ### La legge della non dominanza regge
@@ -112,8 +112,12 @@ cose diverse.
 - **Livelli finiti, con un tetto dichiarato.** Il caveau arriva a un ultimo livello e lì si ferma.
   Il giocatore lo vede dal primo secondo — «caveau 3 di 8» — e sa che i contanti hanno una fine.
 - Ogni livello dà più spazio e costa di più.
-- **Con cosa si paga non lo decide il caveau.** È una meccanica trasversale: vedi
-  _Domande aperte_.
+- **Si paga in contanti o con la carta, a prezzi diversi.** Il meccanismo — il **listino** di
+  un'azione — è dell'[ADR 0027](../../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)
+  e lo costruisce [D019](../../delega/D019-il-pagamento.md); il caveau è il primo a offrirne due.
+  La taratura ha un vincolo: senza il calore, lo strumento più economico vincerebbe sempre, quindi
+  la differenza di prezzo va misurata contro la **commissione del bancomat** — pagare con la carta
+  conviene solo se lo sconto supera quanto costa portarci i contanti.
 
 **Perché livelli finiti e non una curva che si strozza da sola.** L'alternativa era non mettere
 nessun tetto e lasciare che il costo crescesse più in fretta della capienza, così che il muro
@@ -228,11 +232,11 @@ _Lo spazio_. Costa zero oggi e costa una riscrittura fra tre fette.
 
 ## Domande aperte
 
-| Domanda                                                       | Chi la chiude                                                                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Con cosa si paga**, in generale                             | una meccanica trasversale, non il caveau: il giocatore sceglie per ogni transazione, salvo dove una valuta è obbligata. Oggi c'è un solo precedente, `UPGRADE_PAYMENT` in `income`, ed è fisso su `card`. L'ampliamento sarebbe il secondo: il grilletto è scattato, e la voce va nel registro YAGNI |
-| **I numeri**: quanti livelli, quale curva di capienza e costo | [D017](../../delega/D017-il-caveau.md), eseguendola. Vanno in `balance/constants.ts`, con il bersaglio in `balance/targets.ts`                                                                                                                                                                       |
-| **L'ingombro degli oggetti**: come si dichiara                | il primo dominio che produce oggetti — black market o aste di box                                                                                                                                                                                                                                    |
+| Domanda                                                       | Chi la chiude                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Quanto costa con ognuno dei due strumenti**                 | [D017](../../delega/D017-il-caveau.md), eseguendola, e il numero va tarato contro `ATM_FEE`. Il **meccanismo** invece è chiuso: [ADR 0027](../../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md) e [D019](../../delega/D019-il-pagamento.md) |
+| **I numeri**: quanti livelli, quale curva di capienza e costo | [D017](../../delega/D017-il-caveau.md), eseguendola. Vanno in `balance/constants.ts`, con il bersaglio in `balance/targets.ts`                                                                                                                             |
+| **L'ingombro degli oggetti**: come si dichiara                | il primo dominio che produce oggetti — black market o aste di box                                                                                                                                                                                          |
 
 ---
 

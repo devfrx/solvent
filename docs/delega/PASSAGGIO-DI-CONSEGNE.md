@@ -49,6 +49,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | D015 — home e bancomat   | **chiusa**, commit `3aa3460`                                                 |
 | D016 — correzioni audit  | **chiusa**, commit `c648639`, unita a `main` da D013                         |
 | D013 — verifica, STOP 2  | **chiusa**, commit `c5d534c`                                                 |
+| D019 — il pagamento      | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                |
 | D017 — il caveau         | **aperta e preparata** — scritta e misurata allo STOP 2, non ancora eseguita |
 | Kernel                   | **finito** — 471 righe in `kernel/`, **545 con `balance/`** (D003–D008)      |
 | Persistenza nel main     | **finita** — 246 righe in `src/main/` e `src/preload/`                       |
@@ -57,7 +58,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Renderer                 | **1.729 righe**, di cui 439 di CSS e 369 sotto `i18n/`                       |
 | `npm run verify`         | **verde** — 503 test su 55 file, 41,4 s                                      |
 | `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 564,89 kB                        |
-| Prossimo passo           | **[D017 — Il caveau](D017-il-caveau.md)**, quando l'utente dà il via         |
+| Prossimo passo           | **[D019 — Il pagamento](D019-il-pagamento.md)**, quando l'utente dà il via   |
 
 I conteggi di riga sono **righe di codice, commenti e righe vuote escluse**, ed è lo stesso metodo
 per tutti: la riga che diceva che il kernel «usa un altro metodo» era sbagliata, e a scoprirlo è
@@ -197,14 +198,28 @@ Non serve leggere tutti i 24 ADR. Servono quando stai per contraddirne uno: allo
 
 ## Il prossimo passo, in concreto
 
-**Lo STOP 2 è stato riportato, e la fetta 02 ha una delega scritta e non ancora eseguita.**
-La fetta 01 è conclusa e verificata. [D017 — Il caveau](D017-il-caveau.md) è **Aperta**: il testo
-c'è, il codice no, e non parte finché l'utente non dà il via. È stata anche **preparata per
-l'esecuzione**: il costo del cambiamento è stato misurato mettendo davvero una capienza a
-`POOLS.cash` e guardando cosa diventa rosso, e la misura ha trovato un difetto nella delega
-stessa — il recupero dopo un'assenza incassava **zero** invece di quanto ci sta. La decisione
-di gioco è stata riscritta prima che esistesse una riga di codice. Gli otto punti stanno in
-[D017](D017-il-caveau.md), sotto _Cosa la preparazione ha verificato_.
+**Lo STOP 2 è stato riportato, e la fetta 02 ha due deleghe scritte e nessuna eseguita.**
+La fetta 01 è conclusa e verificata. Nessuna delle due parte finché l'utente non dà il via.
+
+**Prima [D019 — Il pagamento](D019-il-pagamento.md).** Non c'era, ed è nata da una domanda posta
+prima di eseguire il caveau: come sceglie il giocatore con cosa paga? La risposta è che non sceglie
+— `income` compra il suo upgrade con il pool scritto nel sorgente — e che
+l'[ADR 0017](../adr/0017-il-denaro-e-plurale.md) prometteva il contrario dalla fetta 01. Il caveau
+sarebbe stato il **secondo** comando a spendere, cioè l'ultimo momento per rispondere senza
+disfare niente. Da lì l'[ADR 0027](../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)
+e il **listino**: ogni azione dichiara, per ogni strumento che accetta, quanto costa con quello.
+Il kernel non cambia di una riga.
+
+**Poi [D017 — Il caveau](D017-il-caveau.md).** È **Aperta** e **preparata per l'esecuzione**: il
+costo del cambiamento è stato misurato mettendo davvero una capienza a `POOLS.cash` e guardando
+cosa diventa rosso, e la misura ha trovato un difetto nella delega stessa — il recupero dopo
+un'assenza incassava **zero** invece di quanto ci sta. La decisione di gioco è stata riscritta
+prima che esistesse una riga di codice. Gli otto punti stanno in [D017](D017-il-caveau.md), sotto
+_Cosa la preparazione ha verificato_.
+
+Il caveau è anche l'unico dominio con una **[scheda](../design/domini/vault.md)** già compilata, ed
+è servita: compilarla ha aggiunto la nona voce all'etichetta della visione — la **tracciabilità**,
+che la legge 1 nominava e l'etichetta non misurava.
 
 Il rapporto è in fondo a [D013](D013-verifica-della-fetta.md), nei cinque punti che lo STOP 2
 chiede. Non si riparte da zero: si riparte da lì.

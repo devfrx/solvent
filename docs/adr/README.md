@@ -51,9 +51,15 @@ strutturale della fetta 02, e riguarda un confine del kernel — il Ledger smett
 capienza di un pool e comincia a **chiederla**, perché il caveau si amplia e una costante compilata
 non si amplia.
 
-Restano _Proposta_ cinque decisioni, e per quattro è corretto: **0022**, **0023**, **0025** e
-**0026** descrivono cose che il progetto non ha ancora costruito, e diventeranno un fatto con la
-delega che le userà. La quinta è **0010**, e ha il meccanismo **a metà**: `boundedList<T>(max)` è l'unico costruttore e `max` è
+Il **0027** nasce lo stesso giorno, ed è l'unico del progetto che non decide una cosa nuova: finisce
+una vecchia. L'[ADR 0017](0017-il-denaro-e-plurale.md) aveva scritto che «non esistono azioni che
+assumono uno strumento», e da allora `income` compra il suo upgrade con il pool scritto nel
+sorgente. Il 0027 dà a quella frase un meccanismo — il **listino** — e lo fa nel momento in cui i
+comandi che spendono stanno per diventare due.
+
+Restano _Proposta_ sei decisioni, e per cinque è corretto: **0022**, **0023**, **0025**, **0026** e
+**0027** descrivono cose che il progetto non ha ancora costruito, e diventeranno un fatto con la
+delega che le userà. La sesta è **0010**, e ha il meccanismo **a metà**: `boundedList<T>(max)` è l'unico costruttore e `max` è
 obbligatorio, ma la seconda frase della decisione — «il validatore del salvataggio rifiuta un array
 che supera il `max` dichiarato» — non ha niente da validare, perché nel payload della versione 1
 non c'è nessun array. La lista delle ultime operazioni ha il suo limite ed è un mirror che riparte
@@ -90,6 +96,7 @@ fetta 02 a chiuderla.
 | [0024](0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md) | Un sistema riceve per costruzione ciò che non sta nel contesto | **Accettata** | come un dominio ottiene ciò che il `SystemContext` non porta            | —               |
 | [0025](0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)                  | La capienza di un pool si chiede, non si legge                 | Proposta      | chi decide quanto tiene un pool, quando il tetto può crescere           | A05             |
 | [0026](0026-la-precisione-del-denaro-e-dichiarata.md)                          | La precisione del denaro è dichiarata, non ereditata           | Proposta      | fin dove il denaro resta esatto, e chi ha scelto quel limite            | —               |
+| [0027](0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)               | Il listino è dell'azione, la scelta è del giocatore            | Proposta      | chi decide con cosa si paga, e dove vive il prezzo di ogni strumento    | A05             |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è
