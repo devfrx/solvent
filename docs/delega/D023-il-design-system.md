@@ -2,8 +2,8 @@
 
 - **Stato:** **Chiusa** — scritta il 2026-08-20 leggendo il canvas di Claude Design consegnato
   dall'utente, **prima** di [D017](D017-il-caveau.md) — il caveau è la prima schermata nuova, e una
-  schermata disegnata prima del sistema è una schermata da rifare — ed eseguita lo stesso giorno,
-  ramo `d023-design-system`. Vedi _Come è andata_ in fondo
+  schermata disegnata prima del sistema è una schermata da rifare — ed eseguita lo stesso giorno:
+  commit `a03b97b`, ramo `d023-design-system`. Vedi _Come è andata_ in fondo
 - **Dipende da:** [D015](D015-home-bancomat.md) — la home e i componenti di oggi sono ciò che il
   kit deve saper vestire. **Non** dipende da [D017](D017-il-caveau.md)
 - **Sblocca:** ogni schermata che verrà, a partire dal caveau
@@ -184,7 +184,7 @@ Tutto ciò che segue è **nel canvas** e non entra adesso. Ognuno prende una rig
 
 ## Come è andata
 
-Eseguita il 2026-08-20, sul ramo `d023-design-system`.
+Eseguita il 2026-08-20, sul ramo `d023-design-system`, commit `a03b97b`.
 
 **Budget.** Dichiarate ~360 righe di sorgente e ~130 di test. Misurate **346 righe di kit** e **129
 di test**, con il metodo di `codeLines`. La migrazione dei componenti e delle viste ne ha **tolte
