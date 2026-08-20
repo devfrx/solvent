@@ -41,7 +41,7 @@ domande ovvie che nessuno aveva scritto in un posto dove tornassero a galla.
 
 ## Cosa trovi già fatto
 
-- **La visione** è riscritta e coerente: l'etichetta a otto voci, la legge della non dominanza, le
+- **La visione** è riscritta e coerente: l'etichetta a nove voci, la legge della non dominanza, le
   quattro forme di saturazione, i requisiti, il tempo, l'attenzione, il fuori-finestra.
 - **La mappa funzionale** ([design/mappa-funzionale.md](../design/mappa-funzionale.md)) descrive già
   ciclo, cosa vedere, cosa decidere e cosa può andare male per tutti e diciassette i domini, e per
@@ -66,8 +66,8 @@ La scheda ha **due metà**, e la seconda è la ragione per cui questa delega esi
 
 **Metà di gioco.** Riprende la visione e la mappa funzionale, e non le riscrive:
 
-1. **L'etichetta a otto voci** — rendimento, varianza, liquidità, calore, attenzione, pozza,
-   pagamento, requisito. Compilata, non descritta.
+1. **L'etichetta a nove voci** — rendimento, varianza, liquidità, tracciabilità, calore, attenzione,
+   pozza, pagamento, requisito. Compilata, non descritta.
 2. **Il ciclo** — cosa fa il giocatore, in una frase.
 3. **Deve vedere / deve decidere / può andare male** — le tre righe della mappa funzionale.
 4. **Come muore il secondo milione** — quale delle quattro forme, e con quale numero.
@@ -112,6 +112,12 @@ E in fondo, due righe che non sono domande ma conseguenze:
 
 Si compilano **leggendo il codice**, non ricordandolo — tranne il caveau, che si compila leggendo
 D017. Una scheda che descrive ciò che credevamo di aver scritto è peggio di nessuna scheda.
+
+**La scheda del caveau ha già la sua metà di gioco**, scritta il 2026-08-20 studiando il dominio
+prima di eseguire D017: [design/domini/vault.md](../design/domini/vault.md). Questa delega non la
+riscrive — le aggiunge la metà kernel, e ne verifica la forma contro la scheda che avrà appena
+definito. È anche il documento che ha fatto nascere la nona voce dell'etichetta, quindi è la prova
+che compilarne una scopre qualcosa: l'invariante più sotto è già soddisfatto per un terzo.
 
 ## Invarianti
 

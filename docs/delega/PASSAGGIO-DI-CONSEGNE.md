@@ -22,7 +22,7 @@ che si costruisce da sé. A impedire che uno strumento diventi la risposta a ogn
 fase del gioco: è che ognuno **satura**, e che ognuno paga in almeno una fra liquidità,
 tracciabilità, varianza e attenzione.
 
-La struttura che regge tutto questo — l'etichetta a otto voci, la legge della non dominanza, le
+La struttura che regge tutto questo — l'etichetta a nove voci, la legge della non dominanza, le
 quattro forme di saturazione — e la profondità di ogni dominio stanno in
 [prodotto/visione.md](../prodotto/visione.md), riscritta il 2026-08-20. **Se hai in mente le quattro
 ere, quel documento è cambiato sotto di te:** le ere non esistono più come struttura di gioco, e

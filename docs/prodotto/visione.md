@@ -101,21 +101,35 @@ La casa sono le tre regole che lo impediscono. Valgono per ogni strumento, prese
 
 ### Regola 1 — l'etichetta
 
-Ogni strumento dichiara le stesse **otto voci**, come dati, sempre nello stesso ordine.
+Ogni strumento dichiara le stesse **nove voci**, come dati, sempre nello stesso ordine.
 
-| #   | Voce           | Risponde a                                                   |
-| --- | -------------- | ------------------------------------------------------------ |
-| 1   | **Rendimento** | quanto rende. Può essere **negativo**: il casinò, i prestiti |
-| 2   | **Varianza**   | quanto spesso va storto, e quanto forte                      |
-| 3   | **Liquidità**  | fra quanto rivedo i soldi, e cosa costa uscire prima         |
-| 4   | **Calore**     | quanto mi fa notare                                          |
-| 5   | **Attenzione** | quanto devo stargli dietro                                   |
-| 6   | **Pozza**      | quanto regge prima che l'attrito morda                       |
-| 7   | **Pagamento**  | contanti, carta, o entrambi (ADR 0017)                       |
-| 8   | **Requisito**  | cosa serve per poterlo usare                                 |
+| #   | Voce              | Risponde a                                                   |
+| --- | ----------------- | ------------------------------------------------------------ |
+| 1   | **Rendimento**    | quanto rende. Può essere **negativo**: il casinò, i prestiti |
+| 2   | **Varianza**      | quanto spesso va storto, e quanto forte                      |
+| 3   | **Liquidità**     | fra quanto rivedo i soldi, e cosa costa uscire prima         |
+| 4   | **Tracciabilità** | che registro lascia, e chi lo può leggere **dopo**           |
+| 5   | **Calore**        | quanto mi fa notare **adesso**                               |
+| 6   | **Attenzione**    | quanto devo stargli dietro                                   |
+| 7   | **Pozza**         | quanto regge prima che l'attrito morda                       |
+| 8   | **Pagamento**     | contanti, carta, o entrambi (ADR 0017)                       |
+| 9   | **Requisito**     | cosa serve per poterlo usare                                 |
 
-Le otto voci sono state provate riempiendole per tutti e diciassette i domini di questa pagina. Ci
+Le prime otto sono state provate riempiendole per tutti e diciassette i domini di questa pagina. Ci
 stanno tutti, e nessuna voce resta vuota per più di uno.
+
+**La tracciabilità è la nona, ed è arrivata dopo.** L'etichetta ne aveva otto fino al 2026-08-20,
+quando compilare la [scheda del caveau](../design/domini/vault.md) ha reso visibile un buco: la
+legge 1 dice che ogni strumento paga in almeno una fra **liquidità, tracciabilità, varianza,
+attenzione**, e l'etichetta aveva una voce per tre di quelle quattro monete. Il caveau è lo
+strumento che paga **solo** in tracciabilità — non rende, non fa rumore, non chiede attenzione, e
+tiene i contanti anonimi — quindi è il primo in cui l'assenza si vede: senza la nona voce sembra un
+deposito vincolato peggiore su tutta la riga.
+
+**Tracciabilità e calore non sono la stessa cosa**, ed è la ragione per cui sono due voci e stanno
+vicine. La tracciabilità è un **registro** che resta e che qualcuno può leggere dopo; il calore è
+attenzione delle autorità **adesso**. Un bonifico non alza il calore di un centesimo, e lascia una
+riga che un'indagine leggerà tre mesi più tardi.
 
 **Un rendimento negativo non è un errore.** È così che si descrivono gli strumenti che non servono
 a guadagnare: il casinò ti prende denaro e ti dà **varianza**, il prestito ti prende denaro futuro
@@ -130,12 +144,12 @@ dire niente su come si cucinano.
 
 ### Regola 2 — nessuno domina
 
-> **Nessuno strumento può essere migliore di un altro su tutte e otto le voci.**
+> **Nessuno strumento può essere migliore di un altro su tutte e nove le voci.**
 
 Se lo fosse, l'altro non lo aprirebbe nessuno, e un dominio che nessuno apre è arredamento con
 dentro del codice.
 
-**Questa legge è verificabile da un test**, perché le otto voci sono dati dichiarati: si prendono
+**Questa legge è verificabile da un test**, perché le nove voci sono dati dichiarati: si prendono
 tutte le coppie di strumenti, e per ogni coppia deve esistere almeno una voce in cui il secondo
 batte il primo.
 
@@ -763,7 +777,7 @@ grosso, e la prova che le altre tre non bastavano.
 scegliere bene le fondamenta, non a costruire tutto insieme — è esattamente il difetto A17, i 24
 sistemi nati prima di un modo per collegarli ([ADR 0014](../adr/0014-una-fetta-verticale-alla-volta.md)).
 
-**La casa è un modulo da riempire, non codice da scrivere adesso.** L'etichetta a otto voci, la
+**La casa è un modulo da riempire, non codice da scrivere adesso.** L'etichetta a nove voci, la
 legge della non dominanza e le quattro forme di saturazione descrivono cosa ogni dominio futuro
 dovrà dichiarare. Diventano un tipo e un test **quando esistono due o tre strumenti veri da cui
 generalizzare**, non prima: una struttura disegnata su un dominio solo è una struttura disegnata

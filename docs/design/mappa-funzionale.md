@@ -85,8 +85,8 @@ certi contatti compaiono solo incontrandoli.
 
 ### La casa: cosa ogni strumento deve dichiarare
 
-Perché diciassette domini stiano sullo stesso scaffale, ognuno dichiara le stesse **otto voci**:
-rendimento, varianza, liquidità, calore, attenzione, **pozza**, pagamento, requisito.
+Perché diciassette domini stiano sullo stesso scaffale, ognuno dichiara le stesse **nove voci**:
+rendimento, varianza, liquidità, tracciabilità, calore, attenzione, **pozza**, pagamento, requisito.
 
 Per l'interfaccia sono esattamente le colonne di qualunque confronto fra strumenti, e la ragione
 per cui un pannello di dominio non può mostrarne solo tre.
