@@ -1,9 +1,10 @@
 # D020 — Nessun sistema si fida del proprio salvataggio
 
-- **Stato:** Aperta — scritta il 2026-08-20 studiando la validazione dello stato caricato prima di
-  eseguire [D017](D017-il-caveau.md), e **preparata per l'esecuzione** subito dopo
-  [D019](D019-il-pagamento.md): il test è stato scritto davvero, eseguito, e poi ritirato. Ne
-  restano le misure. Vedi _Cosa la preparazione ha verificato_
+- **Stato:** **Chiusa** — scritta il 2026-08-20 studiando la validazione dello stato caricato prima
+  di eseguire [D017](D017-il-caveau.md), **preparata per l'esecuzione** subito dopo
+  [D019](D019-il-pagamento.md) — il test scritto davvero, eseguito e poi ritirato — ed eseguita lo
+  stesso giorno: ramo `d020-validazione-del-salvataggio`. Vedi _Cosa la preparazione ha verificato_
+  e _Come è andata_ in fondo
 - **Dipende da:** D013 (tutta la fetta 01). **Non** dipende da [D019](D019-il-pagamento.md): sono
   due lavori che non si toccano
 - **Sblocca:** [D017](D017-il-caveau.md), che porta il **secondo** dominio con stato. E ogni dominio
@@ -132,18 +133,18 @@ allora: il primo array salvato ha già un grilletto nel [registro YAGNI](../road
 
 ## Definizione di fatto
 
-- [ ] `npm run verify` verde, con l'**output incollato**
-- [ ] il test **fallisce** se si toglie a mano la validazione dal `load` di `income` — provato, non
+- [x] `npm run verify` verde, con l'**output incollato**
+- [x] il test **fallisce** se si toglie a mano la validazione dal `load` di `income` — provato, non
       supposto: è l'unica prova che la regola morda
-- [ ] il test passa con lo stato buono ricaricato, e la controprova è dentro il file
-- [ ] la spazzatura è passata sotto l'`id` del sistema, e un commento dice perché — altrimenti il
+- [x] il test passa con lo stato buono ricaricato, e la controprova è dentro il file
+- [x] la spazzatura è passata sotto l'`id` del sistema, e un commento dice perché — altrimenti il
       prossimo che lo legge lo "semplifica"
-- [ ] `docs/tracciabilita.md`: INV-20 ha la sua riga e il suo meccanismo
-- [ ] `docs/architettura.md`: si **estende la riga 7** della tabella «Le regole e chi le fa
+- [x] `docs/tracciabilita.md`: INV-20 ha la sua riga e il suo meccanismo
+- [x] `docs/architettura.md`: si **estende la riga 7** della tabella «Le regole e chi le fa
       rispettare» — il tipo garantisce che un `load` esista, e non dice niente su cosa quel `load`
       accetta. Non si aggiunge una quattordicesima riga: quella tabella è numerata R01..R13 e INV-20
       è un invariante, non una regola con un ID (punto 8 della preparazione)
-- [ ] `docs/stato.md` rigenerato con `npx vitest run tests/rules/project-state -u`: un file in più
+- [x] `docs/stato.md` rigenerato con `npx vitest run tests/rules/project-state -u`: un file in più
       sotto `tests/` cambia un conteggio, ed è la delega in cui è più facile dimenticarlo perché non
       tocca `src/` (punto 9 della preparazione)
 
@@ -267,3 +268,103 @@ regola.
   invece che da una stima.
 - **L'ordine resta quello.** D020 prima di [D017](D017-il-caveau.md): la regola esiste prima del
   secondo dominio con stato, che è il primo che potrebbe dimenticarsene.
+
+## Come è andata
+
+Eseguita il 2026-08-20, sul ramo `d020-validazione-del-salvataggio`.
+
+**Budget.** Dichiarate ~70 righe di test e **zero di sorgente**. Misurate **70 righe di test** —
+righe di codice, commenti e righe vuote escluse, con il metodo di `codeLines` — e **zero di
+sorgente**: `git diff --stat -- src/` è vuoto. Il budget è centrato sulla riga, e non è bravura: è
+che la preparazione lo aveva **misurato** scrivendo il test invece di stimarlo. Le altre deleghe
+hanno stimato, e sono finite sotto o sopra.
+
+Il file produce **sei** casi `it` ed esegue in 9 ms. Rotto di proposito **quattro** volte, e ogni
+rottura è servita a una domanda diversa — sono elencate qui sotto.
+
+### Le quattro rotture, e cosa ha detto ciascuna
+
+| Cosa si rompe                                                              | Cosa diventa rosso                  |
+| -------------------------------------------------------------------------- | ----------------------------------- |
+| La validazione tolta dal `load` di `income` (`state = loaded`)             | due casi: i campi e lo stato intero |
+| Il controllo **pigro** — «è un oggetto» invece di «il campo è un booleano» | gli stessi due                      |
+| Un `load` che rifiuta **tutto**                                            | solo la controprova                 |
+| Gli id scritti a mano invece che derivati (`['reddito']`)                  | lo stato intero                     |
+
+La seconda è quella che conta, e conferma il punto 1 della preparazione: il difetto vero non è il
+`load` che non controlla niente — è quello che controlla la cosa sbagliata. La terza la
+preparazione l'aveva **temuta** senza misurarla (punto 5); adesso si sa che a fermarla è solo il
+punto 4. La quarta conferma il punto 2: un id invecchiato è **rosso**, non verde, e il caso lo
+annuncia da sé — il titolo diventa «reddito salva uno stato senza campi».
+
+### Correzioni rispetto a com'era scritta
+
+**1. Il ramo non parte da `main`, e chi esegue deve saperlo.** `main` è fermo a `5f087ea`, che
+precede [D019](D019-il-pagamento.md): il ramo `d019-il-pagamento` non è stato fuso. Partire da
+`main` avrebbe perso il listino e riaperto una delega chiusa. Il ramo di D020 parte quindi dalla
+punta di `d019-il-pagamento`. Non è un difetto di questa delega — è uno stato del repo che nessun
+documento dice, e la prossima delega lo trova uguale.
+
+**2. «Ventisei test di regola» sono venticinque, e il ventiseiesimo era il test stesso.** La delega
+lo scrive in _Cosa trovi già fatto_ e ai punti 4 e 10 della preparazione. Misurato adesso:
+`tests/rules/` ne contiene venticinque, e i ventitré che leggono i sorgenti come testo sono giusti.
+La preparazione ha contato mentre il proprio test esisteva, e ritirandolo ha lasciato il numero
+indietro di uno — cioè il difetto di [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) nato
+dentro la frase che lo annunciava. Con questo file il conto torna a essere quello, il che rende la
+riga vera di nuovo e non meno pericolosa: nessun documento **vivo** lo ripete.
+
+**3. I casi `it` sono sei, non sette.** La preparazione ne aveva misurati sette. La differenza è
+una scelta: la **controprova sta fuori dal ciclo sui sistemi**, perché ricarica lo stato buono
+_intero_ e non dipende da quale sistema si stia guardando. Dentro il ciclo sarebbe lo stesso caso
+ripetuto una volta per dominio, che con il caveau diventerebbero due identici.
+
+**4. Il piano porta lo stato, non l'elenco dei nomi.** La delega descrive la funzione pura come
+«una funzione pura dei numeri», sul modello del `verdictOf` di `registry-completeness`. Ritornare i
+**nomi** dei campi avrebbe costretto a rileggere il valore buono da uno `unknown`, cioè a un cast.
+`planFor` ritorna invece il record già ristretto da un predicato di tipo, e il file non contiene
+**nessun cast** — che in un test il cui argomento è l'unico cast del progetto non è un dettaglio.
+
+**5. Il caso «nessun sistema con stato» non era nella delega, ed è la stessa trappola.** Se un
+giorno non ne restasse nessuno, il ciclo produrrebbe **zero** casi e il file sarebbe verde senza
+aver provato niente — la trappola principale, entrata dalla porta che la derivazione degli id apre.
+Una riga la chiude: `statefulIds.length` maggiore di zero, con la sua descrizione che dice perché.
+
+**6. `toMatchObject` invece di `toEqual`, ed è la prima volta nel progetto.** Gli errori si
+verificano altrove con `toEqual` e `expect.any(Error)` (`tests/kernel/registry.test.ts`). Qui
+sarebbe **troppo stretto**: INV-20 dice che il sistema rifiuta, non che cosa lancia, e un dominio
+che lanciasse qualcosa che non è un `Error` renderebbe questo file rosso per la ragione sbagliata —
+che è l'ora persa di cui parla la delega. `toMatchObject` afferma esattamente la regola: l'esito
+porta quel codice e quell'id, e nient'altro.
+
+**7. La riga 7 di `architettura.md` cambia anche di forza, non solo di testo.** Era `🔒`. Il tipo
+resta impossibile da aggirare, ma la metà nuova — quale stato quel `load` accetta — è un test:
+`🔒 / ✅`, nella forma che la riga 12 di quella tabella già usa. La definizione di fatto chiedeva di
+estendere la riga e non lo diceva.
+
+**8. `qualita.md` portava un numero che questa delega fa scadere.** «558 test in 61 file» era la
+misura di [D019](D019-il-pagamento.md), e un file di test in più la invalida. Rimisurata e
+riscritta con la data accanto, che è l'unica difesa che quel numero ha (regola C11: il tempo e il
+numero di test non sono derivabili dal repo, e stanno lì apposta).
+
+**9. E un vicino trovato per strada: quella stessa riga violava C11.** «558 test **in 61 file**» —
+i file di test [stato.md](../stato.md) li **conta**, quindi era un fatto contabile ripetuto in un
+documento vivo. `tests/rules/docs-facts` non poteva vederlo: cerca un numero accanto ad «ADR»,
+«documenti» o «markdown», e «file» è fuori da quell'elenco, dove le altre due parole contate stanno
+fuori **apposta** per non gridare al lupo. È il punto cieco dichiarato di
+[D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) che colpisce una seconda volta, dopo il
+titolo di `tracciabilita.md` del punto 12 della preparazione. Il conteggio dei file è stato
+**tolto**, non aggiornato: il numero di test resta, perché non è derivabile senza eseguirli.
+
+### Cosa questa delega lascia a [D017](D017-il-caveau.md)
+
+Il caveau nasce dentro una regola che esiste già, ed è tutto il punto. Tre cose concrete:
+
+- **Il suo `load` deve rifiutare i tipi sbagliati campo per campo.** Copiare le tre righe di
+  `income` va benissimo: il grilletto dell'aiutante condiviso è il primo stato **non banale**, e
+  una capienza non lo è.
+- **Non serve toccare questo file.** I sistemi si derivano dal Registry: registrare il caveau lo
+  mette sotto la regola da solo, ed è la differenza fra questo test e una lista scritta a mano.
+- **Il primo campo `array` che finisce nel salvataggio fa scattare il limite dichiarato in testa
+  al file** — `typeof []` è `'object'` come `typeof {}` — e con esso la voce del
+  [registro YAGNI](../roadmap-fette.md). Il caveau, da solo, non lo fa scattare: dà una capienza,
+  non un inventario.

@@ -21,12 +21,20 @@ bene: `verify` non paga l'avvio di `npm` due volte per lo stesso gate. Sono temp
 quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre
 `npm run`.
 
-**Rimisurata a [D019](delega/D019-il-pagamento.md)**, stesso giorno e stessa macchina: la catena
-intera **34,9 s**, con **558 test in 61 file**. Non è scesa — è la stessa misura ripetuta, e la
-differenza sta dentro la variazione fra due esecuzioni. Il numero di test sta qui e non in
-[stato.md](stato.md) per la stessa ragione del tempo: non è derivabile dal repo senza eseguirli.
-Fino a D019 lo portava il [passaggio di consegne](delega/PASSAGGIO-DI-CONSEGNE.md), che lo aveva
-scaduto di due deleghe; adesso quella pagina punta qui invece di ricopiarlo.
+**Rimisurata a [D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md)**, stesso giorno e
+stessa macchina: la catena intera **34,7 s**, con **564 test**. Era 34,9 s con 558 test a
+[D019](delega/D019-il-pagamento.md), e prima ancora 35,3 s: non sta scendendo — è la stessa misura
+ripetuta, e la differenza sta dentro la variazione fra due esecuzioni. Il numero di test sta qui e
+non in [stato.md](stato.md) per la stessa ragione del tempo: non è derivabile dal repo senza
+eseguirli. Fino a D019 lo portava il [passaggio di consegne](delega/PASSAGGIO-DI-CONSEGNE.md), che
+lo aveva scaduto di due deleghe; adesso quella pagina punta qui invece di ricopiarlo.
+
+**Quanti siano i file, invece, questa pagina non lo dice più.** Fino a D019 diceva «558 test in 61
+file», e i file di test [stato.md](stato.md) li **conta**: era un fatto contabile ripetuto in un
+documento vivo, cioè la regola C11 violata in silenzio. Nessun gate poteva vederlo —
+`tests/rules/docs-facts` cerca un numero accanto ad «ADR», «documenti» o «markdown», e «file» è
+fuori da quell'elenco. Trovato rileggendo, a [D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md),
+che quel conteggio lo faceva scadere.
 
 **Questa è l'unica misura del progetto che resta affidata a un occhio, ed è dichiarato.** Un tempo
 dipende dalla macchina, quindi non può stare in [stato.md](stato.md) con gli altri fatti contabili
@@ -79,14 +87,14 @@ ma da qui in avanti ogni delega deve tenerlo verde.
 
 ## Cosa copre ciascun livello di test
 
-| Livello                | Dove             | Cosa dimostra                                                                                                                               | Cosa **non** dimostra                                           |
-| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| **Kernel**             | `tests/kernel/`  | Clock, Rng, Bus, Registry, Ledger si comportano come dichiarato, isolatamente                                                               | che i sistemi li usino bene                                     |
-| **Dominio**            | `tests/domains/` | le regole pure producono i numeri attesi, con seed fisso                                                                                    | che la UI mostri quei numeri                                    |
-| **Round-trip**         | `tests/save/`    | stato → salva → ricarica → identico. Attraversa payload, busta, validazione                                                                 | che una migrazione futura funzioni                              |
-| **Bilanciamento**      | `tests/balance/` | i numeri stanno negli intervalli dichiarati in `targets.ts`                                                                                 | che il gioco sia divertente                                     |
-| **i18n**               | `tests/i18n/`    | nessuna chiave manca in nessuna lingua, i segnaposto coincidono, ogni chiave si risolve                                                     | che le traduzioni siano corrette                                |
-| **Regole strutturali** | `tests/rules/`   | Registry completo, nessuna logica nei `.vue`, identità del prodotto coerente, nessun `TODO`, nessun barrel, nessuna parola vietata nei nomi | ciò che è dichiarato ⚠️ in [tracciabilita.md](tracciabilita.md) |
+| Livello                | Dove             | Cosa dimostra                                                                                                                                                                                   | Cosa **non** dimostra                                           |
+| ---------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Kernel**             | `tests/kernel/`  | Clock, Rng, Bus, Registry, Ledger si comportano come dichiarato, isolatamente                                                                                                                   | che i sistemi li usino bene                                     |
+| **Dominio**            | `tests/domains/` | le regole pure producono i numeri attesi, con seed fisso                                                                                                                                        | che la UI mostri quei numeri                                    |
+| **Round-trip**         | `tests/save/`    | stato → salva → ricarica → identico. Attraversa payload, busta, validazione                                                                                                                     | che una migrazione futura funzioni                              |
+| **Bilanciamento**      | `tests/balance/` | i numeri stanno negli intervalli dichiarati in `targets.ts`                                                                                                                                     | che il gioco sia divertente                                     |
+| **i18n**               | `tests/i18n/`    | nessuna chiave manca in nessuna lingua, i segnaposto coincidono, ogni chiave si risolve                                                                                                         | che le traduzioni siano corrette                                |
+| **Regole strutturali** | `tests/rules/`   | Registry completo, nessuna logica nei `.vue`, identità del prodotto coerente, nessun `TODO`, nessun barrel, nessuna parola vietata nei nomi, nessun sistema che si fida del proprio salvataggio | ciò che è dichiarato ⚠️ in [tracciabilita.md](tracciabilita.md) |
 
 **Non esistono test end-to-end sulla UI in questa fetta.** I `.vue` sono **dieci** — il guscio, due
 viste, sette componenti — e la riga che stava qui ne diceva due: era il numero di D012, mai

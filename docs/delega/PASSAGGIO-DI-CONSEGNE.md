@@ -41,7 +41,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
 | `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 569,02 kB (rimisurato a [D019](D019-il-pagamento.md))                                      |
-| Prossimo passo           | **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)**, **preparata**; poi **[D017](D017-il-caveau.md)**                           |
+| Prossimo passo           | **[D017](D017-il-caveau.md)**, **preparata** — la fetta 02 vera. D019 e D020 sono chiuse                                               |
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -63,7 +63,7 @@ movimenti da mostrare — e le parole del gioco sotto `i18n/`. Ogni delega chius
 [D014](D014-dominio-bancomat.md) undici, [D011](D011-runtime-e-store.md) quattordici,
 [D012](D012-ui-e-i18n.md) e [D015](D015-home-bancomat.md) diciassette,
 [D016](D016-correzioni-audit.md) sette,
-[D019](D019-il-pagamento.md) tredici. Leggile prima di fidarti del
+[D019](D019-il-pagamento.md) tredici, [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) nove. Leggile prima di fidarti del
 testo di una delega ancora aperta — alcune di quelle correzioni riguardano proprio deleghe che non
 sono ancora state eseguite.
 
@@ -260,19 +260,20 @@ disfare niente. Da lì l'[ADR 0027](../adr/0027-il-listino-e-dell-azione-la-scel
 e il **listino**: ogni azione dichiara, per ogni strumento che accetta, quanto costa con quello.
 Il kernel non cambia di una riga.
 
-**Adesso [D020 — Nessun sistema si fida del proprio salvataggio](D020-nessun-sistema-si-fida-del-salvataggio.md).**
-È **Aperta** e **preparata per l'esecuzione**, e la preparazione ha scritto il test per davvero
-prima di ritirarlo: zero righe di sorgente, ~70 di test, e dodici punti misurati in fondo alla
-delega. Il secondo riscrive la trappola principale, che come era formulata non si riproduceva.
-Viene prima del caveau per la ragione di D001: la regola deve esistere prima del codice che
-governa, e il caveau è il **secondo** dominio con stato.
+**[D020 — Nessun sistema si fida del proprio salvataggio](D020-nessun-sistema-si-fida-del-salvataggio.md)
+è chiusa**, e con lei il pavimento su cui il caveau cammina. Zero righe di sorgente, 70 di test,
+esattamente il budget: ogni sistema con stato deve rifiutare un salvataggio che non riconosce
+(**INV-20**), e a pretenderlo è `tests/rules/stateful-systems-reject-garbage` — il primo test di
+quella cartella che costruisce una partita invece di leggere i sorgenti, il che è dichiarato in
+testa al file. Veniva prima del caveau per la ragione di D001: la regola deve esistere prima del
+codice che governa, e il caveau è il **secondo** dominio con stato.
 
-Questa riga mancava, e non per una modifica recente: il testo passava da D019 a D017 saltando D020
-da prima che D019 fosse eseguita, mentre la tabella in cima diceva un'altra cosa. Due punti dello
-stesso documento in disaccordo su quale sia il prossimo passo è il difetto più caro che questa
-pagina possa avere.
+Ne discende una cosa per chi prende D017: **non c'è niente da aggiungere a quel test.** I sistemi
+si derivano dal Registry, quindi registrare il caveau lo mette sotto la regola da solo. Ciò che il
+caveau deve fare è che il suo `load` rifiuti i tipi sbagliati **campo per campo** — il controllo
+pigro «è un oggetto» non basta, ed è misurato.
 
-**Poi [D017 — Il caveau](D017-il-caveau.md).** È **Aperta** e **preparata per l'esecuzione**: il
+**Adesso [D017 — Il caveau](D017-il-caveau.md).** È **Aperta** e **preparata per l'esecuzione**: il
 costo del cambiamento è stato misurato mettendo davvero una capienza a `POOLS.cash` e guardando
 cosa diventa rosso, e la misura ha trovato un difetto nella delega stessa — il recupero dopo
 un'assenza incassava **zero** invece di quanto ci sta. La decisione di gioco è stata riscritta
@@ -428,7 +429,7 @@ interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto co
 La ventiduesima è di **D013** e costa una riga di un test: è anche l'unica riga non di test che
 quella delega abbia toccato.
 
-**Le ultime cinque sono del 2026-08-20, e tre di loro sono entrate in vigore con [D019](D019-il-pagamento.md).** Il listino dentro l'azione, il selettore rimandato a D017, il calore e `convertibleTo` lasciati fuori: adesso costano `contracts/payment.ts`, il dominio `income`, lo store e un componente — poco, ma non più zero. Le altre due, quelle di D020, non costano ancora niente: nessuna riga di codice le applica, e quello è il momento in cui contestarle è gratis. Nascono tutte dalle due domande poste prima di eseguire D017 — come si sceglie con cosa si paga, e chi controlla lo stato che arriva dal disco. Le scelte **di gioco** di quelle sessioni non sono qui perché non sono state prese in autonomia: lo spazio unico del caveau, il tetto a livelli finiti, la varianza zero e la nona voce dell'etichetta sono state decise dall'utente, e stanno nella [scheda del caveau](../design/domini/vault.md) con le alternative scartate.
+**Le ultime cinque sono del 2026-08-20, e tre di loro sono entrate in vigore con [D019](D019-il-pagamento.md).** Il listino dentro l'azione, il selettore rimandato a D017, il calore e `convertibleTo` lasciati fuori: adesso costano `contracts/payment.ts`, il dominio `income`, lo store e un componente — poco, ma non più zero. Le altre due, quelle di D020, sono entrate in vigore con [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) e non costano quasi niente lo stesso: la validazione come **test** costa un file di `tests/rules/` e zero righe di `src/` — contestarla vuol dire cancellare quel file, non disfare il kernel — e l'ordine «prima di D017, non dentro» è ormai speso, perché D017 le trova entrambe già fatte. Nascono tutte dalle due domande poste prima di eseguire D017 — come si sceglie con cosa si paga, e chi controlla lo stato che arriva dal disco. Le scelte **di gioco** di quelle sessioni non sono qui perché non sono state prese in autonomia: lo spazio unico del caveau, il tetto a livelli finiti, la varianza zero e la nona voce dell'etichetta sono state decise dall'utente, e stanno nella [scheda del caveau](../design/domini/vault.md) con le alternative scartate.
 
 Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
 recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE` scelti
@@ -440,11 +441,12 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 ## Prompt pronto per una sessione nuova
 
 Lo STOP 2 è superato e la fetta 02 è decisa: questo prompt **consegna una delega**. Ne consegna
-una sola per volta. [D019](D019-il-pagamento.md) è chiusa, quindi l'ID adesso è `D020`; dopo di
-quella tocca a [D017](D017-il-caveau.md), che le aspettava entrambe.
+una sola per volta. [D019](D019-il-pagamento.md) e
+[D020](D020-nessun-sistema-si-fida-del-salvataggio.md) sono chiuse, quindi l'ID adesso è `D017` —
+il caveau, cioè la fetta 02 vera, quella che le aspettava entrambe.
 
 ```markdown
-Esegui la delega D020 nel progetto Solvent, in questa repo.
+Esegui la delega D017 nel progetto Solvent, in questa repo.
 
 Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 
@@ -453,42 +455,52 @@ Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 2. `docs/stato.md` — quanti sono gli ADR, le deleghe e i documenti, e in che stato. È **generato**:
    non si scrive a mano, e quando ne cambi uno si rigenera con
    `npx vitest run tests/rules/project-state -u`
-3. `docs/delega/D020-nessun-sistema-si-fida-del-salvataggio.md` — la delega che esegui.
-   Interamente, trappole comprese
-4. `docs/adr/0002-registry-unica-lista-di-sistemi.md` e
-   `docs/adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md` — gli ADR che
-   la delega tocca. Se stai per contraddirne uno, la risposta è lì
-5. `docs/roadmap-fette.md`, il **registro YAGNI** — dice cosa è stato deliberatamente lasciato
+3. `docs/delega/D017-il-caveau.md` — la delega che esegui. Interamente, trappole comprese
+4. `docs/design/domini/vault.md` — la **scheda del caveau**: le decisioni di gioco che la delega
+   non deve prendere da sola, e le alternative già scartate
+5. `docs/adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md` e
+   `docs/adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md` — gli ADR che la delega
+   tocca da vicino. Se stai per contraddirne uno, la risposta è lì
+6. `docs/roadmap-fette.md`, il **registro YAGNI** — dice cosa è stato deliberatamente lasciato
    fuori e cosa lo farà entrare. È il documento che ti impedisce di costruire troppo
-6. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
+7. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
 
 Stato al 2026-08-20: `npm run verify` e `npm run verify:release` **verdi**, il renderer compila
 (91 moduli, 569,02 kB). Quante deleghe siano chiuse, quanti ADR ci siano e quali siano ancora
 `Proposta` lo dice [stato.md](../stato.md), che è generato: per ognuno il perché sta nel suo ADR.
 
+Attenzione al punto di partenza: `main` è indietro di due deleghe — né D019 né D020 sono state
+fuse. Il ramo nuovo parte dalla punta di `d020-validazione-del-salvataggio`, non da `main`.
+
 Le deleghe aperte le elenca [stato.md](../stato.md). L'ordine conta, ed è questo:
 
-- **D020 — la validazione dello stato salvato**: viene prima di D017. D019, l'altra che veniva
-  prima, è chiusa
-- **D017 — il caveau**: la fetta 02 vera, aspetta D020
+- **D017 — il caveau**: la fetta 02 vera. Le due che venivano prima, D019 e D020, sono chiuse
 - **D018 — la scheda di dominio**: solo documenti, non tocca nessuna delle altre
 
-D020 vale ~70 righe di test e **zero di sorgente**: è una regola che nasce prima del codice che
-governa, come D001. Il kernel non si tocca, e nemmeno `defineSystem`.
+D017 vale ~330 righe di sorgente e ~410 di test, ed è la prima delega della fetta 02 che sposta un
+confine del kernel: `capacityOf` smette di chiedere senza sapere la risposta.
 
-È **preparata per l'esecuzione**: il test è già stato scritto una volta, misurato e ritirato. I
-dodici punti in fondo alla delega dicono cosa ha trovato — fra cui che la trappola principale, come
-era scritta, non si riproduceva. Leggili prima di ricominciare da capo.
+È **preparata per l'esecuzione**: il costo del cambiamento è stato misurato mettendo davvero una
+capienza a `POOLS.cash` e guardando cosa diventa rosso, e la misura ha trovato un difetto nella
+delega stessa — il recupero dopo un'assenza incassava zero invece di quanto ci sta. Gli otto punti
+in fondo alla delega dicono cosa ha trovato. Leggili prima di ricominciare da capo.
+
+Due cose che D020 ti ha già preparato, e che non vanno rifatte:
+
+- il `load` del caveau deve rifiutare un salvataggio che non riconosce, **campo per campo**: il
+  controllo pigro «è un oggetto» non basta, ed è misurato
+- non c'è niente da aggiungere a `tests/rules/stateful-systems-reject-garbage`: i sistemi si
+  derivano dal Registry, quindi registrare il caveau lo mette sotto la regola da solo
 
 Come lavoro:
 
-- **Un ramo `d020-validazione-del-salvataggio`.** Non si commetta su `main`
+- **Un ramo `d017-il-caveau`.** Non si commetta su `main`
 - **La delega si esegue, non si riscrive.** Se il testo è invecchiato o sbagliato, fermati e
   dimmelo: è successo tre volte e ogni volta ha tolto lavoro invece di aggiungerlo
 - **Il budget di righe è un allarme, non un limite.** Se lo stai raddoppiando, stai risolvendo
   un problema diverso da quello descritto: dillo invece di continuare
-- **Fuori scope vuol dire fuori scope.** L'aiutante condiviso per i validatori e il campo
-  richiesto da `defineSystem` hanno un grilletto scritto, e non è scattato
+- **Fuori scope vuol dire fuori scope.** L'inventario del caveau, l'aiutante condiviso per i
+  validatori e il primo `boundedList` hanno un grilletto scritto, e non è scattato
 - **Ogni test nuovo va rotto di proposito almeno una volta.** Un test che non si è mai visto
   fallire non è una rete, è una decorazione
 - `npm run verify` verde alla fine, con l'**output incollato**. Non «dovrebbe passare»

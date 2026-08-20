@@ -116,9 +116,10 @@ delega.
 [D019](delega/D019-il-pagamento.md) è **chiusa** — ogni azione che si paga espone un listino, il
 comando riceve lo strumento e ricalcola il prezzo da lì, e l'[ADR 0027](adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)
 è la prima decisione della fetta a passare ad _Accettata_.
-[D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md) porta la regola sotto cui nasce il
-secondo dominio con stato, ed è **preparata**; [D017](delega/D017-il-caveau.md) porta il caveau
-vero e aspetta lei.
+[D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md) è **chiusa** e ha messo la regola
+sotto cui nasce il secondo dominio con stato: nessun sistema accetta un salvataggio che non
+riconosce, e a pretenderlo è un test (INV-20). [D017](delega/D017-il-caveau.md) porta il caveau
+vero, e adesso non aspetta più nessuno.
 [D018](delega/D018-la-scheda-di-dominio.md) corre accanto e non tocca nessuna delle altre. Prima
 di tutte vengono [D021](delega/D021-un-numero-che-nessuno-conta-non-si-scrive.md) e
 [D022](delega/D022-il-confine-disegnato-e-il-confine-vero.md), nate dall'audit dello STOP 2: sono

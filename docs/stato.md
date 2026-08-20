@@ -23,9 +23,9 @@ dall'intestazione del suo ADR, ed è da lì che questo elenco arriva.
 
 ## Deleghe
 
-**22** deleghe: 19 `Chiusa`, 0 `In corso`, 3 `Aperta`.
+**22** deleghe: 20 `Chiusa`, 0 `In corso`, 2 `Aperta`.
 
-- `Aperta`: D017, D018, D020
+- `Aperta`: D017, D018
 - `In corso`: _nessuno_
 
 L'ordine in cui si eseguono non è questo elenco: è il grafo in
@@ -38,7 +38,7 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 ## Codice
 
 **52** file sotto `src/`, di cui **10** `.vue`.
-**61** file di test. I domini sono 2: `atm`, `income`.
+**62** file di test. I domini sono 2: `atm`, `income`.
 
 Le righe sono **righe di codice**: commenti e righe vuote escluse, con lo stesso metodo per
 tutti — ed è `codeLines` in `tests/helpers/projectState.ts` a definirlo, così due misure restano
