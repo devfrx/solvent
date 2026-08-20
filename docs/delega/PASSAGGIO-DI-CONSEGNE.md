@@ -69,8 +69,14 @@ sono ancora state eseguite.
 
 ### Cosa vale per qualunque delega, e nessuna lo ripete
 
-Quattro regole che non stanno nel testo di nessuna delega perché valgono per tutte. Sono qui perché
-una delega chiusa è un documento storico: nessuno la rilegge.
+Le regole che non stanno nel testo di nessuna delega perché valgono per tutte. Sono qui perché una
+delega chiusa è un documento storico: nessuno la rilegge.
+
+Il numero non si scrive, ed è la lezione di [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md)
+applicata a un punto cieco: qui diceva «quattro» e poco più sotto «sei», mentre le righe erano
+**dodici**. `tests/rules/docs-facts` non poteva vederlo — «regole» è fuori dal suo elenco di cose
+contate apposta, perché includerla produceva falsi positivi — quindi l'unica difesa è non scrivere
+un numero che nessuno conta.
 
 - **R05 vieta anche i tipi.** Un `.vue` non può scrivere
   `import type { IncomeError } from '@core/domains/income/commands'`: il lint usa la regola base,
@@ -188,6 +194,16 @@ Da lì in poi vale la stessa avvertenza di sempre: quello che è cambiato dopo, 
 guardato — con una differenza, adesso: sette delle dodici classi trovate non possono più tornare in
 silenzio, perché un gate le vede.
 
+**E la classe che resta scoperta ha appena colpito di nuovo.** [D019](D019-il-pagamento.md) è stata
+chiusa con tutti i gate verdi — collegamenti, conteggi, `stato.md` rigenerato — e alcuni fra i
+**documenti vivi** descrivevano ancora il meccanismo di prima: il glossario non conosceva `PriceList` e la parola
+«listino» era già presa dalla visione per un'altra cosa, `flusso-tick.md` disegnava un `buyUpgrade()`
+senza argomento, `mappa-funzionale.md` diceva che con cosa si paga «si scopre sbagliando».
+Trovati solo rileggendoli. `doc-links` guarda i **collegamenti** e `docs-facts` i **conteggi**:
+nessuno dei due sa dire se una frase descrive ancora il codice di ieri, e non è chiaro che qualcosa
+possa saperlo. Finché non lo sa nessuno, chiudere una delega vuol dire anche **rileggere i documenti
+vivi che nominano ciò che hai cambiato** — non solo quelli che la delega elencava.
+
 ## Le sei cose da non fare
 
 Sono le regole che, violate, riportano il progetto a com'era. Tutte hanno un meccanismo che le
@@ -227,9 +243,9 @@ prima teneva la review. Non costruiscono gioco — costruiscono il pavimento su 
 cammina, e la ragione per cui vengono prima è quella di D001 e D020: le regole devono esistere
 prima del codice che governano.
 
-Quello che ne discende per chi esegue adesso sta in _Cosa vale per qualunque delega_: sono sei
-righe, e la più facile da dimenticare è la prima — chiudere una delega significa **rigenerare
-`docs/stato.md`**, o il gate è rosso.
+Quello che ne discende per chi esegue adesso sta in _Cosa vale per qualunque delega_, e la più
+facile da dimenticare è quella su `docs/stato.md`: chiudere una delega significa **rigenerarlo**, o
+il gate è rosso. Vale anche per una delega che non tocca `src/`, perché i file di test si contano.
 
 **Il codice di gioco non è stato toccato**: cinque righe in tutto, in `eslint.config.js` e in
 `rotation.ts`. Le deleghe della fetta 02 partono esattamente da dove le ha lasciate lo STOP 2, e
@@ -243,6 +259,18 @@ sarebbe stato il **secondo** comando a spendere, cioè l'ultimo momento per risp
 disfare niente. Da lì l'[ADR 0027](../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)
 e il **listino**: ogni azione dichiara, per ogni strumento che accetta, quanto costa con quello.
 Il kernel non cambia di una riga.
+
+**Adesso [D020 — Nessun sistema si fida del proprio salvataggio](D020-nessun-sistema-si-fida-del-salvataggio.md).**
+È **Aperta** e **preparata per l'esecuzione**, e la preparazione ha scritto il test per davvero
+prima di ritirarlo: zero righe di sorgente, ~70 di test, e dodici punti misurati in fondo alla
+delega. Il secondo riscrive la trappola principale, che come era formulata non si riproduceva.
+Viene prima del caveau per la ragione di D001: la regola deve esistere prima del codice che
+governa, e il caveau è il **secondo** dominio con stato.
+
+Questa riga mancava, e non per una modifica recente: il testo passava da D019 a D017 saltando D020
+da prima che D019 fosse eseguita, mentre la tabella in cima diceva un'altra cosa. Due punti dello
+stesso documento in disaccordo su quale sia il prossimo passo è il difetto più caro che questa
+pagina possa avere.
 
 **Poi [D017 — Il caveau](D017-il-caveau.md).** È **Aperta** e **preparata per l'esecuzione**: il
 costo del cambiamento è stato misurato mettendo davvero una capienza a `POOLS.cash` e guardando
@@ -332,7 +360,10 @@ già dei soldi. Il modo esatto è nella nota di chiusura di
 
 ## Le decisioni contestabili
 
-Ventisette, prese in autonomia. Le prime quattro sono **in vigore** da D007 e sono state usate da due
+Trenta, prese in autonomia. **Le righe nuove si aggiungono in fondo**: la prosa qui sotto indicizza
+la tabella per posizione — «le prime quattro», «la ventiduesima» — e una riga infilata in mezzo
+sposta tutto ciò che viene dopo senza che nessun gate se ne accorga.
+Le prime quattro sono **in vigore** da D007 e sono state usate da due
 domini: cambiarle costa il Ledger, i suoi test e i due domini. D014 era il momento buono per
 contestarle ed è passato — nessuna delle quattro si è rivelata scomoda usandole.
 
@@ -390,6 +421,9 @@ interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto co
 | `heat` e `convertibleTo` restano fuori dal listino, con il grilletto scritto | [ADR 0027](../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md) — alternative scartate                        | dichiararli subito: un campo che nessuno legge per tre fette, e un grafo di conversioni per un arco solo                                                                |
 | La validazione dello stato salvato è un **test**, non un tipo né un aiutante | [D020](D020-nessun-sistema-si-fida-del-salvataggio.md)                                                                    | `defineSystem` che chiede un validatore: garantisce che il campo esista, non che funzioni — e cambia il kernel per una regola che il kernel non deve conoscere          |
 | D019 e D020 vanno **prima** di D017, non dentro                              | [README](README.md) — il grafo                                                                                            | infilarle nel caveau: la regola sarebbe scritta dalla stessa persona che scrive il codice da sorvegliare, nello stesso momento                                          |
+| Un pool fuori listino è rifiutato col codice del Ledger, non con uno nuovo   | [D019](D019-il-pagamento.md) — correzione 3                                                                               | un `error.income.*` suo: due frasi per una situazione sola, e il giocatore ne leggerebbe una diversa a seconda di quale delle due strade lo rifiuta                     |
+| Il prezzo resta sul pulsante; la riga sopra porta strumento e ragione        | [D019](D019-il-pagamento.md) — correzione 8                                                                               | l'importo nel riquadro del pagamento e «Compra» nudo: toglie la ripetizione e contraddice il mockup approvato allo STOP 1                                               |
+| Con un'opzione sola il pagamento è **una** chiave i18n, non due              | [D019](D019-il-pagamento.md) — correzione 9                                                                               | le due che l'ADR 0027 prevedeva — _con cosa si paga_ e _perché non gli altri_ — che con un listino di uno sono la stessa frase                                          |
 
 La ventiduesima è di **D013** e costa una riga di un test: è anche l'unica riga non di test che
 quella delega abbia toccato.
