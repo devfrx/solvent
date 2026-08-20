@@ -8,6 +8,10 @@ import type { Pool } from '@core/contracts/pools'
 import type { GameError } from '@renderer/i18n'
 import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
+import UiButton from '@renderer/ui/UiButton.vue'
+import UiChip from '@renderer/ui/UiChip.vue'
+import UiPanel from '@renderer/ui/UiPanel.vue'
+import UiText from '@renderer/ui/UiText.vue'
 
 /**
  * L'upgrade, e la dimostrazione che un componente può essere utile senza sapere nulla di economia.
@@ -22,9 +26,10 @@ import { useGameStore } from '@renderer/stores/game'
  * si legge la ragione: «si paga solo con la carta». Prima quell'informazione arrivava solo
  * sbagliando, cioè come rimprovero invece che come etichetta.
  *
- * Il pulsante non si spegne. Quando i fondi non bastano cambia aspetto — l'anteprima del listino lo
- * dice — ma resta premibile, e a spiegare il no è il Ledger con le due cifre. Un pulsante spento è
- * un rifiuto senza motivo, ed è esattamente ciò che questa fetta esiste per non fare.
+ * Il pulsante non si spegne, e da D023 non **può** spegnersi: `UiButton` non sa farlo (INV-21).
+ * Quando i fondi non bastano si smorza — è l'anteprima del listino — ma resta premibile, e a
+ * spiegare il no è il Ledger con le due cifre. Un pulsante spento è un rifiuto senza motivo, ed è
+ * esattamente ciò che questa fetta esiste per non fare.
  */
 
 const store = useGameStore()
@@ -54,30 +59,26 @@ const buy = (pool: Pool): void => {
 </script>
 
 <template>
-  <section class="panel">
+  <UiPanel>
     <header class="head">
       <span class="name">{{ text('income.upgrade.overtime.name') }}</span>
       <span class="level">{{ text('common.level', { level: upgraded ? 1 : 0 }) }}</span>
     </header>
-    <p class="desc">{{ text('income.upgrade.overtime.desc') }}</p>
+    <UiText class="desc">{{ text('income.upgrade.overtime.desc') }}</UiText>
 
-    <p v-if="upgraded" class="owned">{{ text('income.upgrade.owned') }}</p>
+    <UiChip v-if="upgraded" tone="gain" :label="text('income.upgrade.owned')" />
     <template v-else>
       <div v-for="option of upgradePrices" :key="option.pool" class="option">
-        <p class="instrument">{{ instrumentOf(option) }}</p>
-        <button
-          type="button"
-          class="primary amount"
-          :class="{ dim: !store.canBuyUpgradeWith(option.pool) }"
-          @click="buy(option.pool)"
-        >
-          {{ text('common.buy', { cost: money(option.price) }) }}
-        </button>
+        <UiText tone="ink-3" size="xs" class="instrument">{{ instrumentOf(option) }}</UiText>
+        <UiButton
+          :label="text('common.buy', { cost: money(option.price) })"
+          :muted="!store.canBuyUpgradeWith(option.pool)"
+          :reason="refusal === null ? undefined : failure(refusal)"
+          @press="buy(option.pool)"
+        />
       </div>
     </template>
-
-    <p v-if="refusal !== null" class="refusal boxed">{{ failure(refusal) }}</p>
-  </section>
+  </UiPanel>
 </template>
 
 <style scoped>
@@ -88,47 +89,20 @@ const buy = (pool: Pool): void => {
 }
 
 .name {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
 }
 
 .level {
-  font-size: 12px;
-  color: var(--muted);
+  font-size: var(--text-sm);
+  color: var(--color-ink-3);
 }
 
 .desc {
-  font-size: 12px;
-  color: var(--muted);
-  margin: 6px 0 14px;
-  line-height: 1.5;
+  margin: var(--space-2) 0 var(--space-5);
 }
 
 .instrument {
-  font-size: 12px;
-  color: var(--muted);
-  margin: 0 0 8px;
-}
-
-button {
-  width: 100%;
-}
-
-.dim {
-  background: var(--panel-raised);
-  color: var(--muted);
-  border-color: var(--line);
-}
-
-.owned {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent);
-}
-
-/* Il rifiuto è una primitiva condivisa (`App.vue`): qui resta solo lo stacco dal pulsante. */
-.refusal.boxed {
-  margin-top: 10px;
+  margin: 0 0 var(--space-3);
 }
 </style>

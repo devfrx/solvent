@@ -6,6 +6,8 @@ import type { MessageKey } from './i18n'
 import { useTranslator } from './i18n'
 import type { GameStatus } from './stores/game'
 import { useGameStore } from './stores/game'
+import UiButton from './ui/UiButton.vue'
+import UiText from './ui/UiText.vue'
 import HomeView from './views/HomeView.vue'
 import StatsView from './views/StatsView.vue'
 
@@ -62,24 +64,17 @@ const startOver = (): void => void store.newGame()
     <template v-if="status === 'failed' && failure !== null">
       <div class="center">
         <p class="headline danger">{{ failureText(failure) }}</p>
-        <p class="detail">
+        <UiText class="detail">
           {{ text(failedDuring === 'saving' ? 'app.error.save_hint' : 'app.error.load_hint') }}
-        </p>
+        </UiText>
         <div class="choices">
-          <button type="button" class="ghost" @click="retry">
-            {{ text('app.error.retry') }}
-          </button>
-          <button
+          <UiButton variant="quiet" :label="text('app.error.retry')" @press="retry" />
+          <UiButton
             v-if="failedDuring === 'saving'"
-            type="button"
-            class="primary"
-            @click="store.closeWithoutSaving()"
-          >
-            {{ text('app.error.close_anyway') }}
-          </button>
-          <button v-else type="button" class="primary" @click="startOver">
-            {{ text('app.error.new_game') }}
-          </button>
+            :label="text('app.error.close_anyway')"
+            @press="store.closeWithoutSaving()"
+          />
+          <UiButton v-else :label="text('app.error.new_game')" @press="startOver" />
         </div>
       </div>
     </template>
@@ -105,9 +100,9 @@ const startOver = (): void => void store.newGame()
       <div v-if="status === 'recovering'" class="center veil">
         <span class="ring" aria-hidden="true"></span>
         <p class="headline">{{ text('app.loading.catchup') }}</p>
-        <p v-if="awayFor > 0" class="detail">
+        <UiText v-if="awayFor > 0" class="detail">
           {{ text('app.loading.away_for', { duration: duration(awayFor) }) }}
-        </p>
+        </UiText>
       </div>
     </template>
 
@@ -123,119 +118,6 @@ const startOver = (): void => void store.newGame()
   </main>
 </template>
 
-<style>
-/**
- * P2 — le costanti dello stile approvato, estratte in token come quella preferenza chiede, e le
- * poche **primitive** che più di un componente disegna allo stesso modo.
- *
- * Il verde è **solo** il denaro che entra e l'azione primaria: un secondo verde toglie al primo
- * il suo significato. Le cifre sono tabulari ovunque compaia un importo, altrimenti un saldo che
- * sale fa ballare la riga.
- *
- * Non è scoped, e in tutto il progetto è l'unico blocco che non lo è: ciò che sta qui serve a
- * ogni componente, e il resto dello stile sta attaccato a chi lo usa — così togliere un componente
- * toglie anche il suo CSS, che è la difesa contro le 1.067 righe morte del difetto A14.
- *
- * Il confine fra le due cose è questo: una primitiva entra qui quando la disegnano **due**
- * componenti. `.refusal` ci è entrata con l'audit del 2026-08-20, che l'ha trovata copiata in
- * `AtmPanel` e in `IncomePanel` con il valore di `--danger` **ricopiato a mano** in quattro righe
- * di `rgba()`: cambiare il token avrebbe spostato il testo e lasciato indietro sfondo e bordo.
- */
-:root {
-  --bg: #0f1115;
-  --panel: #171a21;
-  --panel-raised: #1e222b;
-  --line: #2a2f3a;
-  --text: #e6e8ec;
-  --muted: #939aa8;
-  --accent: #4ade80;
-  --on-accent: #06240f;
-  --warn: #fbbf24;
-  --danger: #f87171;
-  --radius: 10px;
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
-  font-size: 14px;
-}
-
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.caption {
-  font-size: 11px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin: 0;
-  font-weight: 600;
-}
-
-.amount {
-  font-variant-numeric: tabular-nums;
-}
-
-button {
-  padding: 10px;
-  border-radius: 7px;
-  border: 1px solid transparent;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.primary {
-  background: var(--accent);
-  color: var(--on-accent);
-}
-
-.ghost {
-  background: transparent;
-  color: var(--text);
-  border-color: var(--line);
-}
-
-/*
- * Un rifiuto spiegato (ADR 0018): un pulsante spento non dice niente, una riga rossa sì. Nuda
- * dentro un riquadro che è già suo, `boxed` quando deve staccarsi dal pannello.
- *
- * Sfondo e bordo si **derivano** dal token invece di ricopiarne il valore: `color-mix` è ciò che
- * rende il rosso una cosa sola anche quando è trasparente.
- */
-.refusal {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--danger);
-}
-
-.refusal.boxed {
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--danger) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
-}
-</style>
-
 <style scoped>
 .shell {
   min-height: 100vh;
@@ -245,29 +127,36 @@ button {
 
 .tabs {
   display: flex;
-  gap: 4px;
-  padding: 8px 12px;
-  background: var(--panel-raised);
-  border-bottom: 1px solid var(--line);
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-raised);
+  border-bottom: 1px solid var(--color-line);
 }
 
 .tab {
   background: transparent;
-  color: var(--muted);
-  padding: 6px 12px;
+  color: var(--color-ink-3);
+  padding: var(--space-2) var(--space-5);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--track-wide);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
 }
 
 .tab.current {
-  color: var(--text);
-  background: var(--panel);
-  border-color: var(--line);
+  color: var(--color-ink);
+  background: var(--color-surface);
+  border-color: var(--color-line);
 }
 
 .board {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px;
+  gap: var(--space-5);
+  padding: var(--space-6);
 }
 
 /*
@@ -277,7 +166,7 @@ button {
 .veil {
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
 }
 
 .center {
@@ -287,36 +176,32 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: var(--space-5);
   text-align: center;
-  padding: 24px;
+  padding: var(--space-6);
 }
 
 .headline {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
   margin: 0;
 }
 
 .headline.danger {
-  color: var(--danger);
+  color: var(--color-loss);
 }
 
 .detail {
-  font-size: 12px;
-  color: var(--muted);
   max-width: 320px;
-  line-height: 1.55;
-  margin: 0;
 }
 
 .choices {
   display: flex;
-  gap: 8px;
-  margin-top: 6px;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
-.choices button {
+.choices > * {
   min-width: 130px;
 }
 
@@ -324,8 +209,8 @@ button {
 .ring {
   width: 22px;
   height: 22px;
-  border: 2px solid var(--line);
-  border-top-color: var(--accent);
+  border: 2px solid var(--color-line);
+  border-top-color: var(--color-accent);
   border-radius: 50%;
 }
 </style>

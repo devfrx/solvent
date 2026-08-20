@@ -56,6 +56,8 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 | R11 | Denaro `Decimal` end-to-end                    | 🔒      | `contracts/money.ts` + `eslint.config.js`                                                                                                   |
 | R12 | Nessuna stringa utente hardcoded               | ✅ / ⚠️ | `tests/i18n/parity` + `tests/rules/no-literal-in-template`                                                                                  |
 | R13 | Un file `rules.ts` contiene solo funzioni pure | ⚠️      | `tests/rules/pure-rules` — cerca le forme dell'impurità, non dimostra la purezza                                                            |
+| R14 | Il kit UI non sa che gioco è                   | ✅      | `eslint.config.js` + `tests/rules/ui-kit-is-standalone` — che prende anche i percorsi relativi                                              |
+| R15 | Nessun colore vive fuori dai token             | ✅      | `tests/rules/no-color-literals` — un'eccezione sola, `ui/tokens.css`, e non è configurabile                                                 |
 
 Regole di configurazione e di processo, con la stessa dignità:
 
@@ -102,6 +104,7 @@ segnala che un confine si sta spostando.
 | INV-17 | Il salvataggio si scrive **solo** da uno stato che ha una partita vera    | ADR 0004 | `tests/renderer/store` — chiudere da `Errore` o da `Caricamento` non scrive                                               |
 | INV-19 | Il prezzo mostrato e quello addebitato vengono dalla **stessa** funzione  | ADR 0027 | `tests/domains/income` + `tests/renderer/store` — confronto per identità                                                  |
 | INV-20 | Nessun sistema con stato accetta un salvataggio che non riconosce         | ADR 0002 | `tests/rules/stateful-systems-reject-garbage` — deriva la spazzatura dallo stato buono, e la passa sotto l'id del sistema |
+| INV-21 | Un pulsante non si spegne mai: se non si può, c'è una frase               | ADR 0028 | `tests/rules/ui-kit-is-standalone` — nessun `disabled` scritto nel kit                                                    |
 
 Il buco fra INV-17 e INV-19 non è una dimenticanza: **INV-18 è di
 [D017](delega/D017-il-caveau.md)** — la capienza che il Ledger fa rispettare è la stessa che la UI

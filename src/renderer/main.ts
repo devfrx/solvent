@@ -2,6 +2,7 @@ import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 
 import App from './App.vue'
+import './ui/tokens.css'
 import { createTranslations, DEFAULT_LOCALE } from './i18n'
 import { createGame } from './runtime/createGame'
 import { createBrowserHost } from './runtime/host'

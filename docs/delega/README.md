@@ -135,6 +135,11 @@ disegnata prima che esista il sistema è una schermata da rifare. Vale la stessa
 — l'ultimo momento per rispondere senza disfare niente — con una differenza: qui non si scopre un
 buco, si riceve un materiale.
 
+**Ed è chiusa lo stesso giorno**, dentro il budget: 346 righe di kit e 129 di test, con la
+migrazione che ne toglie 62 dai file che c'erano già. Eseguirla ha trovato una cosa che nessuna
+lettura poteva trovare — `UiButton` **scriveva** `disabled` pur non avendo quella proprietà, e
+avrebbe rovesciato in silenzio una decisione presa da D019.
+
 Il canvas non è un kit: è un prototipo di **tutta** l'applicazione, diciotto domini, senza nemmeno
 una classe CSS. D023 ne prende le fondamenta e mette il resto nel
 [registro YAGNI](../roadmap-fette.md) con i grilletti, perché costruirlo tutto adesso sarebbe A17
@@ -184,7 +189,7 @@ configurato dopo che c'erano già 156 file.
 | [D022](D022-il-confine-disegnato-e-il-confine-vero.md)    | Il confine disegnato è il confine vero                                | 264 test + 5 di sorgente  | **Chiusa** |
 | [D019](D019-il-pagamento.md)                              | Il pagamento: il listino di un'azione, e chi lo sceglie               | 87 codice + 204 test      | **Chiusa** |
 | [D020](D020-nessun-sistema-si-fida-del-salvataggio.md)    | Nessun sistema si fida del proprio salvataggio                        | 70 test, zero di sorgente | **Chiusa** |
-| [D023](D023-il-design-system.md)                          | Il design system: un livello che non sa che gioco è                   | ~360 codice + ~130 test   | **Aperta** |
+| [D023](D023-il-design-system.md)                          | Il design system: un livello che non sa che gioco è                   | 346 codice + 129 test     | **Chiusa** |
 | [D017](D017-il-caveau.md)                                 | Il caveau: i contanti hanno una capienza — fetta 02                   | ~330 codice + ~410 test   | **Aperta** |
 | [D018](D018-la-scheda-di-dominio.md)                      | La scheda di dominio: la forma, e le prime tre compilate              | ~510 di documentazione    | **Aperta** |
 

@@ -3,6 +3,8 @@ import { storeToRefs } from 'pinia'
 
 import { traceabilityKey, useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
+import UiNumber from '@renderer/ui/UiNumber.vue'
+import UiPanel from '@renderer/ui/UiPanel.vue'
 
 /**
  * L'altra metà della dualità (P4): i contanti, e le due cose che li distinguono dalla carta —
@@ -12,6 +14,9 @@ import { useGameStore } from '@renderer/stores/game'
  * non esiste, e oggi la risposta è «illimitata». È corretta, non provvisoria — il valore arriva
  * con la fetta 02 senza che questo file cambi, e la barra che lo disegna nascerà insieme al
  * valore. Disegnarla adesso vorrebbe dire disegnare una barra sempre vuota.
+ *
+ * Il totale porta il colore dello strumento (D023): i contanti hanno il loro, la carta il suo, ed è
+ * la regola del design — mai un numero nudo, mai due strumenti dello stesso colore.
  */
 
 const { balances, cashCapacity } = storeToRefs(useGameStore())
@@ -19,9 +24,10 @@ const { text, money } = useTranslator()
 </script>
 
 <template>
-  <section class="panel">
-    <p class="caption">{{ text('atm.cash.title') }}</p>
-    <p class="amount total">{{ money(balances.cash) }}</p>
+  <UiPanel :title="text('atm.cash.title')">
+    <p class="total">
+      <UiNumber :value="money(balances.cash)" tone="cash" size="xl" />
+    </p>
 
     <dl class="facts">
       <div class="fact">
@@ -33,37 +39,35 @@ const { text, money } = useTranslator()
         <dd>{{ text(traceabilityKey('cash')) }}</dd>
       </div>
     </dl>
-  </section>
+  </UiPanel>
 </template>
 
 <style scoped>
 .total {
-  font-size: 26px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  margin: 6px 0 0;
+  margin: 0;
 }
 
 .facts {
-  margin: 12px 0 0;
+  margin: var(--space-5) 0 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 11px;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
 }
 
 .fact {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
 dt {
-  color: var(--muted);
+  color: var(--color-ink-3);
 }
 
 dd {
   margin: 0;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 </style>

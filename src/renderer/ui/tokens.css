@@ -1,0 +1,163 @@
+@import './fonts.css';
+
+/*
+ * D023 · ADR 0028 — l'unico posto del progetto in cui esiste un colore.
+ *
+ * Ogni valore viene dal canvas di Claude Design, contato invece che scelto a occhio: le misure che
+ * quel disegno ripete di più sono quelle che sopravvivono. Il canvas ne usa quattordici per il
+ * testo, otto per i raggi e nove per gli spazi; qui sono sei, cinque e sei. Un design system è la
+ * riduzione, non la trascrizione — chi le copiasse tutte avrebbe un foglio di stile, non un
+ * sistema.
+ *
+ * **I due temi vivono in una dichiarazione sola.** `light-dark()` sceglie in base a
+ * `color-scheme`, quindi non esiste un secondo blocco da tenere allineato: cambiare un colore lo
+ * cambia in tutti e due i temi o in nessuno. È la differenza fra un token e due token che si
+ * somigliano, ed è la ragione per cui spedirne due non produce metà CSS che nessuno guarda.
+ *
+ * A scegliere è il sistema operativo. `data-theme` sull'elemento radice lo scavalca, ed è lì per
+ * il giorno in cui esisteranno le impostazioni — che hanno un grilletto nel registro YAGNI.
+ *
+ * R15 vieta un colore fuori da questo file, e `tests/rules/no-color-literals` lo impone.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Le superfici, dal fondo alla più vicina all'occhio. */
+  --color-bg: light-dark(#edeae3, #100f0c);
+  --color-surface: light-dark(#f7f5f1, #191813);
+  --color-raised: light-dark(#ffffff, #201e18);
+  --color-sunken: light-dark(#e5e1d8, #0b0a08);
+  --color-line: light-dark(#dbd5c9, #302d25);
+  --color-line-soft: light-dark(#e6e1d6, #25231c);
+
+  /* Il testo, dai tre livelli di voce. */
+  --color-ink: light-dark(#15140f, #f1ede2);
+  --color-ink-2: light-dark(#4e4a3f, #beb8a8);
+  --color-ink-3: light-dark(#6c6555, #9c9584);
+
+  /*
+   * L'accento è **inchiostro**, non un colore acceso: P2 riservava il verde al denaro in entrata,
+   * e toglierlo del tutto all'azione rende quella regola più forte. Il verde adesso vuol dire una
+   * cosa sola, in ogni punto dello schermo.
+   */
+  --color-accent: light-dark(#15140f, #ede6d5);
+  --color-accent-fg: light-dark(#f7f5f1, #15140f);
+
+  /* I tre significati. Un colore ciascuno, e mai un secondo che voglia dire lo stesso. */
+  --color-gain: light-dark(#2c6e4b, #6fbe92);
+  --color-loss: light-dark(#a63e28, #e07d5f);
+  --color-heat: light-dark(#835a10, #dda43c);
+  --color-gain-bg: light-dark(#e4ede5, #16271d);
+  --color-loss-bg: light-dark(#f3e4df, #2a1913);
+  --color-heat-bg: light-dark(#f3eada, #2a2011);
+
+  /*
+   * Un colore per strumento. `chip` e `cryp` non hanno ancora un pool dietro — arrivano col casinò
+   * e con le crypto — e stanno qui lo stesso perché una tavolozza con dei buchi si riempie male: il
+   * primo che serve verrebbe scelto da chi ha fretta. Sono dati, non codice, e non li importa
+   * nessuno finché nessuno li nomina.
+   */
+  --color-cash: light-dark(#616733, #a8ae63);
+  --color-card: light-dark(#3f5b80, #7ea0cc);
+  --color-chip: light-dark(#84512a, #d0925c);
+  --color-cryp: light-dark(#6a4e8c, #ae8fd0);
+
+  /*
+   * `light-dark()` accetta un colore, non un'ombra: la geometria resta fissa e a cambiare è il
+   * colore. Nello scuro è trasparente, che è il modo di dire «nessuna ombra» senza una seconda
+   * dichiarazione da tenere allineata.
+   */
+  --shadow-color: light-dark(rgb(21 20 15 / 5%), transparent);
+  --shadow: 0 1px 2px var(--shadow-color);
+
+  /*
+   * Due caratteri, due mestieri (ADR 0029). Il mono porta ogni cifra e ogni etichetta — nel canvas
+   * compare centinaia di volte contro una del sans — e il sans è riservato a ciò che è rivolto al
+   * giocatore. Le riserve valgono finché i pacchetti non sono installati, e dopo.
+   */
+  --font-mono: 'JetBrains Mono', ui-monospace, sfmono-regular, monospace;
+  --font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+
+  /* Sei passi. Il più piccolo è l'etichetta maiuscola, la forma più frequente del canvas. */
+  --text-micro: 9.5px;
+  --text-xs: 11px;
+  --text-sm: 12.5px;
+  --text-md: 13.5px;
+  --text-lg: 19px;
+  --text-xl: 23px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Larga per le etichette, stretta per i numeri grandi, media per il resto. */
+  --track-label: 0.13em;
+  --track-wide: 0.07em;
+  --track-tight: -0.03em;
+
+  --space-1: 2px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 14px;
+  --space-6: 18px;
+
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 9px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  /*
+   * **I materiali.** Non sono ruoli: sono di che cosa è fatto un oggetto. La carta è d'oro in tutti
+   * e due i temi, come un oggetto vero, quindi qui non c'è `light-dark()` — e non è una svista.
+   *
+   * Stanno qui perché R15 non ha eccezioni: un file esente sarebbe una lista da mantenere, cioè la
+   * regola che si apre da sola. I valori sono quelli che la carta aveva già: D023 sposta il colore,
+   * non lo ridisegna. Ridisegnarla è una decisione visiva, e ha il suo grilletto nel registro YAGNI.
+   */
+  --metal-edge: #3a3016;
+  --metal-mid: #8a6d24;
+  --metal-shine: #d9b451;
+  --metal-ink: #231a07;
+  --metal-back-edge: #2a2413;
+  --metal-back-mid: #6d5620;
+  --metal-chip-light: #f5e2a0;
+  --metal-chip-dark: #b8912f;
+  --metal-chip-ink: #3a2f10;
+  --metal-stripe: #120f06;
+  --metal-shadow: rgb(0 0 0 / 90%);
+  --metal-sheen: rgb(255 255 255 / 7%);
+  --metal-chip-inset: rgb(0 0 0 / 25%);
+}
+
+/* Lo scavalco esplicito. Due righe, e le impostazioni un giorno le accenderanno. */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+/* Il canvas lo dichiara, e costa tre righe: chi ha chiesto meno movimento ne riceve meno. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

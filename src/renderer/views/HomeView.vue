@@ -9,6 +9,8 @@ import OperationList from '@renderer/components/OperationList.vue'
 import StatTile from '@renderer/components/StatTile.vue'
 import { traceabilityKey, useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
+import UiLabel from '@renderer/ui/UiLabel.vue'
+import UiPanel from '@renderer/ui/UiPanel.vue'
 
 /**
  * ADR 0018 — la home è **bancomat sopra, cruscotto sotto**, e l'ordine non è negoziabile: il
@@ -40,7 +42,9 @@ const { text, money } = useTranslator()
 </script>
 
 <template>
-  <p class="caption zone">{{ text('home.zone.atm') }}</p>
+  <p class="zone">
+    <UiLabel>{{ text('home.zone.atm') }}</UiLabel>
+  </p>
 
   <BankCard3d
     :account="money(balances.card)"
@@ -54,7 +58,9 @@ const { text, money } = useTranslator()
 
   <IncomePanel />
 
-  <p class="caption zone">{{ text('home.zone.dashboard') }}</p>
+  <p class="zone">
+    <UiLabel>{{ text('home.zone.dashboard') }}</UiLabel>
+  </p>
 
   <div class="tiles">
     <StatTile
@@ -68,10 +74,9 @@ const { text, money } = useTranslator()
     <StatTile label="home.tile.fees" :value="money(feesPaid)" tone="plain" />
   </div>
 
-  <section class="panel">
-    <p class="caption">{{ text('atm.recent.title') }}</p>
+  <UiPanel :title="text('atm.recent.title')">
     <OperationList :operations="recentOperations" />
-  </section>
+  </UiPanel>
 </template>
 
 <style scoped>
@@ -79,20 +84,20 @@ const { text, money } = useTranslator()
 .zone {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin: 4px 0 -4px;
+  gap: var(--space-3);
+  margin: var(--space-1) 0 calc(var(--space-1) * -1);
 }
 
 .zone::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--line);
+  background: var(--color-line);
 }
 
 .tiles {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: var(--space-3);
 }
 </style>

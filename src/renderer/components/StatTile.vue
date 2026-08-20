@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { MessageKey } from '@renderer/i18n'
 import { useTranslator } from '@renderer/i18n'
+import UiLabel from '@renderer/ui/UiLabel.vue'
+import UiNumber from '@renderer/ui/UiNumber.vue'
+import UiPanel from '@renderer/ui/UiPanel.vue'
 
 /**
  * Un riquadro del cruscotto. È ciò che `tests/rules/home-tiles` conta, e il conto è il solo motivo
@@ -9,6 +12,9 @@ import { useTranslator } from '@renderer/i18n'
  *
  * Riceve un valore **già formattato**: nessun `Decimal`, nessuna conversione, nessuna decisione su
  * cosa mostrare. La chiave dell'etichetta invece la traduce da sé — una chiave non è un valore.
+ *
+ * Da D023 la superficie, l'etichetta e la cifra vengono dal kit: qui resta solo il fatto che un
+ * riquadro è un'etichetta sopra un numero.
  */
 
 defineProps<{
@@ -22,27 +28,16 @@ const { text } = useTranslator()
 </script>
 
 <template>
-  <div class="tile">
-    <p class="caption">{{ text(label) }}</p>
-    <p class="amount figure" :class="tone">{{ value }}</p>
-  </div>
+  <UiPanel dense surface="raised">
+    <UiLabel>{{ text(label) }}</UiLabel>
+    <p class="figure">
+      <UiNumber :value="value" size="md" :tone="tone === 'gain' ? 'gain' : 'ink'" />
+    </p>
+  </UiPanel>
 </template>
 
 <style scoped>
-.tile {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px 11px;
-}
-
 .figure {
-  font-size: 15px;
-  font-weight: 600;
-  margin: 4px 0 0;
-}
-
-.gain {
-  color: var(--accent);
+  margin: var(--space-1) 0 0;
 }
 </style>

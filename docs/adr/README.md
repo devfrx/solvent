@@ -61,7 +61,9 @@ Il **0028** e il **0029** nascono il 2026-08-20 da un design consegnato dall'ute
 del progetto che riguardano l'**aspetto** invece della struttura. Il 0028 dice dove vive lo stile e
 cosa gli è vietato sapere: un livello, `renderer/ui/`, che non conosce dominio, store né parole — il
 primo nodo del diagramma con sole frecce entranti. Il 0029 sono i due caratteri, ed esiste perché
-sono due dipendenze nuove (ADR 0015). Tutti e due li impone [D023](../delega/D023-il-design-system.md).
+sono due dipendenze nuove (ADR 0015). Tutti e due li **impone** [D023](../delega/D023-il-design-system.md), che li ha portati ad
+_Accettata_ nello stesso giorno in cui sono nati: è la prima volta che succede, e la ragione è che
+un ADR sull'aspetto senza il CSS che lo applica non decide niente.
 
 Quali decisioni siano ancora _Proposta_ lo dice [stato.md](../stato.md), che le conta invece di
 ricordarsele. Qui c'è il **perché**, che è la sola cosa che un conteggio non può dire.
@@ -108,8 +110,8 @@ fetta 02 a chiuderla.
 | [0025](0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)                  | La capienza di un pool si chiede, non si legge                 | Proposta      | chi decide quanto tiene un pool, quando il tetto può crescere           | A05             |
 | [0026](0026-la-precisione-del-denaro-e-dichiarata.md)                          | La precisione del denaro è dichiarata, non ereditata           | Proposta      | fin dove il denaro resta esatto, e chi ha scelto quel limite            | —               |
 | [0027](0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)               | Il listino è dell'azione, la scelta è del giocatore            | Accettata     | chi decide con cosa si paga, e dove vive il prezzo di ogni strumento    | A05             |
-| [0028](0028-il-kit-ui-non-sa-che-gioco-e.md)                                   | Il kit UI non sa che gioco è                                   | Proposta      | dove vive lo stile, e cosa gli è vietato sapere                         | A14             |
-| [0029](0029-due-caratteri-e-stanno-nel-bundle.md)                              | Due caratteri, e stanno nel bundle                             | Proposta      | con quali caratteri si legge il gioco, e da dove arrivano               | —               |
+| [0028](0028-il-kit-ui-non-sa-che-gioco-e.md)                                   | Il kit UI non sa che gioco è                                   | **Accettata** | dove vive lo stile, e cosa gli è vietato sapere                         | A14             |
+| [0029](0029-due-caratteri-e-stanno-nel-bundle.md)                              | Due caratteri, e stanno nel bundle                             | **Accettata** | con quali caratteri si legge il gioco, e da dove arrivano               | —               |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è

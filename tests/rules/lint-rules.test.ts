@@ -72,6 +72,33 @@ describe('regole che devono scattare', () => {
     expect(has(f, 'R05')).toBe(true)
   })
 
+  it('R14 — un file del kit che importa il dominio', async () => {
+    const f = await lint(
+      'src/renderer/ui/UiNumber.vue',
+      VUE(`import { toString } from '@core/contracts/money'
+console.log(toString)`)
+    )
+    expect(has(f, 'R14')).toBe(true)
+  })
+
+  it('R14 — e uno che importa le parole', async () => {
+    const f = await lint(
+      'src/renderer/ui/UiLabel.vue',
+      VUE(`import { useTranslator } from '@renderer/i18n'
+console.log(useTranslator)`)
+    )
+    expect(has(f, 'R14')).toBe(true)
+  })
+
+  it('R14 — un import dentro il kit invece è consentito', async () => {
+    const f = await lint(
+      'src/renderer/ui/UiPanel.vue',
+      VUE(`import { toneVar } from './roles'
+console.log(toneVar)`)
+    )
+    expect(has(f, 'R14')).toBe(false)
+  })
+
   it('R06 — assegnamento diretto a un saldo', async () => {
     const f = await lint(
       'src/core/domains/income/system.ts',

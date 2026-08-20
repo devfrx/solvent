@@ -170,26 +170,31 @@ const release = (): void => {
   flex-direction: column;
   justify-content: space-between;
   box-shadow:
-    0 18px 40px -18px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(255, 255, 255, 0.07) inset;
+    0 18px 40px -18px var(--metal-shadow),
+    0 0 0 1px var(--metal-sheen) inset;
 }
 
 /* L'oro non è un secondo accento: è il materiale della carta, e cambierà con la progressione. */
 .front {
   background: linear-gradient(
     135deg,
-    #3a3016 0%,
-    #8a6d24 38%,
-    #d9b451 55%,
-    #8a6d24 72%,
-    #3a3016 100%
+    var(--metal-edge) 0%,
+    var(--metal-mid) 38%,
+    var(--metal-shine) 55%,
+    var(--metal-mid) 72%,
+    var(--metal-edge) 100%
   );
-  color: #231a07;
+  color: var(--metal-ink);
 }
 
 .back {
-  background: linear-gradient(135deg, #2a2413 0%, #6d5620 50%, #2a2413 100%);
-  color: #231a07;
+  background: linear-gradient(
+    135deg,
+    var(--metal-back-edge) 0%,
+    var(--metal-back-mid) 50%,
+    var(--metal-back-edge) 100%
+  );
+  color: var(--metal-ink);
   transform: rotateY(180deg);
 }
 
@@ -210,12 +215,12 @@ const release = (): void => {
   width: 38px;
   height: 28px;
   border-radius: 5px;
-  background: linear-gradient(145deg, #f5e2a0, #b8912f);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(145deg, var(--metal-chip-light), var(--metal-chip-dark));
+  box-shadow: inset 0 0 0 1px var(--metal-chip-inset);
 }
 
 .engraved {
-  color: #3a2f10;
+  color: var(--metal-chip-ink);
 }
 
 .balance {
@@ -227,7 +232,7 @@ const release = (): void => {
 
 .stripe {
   height: 36px;
-  background: #120f06;
+  background: var(--metal-stripe);
   margin: -16px -16px 0;
   border-radius: 14px 14px 0 0;
 }
@@ -261,7 +266,7 @@ dd {
 .hint {
   text-align: center;
   font-size: 11px;
-  color: var(--muted);
+  color: var(--color-ink-3);
   margin: 4px 0 0;
 }
 </style>

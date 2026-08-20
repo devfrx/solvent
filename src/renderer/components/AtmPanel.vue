@@ -8,6 +8,11 @@ import type { GameError, MessageKey } from '@renderer/i18n'
 import { useTranslator } from '@renderer/i18n'
 import type { AtmOperationKind } from '@renderer/stores/game'
 import { ATM_KINDS, useGameStore } from '@renderer/stores/game'
+import UiButton from '@renderer/ui/UiButton.vue'
+import UiLabel from '@renderer/ui/UiLabel.vue'
+import UiNumber from '@renderer/ui/UiNumber.vue'
+import UiPanel from '@renderer/ui/UiPanel.vue'
+import UiText from '@renderer/ui/UiText.vue'
 
 import PostingRows from './PostingRows.vue'
 
@@ -24,6 +29,7 @@ import PostingRows from './PostingRows.vue'
  * Se l'anteprima è un **no**, si legge il perché al posto dei movimenti e il pulsante resta
  * premibile: un pulsante spento è un rifiuto senza motivo, ed è esattamente ciò che questa fetta
  * esiste per non fare. Premerlo ridà lo stesso codice, perché a rispondere è la stessa funzione.
+ * Da D023 non è più disciplina: `UiButton` non sa spegnersi (INV-21).
  */
 
 interface Wording {
@@ -85,95 +91,95 @@ const submit = (): void => {
 </script>
 
 <template>
-  <section class="panel">
+  <UiPanel>
     <div class="switch">
-      <button
+      <UiButton
         v-for="option of ATM_KINDS"
         :key="option"
-        type="button"
-        class="ghost"
+        variant="quiet"
         :class="{ current: kind === option }"
-        @click="choose(option)"
-      >
-        {{ text(WORDING[option].name) }}
-      </button>
+        :label="text(WORDING[option].name)"
+        @press="choose(option)"
+      />
     </div>
 
-    <p class="caption">{{ text(WORDING[kind].title) }}</p>
-    <p class="amount chosen">{{ money(amount) }}</p>
+    <UiLabel>{{ text(WORDING[kind].title) }}</UiLabel>
+    <p class="chosen">
+      <UiNumber :value="money(amount)" size="xl" />
+    </p>
 
     <div class="quick">
-      <button
+      <UiButton
         v-for="(option, index) of atmAmounts"
         :key="index"
-        type="button"
-        class="ghost amount"
-        @click="setAmount(option)"
-      >
-        {{ money(option) }}
-      </button>
+        variant="quiet"
+        :label="money(option)"
+        @press="setAmount(option)"
+      />
     </div>
 
-    <p class="caption breakdown">{{ text('atm.breakdown') }}</p>
+    <p class="breakdown">
+      <UiLabel>{{ text('atm.breakdown') }}</UiLabel>
+    </p>
     <div class="ledger">
       <PostingRows v-if="preview.ok" :postings="preview.value" />
-      <p v-else class="refusal">{{ failure(preview.error) }}</p>
+      <UiText v-else tone="loss" size="xs">{{ failure(preview.error) }}</UiText>
     </div>
 
-    <button type="button" class="primary send" @click="submit">
-      {{ text(WORDING[kind].confirm) }}
-    </button>
-
-    <p v-if="refusal !== null" class="refusal boxed">{{ failure(refusal) }}</p>
-  </section>
+    <div class="send">
+      <UiButton
+        :label="text(WORDING[kind].confirm)"
+        :reason="refusal === null ? undefined : failure(refusal)"
+        @press="submit"
+      />
+    </div>
+  </UiPanel>
 </template>
 
 <style scoped>
 .switch {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
 }
 
-.switch .current {
-  background: var(--panel-raised);
-  color: var(--text);
+/*
+ * La direzione scelta si vede **dal bordo**, non dal fondo. Guardando le due schermate a occhio nei
+ * due temi — che la definizione di fatto di D023 chiede apposta — nel tema scuro `--color-raised`
+ * contro `--color-surface` è una differenza di due punti di luminosità: nel chiaro il bianco si
+ * stacca, nello scuro il pulsante scelto era indistinguibile dall'altro.
+ */
+.switch .current :deep(button) {
+  background: var(--color-raised);
+  color: var(--color-ink);
+  border-color: var(--color-ink-3);
 }
 
 .chosen {
-  font-size: 30px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  margin: 6px 0 0;
+  margin: var(--space-2) 0 0;
 }
 
 .quick {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 12px;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
 }
 
 .breakdown {
-  margin-top: 16px;
+  margin: var(--space-6) 0 0;
 }
 
 .ledger {
-  margin-top: 8px;
-  background: var(--panel-raised);
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  padding: 11px;
+  margin-top: var(--space-3);
+  background: var(--color-raised);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
 }
 
 .send {
-  width: 100%;
-  margin-top: 14px;
-}
-
-/* Il rifiuto è una primitiva condivisa (`App.vue`): qui resta solo lo stacco dal pannello. */
-.refusal.boxed {
-  margin-top: 10px;
+  margin-top: var(--space-5);
 }
 </style>

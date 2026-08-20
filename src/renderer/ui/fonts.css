@@ -1,0 +1,61 @@
+/*
+ * D023 · ADR 0029 — i due caratteri, dichiarati a mano invece che presi dai fogli dei pacchetti.
+ *
+ * `@fontsource` porta un `.css` già pronto per ogni peso, e sarebbe una riga invece di cinque
+ * blocchi. Dichiara però **due** formati per ciascuno, `woff2` e `woff`, e il secondo esiste per i
+ * motori che il `woff2` non lo sanno leggere: qui il motore è uno solo ed è Chromium. Preso così
+ * com'era, il bundle portava nove file di carattere invece di cinque — circa centotrenta kilobyte
+ * che nessuno avrebbe mai scaricato, cioè la definizione di codice morto (difetto A14, applicato
+ * agli asset).
+ *
+ * Dichiararli qui costa una trentina di righe e in cambio dà due cose: solo il formato che serve, e
+ * `font-display` scelto invece che ereditato. È `block` perché i file stanno nel bundle e arrivano
+ * dal disco: non c'è un'attesa di rete da coprire, e `swap` produrrebbe uno sfarfallio fra la
+ * riserva e il carattere vero su ogni avvio.
+ *
+ * Solo il sottoinsieme `latin`: il gioco parla italiano e inglese. I pesi sono quelli della scala
+ * di `tokens.css`, uno a uno — un peso dichiarato e non caricato verrebbe **sintetizzato** dal
+ * motore, cioè una grassezza finta che nessun gate può vedere. Il sans ne ha uno solo perché la
+ * prosa del gioco oggi non ha enfasi: il secondo entra quando ce l'avrà.
+ */
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url('@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url('@fontsource/jetbrains-mono/files/jetbrains-mono-latin-600-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff2')
+    format('woff2');
+}

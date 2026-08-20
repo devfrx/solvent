@@ -4,6 +4,8 @@ import { storeToRefs } from 'pinia'
 import OperationList from '@renderer/components/OperationList.vue'
 import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
+import UiNumber from '@renderer/ui/UiNumber.vue'
+import UiPanel from '@renderer/ui/UiPanel.vue'
 
 /**
  * La schermata Statistiche. Esiste **dal primo giorno**, e non è un segnaposto: P3 le dà un
@@ -21,22 +23,22 @@ const { text, instant } = useTranslator()
 </script>
 
 <template>
-  <section class="panel">
-    <p class="caption">{{ text('stats.saved_at.title') }}</p>
-    <p class="saved amount">
-      {{ savedAt === null ? text('stats.saved_at.never') : instant(savedAt) }}
+  <UiPanel :title="text('stats.saved_at.title')">
+    <p class="saved">
+      <UiNumber
+        :value="savedAt === null ? text('stats.saved_at.never') : instant(savedAt)"
+        size="md"
+      />
     </p>
-  </section>
+  </UiPanel>
 
-  <section class="panel">
-    <p class="caption">{{ text('stats.operations.title') }}</p>
+  <UiPanel :title="text('stats.operations.title')">
     <OperationList :operations="operations" />
-  </section>
+  </UiPanel>
 </template>
 
 <style scoped>
 .saved {
-  margin: 8px 0 0;
-  font-size: 15px;
+  margin: 0;
 }
 </style>

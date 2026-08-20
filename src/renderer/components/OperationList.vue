@@ -36,23 +36,23 @@ const { text } = useTranslator()
 
 <style scoped>
 .empty {
-  margin: 8px 0 0;
-  font-size: 12px;
-  color: var(--muted);
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-ink-3);
 }
 
 .operations {
-  margin: 10px 0 0;
+  margin: var(--space-4) 0 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-4);
 }
 
 .reason {
-  margin: 0 0 3px;
-  font-size: 12px;
-  font-weight: 600;
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
 }
 </style>

@@ -1,7 +1,8 @@
 # ADR 0029 — Due caratteri, e stanno nel bundle
 
-- **Stato:** Proposta — le due dipendenze entrano con
-  [D023](../delega/D023-il-design-system.md)
+- **Stato:** **Accettata** — [D023](../delega/D023-il-design-system.md): i due pacchetti sono in
+  `package.json`, i cinque `woff2` nel bundle, e `ui/fonts.css` li dichiara a mano per non portarsi
+  dietro il `woff` che nessuno leggerebbe
 - **Data:** 2026-08-20
 
 ## Contesto

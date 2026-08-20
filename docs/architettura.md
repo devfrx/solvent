@@ -24,6 +24,7 @@ flowchart TD
     APP["App.vue<br/>il guscio: i sette stati"]
     VIEWS["views/*.vue<br/>HomeView · StatsView"]
     CMP["components/*<br/>sette componenti · rotation · postings"]
+    UI["ui/*<br/>tokens · roles · sei pezzi<br/>non sa che gioco è"]
     I18N["i18n/*"]
     ST["stores/*"]
     RT["runtime/*<br/>createGame · loop · host"]
@@ -48,6 +49,9 @@ flowchart TD
   VIEWS --> I18N
   CMP --> ST
   CMP --> I18N
+  APP --> UI
+  VIEWS --> UI
+  CMP --> UI
   CMP --> CON
   I18N --> CON
   I18N --> DOM
@@ -229,6 +233,8 @@ Legenda: **🔒 impossibile** = il tipo o la struttura non permettono di scriver
 | 11  | Denaro `Decimal` end-to-end                | `Money = Decimal` è una classe + lint sulle conversioni nei domini                                                                                                                                                                    | 🔒      |
 | 12  | Nessuna stringa utente hardcoded           | Test di parità i18n (✅) + test euristico sui template `.vue` (⚠️)                                                                                                                                                                    | ✅ / ⚠️ |
 | 13  | Un file `rules.ts` è puro                  | `tests/rules/pure-rules`: nessun `ctx`, nessun effetto, nessuna lettura dell'ora                                                                                                                                                      | ⚠️      |
+| 14  | Il kit UI non sa che gioco è               | ESLint `no-restricted-imports` su `src/renderer/ui/**` + `tests/rules/ui-kit-is-standalone`, che risolve anche i percorsi relativi                                                                                                    | ✅      |
+| 15  | Nessun colore fuori dai token              | `tests/rules/no-color-literals`: un'eccezione sola, `ui/tokens.css`, e non è configurabile                                                                                                                                            | ✅      |
 
 **Quando entra ciascun meccanismo.** Alcune di queste regole sono già in vigore, altre nascono con
 la delega che le usa: la colonna _Delega_ di [tracciabilita.md](tracciabilita.md) dice quale, per

@@ -81,20 +81,28 @@ D009 la stessa cosa, con 62 test in più: `lint` è persino sceso, il che dice q
 misura sola.
 
 `verify:release` è **verde** da D011: `build` compila `out/main/index.js`, `out/preload/index.cjs`
-e `out/renderer/`. Da D009 a D010 era rosso e non era una regressione — il renderer non esisteva —
+e `out/renderer/`.
+
+**Il peso del renderer, misurato a [D023](delega/D023-il-design-system.md).** Il modulo compilato è
+**574,99 kB** e il foglio di stile **19,20 kB**; accanto ci sono adesso **cinque file di carattere**
+in `woff2`, **116 kB** in tutto, che prima non c'erano ([ADR 0029](adr/0029-due-caratteri-e-stanno-nel-bundle.md)).
+Solo `woff2` e solo il sottoinsieme `latin`: presi come i pacchetti li offrono sarebbero stati nove
+file, perché ognuno dichiara anche un `woff` per i motori che il `woff2` non lo leggono — e qui il
+motore è uno solo. La misura sta qui e non in [stato.md](stato.md) per la stessa ragione del tempo:
+non è derivabile dal repo senza compilarlo. Da D009 a D010 era rosso e non era una regressione — il renderer non esisteva —
 ma da qui in avanti ogni delega deve tenerlo verde.
 `tests/rules/gates.test.ts` impedisce che un gate sparisca da una delle due catene (INV-14).
 
 ## Cosa copre ciascun livello di test
 
-| Livello                | Dove             | Cosa dimostra                                                                                                                                                                                   | Cosa **non** dimostra                                           |
-| ---------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| **Kernel**             | `tests/kernel/`  | Clock, Rng, Bus, Registry, Ledger si comportano come dichiarato, isolatamente                                                                                                                   | che i sistemi li usino bene                                     |
-| **Dominio**            | `tests/domains/` | le regole pure producono i numeri attesi, con seed fisso                                                                                                                                        | che la UI mostri quei numeri                                    |
-| **Round-trip**         | `tests/save/`    | stato → salva → ricarica → identico. Attraversa payload, busta, validazione                                                                                                                     | che una migrazione futura funzioni                              |
-| **Bilanciamento**      | `tests/balance/` | i numeri stanno negli intervalli dichiarati in `targets.ts`                                                                                                                                     | che il gioco sia divertente                                     |
-| **i18n**               | `tests/i18n/`    | nessuna chiave manca in nessuna lingua, i segnaposto coincidono, ogni chiave si risolve                                                                                                         | che le traduzioni siano corrette                                |
-| **Regole strutturali** | `tests/rules/`   | Registry completo, nessuna logica nei `.vue`, identità del prodotto coerente, nessun `TODO`, nessun barrel, nessuna parola vietata nei nomi, nessun sistema che si fida del proprio salvataggio | ciò che è dichiarato ⚠️ in [tracciabilita.md](tracciabilita.md) |
+| Livello                | Dove             | Cosa dimostra                                                                                                                                                                                                                                                       | Cosa **non** dimostra                                           |
+| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Kernel**             | `tests/kernel/`  | Clock, Rng, Bus, Registry, Ledger si comportano come dichiarato, isolatamente                                                                                                                                                                                       | che i sistemi li usino bene                                     |
+| **Dominio**            | `tests/domains/` | le regole pure producono i numeri attesi, con seed fisso                                                                                                                                                                                                            | che la UI mostri quei numeri                                    |
+| **Round-trip**         | `tests/save/`    | stato → salva → ricarica → identico. Attraversa payload, busta, validazione                                                                                                                                                                                         | che una migrazione futura funzioni                              |
+| **Bilanciamento**      | `tests/balance/` | i numeri stanno negli intervalli dichiarati in `targets.ts`                                                                                                                                                                                                         | che il gioco sia divertente                                     |
+| **i18n**               | `tests/i18n/`    | nessuna chiave manca in nessuna lingua, i segnaposto coincidono, ogni chiave si risolve                                                                                                                                                                             | che le traduzioni siano corrette                                |
+| **Regole strutturali** | `tests/rules/`   | Registry completo, nessuna logica nei `.vue`, identità del prodotto coerente, nessun `TODO`, nessun barrel, nessuna parola vietata nei nomi, nessun sistema che si fida del proprio salvataggio, il kit UI che non conosce il gioco e nessun colore fuori dai token | ciò che è dichiarato ⚠️ in [tracciabilita.md](tracciabilita.md) |
 
 **Non esistono test end-to-end sulla UI in questa fetta.** I `.vue` sono **dieci** — il guscio, due
 viste, sette componenti — e la riga che stava qui ne diceva due: era il numero di D012, mai

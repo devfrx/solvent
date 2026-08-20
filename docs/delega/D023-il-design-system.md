@@ -1,8 +1,9 @@
 # D023 — Il design system: un livello che non sa che gioco è
 
-- **Stato:** Aperta — scritta il 2026-08-20 leggendo il canvas di Claude Design consegnato
-  dall'utente, e **prima** di [D017](D017-il-caveau.md): il caveau è la prima schermata nuova, e
-  una schermata nuova disegnata prima del sistema è una schermata da rifare
+- **Stato:** **Chiusa** — scritta il 2026-08-20 leggendo il canvas di Claude Design consegnato
+  dall'utente, **prima** di [D017](D017-il-caveau.md) — il caveau è la prima schermata nuova, e una
+  schermata disegnata prima del sistema è una schermata da rifare — ed eseguita lo stesso giorno,
+  ramo `d023-design-system`. Vedi _Come è andata_ in fondo
 - **Dipende da:** [D015](D015-home-bancomat.md) — la home e i componenti di oggi sono ciò che il
   kit deve saper vestire. **Non** dipende da [D017](D017-il-caveau.md)
 - **Sblocca:** ogni schermata che verrà, a partire dal caveau
@@ -146,22 +147,22 @@ Tutto ciò che segue è **nel canvas** e non entra adesso. Ognuno prende una rig
 
 ## Definizione di fatto
 
-- [ ] `npm run verify` verde, con l'**output incollato**
-- [ ] `npm run verify:release` verde, e il peso del bundle **rimisurato**: due caratteri lo fanno
+- [x] `npm run verify` verde, con l'**output incollato**
+- [x] `npm run verify:release` verde, e il peso del bundle **rimisurato**: due caratteri lo fanno
       crescere, e di quanto va scritto in [qualita.md](../qualita.md) con la data accanto
-- [ ] R14 e R15 hanno un test, e tutti e due sono stati **rotti di proposito**
-- [ ] INV-21 rotto di proposito: si prova a spegnere un pulsante senza ragione, e `typecheck`
+- [x] R14 e R15 hanno un test, e tutti e due sono stati **rotti di proposito**
+- [x] INV-21 rotto di proposito: si prova a spegnere un pulsante senza ragione, e `typecheck`
       diventa rosso. Provato, non supposto — è 🔒, e non ha altro modo di dimostrarsi
-- [ ] `App.vue` non ha più un blocco `<style>` non scoped, e nessun colore letterale vive fuori da
+- [x] `App.vue` non ha più un blocco `<style>` non scoped, e nessun colore letterale vive fuori da
       `tokens.css`
-- [ ] `docs/architettura.md`: il nodo `UI` è nel diagramma, **senza frecce in uscita**, e la tabella
+- [x] `docs/architettura.md`: il nodo `UI` è nel diagramma, **senza frecce in uscita**, e la tabella
       delle regole ha R14 e R15
-- [ ] `tests/rules/import-graph`: `src/renderer/ui/` è nella mappa `NODES` (C13)
-- [ ] `docs/tracciabilita.md`: R14, R15 e INV-21 hanno la loro riga e il loro meccanismo
-- [ ] `docs/prodotto/preferenze.md`: P2 è riscritta, e dice cosa è cambiato rispetto al 2026-08-19
-- [ ] `docs/roadmap-fette.md`: le voci del fuori scope, ognuna col grilletto
-- [ ] `docs/stato.md` rigenerato con `npx vitest run tests/rules/project-state -u`
-- [ ] **Le due schermate di oggi sono state guardate a occhio, nei due temi.** Nessun gate lo fa, e
+- [x] `tests/rules/import-graph`: `src/renderer/ui/` è nella mappa `NODES` (C13)
+- [x] `docs/tracciabilita.md`: R14, R15 e INV-21 hanno la loro riga e il loro meccanismo
+- [x] `docs/prodotto/preferenze.md`: P2 è riscritta, e dice cosa è cambiato rispetto al 2026-08-19
+- [x] `docs/roadmap-fette.md`: le voci del fuori scope, ognuna col grilletto
+- [x] `docs/stato.md` rigenerato con `npx vitest run tests/rules/project-state -u`
+- [x] **Le due schermate di oggi sono state guardate a occhio, nei due temi.** Nessun gate lo fa, e
       due temi con un occhio solo è come nascono le righe morte
 
 ## Trappole note
@@ -180,3 +181,101 @@ Tutto ciò che segue è **nel canvas** e non entra adesso. Ognuno prende una rig
 - **A17, di nuovo, e più forte del solito.** Il canvas mostra diciotto domini finiti e bellissimi. È
   la tentazione più grossa che questo progetto abbia incontrato finora: tutto sembra già disegnato,
   quindi tutto sembra a un pomeriggio di distanza. Non lo è, e quei domini non esistono.
+
+## Come è andata
+
+Eseguita il 2026-08-20, sul ramo `d023-design-system`.
+
+**Budget.** Dichiarate ~360 righe di sorgente e ~130 di test. Misurate **346 righe di kit** e **129
+di test**, con il metodo di `codeLines`. La migrazione dei componenti e delle viste ne ha **tolte
+62**: 282 aggiunte contro 344 tolte nei file che esistevano già. Il netto di `src/` è quindi **+284**
+contro un lordo di 346, che è la metà annunciata più qualcosa.
+
+Le tre regole nuove sono state rotte di proposito, una per una:
+
+| Cosa si rompe                     | Cosa diventa rosso                   |
+| --------------------------------- | ------------------------------------ |
+| Un file del kit importa lo store  | il test **e** il lint, tutti e due   |
+| Un `#hex` dentro `StatTile.vue`   | R15, con il valore stampato nel diff |
+| `:disabled` rimesso su `UiButton` | INV-21                               |
+
+## Correzioni rispetto a com'era scritta
+
+**1. `UiButton` scriveva `disabled` pur non avendo quella proprietà, e la delega non poteva vederlo.**
+Il testo diceva: «il tipo non offre `disabled`, quindi spento senza motivo è impossibile da
+scrivere». È falso, e a dimostrarlo è stata la prima stesura di questo stesso componente: la
+proprietà non c'era e l'attributo sì — `:disabled="refused"` sul `<button>`. Una proprietà che non
+esiste nell'API non impedisce all'attributo di esistere nel template. Sono due cose, e solo la
+seconda è quella che il giocatore vede.
+
+**2. Ne discende che INV-21 non è 🔒, è ✅** — e ha un test, che la delega diceva di non avere.
+`tests/rules/ui-kit-is-standalone` cerca l'attributo nei sorgenti del kit. È leggibile dai sorgenti
+proprio perché è una forma, non un tipo, quindi non serve montare niente e il grilletto di jsdom
+resta dov'era.
+
+**3. La regola che il design chiede il progetto l'aveva già, e la prima stesura la disfaceva.**
+`IncomePanel` porta scritto da D019: «il pulsante non si spegne. Un pulsante spento è un rifiuto
+senza motivo, ed è esattamente ciò che questa fetta esiste per non fare». Un `UiButton` che si
+disabilita quando riceve una ragione avrebbe rovesciato quella decisione **passando tutti i gate**.
+La versione buona è più forte di tutte e due: il kit non sa spegnere un pulsante, punto.
+
+**4. Servono due proprietà, non una.** «Probabilmente non puoi» e «ecco perché non hai potuto» sono
+informazioni diverse e arrivano in momenti diversi: `muted` è l'anteprima che il listino sa dare
+prima di premere, `reason` è la frase che il Ledger produce dopo. Con una sola, o si perde
+l'anteprima o si inventa una ragione che nessuno ha ancora calcolato.
+
+**5. I due temi stanno in una dichiarazione sola, non in due blocchi.** `light-dark()` sceglie in
+base a `color-scheme`, quindi ogni colore è scritto **una volta** con i suoi due valori. La forma
+consueta — un blocco chiaro e un blocco scuro — sarebbe stata ventiquattro token da tenere
+allineati a mano, cioè la stessa classe di difetto che R15 esiste per chiudere. Non funziona per
+`--shadow`, che non è un colore: lì il token è il **colore** dell'ombra e la geometria resta fissa.
+
+**6. R15 non ha eccezioni, quindi i colori della carta sono diventati token.** `BankCard3d` ne
+scriveva tredici, e sono oro: non sono ruoli, sono **di che cosa è fatto un oggetto**. Un elenco di
+file esenti sarebbe stata una lista da mantenere — la regola che si apre da sola — quindi hanno una
+sezione loro in `tokens.css`, `--metal-*`, senza `light-dark()`: una carta d'oro è d'oro anche di
+notte. **La carta non è stata ridisegnata**: i valori sono quelli di prima. Ridisegnarla è una
+decisione visiva e non era in questa delega.
+
+**7. I fogli di stile dei pacchetti non si usano: i `@font-face` sono scritti a mano.**
+`@fontsource` dichiara per ogni peso sia `woff2` sia `woff`, e il secondo esiste per motori che qui
+non esistono. Presi così com'erano, il bundle portava **nove** file di carattere invece di cinque —
+circa centotrenta kilobyte che nessuno avrebbe mai scaricato, cioè il difetto A14 applicato agli
+asset. Trenta righe in `ui/fonts.css` costano meno, e in cambio danno `font-display` scelto invece
+che ereditato.
+
+**8. `npm install` in questa repo non funziona, e non per colpa di questa delega.** `electron-vite@5`
+dichiara di reggere `vite` fino alla 7, e il progetto è sulla 8: `npm install` e `npm ci` falliscono
+tutti e due con `ERESOLVE`, da prima di D023. L'unica via è `--legacy-peer-deps`, che però **ignora
+i peer**: aggiungendo i caratteri sono spariti `@vue/devtools-api` (senza cui il build non compila)
+e `vue-eslint-parser` (senza cui il lint non parte). Adesso sono dichiarati fra le dipendenze di
+sviluppo — se un gate ne ha bisogno, deve stare scritto. **La causa vera resta aperta**, ed è una
+decisione strutturale che va presa a parte: o `vite` scende alla 7, o `electron-vite` sale alla 6
+quando sarà stabile. Fino ad allora l'unico comando che installa è
+`npm ci --legacy-peer-deps`, e questa riga è l'unico posto in cui è scritto.
+
+**9. Un difetto che nessun gate poteva vedere, trovato guardando.** Nel tema scuro il pulsante
+scelto del bancomat era indistinguibile dall'altro: `--color-raised` contro `--color-surface` sono
+due punti di luminosità, e nel chiaro la differenza è bianco contro carta. Adesso a dirlo è il
+**bordo**, che si vede in tutti e due. È esattamente la spunta che la definizione di fatto chiedeva,
+ed è servita al primo colpo.
+
+**10. `UiPanel` ha guadagnato una variante densa.** Il riquadro del cruscotto è un pannello con meno
+imbottitura, e senza quella variante sarebbe nata una **seconda** implementazione di superficie —
+cioè la cosa che il kit esiste per impedire. Una proprietà booleana costa meno di due file che si
+somigliano.
+
+**11. Il ponte fra dominio e colore ha un nome e un posto.** `roleOf` sta in
+`components/postings.ts`: traduce il significato di un movimento — entrata, uscita, commissione —
+nel ruolo di colore che il kit capisce. La delega lo prescriveva a parole; adesso è una funzione
+pura di tre casi, dalla parte giusta del confine.
+
+### Cosa questa delega lascia a [D017](D017-il-caveau.md)
+
+- **Il caveau non disegna niente di nuovo.** Superficie, etichetta, cifra, targhetta, pulsante e
+  prosa ci sono: se serve un settimo pezzo, il criterio è quello di sempre — entra quando lo
+  disegnano **due** componenti, non prima.
+- **La barra della capienza sarà il primo pezzo nuovo davvero**, e nasce con un numero vero invece
+  che vuota. È l'unica cosa che `CashPanel` aspetta.
+- **Il colore dei contanti e quello della carta esistono già** come ruoli, e li usa già la home. Il
+  caveau non ne sceglie di nuovi.

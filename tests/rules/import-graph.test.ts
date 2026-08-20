@@ -47,6 +47,7 @@ const NODES: readonly (readonly [string, string])[] = [
   ['src/renderer/runtime/', 'RT'],
   ['src/renderer/stores/', 'ST'],
   ['src/renderer/i18n/', 'I18N'],
+  ['src/renderer/ui/', 'UI'],
   ['src/renderer/components/', 'CMP'],
   ['src/renderer/views/', 'VIEWS'],
   ['src/renderer/App.vue', 'APP'],

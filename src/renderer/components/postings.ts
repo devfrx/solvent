@@ -3,6 +3,8 @@ import type { Money } from '@core/contracts/money'
 import type { Pool } from '@core/contracts/pools'
 import { POOLS } from '@core/contracts/pools'
 
+import type { ColorRole } from '@renderer/ui/roles'
+
 /**
  * Quali movimenti di una transazione il giocatore vede, e come.
  *
@@ -22,6 +24,14 @@ import { POOLS } from '@core/contracts/pools'
  * verde al denaro che entra, l'ambra al costo, e tutto il resto resta del colore del testo.
  */
 export type PostingTone = 'in' | 'out' | 'fee'
+
+/**
+ * Il ponte fra un significato di dominio e un ruolo di colore, e **vive qui** invece che nel kit:
+ * `ui/` non sa cosa sia un movimento, e non deve saperlo (R14, ADR 0028). È una funzione pura di
+ * tre casi, quindi si prova senza montare niente.
+ */
+export const roleOf = (tone: PostingTone): ColorRole =>
+  tone === 'in' ? 'gain' : tone === 'fee' ? 'heat' : 'ink'
 
 export interface PostingRow {
   /**

@@ -1,7 +1,9 @@
 # ADR 0028 — Il kit UI non sa che gioco è
 
-- **Stato:** Proposta — il meccanismo che la impone nasce con
-  [D023](../delega/D023-il-design-system.md)
+- **Stato:** **Accettata** — [D023](../delega/D023-il-design-system.md): `src/renderer/ui/`, la
+  riga di `no-restricted-imports`, `tests/rules/ui-kit-is-standalone` e
+  `tests/rules/no-color-literals`. Tutte e tre rotte di proposito, e il nodo `UI` del diagramma non
+  ha frecce in uscita
 - **Data:** 2026-08-20
 
 ## Contesto

@@ -261,6 +261,44 @@ export default ts.config(
     }
   },
 
+  // ------------------------------------------------ R14 — il kit UI non sa che gioco e' (D023)
+  //
+  // Sta **dopo** il blocco dei `.vue` di proposito: in flat config `no-restricted-imports` non si
+  // somma, e per i file di `ui/` questa configurazione sostituisce quella di R05. Non e' una
+  // perdita, e' un rafforzamento — R05 vieta kernel, balance e le regole di dominio, questa vieta
+  // `@core` per intero, piu' lo store, le parole e il runtime.
+  //
+  // Cio' che a ESLint sfugge sono i percorsi relativi che escono dalla cartella: per lui sono
+  // percorsi, non pacchetti. A prenderli e' `tests/rules/ui-kit-is-standalone`, che risolve il
+  // percorso prima di giudicarlo (ADR 0028).
+  {
+    files: ['src/renderer/ui/**/*.{ts,vue}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@core/**',
+                '**/core/**',
+                '@renderer/stores/**',
+                '**/stores/**',
+                '@renderer/i18n',
+                '@renderer/i18n/**',
+                '**/i18n/**',
+                '@renderer/runtime/**',
+                '**/runtime/**'
+              ],
+              message:
+                "R14 — il kit UI non sa che gioco e' (ADR 0028). Riceve testo e valori per proprieta'."
+            }
+          ]
+        }
+      ]
+    }
+  },
+
   // Prettier per ultimo: spegne ogni regola di stile in ESLint (ADR 0013).
   prettier
 )
