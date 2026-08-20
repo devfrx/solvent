@@ -7,9 +7,12 @@ import type { Modifiers } from '@core/balance/modifiers'
 import { createModifiers } from '@core/balance/modifiers'
 import { createAtm, type Atm } from '@core/domains/atm/commands'
 import { createIncome, type Income } from '@core/domains/income/system'
+import { roomIn, VAULT_POOL } from '@core/domains/vault/rules'
+import { createVault, type Vault } from '@core/domains/vault/system'
 import { createBus } from '@core/kernel/Bus'
 import { clock } from '@core/kernel/Clock'
-import { createLedger } from '@core/kernel/Ledger'
+import type { Capacities } from '@core/kernel/Ledger'
+import { createLedger, poolCapacity } from '@core/kernel/Ledger'
 import type { LoadReport, Registry, RegistryError, SystemContext } from '@core/kernel/Registry'
 import { createRegistry } from '@core/kernel/Registry'
 import { createRng, randomSeed } from '@core/kernel/Rng'
@@ -53,6 +56,7 @@ export interface Game {
   readonly modifiers: Modifiers
   readonly income: Income
   readonly atm: Atm
+  readonly vault: Vault
   readonly save: () => SavePayload
   readonly load: (payload: SavePayload) => Result<LoadReport, GameLoadError>
   readonly reset: (scope: ResetScope) => void
@@ -60,17 +64,40 @@ export interface Game {
 
 export const createGame = (seed: number = randomSeed()): Game => {
   const bus = createBus()
-  const ledger = createLedger(bus)
+
+  /**
+   * ADR 0025 — la capienza che il Ledger fa rispettare **si chiede**. Per il pool del caveau
+   * risponde il caveau; per tutti gli altri risponde `poolCapacity`, cioè `POOLS` come prima.
+   *
+   * Questa funzione nomina `vault` prima che `vault` esista, e va bene: non viene **chiamata**
+   * prima. La prima interrogazione arriva da una transazione, cioè dopo che il bootstrap è finito.
+   * L'alternativa sarebbe costruire il caveau senza il Ledger e consegnarglielo dopo, cioè un
+   * oggetto che per un istante non è ancora sé stesso.
+   */
+  const capacities: Capacities = (pool) =>
+    pool === VAULT_POOL ? vault.capacity() : poolCapacity(pool)
+
+  const ledger = createLedger(bus, capacities)
   const rng = createRng(seed)
   const modifiers = createModifiers()
   const registry = createRegistry()
 
   const ctx: SystemContext = { clock, rng, bus, ledger }
 
-  const income = createIncome(ledger, modifiers)
+  const vault = createVault(ledger)
+
+  /**
+   * Il reddito riceve lo **spazio** per costruzione, non il caveau: `income` non sa che il caveau
+   * esiste, e il caveau non sa che c'è uno stipendio. A collegarli è questa riga, che è l'unico
+   * posto del progetto che ha entrambi sotto mano — nessun dominio impara il nome di un altro.
+   */
+  const income = createIncome(ledger, modifiers, (pool) =>
+    roomIn(ledger.capacities(pool), ledger.balance(pool))
+  )
   const atm = createAtm(ledger)
 
   registry.register(income.system)
+  registry.register(vault.system)
 
   return {
     ctx,
@@ -78,6 +105,7 @@ export const createGame = (seed: number = randomSeed()): Game => {
     modifiers,
     income,
     atm,
+    vault,
 
     save: () => ({ ledger: ledger.save(), rng: rng.save(), systems: registry.saveAll() }),
 

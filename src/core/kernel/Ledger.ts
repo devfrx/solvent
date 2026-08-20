@@ -150,6 +150,26 @@ export const transfer = (from: Pool, to: Pool, amount: Money, fee: Money): reado
   ]
 }
 
+/**
+ * ADR 0025 — la capienza di un pool **si chiede, non si legge**.
+ *
+ * Il Ledger continua a farla rispettare; cambia da dove prende il numero. `null` significa
+ * "nessun tetto", ed è la risposta per i quattro conti non-giocatore e per la carta.
+ *
+ * È una funzione e non una mappa perché la capienza del caveau **si sposta**: una costante
+ * compilata non può rispondere «quanto ci sta adesso» dopo il primo ampliamento.
+ */
+export type Capacities = (pool: Pool) => Money | null
+
+/**
+ * Il valore predefinito: legge `POOLS[pool].capacity`, cioè la capienza **di partenza**.
+ *
+ * Chi non ha una capienza variabile non cambia di una riga, e un Ledger costruito senza consegnare
+ * niente si comporta come prima. È anche la trappola dichiarata di D017: un test che costruisce un
+ * Ledger nudo prova il comportamento di prima, non quello nuovo.
+ */
+export const poolCapacity: Capacities = (pool) => POOLS[pool].capacity
+
 export interface Ledger {
   /**
    * La primitiva. Tutto o niente: se un movimento non regge, nessun saldo si muove e nessun
@@ -166,12 +186,22 @@ export interface Ledger {
    * lo dice, perché caricare non è un movimento economico (D011).
    */
   readonly balances: () => Balances
+  /**
+   * INV-18 — **la stessa** funzione che questo Ledger fa rispettare, esposta perché la UI legga da
+   * qui invece di ricostruirsi la risposta.
+   *
+   * Non è un getter di comodo: è ciò che rende l'invariante verificabile per **identità** invece
+   * che per uguaglianza. Due funzioni che rispondono allo stesso numero oggi sono due funzioni che
+   * un giorno risponderanno diversamente, ed è il difetto che INV-11 esiste per rendere
+   * impossibile — qui applicato al tetto invece che alla commissione.
+   */
+  readonly capacities: Capacities
   readonly save: () => LedgerSave
   readonly load: (state: LedgerSave) => void
   readonly reset: (scope: ResetScope) => void
 }
 
-export const createLedger = (bus: Bus): Ledger => {
+export const createLedger = (bus: Bus, capacities: Capacities = poolCapacity): Ledger => {
   // A05 — l'unica copia dei saldi che esiste. Non è esportata, non è ritornata da nulla, e non
   // compare in nessun campo del `Ledger`: dall'esterno non c'è niente a cui assegnare.
   const balances = new Map<Pool, Money>()
@@ -261,12 +291,16 @@ export const createLedger = (bus: Bus): Ledger => {
         })
       }
 
-      if (props.capacity !== null && next.greaterThan(props.capacity)) {
+      // ADR 0025 — si **chiede**, non si legge da `POOLS`: dopo un ampliamento il tetto di partenza
+      // è la risposta sbagliata, e sarebbe quella che la UI mostra mentre il Ledger ne fa
+      // rispettare un'altra (INV-18).
+      const capacity = capacities(pool)
+      if (capacity !== null && next.greaterThan(capacity)) {
         return err({
           code: 'error.ledger.capacity_exceeded',
           pool,
-          capacity: props.capacity,
-          fits: props.capacity.minus(current)
+          capacity,
+          fits: capacity.minus(current)
         })
       }
     }
@@ -305,6 +339,8 @@ export const createLedger = (bus: Bus): Ledger => {
     balance: read,
 
     balances: () => perPool(read),
+
+    capacities,
 
     // INV-04 — oltre il confine di persistenza il denaro è una stringa decimale. I conti
     // non-giocatore entrano nel salvataggio: senza, la somma non farebbe zero al ricaricamento.

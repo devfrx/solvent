@@ -49,6 +49,14 @@ export const it: Dictionary = {
   'income.upgrade.owned': 'Già in funzione',
 
   'payment.only_with': 'Si paga solo con: {pool}',
+  'payment.with': 'Con {pool}',
+
+  'vault.level': 'Caveau {level} di {total}',
+  'vault.room': 'Spazio libero',
+  'vault.expand': 'Amplia — {cost}',
+  'vault.at_max': 'Ultimo livello: i contanti finiscono qui.',
+  'vault.full': 'Il caveau è pieno: lo stipendio non entra più. Deposita sul conto.',
+  'vault.withholding': 'Il caveau non tiene tutto: {amount} di stipendio non è entrato.',
 
   'stats.saved_at.title': 'Ultimo salvataggio',
   'stats.saved_at.never': 'Mai: questa partita non è ancora stata scritta su disco.',
@@ -84,12 +92,14 @@ export const it: Dictionary = {
   'reason.income.upgrade': 'Straordinari acquistati',
   'reason.atm.deposit': 'Deposito',
   'reason.atm.withdraw': 'Prelievo',
+  'reason.vault.expand': 'Caveau ampliato',
 
   'error.ledger.insufficient_funds': 'Ti servono {required} su {pool}, ne hai {available}.',
   'error.ledger.capacity_exceeded': '{pool} non tiene più di {capacity}: ci stanno ancora {fits}.',
   'error.ledger.pool_not_accepted': 'Non si paga con {pool}. Si accetta: {accepted}.',
   'error.ledger.invalid_amount': 'Importo non utilizzabile su {pool}: {amount}.',
   'error.income.already_upgraded': 'Gli straordinari sono già stati comprati.',
+  'error.vault.max_level': 'Il caveau è già all’ultimo livello: più grande di così non si fa.',
   'error.atm.amount_not_positive': 'Serve un importo maggiore di zero, non {amount}.',
   'error.atm.fee_exceeds_amount': 'La commissione di {fee} si mangia tutti i {amount}.',
   'error.save.corrupt': 'Il salvataggio non è leggibile',

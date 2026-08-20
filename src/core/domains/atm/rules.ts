@@ -1,7 +1,5 @@
 import type { Money } from '@core/contracts/money'
 import { ZERO } from '@core/contracts/money'
-import type { Pool } from '@core/contracts/pools'
-import { POOLS } from '@core/contracts/pools'
 
 import { BALANCE } from '@core/balance/constants'
 
@@ -48,15 +46,16 @@ export const isValidAmount = (amount: Money): boolean =>
 export const isFeeWithinAmount = (amount: Money, fee: Money): boolean => fee.lessThan(amount)
 
 /**
- * Il tetto fisico di un pool, `null` se non ne ha. Oggi non ne ha nessuno: i valori arrivano con
- * il caveau (fetta 02), e questa riga non cambierà.
- */
-export const capacityOf = (pool: Pool): Money | null => POOLS[pool].capacity
-
-/**
  * Se un importo in arrivo ci entra ancora. La capienza arriva **per argomento** invece di essere
- * letta qui dentro: è ciò che permette di provare i bordi con una capienza finta senza sostituire
- * un modulo, e la fetta 02 troverà la regola già provata invece di scriverla insieme al caveau.
+ * letta qui dentro, e da D017 quella scelta si è ripagata due volte: permette di provare i bordi
+ * con una capienza finta senza sostituire un modulo, e permette al bancomat di sapere del caveau
+ * senza importarlo. La consegna chi ha entrambi sotto mano — lo store.
+ *
+ * `capacityOf` stava qui accanto e **non c'è più** (ADR 0025): rispondeva leggendo `POOLS`, cioè
+ * la capienza di partenza, che dopo il primo ampliamento è la risposta sbagliata. Due funzioni che
+ * rispondono alla stessa domanda con due valori diversi sono il difetto che INV-18 rende
+ * impossibile, quindi è stata rifatta altrove invece che affiancata: adesso a rispondere è il
+ * Ledger, con la stessa funzione che fa rispettare.
  *
  * Il confronto è lo stesso che fa il Ledger, che resta l'unico a decidere: qui si risponde alla
  * UI, che vuole saperlo **prima** di accendere un pulsante.

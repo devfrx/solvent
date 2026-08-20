@@ -96,6 +96,16 @@ disegnarla è [D015](delega/D015-home-bancomat.md), che l'ha usata due volte.
 
 Il main tocca **solo** `core/contracts/save.ts`. È un arco stretto e voluto.
 
+**Una freccia che nessuno vieta, e che nessuno ha ancora disegnato: `domains/* --> domains/*`.** Il
+diagramma non la distingue — due domini stanno nello stesso nodo — e nemmeno il lint, che sotto
+`src/core/domains/**` vieta `vue`, `pinia`, `electron` e le conversioni di `Money`, non un dominio
+che ne importa un altro. [D017](delega/D017-il-caveau.md) è la prima delega che avrebbe potuto
+aprirla, per due volte: il reddito ha bisogno di sapere quanto spazio c'è nel caveau, e il bancomat
+di sapere se un prelievo ci sta. In tutti e due i casi la risposta arriva **per argomento**, e a
+consegnarla è chi ha entrambi sotto mano — il bootstrap per il reddito, lo store per il bancomat
+(ADR 0024). Il precedente non è stato aperto, e la visione ha diciassette domini che si contendono
+le stesse risorse.
+
 L'unica freccia dentro il riquadro `main + preload` è `preload --> main/save/channels.ts`, e porta
 tre stringhe: i nomi dei canali IPC. Non passa da `ipc.ts` perché quel file importa `zod`, e un
 preload in **sandbox** non carica pacchetti esterni; non è duplicata perché due costanti che devono
@@ -143,7 +153,7 @@ solvent/
 │  │  │  ├─ Rng.ts                # unico posto dove Math.random e' consentito
 │  │  │  ├─ Bus.ts                # sincrono: niente code, niente storico, niente attese
 │  │  │  ├─ Registry.ts
-│  │  │  └─ Ledger.ts
+│  │  │  └─ Ledger.ts             # Capacities: la capienza si chiede, non si legge (ADR 0025)
 │  │  ├─ balance/
 │  │  │  ├─ constants.ts
 │  │  │  ├─ modifiers.ts          # unico registro dei moltiplicatori
@@ -151,7 +161,7 @@ solvent/
 │  │  ├─ contracts/
 │  │  │  ├─ result.ts             # Result<T, E>
 │  │  │  ├─ money.ts              # Money = Decimal + le uniche conversioni
-│  │  │  ├─ pools.ts              # Pool · PoolProps · POOLS come dati
+│  │  │  ├─ pools.ts              # Pool · PoolProps · POOLS come dati · la capienza di partenza
 │  │  │  ├─ ledger.ts             # Posting · Transaction · TransactionMeta · Balances · LedgerError
 │  │  │  ├─ payment.ts            # PaymentOption · PriceList — il listino di un'azione (ADR 0027)
 │  │  │  ├─ lifecycle.ts          # ResetScope — la parola che Registry e Ledger si scambiano
@@ -164,10 +174,14 @@ solvent/
 │  │     │  ├─ types.ts
 │  │     │  ├─ rules.ts           # funzioni pure, nessun effetto
 │  │     │  ├─ commands.ts        # l'acquisto dell'upgrade, ritorna Result
-│  │     │  └─ system.ts          # createIncome(ledger, modifiers) - ADR 0024
-│  │     └─ atm/                  # senza system.ts: non ha stato e non ticchetta (D014)
-│  │        ├─ rules.ts           # commissione, importo valido, capienza
-│  │        └─ commands.ts        # previewOf + i due comandi, ritornano Result
+│  │     │  └─ system.ts          # createIncome(ledger, modifiers, room) - ADR 0024
+│  │     ├─ atm/                  # senza system.ts: non ha stato e non ticchetta (D014)
+│  │     │  ├─ rules.ts           # commissione, importo valido, fitsIn
+│  │     │  └─ commands.ts        # previewOf + i due comandi, ritornano Result
+│  │     └─ vault/                # il caveau: ha stato, non ticchetta (D017)
+│  │        ├─ types.ts
+│  │        ├─ rules.ts           # capienze, listino a due voci, roomIn - pure
+│  │        └─ system.ts          # createVault(ledger): il livello, e il comando expand
 │  └─ renderer/
 │     ├─ index.html
 │     ├─ main.ts
@@ -181,11 +195,16 @@ solvent/
 │     ├─ views/
 │     │  ├─ HomeView.vue          # bancomat, upgrade, cruscotto, ultime operazioni
 │     │  └─ StatsView.vue
+│     ├─ ui/                      # il kit: non sa che gioco e' (ADR 0028)
+│     │  ├─ tokens.css            # i colori: l'unico posto dove un #hex e' ammesso (R15)
+│     │  ├─ fonts.css
+│     │  ├─ roles.ts              # ruoli di colore, misure, superfici — nessun Pool
+│     │  └─ Ui*.vue               # superficie, etichetta, cifra, targhetta, pulsante, prosa
 │     ├─ components/
 │     │  ├─ IncomePanel.vue       # l'upgrade: il listino letto prima di premere, un comando, un rifiuto
 │     │  ├─ BankCard3d.vue        # la carta: CSS 3D puro, zero logica
 │     │  ├─ rotation.ts           # la matematica della rotazione, pura e provata a parte
-│     │  ├─ CashPanel.vue         # contanti, capienza, tracciabilita
+│     │  ├─ CashPanel.vue         # contanti, capienza, barra, ampliamento, tracciabilita
 │     │  ├─ AtmPanel.vue          # importo, importi rapidi, anteprima, conferma
 │     │  ├─ PostingRows.vue       # i movimenti di una transazione, riga per riga
 │     │  ├─ postings.ts           # quali movimenti il giocatore vede - pura
@@ -198,8 +217,9 @@ solvent/
 └─ tests/
    ├─ helpers/         sources (lettura dei sorgenti per i test di regola) - host (il finto browser)
    ├─ contracts/       result · money · pools · ledger · bounded · events · save · commands · payment
-   ├─ kernel/          clock · rng · bus · registry · ledger
-   ├─ domains/         income/ rules - commands - system
+   ├─ kernel/          clock · rng · bus · registry · ledger · ledger-capacity
+   ├─ domains/         income/ rules - commands - system · atm/ rules - commands
+                       vault/ rules - system
    ├─ save/            schema - roundtrip - kernel-roundtrip - migrations - ipc - preload
    ├─ balance/         modifiers · targets
    ├─ i18n/            parity · translator

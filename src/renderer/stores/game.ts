@@ -16,7 +16,7 @@ import type { SaveError } from '@core/contracts/save'
 import { BALANCE } from '@core/balance/constants'
 import type { AtmError, AtmOperation } from '@core/domains/atm/commands'
 import { DEPOSIT, previewOf, WITHDRAW } from '@core/domains/atm/commands'
-import { atmFee, capacityOf } from '@core/domains/atm/rules'
+import { atmFee } from '@core/domains/atm/rules'
 import type { IncomeError } from '@core/domains/income/commands'
 import {
   canBuyUpgrade,
@@ -25,6 +25,16 @@ import {
   upgradePrices
 } from '@core/domains/income/rules'
 import type { IncomeState } from '@core/domains/income/types'
+import {
+  canExpand,
+  expansionPriceFor,
+  expansionPrices,
+  MAX_LEVEL,
+  roomIn,
+  VAULT_POOL
+} from '@core/domains/vault/rules'
+import type { VaultError } from '@core/domains/vault/system'
+import type { VaultState } from '@core/domains/vault/types'
 import type { Milliseconds } from '@core/kernel/Clock'
 import { milliseconds } from '@core/kernel/Clock'
 
@@ -113,6 +123,9 @@ const RECENT_ON_HOME = 4
  */
 const HISTORY_MAX = 20
 
+/** Da frazione a percentuale: la barra della capienza si disegna con una larghezza in `%`. */
+const FULL_BAR = 100
+
 /**
  * Ciò che lo store non può costruire da sé: il gioco e il browser.
  *
@@ -168,10 +181,21 @@ export const useGameStore = defineStore('game', () => {
    */
   const upgrade = shallowRef<IncomeState>(game.income.state())
   const rate = shallowRef<Money>(incomePerSecond(game.modifiers))
+  /**
+   * Quanto dell'ultimo tick non è entrato perché il caveau non lo teneva. È l'unica cosa che dice
+   * al giocatore che il reddito si è fermato: un idle in cui i soldi smettono di arrivare **senza
+   * dirlo** è un idle rotto, e nessun numero che sale lo racconta — è un numero che *non* sale.
+   *
+   * Va riletto a ogni passo del loop, e non è un mirror come gli altri: nessun evento lo annuncia,
+   * perché il tick che non incassa **non emette niente**. Un `ref` riscritto con lo stesso valore
+   * non sveglia nessuno, quindi rileggerlo dieci volte al secondo costa un confronto.
+   */
+  const withheld = shallowRef<Money>(game.income.withheld())
 
   const readIncome = (): void => {
     upgrade.value = game.income.state()
     rate.value = incomePerSecond(game.modifiers)
+    withheld.value = game.income.withheld()
   }
 
   /**
@@ -217,12 +241,100 @@ export const useGameStore = defineStore('game', () => {
   const defaultAmount = shallowRef<Money>(BALANCE.ATM_DEFAULT_AMOUNT)
 
   /**
-   * Il tetto fisico dei due strumenti, `null` finché non ne hanno uno. Oggi rispondono entrambi
-   * "illimitato" ed è corretto: il valore del caveau arriva con la fetta 02, e `capacityOf` non
-   * cambierà — cambierà `POOLS`.
+   * INV-18 — il tetto dei due strumenti, letto dalla **stessa** funzione che il Ledger fa
+   * rispettare (ADR 0025). Non una seconda lettura da tenere allineata: la stessa, chiamata da due
+   * parti. La carta risponde "illimitato", e per lei è la risposta definitiva.
+   *
+   * Sono **mirror**, non `computed`, e adesso vale davvero: la capienza del caveau cambia quando
+   * il giocatore amplia, e niente in `core/` è reattivo (ADR 0001). Fino a D017 erano letti una
+   * volta sola alla costruzione, ed era corretto perché il numero non si muoveva mai — quella riga
+   * era una trappola che aspettava questa delega.
    */
-  const cashCapacity = shallowRef<Money | null>(capacityOf('cash'))
-  const cardCapacity = shallowRef<Money | null>(capacityOf('card'))
+  const cashCapacity = shallowRef<Money | null>(null)
+  const cardCapacity = shallowRef<Money | null>(game.ctx.ledger.capacities('card'))
+
+  /** Il livello del caveau, e il listino del prossimo ampliamento: **vuoto** all'ultimo livello. */
+  const vault = shallowRef<VaultState>(game.vault.state())
+  const expansionOptions = shallowRef<PriceList>([])
+
+  /**
+   * L'**unico** posto che legge il caveau, e i tre valori si rileggono insieme perché insieme
+   * cambiano: ampliare li sposta tutti e tre. I `ref` nascono vuoti e questa funzione li riempie
+   * subito — una seconda lettura per inizializzarli sarebbe una seconda lettura da tenere
+   * allineata, cioè la forma del difetto che INV-18 esiste per rendere impossibile.
+   */
+  const readVault = (): void => {
+    vault.value = game.vault.state()
+    cashCapacity.value = game.ctx.ledger.capacities(VAULT_POOL)
+    expansionOptions.value = expansionPrices(vault.value.level)
+  }
+
+  readVault()
+
+  /**
+   * Quanto spazio resta nel caveau, `null` se non c'è tetto. È una `computed` e non un mirror
+   * perché entrambe le sorgenti lo sono già: i saldi arrivano dall'evento del Ledger, la capienza
+   * da `readVault`.
+   *
+   * A rispondere è `roomIn`, cioè la **stessa** funzione da cui il reddito sa quanto accreditare:
+   * il numero che il giocatore legge è quello che decide se lo stipendio entra.
+   */
+  const room = computed<Money | null>(() => roomIn(cashCapacity.value, balances.value[VAULT_POOL]))
+
+  /**
+   * «Caveau 1 di 5»: il livello come lo conta il giocatore, non come lo conta un indice.
+   *
+   * Lo scarto di uno vive qui e non nel template per la regola di sempre — un `.vue` non calcola
+   * (R05) — e i due numeri viaggiano insieme perché insieme vanno nella stessa frase. Che i
+   * livelli finiscano il giocatore lo vede dal primo secondo: è metà del dominio.
+   */
+  const progress = computed<{ readonly level: number; readonly total: number }>(() => ({
+    level: vault.value.level + 1,
+    total: MAX_LEVEL + 1
+  }))
+
+  /**
+   * Il muro, detto come booleano: non c'è più spazio, e lo stipendio non entra affatto. È diverso
+   * da «ne entra una parte», che il giocatore vive in un altro modo — e con un solo messaggio per
+   * tutti e due i casi la differenza sparirebbe proprio quando conta.
+   */
+  const isFull = computed<boolean>(() => room.value !== null && room.value.isZero())
+
+  /**
+   * Quanto è pieno il caveau, già in percentuale e già come stringa: è la larghezza della barra.
+   *
+   * La sottrazione la farebbe anche un template, e proprio per questo sta qui: un `.vue` non
+   * calcola (R05), e una percentuale calcolata in due schermate è una percentuale che diverge. Si
+   * ferma a cento perché un saldo sopra il tetto — possibile con un salvataggio più vecchio della
+   * curva — disegnerebbe una barra fuori dal proprio riquadro.
+   */
+  const fill = computed<string>(() => {
+    const capacity = cashCapacity.value
+    if (capacity === null || capacity.isZero()) return `${FULL_BAR}%`
+    const share = balances.value[VAULT_POOL].div(capacity).mul(FULL_BAR)
+    return `${share.greaterThan(FULL_BAR) ? FULL_BAR : share.toFixed(0)}%`
+  })
+
+  /**
+   * L'anteprima del pulsante «amplia», **per strumento** — il primo listino a due voci del gioco,
+   * e la prima volta che «con cosa paghi» è una domanda vera.
+   *
+   * Il prezzo non lo decide questa funzione: lo prende dal listino, cioè dallo stesso posto da cui
+   * lo prende il comando (INV-19). All'ultimo livello il listino è vuoto e la risposta è `false`
+   * per chiunque, perché non c'è niente da comprare.
+   */
+  const canExpandWith = (pool: Pool): boolean => {
+    const option = expansionPriceFor(vault.value.level, pool)
+    return option !== null && canExpand(vault.value, option, balances.value[pool])
+  }
+
+  const expandVault = (pool: Pool): Result<VaultState, VaultError> => {
+    const expanded = game.vault.expand(pool)
+    // I saldi li rispecchia l'evento del Ledger; la capienza no, perché ampliare non è un
+    // movimento economico e nessuno lo annuncia. È la stessa trappola dei modificatori (D011).
+    if (expanded.ok) readVault()
+    return expanded
+  }
 
   const directions: Readonly<Record<AtmOperationKind, AtmDirection>> = {
     deposit: { operation: DEPOSIT, command: game.atm.deposit },
@@ -237,8 +349,15 @@ export const useGameStore = defineStore('game', () => {
    * Ritorna un `Result` perché l'anteprima sa già dire di no, e allora la UI mostra il codice
    * tradotto invece di spegnere un pulsante (ADR 0018).
    */
-  const preview = (kind: AtmOperationKind, amount: Money): Result<readonly Posting[], AtmError> =>
-    previewOf(directions[kind].operation, amount)
+  const preview = (kind: AtmOperationKind, amount: Money): Result<readonly Posting[], AtmError> => {
+    const { operation } = directions[kind]
+    // Il pool in arrivo, con il suo tetto e il suo saldo. Il bancomat non conosce il caveau: a
+    // consegnarglielo è questo file, che ha entrambi sotto mano (D017).
+    return previewOf(operation, amount, {
+      capacity: game.ctx.ledger.capacities(operation.to),
+      current: balances.value[operation.to]
+    })
+  }
 
   /** L'altra metà della coppia, dalla stessa riga della tabella: qui il denaro si muove davvero. */
   const confirm = (kind: AtmOperationKind, amount: Money): Result<Balances, AtmError> =>
@@ -293,6 +412,7 @@ export const useGameStore = defineStore('game', () => {
   const mirror = (): void => {
     balances.value = game.ctx.ledger.balances()
     readIncome()
+    readVault()
   }
 
   const fail = (cause: GameFailure, phase: FailurePhase): void => {
@@ -308,6 +428,10 @@ export const useGameStore = defineStore('game', () => {
     schedule: host.schedule,
     onStep: (step) => {
       game.registry.tickAll(game.ctx, step.elapsed)
+      // Un tick che non incassa **non emette niente**, quindi nessun evento porta questa notizia:
+      // è l'unico mirror che va riletto a ogni passo. Con il caveau che ha spazio è `ZERO` contro
+      // `ZERO`, cioè lo stesso oggetto, e il `ref` non sveglia nessuno.
+      withheld.value = game.income.withheld()
       // Il primo frame dopo il ritorno dal nascondimento porta con sé tutto il tempo passato: è
       // quello che chiude `Recupero`, e non c'è un secondo percorso che lo faccia.
       if (status.value === 'recovering') status.value = 'playing'
@@ -501,6 +625,14 @@ export const useGameStore = defineStore('game', () => {
     atmDefaultAmount: defaultAmount,
     cashCapacity,
     cardCapacity,
+    vaultProgress: progress,
+    vaultRoom: room,
+    vaultFill: fill,
+    vaultIsFull: isFull,
+    expansionPrices: expansionOptions,
+    canExpandWith,
+    expandVault,
+    incomeWithheld: withheld,
     preview,
     confirm,
     netWorth,

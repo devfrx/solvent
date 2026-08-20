@@ -48,6 +48,14 @@ export const en: Dictionary = {
   'income.upgrade.owned': 'Already running',
 
   'payment.only_with': 'Paid with {pool} only',
+  'payment.with': 'With {pool}',
+
+  'vault.level': 'Vault {level} of {total}',
+  'vault.room': 'Free space',
+  'vault.expand': 'Expand — {cost}',
+  'vault.at_max': 'Last level: this is where cash ends.',
+  'vault.full': 'The vault is full: your salary no longer fits. Deposit it into the account.',
+  'vault.withholding': 'The vault cannot hold it all: {amount} of salary did not come in.',
 
   'stats.saved_at.title': 'Last save',
   'stats.saved_at.never': 'Never: this game has not been written to disk yet.',
@@ -83,12 +91,14 @@ export const en: Dictionary = {
   'reason.income.upgrade': 'Overtime purchased',
   'reason.atm.deposit': 'Deposit',
   'reason.atm.withdraw': 'Withdrawal',
+  'reason.vault.expand': 'Vault expanded',
 
   'error.ledger.insufficient_funds': 'You need {required} on {pool}, you have {available}.',
   'error.ledger.capacity_exceeded': '{pool} holds no more than {capacity}: {fits} still fits.',
   'error.ledger.pool_not_accepted': 'You cannot pay with {pool}. Accepted: {accepted}.',
   'error.ledger.invalid_amount': 'That amount cannot be used on {pool}: {amount}.',
   'error.income.already_upgraded': 'Overtime has already been bought.',
+  'error.vault.max_level': 'The vault is already at its last level: it does not get any bigger.',
   'error.atm.amount_not_positive': 'The amount must be greater than zero, not {amount}.',
   'error.atm.fee_exceeds_amount': 'The {fee} fee eats up the whole {amount}.',
   'error.save.corrupt': 'The save file cannot be read',

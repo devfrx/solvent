@@ -7,7 +7,7 @@ import { err, ok } from '@core/contracts/result'
 
 import { transfer, type Ledger } from '@core/kernel/Ledger'
 
-import { atmFee, isFeeWithinAmount, isValidAmount } from './rules'
+import { atmFee, fitsIn, isFeeWithinAmount, isValidAmount } from './rules'
 
 /**
  * Il gesto centrale del gioco: spostare denaro fra contanti e carta pagandone il prezzo. È ciò che
@@ -76,15 +76,47 @@ export const DEPOSIT: AtmOperation = {
  * Un `try`/`catch` intorno al Ledger sarebbe la risposta sbagliata — quei lanci dicono che il
  * programma è scritto male, mentre qui è il giocatore ad aver digitato un numero che non va.
  */
+/**
+ * Il pool in arrivo, visto da chi ha in mano sia il tetto sia il saldo: lo store (D017).
+ *
+ * Arriva **per argomento** e non da un import, ed è una decisione più che una comodità: un
+ * prelievo porta denaro verso i contanti, quindi l'anteprima deve sapere se ci sta — ma il
+ * bancomat che importa il caveau sarebbe il primo accoppiamento fra domini del progetto, cioè un
+ * precedente in un gioco che ne ha diciassette a contendersi le stesse risorse. Il dominio resta
+ * ignorante di chi gli risponde, e la funzione resta provabile con una capienza finta.
+ */
+export interface Destination {
+  /** Il tetto del pool in arrivo, `null` se non ne ha. */
+  readonly capacity: Money | null
+  /** Quanto c'è già dentro. */
+  readonly current: Money
+}
+
 export const previewOf = (
   operation: AtmOperation,
-  amount: Money
+  amount: Money,
+  destination: Destination
 ): Result<readonly Posting[], AtmError> => {
   if (!isValidAmount(amount)) return err({ code: 'error.atm.amount_not_positive', amount })
 
   const fee = atmFee()
   if (!isFeeWithinAmount(amount, fee)) {
     return err({ code: 'error.atm.fee_exceeds_amount', amount, fee })
+  }
+
+  // Ciò che **arriva** è al netto della commissione, non l'importo digitato: chi preleva 500,00 €
+  // verso un caveau con 498,00 € di spazio ci sta, e chiedere sull'importo lordo lo rifiuterebbe.
+  const { capacity, current } = destination
+  const incoming = amount.minus(fee)
+  if (capacity !== null && !fitsIn(capacity, current, incoming)) {
+    // Lo stesso codice e le stesse due cifre che il Ledger produrrebbe premendo: l'anteprima dice
+    // di no con la frase del rifiuto, non con una seconda spiegazione da tenere allineata.
+    return err({
+      code: 'error.ledger.capacity_exceeded',
+      pool: operation.to,
+      capacity,
+      fits: capacity.minus(current)
+    })
   }
 
   // Il dominio non nomina mai il conto delle commissioni (INV-10): la terza riga la scrive
@@ -108,12 +140,16 @@ export const createAtm = (ledger: Ledger): Atm => {
   const commandFor =
     (operation: AtmOperation): CommandHandler<Money, Balances, AtmError> =>
     (amount) => {
-      const preview = previewOf(operation, amount)
+      // La capienza la legge dal **Ledger**, cioè dalla stessa funzione che il Ledger fa
+      // rispettare (INV-18, ADR 0025). Non è un secondo controllo che duplica il primo: l'ultima
+      // parola resta di `transaction`, e questa serve a far dire di no all'anteprima **con la
+      // stessa frase** invece di lasciare che la si scopra premendo.
+      const preview = previewOf(operation, amount, {
+        capacity: ledger.capacities(operation.to),
+        current: ledger.balance(operation.to)
+      })
       if (!preview.ok) return preview
 
-      // La capienza del pool in arrivo non si ricontrolla qui: la decide il Ledger, che risponde
-      // con `error.ledger.capacity_exceeded` e con quanto ci starebbe ancora. Il dominio la
-      // interroga solo per l'anteprima (`capacityOf`, `fitsIn`), e oggi la risposta è "illimitata".
       return ledger.transaction(preview.value, operation.meta)
     }
 

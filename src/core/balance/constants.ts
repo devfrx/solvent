@@ -1,4 +1,5 @@
 import { fromString } from '@core/contracts/money'
+import { CASH_START_CAPACITY } from '@core/contracts/pools'
 
 import { clock, seconds } from '@core/kernel/Clock'
 
@@ -78,6 +79,67 @@ export const BALANCE = {
 
   /** Un bancomat non si apre sulla propria opzione peggiore. */
   ATM_DEFAULT_AMOUNT: ATM_LARGEST,
+
+  /**
+   * Le capienze del caveau, **una per livello**, dal livello zero all'ultimo. Quanti livelli
+   * esistano non è un numero a parte: è la lunghezza di questo elenco, e `MAX_LEVEL` la legge.
+   *
+   * Livelli **finiti** con un tetto dichiarato, e non una curva che si strozza da sola: in un idle
+   * «costa più di quanto renda» è un bersaglio mobile, tarato contro la curva del gioco, mentre un
+   * tetto si verifica con un test e non si ritara mai (docs/design/domini/vault.md).
+   *
+   * L'ultima cifra è il muro definitivo: sopra 250.000,00 € i contanti smettono di essere una
+   * scelta possibile, non una scelta cara — ed è la forma 1 della saturazione, l'unica in cui la
+   * pozza di uno strumento **coincide** con il suo tetto.
+   *
+   * Il primo elemento non è scritto qui: è `CASH_START_CAPACITY`, che il pool dichiara da sé
+   * (ADR 0017). Riscriverlo sarebbe la stessa cifra in due posti.
+   */
+  VAULT_CAPACITIES: [
+    CASH_START_CAPACITY,
+    fromString('5000'),
+    fromString('20000'),
+    fromString('75000'),
+    fromString('250000')
+  ],
+
+  /**
+   * Quanto costa passare al livello successivo pagando in **contanti**, indicizzato dal livello da
+   * cui si parte. Un elemento in meno delle capienze: dall'ultimo livello non si va da nessuna
+   * parte, e a dirlo è la lunghezza invece di un `if`.
+   *
+   * Ogni prezzo sta appena sotto la capienza del livello da cui si paga — 900 su 1.000, 4.500 su
+   * 5.000 — e non è un caso: per pagare in contanti bisogna **poterli tenere**, quindi il caveau
+   * va quasi riempito prima di potersi ampliare. È il muro che insegna sé stesso.
+   */
+  VAULT_PRICES_CASH: [
+    fromString('900'),
+    fromString('4500'),
+    fromString('18000'),
+    fromString('68000')
+  ],
+
+  /**
+   * Gli stessi ampliamenti pagati con la **carta**, e sono due euro in meno ciascuno.
+   *
+   * Due euro sembrano nulla, e sono l'unico numero possibile finché il calore non esiste. Chi ha
+   * solo contanti, per pagare con la carta, deve prima versarli e lasciare `ATM_FEE` al bancomat:
+   * lo sconto conviene **solo se supera la commissione**. Con uno sconto di 50,00 € i contanti
+   * diventerebbero una voce di listino che nessuno sceglie mai — arredamento con dentro del codice
+   * — perché la carta non paga ancora niente in cambio della traccia che lascia.
+   *
+   * Sono quattro costanti loro, non una sottrazione applicata alle prime: due dichiarazioni della
+   * stessa cosa possono divergere, un prezzo derivato da un altro non è un prezzo. Che la
+   * differenza resti sotto la commissione lo verifica `tests/balance/targets`, non questo commento.
+   *
+   * Quando il calore arriverà (fetta 04), questo elenco è il primo posto da ritarare.
+   */
+  VAULT_PRICES_CARD: [
+    fromString('898'),
+    fromString('4498'),
+    fromString('17998'),
+    fromString('67998')
+  ],
 
   /**
    * ADR 0009 — il tetto ai tick di recupero. Riaprire il gioco dopo giorni non deve bloccare

@@ -1,4 +1,5 @@
 import type { Money } from './money'
+import { fromString } from './money'
 
 /**
  * ADR 0017 — il denaro è plurale: `Pool` è una dimensione di prima classe, non un'etichetta
@@ -17,7 +18,14 @@ export type Pool = (typeof POOL_IDS)[number]
 export interface PoolProps {
   /** Se i movimenti lasciano traccia: i contanti no, la carta sì. */
   readonly traceable: boolean
-  /** Il tetto fisico del pool. `null` = nessun tetto; il caveau arriva con la fetta 02. */
+  /**
+   * Il tetto fisico del pool **quando nessuno l'ha ancora ampliato**. `null` = nessun tetto.
+   *
+   * Da ADR 0025 non è più l'ultima parola: il Ledger riceve una funzione, e per i contanti
+   * quella funzione la possiede il caveau. Questo dato resta la **dichiarazione di partenza** —
+   * ciò che vale in una partita appena nata, e ciò che vale per chi costruisce un Ledger senza
+   * consegnargli niente.
+   */
   readonly capacity: Money | null
   /** Se il saldo fermo produce interessi. */
   readonly yields: boolean
@@ -25,8 +33,19 @@ export interface PoolProps {
   readonly player: boolean
 }
 
+/**
+ * La capienza del caveau al livello zero, ed è un numero di gioco che vive qui invece che in
+ * `balance/` per una ragione sola: `contracts/` non può importare `balance/` (il verso della
+ * freccia è `BAL --> CON`), e la dichiarazione di un pool è fatta di dati suoi (ADR 0017).
+ *
+ * Non è una seconda dichiarazione della curva: `BALANCE.VAULT_CAPACITIES` **comincia da questa
+ * costante**, quindi il livello zero è scritto in un posto solo e letto da due — che è la forma
+ * di INV-18 applicata al primo gradino.
+ */
+export const CASH_START_CAPACITY: Money = fromString('1000')
+
 export const POOLS: Readonly<Record<Pool, PoolProps>> = {
-  cash: { traceable: false, capacity: null, yields: false, player: true },
+  cash: { traceable: false, capacity: CASH_START_CAPACITY, yields: false, player: true },
   card: { traceable: true, capacity: null, yields: false, player: true },
 
   // Conti non-giocatore (ADR 0020): contabilità interna. Tutto ciò che li attraversa è

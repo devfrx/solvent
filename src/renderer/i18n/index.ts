@@ -9,6 +9,7 @@ import type { SaveError } from '@core/contracts/save'
 
 import type { AtmError } from '@core/domains/atm/commands'
 import type { IncomeError } from '@core/domains/income/commands'
+import type { VaultError } from '@core/domains/vault/system'
 import type { Milliseconds } from '@core/kernel/Clock'
 import { MILLISECONDS_PER_SECOND } from '@core/kernel/Clock'
 
@@ -51,7 +52,7 @@ export const DEFAULT_LOCALE: Locale = 'it'
  * È l'unione che rende INV-07 un errore di **compilazione**: `messageOf` la percorre tutta con uno
  * `switch`, e un codice nato in un dominio nuovo non compila finché non ha la sua frase.
  */
-export type GameError = SaveError | GameLoadError | IncomeError | AtmError
+export type GameError = SaveError | GameLoadError | IncomeError | AtmError | VaultError
 
 export type ErrorCode = GameError['code']
 
@@ -89,10 +90,20 @@ export type ScreenKey =
   | 'income.upgrade.overtime.name'
   | 'income.upgrade.overtime.desc'
   | 'income.upgrade.owned'
-  // Il pagamento (ADR 0027). Una chiave sola, e non è provvisorio: finché un listino ha una
-  // voce sola non c'è una scelta da etichettare, c'è una ragione da dare. Le parole del
-  // selettore nascono con il primo listino a due voci, che è il caveau della fetta 02.
+  // Il pagamento (ADR 0027). `payment.only_with` è nata con un listino di una voce sola, dove non
+  // c'era una scelta da etichettare ma una ragione da dare. Il caveau porta il primo listino a
+  // **due** voci, e con esso la parola che manca: il nome dello strumento non basta più, perché
+  // adesso i due prezzi sono diversi e la differenza è la scelta.
   | 'payment.only_with'
+  | 'payment.with'
+  // Il caveau (D017). La capienza vera, quanti livelli restano, e — la più importante — che il
+  // reddito si è fermato: un idle in cui i soldi smettono di arrivare senza dirlo è un idle rotto.
+  | 'vault.level'
+  | 'vault.room'
+  | 'vault.expand'
+  | 'vault.at_max'
+  | 'vault.full'
+  | 'vault.withholding'
   | 'stats.saved_at.title'
   | 'stats.saved_at.never'
   | 'stats.operations.title'
@@ -313,6 +324,7 @@ export const createTranslator = (wording: Wording): Translator => {
       case 'error.ledger.invalid_amount':
         return text(error.code, { pool: poolName(error.pool), amount: money(error.amount) })
       case 'error.income.already_upgraded':
+      case 'error.vault.max_level':
         return text(error.code)
       case 'error.atm.amount_not_positive':
         return text(error.code, { amount: money(error.amount) })

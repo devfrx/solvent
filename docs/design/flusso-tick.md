@@ -57,8 +57,15 @@ sequenceDiagram
     R->>S: tick(ctx, n)
     S->>P: incomeOver(clock, modificatori, n)
     Note over P: funzione pura: nessun ctx, nessun effetto<br/>lo stato non entra: l'upgrade è un modificatore
-    P-->>S: Money
-    S->>LG: transaction — reason.income.tick, categoria income
+    P-->>S: Money maturato
+    S->>P: incomeThatFits(maturato, spazio nel caveau)
+    Note over P: lo spazio arriva per costruzione (D017)<br/>il reddito non sa che il caveau esiste
+    P-->>S: Money accreditato — quanto ci sta
+    alt accreditato è zero
+        Note over S: il caveau è pieno: nessuna transazione,<br/>nemmeno da 0,00 €
+    else
+        S->>LG: transaction — reason.income.tick, categoria income
+    end
     Note over LG: due movimenti: world -X e cash +X<br/>somma zero (ADR 0020)
     LG->>LG: valida TUTTI i movimenti, poi applica sul saldo privato
     LG->>B: emit('money.posted', { transaction, balances })
@@ -68,7 +75,7 @@ sequenceDiagram
     Note over R: prossimo sistema
 ```
 
-Quattro punti che il diagramma rende visibili meglio di qualsiasi paragrafo:
+Cinque punti che il diagramma rende visibili meglio di qualsiasi paragrafo:
 
 1. **Il sistema non tocca mai un saldo.** Chiede al Ledger, che gli risponde con un `Result`.
 2. **Il reddito non nasce dal nulla: esce da `world`.** Il sistema non nomina `world` a mano — lo
@@ -80,6 +87,13 @@ Quattro punti che il diagramma rende visibili meglio di qualsiasi paragrafo:
    reddito lo stato non ha parte (D010, correzione 4).
 4. **Lo store è un lettore, non una fonte.** Riceve dal Bus, non calcola. Se lo store calcolasse,
    il gioco non sarebbe simulabile senza Vue — e cadrebbe l'ADR 0001.
+5. **Il reddito sa quanto ci sta prima di chiedere**, ed è il ramo che
+   [D017](../delega/D017-il-caveau.md) ha aggiunto. Non chiede e incassa il rifiuto: il recupero
+   dopo un'assenza è **una sola** transazione da otto ore di stipendio, e una transazione è atomica
+   (ADR 0019) — chi torna dopo una notte tornerebbe con zero anche a caveau vuoto. Lo spazio arriva
+   per costruzione, non da un import: `income` non nomina il caveau, e a collegarli è il bootstrap
+   (ADR 0024). Quello che resta fuori non sparisce in silenzio — il sistema lo espone, e la
+   schermata dei contanti lo dice.
 
 ## Un comando che può fallire
 

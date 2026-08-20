@@ -1,4 +1,6 @@
 import type { CommandHandler } from '@core/contracts/commands'
+import type { Money } from '@core/contracts/money'
+import { ZERO } from '@core/contracts/money'
 import type { Pool } from '@core/contracts/pools'
 
 import type { Modifiers } from '@core/balance/modifiers'
@@ -6,7 +8,7 @@ import { income, type Ledger } from '@core/kernel/Ledger'
 import { defineSystem, ORDER, type Stateful } from '@core/kernel/Registry'
 
 import { createBuyUpgrade, type IncomeError } from './commands'
-import { incomeOver, upgradeModifier, UPGRADE_MODIFIER_ID } from './rules'
+import { incomeOver, incomeThatFits, upgradeModifier, UPGRADE_MODIFIER_ID } from './rules'
 import type { IncomeSave, IncomeState } from './types'
 
 /**
@@ -16,6 +18,21 @@ import type { IncomeSave, IncomeState } from './types'
  */
 
 const INITIAL: IncomeState = { upgraded: false }
+
+/** Dove arriva lo stipendio. Il reddito nasce in contanti, ed è il motivo per cui il caveau conta. */
+const INCOME_POOL: Pool = 'cash'
+
+/**
+ * Quanto spazio c'è ancora in un pool, `null` se non ha tetto.
+ *
+ * Arriva **per costruzione** e non da un import: a rispondere è il caveau, e un dominio che
+ * importa un altro dominio è un precedente, non un import — la visione ne ha diciassette che si
+ * contendono le stesse risorse. A collegarli è il bootstrap, che è l'unico posto che ha entrambi
+ * sotto mano (ADR 0024).
+ *
+ * Non è un valore ma una funzione, e va chiamata a ogni tick: lo spazio cambia a ogni transazione.
+ */
+export type Room = (pool: Pool) => Money | null
 
 export interface Income {
   readonly system: Stateful<IncomeSave>
@@ -32,6 +49,19 @@ export interface Income {
    * dire quanto costa con quello resta il listino, che il comando interroga da sé.
    */
   readonly buyUpgrade: CommandHandler<Pool, IncomeState, IncomeError>
+  /**
+   * Quanto dell'ultimo tick **non** è entrato perché il caveau non lo teneva. Zero quando tutto
+   * entra, e quando il caveau è pieno vale l'intero stipendio maturato.
+   *
+   * Esiste perché un idle in cui il reddito smette di entrare **senza dirlo** è un idle rotto: il
+   * giocatore deve capire in un colpo d'occhio che i soldi non stanno arrivando, e perché. È un
+   * numero e non un booleano perché la condizione ha due gradi che il giocatore vive in modo
+   * diverso — «ne entra una parte» e «non entra niente» — e con un `sì/no` la prima sparirebbe.
+   *
+   * Non si salva: descrive l'ultimo tick, non la partita. Alla riapertura vale zero finché il
+   * primo tick non dice il contrario.
+   */
+  readonly withheld: () => Money
 }
 
 /**
@@ -44,8 +74,9 @@ export interface Income {
  * sono due partite diverse, e nessun tipo lo impedisce: è il prezzo di avere i comandi fuori dal
  * tick, e sta al bootstrap (D011) pagarlo una volta sola.
  */
-export const createIncome = (ledger: Ledger, modifiers: Modifiers): Income => {
+export const createIncome = (ledger: Ledger, modifiers: Modifiers, room: Room): Income => {
   let state: IncomeState = INITIAL
+  let withheld: Money = ZERO
   const purchase = createBuyUpgrade({ ledger, modifiers })
 
   /**
@@ -63,14 +94,34 @@ export const createIncome = (ledger: Ledger, modifiers: Modifiers): Income => {
       id: 'income',
       order: ORDER.INCOME,
 
+      /**
+       * D017 — questo è il giorno che il commento di D010 annunciava: la capienza del caveau
+       * esiste, e il reddito può non entrare.
+       *
+       * Il tick **non chiede e incassa il rifiuto**: sa quanto ci sta **prima** di chiedere, e
+       * accredita quello. La ragione è il recupero — `recover()` fa un solo `tickAll` con tutti i
+       * tick arretrati, cioè una transazione sola da otto ore di stipendio, e il Ledger la
+       * rifiuterebbe intera perché una transazione è atomica (ADR 0019). Chi è stato via una notte
+       * tornerebbe con **zero**, a caveau vuoto: non un muro, un guasto travestito da regola.
+       *
+       * Il `Result` continua a non avere un ramo qui, e adesso è una proprietà invece di una
+       * scommessa: la capienza è già stata guardata, e l'unico altro fallimento possibile su un
+       * `income` sarebbe un importo non finito, che è un programma scritto male.
+       */
       tick: (ctx, elapsed) => {
-        // Il `Result` del Ledger non ha un ramo da gestire qui, e non è una svista: dopo il
-        // posting il tick non fa altro, e l'unico fallimento possibile — la capienza del caveau —
-        // non esiste prima della fetta 02. Quando esisterà, il reddito non incassato sarà un
-        // esito da mostrare al giocatore, e questa riga crescerà di conseguenza.
-        ctx.ledger.transaction(income('cash', incomeOver(ctx.clock, modifiers, elapsed)), {
-          reason: 'reason.income.tick'
-        })
+        const earned = incomeOver(ctx.clock, modifiers, elapsed)
+        const credited = incomeThatFits(earned, room(INCOME_POOL))
+        // `ZERO` e non `earned.minus(credited)` quando non c'è niente da trattenere: sarebbe lo
+        // stesso numero dentro un oggetto nuovo a ogni tick, cioè dieci volte al secondo un
+        // mirror che si sveglia per dire la stessa cosa.
+        withheld = credited.equals(earned) ? ZERO : earned.minus(credited)
+
+        // Zero non è un non-evento: sarebbe una transazione valida che non muove niente ed emette
+        // lo stesso, e il giocatore vedrebbe lo storico riempirsi di stipendi da 0,00 € proprio
+        // mentre gli si dice che il caveau è pieno.
+        if (credited.isZero()) return
+
+        ctx.ledger.transaction(income(INCOME_POOL, credited), { reason: 'reason.income.tick' })
       },
 
       save: () => state,
@@ -86,6 +137,9 @@ export const createIncome = (ledger: Ledger, modifiers: Modifiers): Income => {
           )
         }
         state = { upgraded: loaded.upgraded }
+        // Ciò che l'ultimo tick non ha incassato riguarda l'ultimo tick, e dopo un caricamento
+        // l'ultimo tick è di un'altra sessione. Il recupero, che arriva subito dopo, lo riscrive.
+        withheld = ZERO
         syncUpgradeModifier()
       },
 
@@ -95,11 +149,14 @@ export const createIncome = (ledger: Ledger, modifiers: Modifiers): Income => {
       // significherebbe inventare una regola di gioco dentro una delega che non la riguarda.
       reset: () => {
         state = INITIAL
+        withheld = ZERO
         syncUpgradeModifier()
       }
     }),
 
     state: () => state,
+
+    withheld: () => withheld,
 
     buyUpgrade: (pool) => {
       const bought = purchase({ state, pool })

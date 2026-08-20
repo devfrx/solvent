@@ -102,15 +102,16 @@ segnala che un confine si sta spostando.
 | INV-15 | Il Bus è sincrono: nessuna attesa, nessuna coda dentro `emit`             | ADR 0016 | `tests/rules/bus-synchronous` — la firma `void` da sola non basta                                                         |
 | INV-16 | Il preload espone tre funzioni, non `ipcRenderer`                         | ADR 0004 | `tests/save/preload` — guarda l'oggetto esposto, non il sorgente                                                          |
 | INV-17 | Il salvataggio si scrive **solo** da uno stato che ha una partita vera    | ADR 0004 | `tests/renderer/store` — chiudere da `Errore` o da `Caricamento` non scrive                                               |
+| INV-18 | La capienza che il Ledger fa rispettare è la stessa che la UI mostra      | ADR 0025 | `tests/kernel/ledger-capacity` + `tests/renderer/store` — confronto per identità                                          |
 | INV-19 | Il prezzo mostrato e quello addebitato vengono dalla **stessa** funzione  | ADR 0027 | `tests/domains/income` + `tests/renderer/store` — confronto per identità                                                  |
 | INV-20 | Nessun sistema con stato accetta un salvataggio che non riconosce         | ADR 0002 | `tests/rules/stateful-systems-reject-garbage` — deriva la spazzatura dallo stato buono, e la passa sotto l'id del sistema |
 | INV-21 | Un pulsante non si spegne mai: se non si può, c'è una frase               | ADR 0028 | `tests/rules/ui-kit-is-standalone` — nessun `disabled` scritto nel kit                                                    |
 
-Il buco fra INV-17 e INV-19 non è una dimenticanza: **INV-18 è di
-[D017](delega/D017-il-caveau.md)** — la capienza che il Ledger fa rispettare è la stessa che la UI
-mostra — e prende la sua riga quando quella delega la costruisce. I numeri si assegnano quando si
-scrive la delega, e D019 si è infilata dopo D017 nell'ordine di scrittura ma prima
-nell'esecuzione.
+Il buco fra INV-17 e INV-19 **è stato chiuso** da [D017](delega/D017-il-caveau.md): i numeri si
+assegnano quando si scrive la delega, e D019 si era infilata dopo D017 nell'ordine di scrittura ma
+prima in quello di esecuzione. INV-18 ha adesso il suo meccanismo, ed è la forma più forte che
+potesse avere: non due letture confrontate da un test, ma **una funzione sola** che il Ledger
+riceve, fa rispettare ed espone — quindi il confronto è per identità e non per uguaglianza.
 
 ## Le regole di lint si verificano da sole
 

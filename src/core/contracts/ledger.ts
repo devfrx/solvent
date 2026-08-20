@@ -14,7 +14,11 @@ import type { Pool } from './pools'
  * traduce un codice, non riceve una frase. Cresce con i domini, come `GameEvents`.
  */
 export type Reason =
-  'reason.income.tick' | 'reason.income.upgrade' | 'reason.atm.deposit' | 'reason.atm.withdraw'
+  | 'reason.income.tick'
+  | 'reason.income.upgrade'
+  | 'reason.atm.deposit'
+  | 'reason.atm.withdraw'
+  | 'reason.vault.expand'
 
 /** Il raggruppamento per la telemetria economica. Cresce quando una schermata lo mostra. */
 export type Category = 'income' | 'purchase' | 'transfer' | 'fee'

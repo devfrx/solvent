@@ -40,6 +40,21 @@ export const incomeOver = (clock: Clock, modifiers: Modifiers, elapsed: Ticks): 
   clock.perSecondToPerTick(incomePerSecond(modifiers)).mul(elapsed)
 
 /**
+ * Quanto del reddito maturato entra davvero: **quanto ci sta**, e il resto non entra. Non «tutto o
+ * niente» (D017).
+ *
+ * Lo spazio arriva per argomento e non si calcola qui: a rispondere «quanto ci sta ancora» è
+ * `roomIn`, che è del caveau, e il reddito non deve sapere che il caveau esiste. `null` significa
+ * nessun tetto, e allora entra tutto.
+ *
+ * Il muro resta un muro: a caveau pieno lo spazio vale zero, quindi il reddito vale zero e si
+ * ferma del tutto. La differenza fra fermarsi e essere rifiutati è tutta nel recupero — un
+ * rifiuto è atomico e farebbe tornare a casa con **niente** chi è stato via una notte.
+ */
+export const incomeThatFits = (earned: Money, room: Money | null): Money =>
+  room === null || earned.lessThanOrEqualTo(room) ? earned : room
+
+/**
  * Il listino dell'upgrade: per ogni strumento che lo compra, quanto costa con quello (ADR 0027).
  *
  * Oggi ha **una** voce, e va bene così: un listino di uno non è un caso speciale. È anche la prova
