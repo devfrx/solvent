@@ -58,19 +58,21 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 
 Regole di configurazione e di processo, con la stessa dignità:
 
-| ID  | Regola                                                    | Forza | Dove                                                           |
-| --- | --------------------------------------------------------- | ----- | -------------------------------------------------------------- |
-| C01 | `noUnusedLocals` e `noUnusedParameters` sempre accesi     | ✅    | `tsconfig.base.json`                                           |
-| C02 | Il codice è sempre formattato                             | ✅    | `package.json` → `format:check`                                |
-| C03 | Un solo nome per il prodotto, ovunque                     | ✅    | `tests/rules/product-identity`                                 |
-| C04 | `.gitignore` copre gli artefatti, `*.tsbuildinfo` incluso | 👤    | `.gitignore`                                                   |
-| C05 | Nessun entitlement o permesso non usato                   | 👤    | `electron-builder.yml`                                         |
-| C06 | Ogni `eslint-disable` porta la propria motivazione        | ✅    | `tests/rules/eslint-disable`                                   |
-| C07 | Ogni collegamento fra documenti risolve, ancore incluse   | ✅    | `tests/rules/doc-links`                                        |
-| C08 | Identificatori in inglese, prosa in italiano              | ⚠️    | `tests/rules/english-identifiers` — lista, non dizionario      |
-| C09 | Nessuna parola vietata nei nomi di file e cartelle        | ⚠️    | `tests/rules/forbidden-words` — i nomi, non gli identificatori |
-| C10 | Nessun barrel: nessun file che si limiti a ri-esportare   | ✅    | `tests/rules/no-barrel` — guarda il contenuto, non il nome     |
-| P01 | Una fetta verticale alla volta, nessun `TODO` nel codice  | ✅    | `docs/roadmap-fette.md` + `tests/rules/no-todo`                |
+| ID  | Regola                                                    | Forza   | Dove                                                                     |
+| --- | --------------------------------------------------------- | ------- | ------------------------------------------------------------------------ |
+| C01 | `noUnusedLocals` e `noUnusedParameters` sempre accesi     | ✅      | `tsconfig.base.json`                                                     |
+| C02 | Il codice è sempre formattato                             | ✅      | `package.json` → `format:check`                                          |
+| C03 | Un solo nome per il prodotto, ovunque                     | ✅      | `tests/rules/product-identity`                                           |
+| C04 | `.gitignore` copre gli artefatti, `*.tsbuildinfo` incluso | 👤      | `.gitignore`                                                             |
+| C05 | Nessun entitlement o permesso non usato                   | 👤      | `electron-builder.yml`                                                   |
+| C06 | Ogni `eslint-disable` porta la propria motivazione        | ✅      | `tests/rules/eslint-disable`                                             |
+| C07 | Ogni collegamento fra documenti risolve, ancore incluse   | ✅      | `tests/rules/doc-links`                                                  |
+| C08 | Identificatori in inglese, prosa in italiano              | ⚠️      | `tests/rules/english-identifiers` — lista, non dizionario                |
+| C09 | Nessuna parola vietata nei nomi di file e cartelle        | ⚠️      | `tests/rules/forbidden-words` — i nomi, non gli identificatori           |
+| C10 | Nessun barrel: nessun file che si limiti a ri-esportare   | ✅      | `tests/rules/no-barrel` — guarda il contenuto, non il nome               |
+| C11 | Un fatto contabile ha un posto solo, ed è generato        | ✅ / ⚠️ | `docs/stato.md` + `tests/rules/project-state` e `tests/rules/docs-facts` |
+| C12 | Nessuna riga di tabella vive fuori da una tabella         | ✅      | `tests/rules/markdown-form`                                              |
+| P01 | Una fetta verticale alla volta, nessun `TODO` nel codice  | ✅      | `docs/roadmap-fette.md` + `tests/rules/no-todo`                          |
 
 ## Invarianti derivati
 
