@@ -93,11 +93,17 @@ adesso invece che quando arriveranno gli oggetti. Il Ledger controlla `saldo + i
 con una capienza di tipo `Money`; l'[ADR 0025](../../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)
 la trasforma da costante a **funzione**, e la funzione del caveau fa la sottrazione qui sopra.
 
-**Conseguenza vincolante per [D017](../../delega/D017-il-caveau.md):** `capacityFor(level)` è la
-capienza **lorda** del livello, e la funzione consegnata al Ledger è
-`capacityFor(level) − ingombro`. Con zero oggetti l'ingombro è zero e il comportamento è identico a
-quello che D017 descrive — ma la forma è già quella giusta, e il giorno degli oggetti non si rifà
-niente.
+**Conseguenza per [D017](../../delega/D017-il-caveau.md): nessuna, ed è il punto.** La capienza che
+il Ledger riceve è una funzione che il caveau **possiede**, quindi il giorno degli oggetti la
+sottrazione entra dentro quella funzione e nient'altro si muove — nessun parametro nuovo, nessuna
+firma diversa, nessun test in più. Costruire oggi un posto dove mettere un ingombro che nessuno
+produce sarebbe generalizzazione speculativa, cioè la cosa che l'
+[ADR 0014](../../adr/0014-una-fetta-verticale-alla-volta.md) vieta.
+
+Quello che D017 deve rispettare è **una riga sola**: la capienza si misura in **euro**. Non in
+posti, non in slot, non in un'unità astratta di volume. Rispettarla costa zero perché è già così;
+ignorarla costerebbe una conversione a ogni transazione il giorno in cui il caveau contiene due
+cose diverse.
 
 ---
 

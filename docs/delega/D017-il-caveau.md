@@ -4,7 +4,12 @@
   stesso giorno: la preparazione ha misurato il costo del cambiamento e ha trovato un difetto
   nella delega stessa. Vedi _Cosa la preparazione ha verificato_
 - **Dipende da:** D013 (cioè tutta la fetta 01)
-- **Sblocca:** la fetta 02, e con essa l'era 1 della [visione](../prodotto/visione.md)
+- **Sblocca:** la fetta 02: il primo muro del gioco, e il primo confine del kernel che si sposta
+  dopo la fetta 01
+- **Il dominio è stato studiato prima:** [design/domini/vault.md](../design/domini/vault.md), la
+  metà di gioco della scheda. Contiene le decisioni di gioco che questa delega **non** deve
+  prendere da sola — l'unità della capienza, il tetto a livelli finiti, la varianza zero — e le
+  alternative che sono state scartate, con il perché
 - **ADR vincolanti:** [0025](../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md) (nuovo),
   0003, 0014, 0017, 0018, 0020, 0024
 - **Regole:** nessuna nuova. Un invariante nuovo: **INV-18**
@@ -14,8 +19,8 @@
 
 ## Obiettivo
 
-Accendere il **muro dell'era 1**: i contanti occupano spazio, e quando lo spazio finisce l'unica
-via è la carta — che lascia tracce. È la prima volta che la dualità dell'[ADR 0017](../adr/0017-il-denaro-e-plurale.md)
+Accendere il **primo muro del gioco**: i contanti occupano spazio, e quando lo spazio finisce
+l'unica via è la carta — che lascia tracce. È la prima volta che la dualità dell'[ADR 0017](../adr/0017-il-denaro-e-plurale.md)
 smette di essere una descrizione e diventa una costrizione.
 
 ## Perché esiste, e perché è più piccola di quanto sembri
@@ -33,8 +38,8 @@ Metà di questa fetta è **già costruita e spenta**, e a scoprirlo è stata
 - `error.ledger.capacity_exceeded` è tradotto in entrambe le lingue.
 
 Accendere il muro **fisso** è una riga: un valore al posto di `null` in `POOLS.cash.capacity`. Il
-lavoro vero è che il muro dell'era 1 **si sposta** — «il caveau si amplia, ma non all'infinito» — e
-una capienza che cresce non sta in una costante compilata. Da lì nasce
+lavoro vero è che il muro **si sposta** — «il caveau si amplia, ma non all'infinito» — e una
+capienza che cresce non sta in una costante compilata. Da lì nasce
 l'[ADR 0025](../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md), che è l'unica decisione
 strutturale di questa delega.
 
@@ -205,10 +210,14 @@ permette.
   denaro va da qualche parte.
 - **Nessun percorso accredita contanti senza passare dal Ledger** (R06). È l'invariante che
   l'ADR 0025 protegge scegliendo di non spostare il controllo nel dominio.
-- Il caveau si amplia con la **carta** o con i **contanti**? È una scelta di gioco da fare
-  eseguendo, e va dichiarata in `UPGRADE_PAYMENT`-style come ha fatto D010: se si paga in contanti,
-  ampliare un caveau pieno diventa impossibile proprio quando serve — che può essere il punto, o
-  una crudeltà. Decidere e scriverlo.
+- **La capienza è misurata in euro, e un giorno gli oggetti se la contenderanno con i contanti.**
+  Non è un invariante da far rispettare qui: è una decisione presa nella
+  [scheda del caveau](../design/domini/vault.md) — lo spazio del caveau è **uno solo**, e un
+  oggetto vi occupa un ingombro espresso in euro che non è il suo valore. Va scritta qui perché
+  **non costa niente rispettarla e costerebbe una riscrittura ignorarla**: la capienza consegnata
+  al Ledger è una funzione che il caveau possiede (ADR 0025), quindi il giorno degli oggetti la
+  sottrazione entra lì dentro e nient'altro si muove. Non serve nessun parametro, nessuna firma
+  diversa e nessun test in più oggi. Serve solo non misurare la capienza in qualcos'altro.
 
 ## Fuori scope
 
@@ -218,12 +227,24 @@ permette.
   del [registro delle fette](../roadmap-fette.md) che lo prometteva va corretta invece che
   obbedita. L'[ADR 0010](../adr/0010-liste-storiche-limitate-alla-definizione.md) resta `Proposta`
   ancora una fetta, e adesso si sa perché.
-- **Il calore.** È il secondo muro dell'era 1 e ha bisogno di un dominio suo.
+- **Il calore.** È il secondo muro dei contanti e ha bisogno di un dominio suo.
 - **Le soglie giornaliere del bancomat.** Daranno ad `atm` il suo primo stato, e sono un'altra
   delega.
 - **Interessi sul saldo fermo.** `POOLS.yields` esiste ed è `false` per tutti: resta così.
 - **I conti dinamici** dell'[ADR 0022](../adr/0022-il-ledger-ha-conti-non-solo-pool.md). L'ADR 0025
   è deliberatamente più piccolo: risponde a «quanto ci sta», non a «esiste un conto».
+- **La scelta di con cosa si paga.** La delega chiedeva di decidere se il caveau si amplia con la
+  carta o con i contanti, e con un argomento sbagliato: diceva che pagare in contanti renderebbe
+  l'ampliamento «impossibile proprio quando serve», mentre se il caveau è pieno di contanti il
+  giocatore ha per definizione i soldi per pagare — e **il pagamento stesso libera spazio**.
+  L'argomento cade, ma la domanda esce lo stesso dalla delega: **è una meccanica trasversale**, il
+  giocatore sceglie il pool a ogni transazione, e disegnarla dentro un dominio la farebbe nascere
+  storta. È nel [registro YAGNI](../roadmap-fette.md) con il grilletto già scattato.
+
+  **Cosa fa D017 nel frattempo:** l'ampliamento si paga con la **carta**, come `UPGRADE_PAYMENT` in
+  `income`. Non è la decisione, è la **convenzione corrente**, e va scritta come tale nel codice.
+  Due chiamanti con lo stesso valore fisso sono esattamente ciò che la delega trasversale andrà a
+  sostituire — in un posto solo, e senza doverne scoprire un terzo.
 
 ## Definizione di fatto
 
@@ -283,5 +304,5 @@ economico: togliere il componente toglierà anche il suo stile.
   vedere il Ledger obbedirle.
 - **I numeri sono contestabili e vanno scelti giocando**, non calcolati: la capienza di partenza
   decide dopo quanti secondi il giocatore incontra il muro la prima volta, e quel numero è
-  l'esperienza dell'era 1. `targets.ts` è il posto dove si dichiara l'intervallo accettabile, e un
-  test lo fa rispettare.
+  l'esperienza dei primi minuti di gioco. `targets.ts` è il posto dove si dichiara l'intervallo
+  accettabile, e un test lo fa rispettare.
