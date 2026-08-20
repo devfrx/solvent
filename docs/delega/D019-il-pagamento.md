@@ -1,7 +1,7 @@
 # D019 — Il pagamento: il listino di un'azione, e chi lo sceglie
 
 - **Stato:** **Chiusa** — scritta il 2026-08-20 ragionando sul sistema di pagamento **prima** di
-  eseguire [D017](D017-il-caveau.md), ed eseguita lo stesso giorno sul ramo `d019-il-pagamento`.
+  eseguire [D017](D017-il-caveau.md), ed eseguita lo stesso giorno: commit `a7c5e85`, ramo `d019-il-pagamento`.
   Vedi _Come è andata_ in fondo
 - **Dipende da:** D013 (tutta la fetta 01)
 - **Sblocca:** [D017](D017-il-caveau.md), che senza di questa nascerebbe con un pool fisso da
