@@ -68,28 +68,28 @@ movimenti da mostrare — e le parole del gioco sotto `i18n/`. Ogni delega chius
 testo di una delega ancora aperta — alcune di quelle correzioni riguardano proprio deleghe che non
 sono ancora state eseguite.
 
-### Cosa è già cambiato nelle deleghe ancora aperte
+### Cosa vale per qualunque delega, e nessuna lo ripete
 
-Undici cose che il testo di quella delega **non** dice ancora, e che chi la esegue deve sapere
-prima di iniziare. Sono qui perché una delega chiusa è un documento storico: nessuno la rilegge.
+Quattro regole che non stanno nel testo di nessuna delega perché valgono per tutte. Sono qui perché
+una delega chiusa è un documento storico: nessuno la rilegge.
 
-**Resta aperta solo D013**, che è lo STOP 2. Quasi tutto ciò che la riguarda viene dalle correzioni
-di [D015](D015-home-bancomat.md), che ha toccato la home, lo store, il dizionario e cinque
-documenti di disegno.
+- **R05 vieta anche i tipi.** Un `.vue` non può scrivere
+  `import type { IncomeError } from '@core/domains/income/commands'`: il lint usa la regola base,
+  che non distingue un import di tipo. Le unioni che servono alla UI vivono in
+  `renderer/i18n/index.ts`.
+- **Il codice si scrive in inglese.** Identificatori in inglese; prosa — commenti, messaggi degli
+  errori lanciati, descrizioni dei test — in italiano. È la regola C08 di
+  [convenzioni.md](../convenzioni.md), imposta da `tests/rules/english-identifiers`, che è
+  ⚠️ parziale e lo dichiara.
+- **Un importo di gioco non può nascere dentro un dominio.** `no-magic-numbers` guarda i **numeri**,
+  ma `Money` si costruisce da una **stringa**: a fermarlo è `tests/rules/domains-no-money-literals`
+  (D014, correzione 2).
+- **Un `eslint-disable` senza motivazione è un test rosso**, non un appunto di review (C06).
 
-| Delega | Cosa è cambiato                                                                                                                                                                                                                                                                                          |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D013   | **La fetta 01 è giocabile, ed è stata giocata**: guadagna, deposita, compra. Il giro è stato percorso a mano e i numeri sono scritti nella nota di chiusura di [D015](D015-home-bancomat.md) — 500 prelevati diventano 497,50 sui contanti e 2,50 di commissione, e le ultime operazioni lo mostrano     |
-| D013   | **Il gioco si fa girare senza Electron**: bundle di produzione (`npm run build`), le tre funzioni di `SaveApi` finte al posto del preload, e un salvataggio con dei soldi dentro. In una finestra che non compone frame `requestAnimationFrame` non scatta e il reddito non entra mai — non è un difetto |
-| D013   | **`failed` ha due cause e due uscite diverse**, e a distinguerle è `failedDuring`, non il codice dell'errore. Il diagramma di [ciclo-di-vita.md](../design/ciclo-di-vita.md) ha gli archi `Chiusura → Errore`, `Errore → Caricamento` ed `Errore → Chiusura`                                             |
-| D013   | **jsdom non è entrato**, contro il grilletto che il registro YAGNI aveva scritto: la carta 3D e il pannello del bancomat esistono, ma la loro parte sbagliabile è uscita in due moduli puri — `components/rotation.ts` e `components/postings.ts`. Il grilletto è stato riscritto, non tirato            |
-| D013   | **Il cruscotto ha cinque riquadri e il tetto è sei.** Il posto libero è voluto (INV-12 è un tetto, non una quota). `tests/rules/home-tiles` è ⚠️ parziale: conta i tag e rifiuta un `v-for` su un riquadro, ma un `v-for` su un contenitore che ne avvolge uno le sfugge                                 |
-| D013   | **I cinque numeri del cruscotto si tengono fra loro**: guadagnato − speso − commissioni = patrimonio netto, sempre. È INV-08 vista dal lato del giocatore, e ha un test suo — se un giorno non tornasse, il difetto sarebbe nel Ledger                                                                   |
-| D013   | **`store.deposit` e `store.withdraw` non esistono più**: c'è `preview(kind, amount)` e `confirm(kind, amount)`, e leggono la **stessa riga** di una tabella sola. Separati, un giorno «Deposita» mostrerebbe l'anteprima di un prelievo                                                                  |
-| tutte  | **R05 vieta anche i tipi.** Un `.vue` non può scrivere `import type { IncomeError } from '@core/domains/income/commands'`: il lint usa la regola base, che non distingue un import di tipo. Le unioni che servono alla UI vivono in `renderer/i18n/index.ts`                                             |
-| tutte  | **Il codice si scrive in inglese.** Identificatori in inglese; prosa — commenti, messaggi degli errori lanciati, descrizioni dei test — in italiano. È la regola C08 di [convenzioni.md](../convenzioni.md), imposta da `tests/rules/english-identifiers`, che è ⚠️ parziale e lo dichiara               |
-| tutte  | **Un importo di gioco non può nascere dentro un dominio**: `no-magic-numbers` guarda i **numeri**, ma `Money` si costruisce da una **stringa**. Lo ferma `tests/rules/domains-no-money-literals` (D014, correzione 2)                                                                                    |
-| tutte  | Un `eslint-disable` senza motivazione è un test rosso, non un appunto di review (C06)                                                                                                                                                                                                                    |
+**Resta aperta solo D013**, che è lo STOP 2, ed è stata **preparata per l'esecuzione**: le sette
+righe che stavano qui ora vivono dentro [D013](D013-verifica-della-fetta.md), insieme a tutto ciò
+che il suo testo originale dava per non ancora esistente e che invece esiste. Chi la prende legge
+quella, non questa.
 
 ### Quanto ci si può fidare di questi documenti
 
@@ -142,33 +142,33 @@ impone; il meccanismo sta in [tracciabilita.md](../tracciabilita.md).
 | prima di scrivere codice      | la delega che stai eseguendo                      | 5 min |
 | quando dubiti che regga       | [rischi.md](../rischi.md), parti 2 e 3            | 5 min |
 
-Non serve leggere tutti i 20 ADR. Servono quando stai per contraddirne uno: allora leggi
+Non serve leggere tutti i 24 ADR. Servono quando stai per contraddirne uno: allora leggi
 **quello**, e riparti dalle alternative già scartate invece che da zero.
 
 ## Il prossimo passo, in concreto
 
-**[D013 — Verifica della fetta](D013-verifica-della-fetta.md)**, che è lo **STOP 2**: ~250 righe di
-test, **nessun codice nuovo**, e la decisione sulla fetta 02.
+**[D013 — Verifica della fetta](D013-verifica-della-fetta.md)**, che è lo **STOP 2**: ~120 righe di
+test, un README di venti righe, **nessun codice di gioco nuovo**, e la decisione sulla fetta 02.
+
+**La delega è preparata per l'esecuzione**, come lo erano state D009 e D014: è stata riletta con la
+fetta 01 davanti, e sette punti del suo testo erano invecchiati — cinque dei sei file che chiedeva
+di produrre esistono già, il round-trip su stato non banale c'è, la `boundedList` nel salvataggio
+non c'è e non deve esserci, e due dei sei passi manuali oggi non si fanno come sono scritti. Tutto
+questo è dentro la delega, sotto _Cosa è cambiato da quando è stata scritta_: non serve cercarlo
+altrove.
 
 La fetta 01 è completa e giocabile. Il giro si chiude a schermo — si guadagna in contanti, si
 deposita al bancomat pagando la commissione, si compra l'upgrade con la carta, e il reddito sale da
-12,00 a 18,00 €/s. D015 l'ha percorso a mano e ha scritto i numeri nella propria nota di chiusura:
-D013 non parte da zero, ma è il suo mestiere rifarlo senza fidarsi.
+12,00 a 18,00 €/s. [D015](D015-home-bancomat.md) l'ha percorso a mano e ha scritto i numeri nella
+propria nota di chiusura: D013 non parte da zero, ma è il suo mestiere rifarlo senza fidarsi.
 
-Cinque cose che il testo di D013 non dice, e che cambiano da dove si parte:
+Le due cose da sapere prima ancora di aprire la delega:
 
 1. **Il gioco si fa girare senza Electron**, ed è l'unico modo in un ambiente che non compone
-   frame: `npm run build`, la pagina servita da `out/renderer/`, le tre funzioni di `SaveApi`
-   finte al posto del preload, e un salvataggio con dei soldi dentro al posto del tempo che non
-   passa. Senza frame `requestAnimationFrame` non scatta e il reddito non entra mai.
-2. **jsdom continua a non esserci**, e il suo grilletto è stato riscritto per la seconda volta: non
-   più «il primo componente con stato locale non banale» — la carta 3D e il pannello del bancomat
-   esistono — ma il primo comportamento che **non** si riesce a estrarre in una funzione pura.
-3. **`tests/rules/home-tiles` è ⚠️ parziale e lo dichiara.** Se D013 vuole chiudere il buco — un
-   `v-for` su un contenitore — quella è la strada di jsdom, con il suo ADR.
-4. **Il cruscotto ha un posto libero.** Cinque riquadri su sei: se la verifica della fetta fa
-   nascere una statistica che manca, c'è dove metterla. Il settimo no.
-5. **`verify` sta a ~28 s** e `verify:release` aggiunge la compilazione. La soglia dichiarata in
+   frame: `npm run build`, la pagina servita da `out/renderer/`, le tre funzioni di `SaveApi` finte
+   al posto del preload, e un salvataggio con dei soldi dentro al posto del tempo che non passa.
+   Senza frame `requestAnimationFrame` non scatta e il reddito non entra mai.
+2. **`verify` sta a ~26 s** e `verify:release` aggiunge la compilazione. La soglia dichiarata in
    [qualita.md](../qualita.md) è il minuto.
 
 ## Come si lavora
@@ -212,6 +212,12 @@ una regressione — il renderer non esisteva ancora — ma da qui in avanti non 
 Per vedere il gioco girare davvero serve il binario di Electron, che l'installazione di `npm` non
 sempre scarica: se `npm run dev` dice _Electron uninstall_, si completa con
 `node node_modules/electron/install.js`.
+
+Se la finestra non c'è — o non compone frame, e allora il saldo non sale mai — il gioco si guarda
+lo stesso: `npm run build`, la pagina di `out/renderer/` servita da un server statico qualunque, e
+al posto del preload le tre funzioni di `SaveApi` scritte a mano, con dentro un salvataggio che ha
+già dei soldi. Il modo esatto è nella nota di chiusura di
+[D015](D015-home-bancomat.md#cosa-è-stato-verificato-a-mano-e-come).
 
 ## Le decisioni contestabili
 
@@ -283,22 +289,22 @@ Riprendi il progetto Solvent in questa repo ed esegui la delega D013 — che è 
 Leggi in quest'ordine, e non altro prima di aver finito:
 
 1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, prossimo passo
-2. `docs/delega/D013-verifica-della-fetta.md` — la delega
-3. La tabella "Cosa è già cambiato nelle deleghe ancora aperte" qui sopra: **sette righe**
-   riguardano D013, e sono cose che il testo della delega non dice
-4. `docs/delega/D015-home-bancomat.md`, sezione "Cosa deve sapere chi prende D013" e la nota di
-   chiusura — il giro di gioco già percorso a mano, con i numeri
-5. `docs/qualita.md` — cosa si prova e cosa no, e perché non ci sono test end-to-end
-6. `docs/convenzioni.md` — nomi, commit, e la lingua del codice (C08)
+2. `docs/delega/D013-verifica-della-fetta.md` — la delega, **preparata per l'esecuzione**: la
+   sezione "Cosa è cambiato da quando è stata scritta" per prima, perché sette punti del testo
+   originale sono invecchiati e lì sono già corretti
+3. `docs/delega/D015-home-bancomat.md`, la nota di chiusura — il giro di gioco già percorso a
+   mano, con i numeri che devi rivedere
+4. `docs/qualita.md` — cosa si prova e cosa no, e perché non ci sono test end-to-end
+5. `docs/convenzioni.md` — nomi, commit, e la lingua del codice (C08)
 
-Stato: STOP 1 approvato. Chiuse da D001 a D012, D014 e D015: resta aperta solo D013.
-La fetta 01 è **completa e giocabile** — si guadagna in contanti, si deposita al bancomat pagando
-la commissione, si compra l'upgrade con la carta e il reddito passa da 12,00 a 18,00 €/s.
-`npm run verify` verde con 477 test su 52 file in ~28 s, e `npm run verify:release` è verde: un
-renderer che non compila è una regressione.
+Stato: STOP 1 approvato. Chiuse da D001 a D012, D014 e D015, tutte unite a `main`: resta aperta
+solo D013. La fetta 01 è **completa e giocabile** — si guadagna in contanti, si deposita al
+bancomat pagando la commissione, si compra l'upgrade con la carta e il reddito passa da 12,00 a
+18,00 €/s. `npm run verify` verde con 477 test su 52 file in ~26 s, e `npm run verify:release` è
+verde: un renderer che non compila è una regressione.
 
-D013 vale ~250 righe di **test**, e nessun codice nuovo. È l'ultima delega della fetta 01, ed è lo
-STOP 2: alla fine si decide se la fetta 02 parte e con quale forma.
+D013 vale ~120 righe di test e un README di venti righe. Nessun codice di gioco nuovo. È l'ultima
+delega della fetta 01, e alla fine si decide se la fetta 02 parte e con quale forma.
 
 Come voglio che lavori:
 
@@ -314,14 +320,17 @@ Come voglio che lavori:
 - La documentazione toccata dal cambiamento si aggiorna nello stesso commit.
 - Commit: Conventional Commits con lo scope uguale all'ID — `test(D013): …`.
 
-Tre cose che il codice ti dà già e che non vanno riscritte:
+Quattro cose che il progetto ti dà già e che non vanno rifatte:
 
-- **La fetta è stata giocata a mano**, e i passaggi sono nella nota di chiusura di D015: rifalli,
-  ma sapendo cosa devi vedere.
+- **Cinque dei sei file che la delega elencava esistono**: si eseguono e si guardano, non si
+  riscrivono. Riscriverli sarebbe il modo più elegante di non verificare niente.
+- **La fetta è stata giocata a mano**, e i passaggi sono nella nota di chiusura di D015.
 - **Il gioco gira senza Electron**: bundle di produzione, le tre funzioni di `SaveApi` finte al
   posto del preload, un salvataggio con dei soldi dentro. Senza frame comporti, il reddito non
   entra mai — e non è un difetto del gioco.
-- **Le reti esistono già**: 477 test, e ognuna di quelle di D015 è stata vista rossa una volta.
+- **Le reti esistono già**: 477 test, e cinquantatré rotture indotte una alla volta nelle deleghe
+  chiuse. Il punto 3 del rapporto allo STOP 2 — quali regole si sono rivelate scomode — ha già
+  cinque candidati elencati nella delega, da verificare invece che da ricopiare.
 
 Due trappole che le deleghe precedenti hanno già pagato:
 
@@ -331,7 +340,7 @@ Due trappole che le deleghe precedenti hanno già pagato:
 - **Un `Money` esposto nudo da uno store Pinia** viene avvolto in un proxy alla lettura e smette
   di essere il `Decimal` che il dominio ha prodotto. Va dentro uno `shallowRef`.
 
-Quando D013 è chiusa, fermati: marcala `Chiusa` con il commit, aggiorna il passaggio di consegne e
-`tracciabilita.md` se hai cambiato un meccanismo, e mostrami l'output dei gate. Poi la fetta 01 è
-finita, e la domanda successiva è la fetta 02.
+Quando D013 è chiusa, fermati: marcala `Chiusa` con il commit, unisci il ramo a `main`, aggiorna il
+passaggio di consegne e `tracciabilita.md` se hai cambiato un meccanismo, e mostrami l'output dei
+gate. Poi la fetta 01 è finita, e la domanda successiva è la fetta 02.
 ```
