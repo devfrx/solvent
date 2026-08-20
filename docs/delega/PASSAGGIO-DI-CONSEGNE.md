@@ -30,36 +30,37 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                              |
-| ------------------------ | ---------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile, dipendenze, architettura                        |
-| D001 — tooling e gate    | **chiusa**, commit `e275f59`                                                 |
-| D002 — contratti         | **chiusa**, commit `288367e`                                                 |
-| D003 — kernel: Clock     | **chiusa**, commit `f398a47`                                                 |
-| D004 — kernel: Rng       | **chiusa**, commit `a87d8cf`                                                 |
-| D005 — kernel: Bus       | **chiusa**, commit `e9cf441`                                                 |
-| D006 — kernel: Registry  | **chiusa**, commit `39b8520`                                                 |
-| D007 — kernel: Ledger    | **chiusa**, commit `f9a0c59`                                                 |
-| D008 — balance           | **chiusa**, commit `e01e885`                                                 |
-| D009 — persistenza main  | **chiusa**, commit `256f622`                                                 |
-| D010 — dominio income    | **chiusa**, commit `b98f025`                                                 |
-| D014 — dominio bancomat  | **chiusa**, commit `a0b3b9f`                                                 |
-| D011 — runtime e store   | **chiusa**, commit `dbf821c`                                                 |
-| D012 — guscio e parole   | **chiusa**, commit `fb45d71`                                                 |
-| D015 — home e bancomat   | **chiusa**, commit `3aa3460`                                                 |
-| D016 — correzioni audit  | **chiusa**, commit `c648639`, unita a `main` da D013                         |
-| D013 — verifica, STOP 2  | **chiusa**, commit `c5d534c`                                                 |
-| D019 — il pagamento      | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                |
-| D020 — la validazione    | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                |
-| D017 — il caveau         | **aperta e preparata** — scritta e misurata allo STOP 2, non ancora eseguita |
-| Kernel                   | **finito** — 471 righe in `kernel/`, **545 con `balance/`** (D003–D008)      |
-| Persistenza nel main     | **finita** — 246 righe in `src/main/` e `src/preload/`                       |
-| Codice di dominio        | **`income` 104 righe, `atm` 64** — i due della fetta 01                      |
-| Fetta 01                 | **conclusa** — verificata da D013, lo STOP 2, otto passi manuali su otto     |
-| Renderer                 | **1.729 righe**, di cui 439 di CSS e 369 sotto `i18n/`                       |
-| `npm run verify`         | **verde** — 503 test su 55 file, 41,4 s                                      |
-| `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 564,89 kB                        |
-| Prossimo passo           | **[D019 — Il pagamento](D019-il-pagamento.md)**, quando l'utente dà il via   |
+|                          |                                                                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile, dipendenze, architettura                                                                               |
+| D001 — tooling e gate    | **chiusa**, commit `e275f59`                                                                                                        |
+| D002 — contratti         | **chiusa**, commit `288367e`                                                                                                        |
+| D003 — kernel: Clock     | **chiusa**, commit `f398a47`                                                                                                        |
+| D004 — kernel: Rng       | **chiusa**, commit `a87d8cf`                                                                                                        |
+| D005 — kernel: Bus       | **chiusa**, commit `e9cf441`                                                                                                        |
+| D006 — kernel: Registry  | **chiusa**, commit `39b8520`                                                                                                        |
+| D007 — kernel: Ledger    | **chiusa**, commit `f9a0c59`                                                                                                        |
+| D008 — balance           | **chiusa**, commit `e01e885`                                                                                                        |
+| D009 — persistenza main  | **chiusa**, commit `256f622`                                                                                                        |
+| D010 — dominio income    | **chiusa**, commit `b98f025`                                                                                                        |
+| D014 — dominio bancomat  | **chiusa**, commit `a0b3b9f`                                                                                                        |
+| D011 — runtime e store   | **chiusa**, commit `dbf821c`                                                                                                        |
+| D012 — guscio e parole   | **chiusa**, commit `fb45d71`                                                                                                        |
+| D015 — home e bancomat   | **chiusa**, commit `3aa3460`                                                                                                        |
+| D016 — correzioni audit  | **chiusa**, commit `c648639`, unita a `main` da D013                                                                                |
+| D013 — verifica, STOP 2  | **chiusa**, commit `c5d534c`                                                                                                        |
+| D019 — il pagamento      | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                                                                       |
+| D020 — la validazione    | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                                                                       |
+| D017 — il caveau         | **aperta e preparata** — scritta e misurata allo STOP 2, non ancora eseguita                                                        |
+| D018 — la scheda dominio | **aperta** — solo documenti, non tocca nessuna delle altre                                                                          |
+| Kernel                   | **finito** — 471 righe in `kernel/`, **545 con `balance/`** (D003–D008)                                                             |
+| Persistenza nel main     | **finita** — 246 righe in `src/main/` e `src/preload/`                                                                              |
+| Codice di dominio        | **`income` 104 righe, `atm` 64** — i due della fetta 01                                                                             |
+| Fetta 01                 | **conclusa** — verificata da D013, lo STOP 2, otto passi manuali su otto                                                            |
+| Renderer                 | **1.729 righe**, di cui 439 di CSS e 369 sotto `i18n/`                                                                              |
+| `npm run verify`         | **verde** — 503 test su 55 file, 41,4 s                                                                                             |
+| `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 564,89 kB                                                                               |
+| Prossimo passo           | **[D019](D019-il-pagamento.md)** o **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)** — non si toccano, in qualunque ordine |
 
 I conteggi di riga sono **righe di codice, commenti e righe vuote escluse**, ed è lo stesso metodo
 per tutti: la riga che diceva che il kernel «usa un altro metodo» era sbagliata, e a scoprirlo è
@@ -194,7 +195,7 @@ impone; il meccanismo sta in [tracciabilita.md](../tracciabilita.md).
 | prima di scrivere codice      | la delega che stai eseguendo                      | 5 min |
 | quando dubiti che regga       | [rischi.md](../rischi.md), parti 2 e 3            | 5 min |
 
-Non serve leggere tutti i 24 ADR. Servono quando stai per contraddirne uno: allora leggi
+Non serve leggere tutti i 27 ADR. Servono quando stai per contraddirne uno: allora leggi
 **quello**, e riparti dalle alternative già scartate invece che da zero.
 
 ## Il prossimo passo, in concreto
@@ -298,7 +299,7 @@ già dei soldi. Il modo esatto è nella nota di chiusura di
 
 ## Le decisioni contestabili
 
-Ventidue, prese in autonomia. Le prime quattro sono **in vigore** da D007 e sono state usate da due
+Ventisette, prese in autonomia. Le prime quattro sono **in vigore** da D007 e sono state usate da due
 domini: cambiarle costa il Ledger, i suoi test e i due domini. D014 era il momento buono per
 contestarle ed è passato — nessuna delle quattro si è rivelata scomoda usandole.
 
@@ -327,33 +328,40 @@ i tre numeri del retro della carta e il sesto riquadro — e sono le meno costos
 arriveranno, e i posti sono lì ad aspettarli. La terza è un numero di gioco travestito da
 interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto così.
 
-| Cosa                                                                        | ADR                                                                                                                       | Alternativa scartata                                                                                                                                                    |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ogni transazione somma a zero (partita doppia)                              | [0020](../adr/0020-partita-doppia.md)                                                                                     | movimenti singoli con categoria                                                                                                                                         |
-| Il Ledger espone transazioni, non movimenti                                 | [0019](../adr/0019-transazioni-atomiche-nel-ledger.md)                                                                    | due `post()` con rollback nel chiamante                                                                                                                                 |
-| I pool dichiarano le proprie affordance come dati                           | [0017](../adr/0017-il-denaro-e-plurale.md)                                                                                | un saldo unico con etichette nella UI                                                                                                                                   |
-| `post()` non esiste: una primitiva sola                                     | [0021](../adr/0021-una-sola-primitiva-per-il-denaro.md)                                                                   | zucchero a due movimenti, che però rimette `world` e `sink` nei domini                                                                                                  |
-| Il Ledger avrà conti dinamici, non solo sei pool                            | [0022](../adr/0022-il-ledger-ha-conti-non-solo-pool.md)                                                                   | il budget di un'attività tenuto come stato del dominio                                                                                                                  |
-| Il tempo di gioco è un dominio, non il kernel                               | [0023](../adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)                                                          | un `now` nel `SystemContext`, che aggiunge una chiave al salvataggio                                                                                                    |
-| I tipi d'esito del salvataggio stanno in `contracts/save.ts`                | [D009](D009-persistenza-main.md#il-contratto-cresce) — non ha un ADR: è una conseguenza di INV-03, non una decisione a sé | allargare INV-03 a tutto `contracts/`, cioè un allowlist di un file che diventa un denylist da mantenere                                                                |
-| Un sistema riceve per costruzione ciò che il contesto non porta             | [0024](../adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md)                                     | un singleton in `balance/`: nessun parametro in più, e una dipendenza che sparisce dalle firme                                                                          |
-| Un dominio senza stato non ha un `system.ts` e non si registra              | [D014](D014-dominio-bancomat.md) — decisione 1                                                                            | inventargli uno stato per riempire il file: un contatore che nessuna schermata mostra, più una migrazione il giorno in cui la forma giusta si vede                      |
-| La commissione del bancomat è un importo fisso, non una percentuale         | [D014](D014-dominio-bancomat.md) — decisione 2                                                                            | una percentuale, che però non produce **mai** il caso "commissione superiore all'importo" — e quel caso è metà del valore della fetta                                   |
-| D011 produce anche l'ingresso del renderer, non solo i tre file dichiarati  | [D011](D011-runtime-e-store.md) — correzione 6                                                                            | lasciare `verify:release` rosso fino a D012, e chiudere D011 senza aver mai eseguito il proprio loop                                                                    |
-| Se il salvataggio finale fallisce, la finestra **non** si chiude            | [D011](D011-runtime-e-store.md) — correzione 13                                                                           | chiudere comunque: comodo, e perde l'unica copia esistente della partita                                                                                                |
-| Il saldo della home mostra i **due pool del giocatore**, non una cifra sola | [D012](D012-ui-e-i18n.md) — correzione 7                                                                                  | la cifra sola del mockup, sotto cui il messaggio «ti servono 800,00 €, ne hai 0,00 €» è incomprensibile                                                                 |
-| Le chiavi i18n sono **piatte**, non una gerarchia di oggetti                | [D012](D012-ui-e-i18n.md) — correzione 9                                                                                  | l'annidamento, in cui `atm.withdraw.title` prende il posto di `atm.withdraw` senza che nulla lo dica                                                                    |
-| La navigazione è un `ref`, non un router                                    | [D012](D012-ui-e-i18n.md) — [registro YAGNI](../roadmap-fette.md)                                                         | `vue-router`: una dipendenza, quindi un ADR (ADR 0015), per due destinazioni senza indirizzo                                                                            |
-| jsdom resta fuori: le verifiche a occhio diventano test per un'altra strada | [D012](D012-ui-e-i18n.md) — correzione 15                                                                                 | `jsdom` + `@vue/test-utils`, cioè due dipendenze e un ADR, per montare componenti che la definizione di fatto non chiede di montare                                     |
-| Il cruscotto ha **cinque** riquadri, non sei: il tetto è un tetto           | [D015](D015-home-bancomat.md) — correzione 1                                                                              | riempire il sesto posto con un numero inventato, che è anche il posto che la fetta 02 userà davvero                                                                     |
-| Il retro della carta porta le affordance del pool, non tre numeri finti     | [D015](D015-home-bancomat.md) — correzione 3                                                                              | plafond, limite e punteggio di credito come li disegna il mockup: dati che nella fetta 01 non esistono                                                                  |
-| L'importo si sceglie fra quattro, e il più piccolo è rifiutato apposta      | [D015](D015-home-bancomat.md) — correzione 5                                                                              | un campo di testo, che apre il confine «chi trasforma una stringa digitata in `Money`» e cosa succede quando non è un numero                                            |
-| jsdom resta fuori una **seconda** volta: si estrae invece di montare        | [D015](D015-home-bancomat.md) — correzione 13                                                                             | tirare il grilletto che il registro YAGNI aveva scritto: due dipendenze e un ADR per provare quattro funzioni pure                                                      |
-| Le righe di una transazione hanno il segno: nasce `signedMoney`             | [D015](D015-home-bancomat.md) — correzione 10                                                                             | un formato solo: «497,50» in un elenco di movimenti non dice da che parte va il denaro                                                                                  |
-| `doc-links` guarda anche il `README.md` della radice, non solo `docs/`      | [D013](D013-verifica-della-fetta.md) — correzione 7                                                                       | lasciarlo scoperto perché «non è un documento di `docs/`»: sarebbe l'unico del progetto con i collegamenti liberi di marcire, e l'unico che un estraneo legge per primo |
+| Cosa                                                                         | ADR                                                                                                                       | Alternativa scartata                                                                                                                                                    |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ogni transazione somma a zero (partita doppia)                               | [0020](../adr/0020-partita-doppia.md)                                                                                     | movimenti singoli con categoria                                                                                                                                         |
+| Il Ledger espone transazioni, non movimenti                                  | [0019](../adr/0019-transazioni-atomiche-nel-ledger.md)                                                                    | due `post()` con rollback nel chiamante                                                                                                                                 |
+| I pool dichiarano le proprie affordance come dati                            | [0017](../adr/0017-il-denaro-e-plurale.md)                                                                                | un saldo unico con etichette nella UI                                                                                                                                   |
+| `post()` non esiste: una primitiva sola                                      | [0021](../adr/0021-una-sola-primitiva-per-il-denaro.md)                                                                   | zucchero a due movimenti, che però rimette `world` e `sink` nei domini                                                                                                  |
+| Il Ledger avrà conti dinamici, non solo sei pool                             | [0022](../adr/0022-il-ledger-ha-conti-non-solo-pool.md)                                                                   | il budget di un'attività tenuto come stato del dominio                                                                                                                  |
+| Il tempo di gioco è un dominio, non il kernel                                | [0023](../adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)                                                          | un `now` nel `SystemContext`, che aggiunge una chiave al salvataggio                                                                                                    |
+| I tipi d'esito del salvataggio stanno in `contracts/save.ts`                 | [D009](D009-persistenza-main.md#il-contratto-cresce) — non ha un ADR: è una conseguenza di INV-03, non una decisione a sé | allargare INV-03 a tutto `contracts/`, cioè un allowlist di un file che diventa un denylist da mantenere                                                                |
+| Un sistema riceve per costruzione ciò che il contesto non porta              | [0024](../adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md)                                     | un singleton in `balance/`: nessun parametro in più, e una dipendenza che sparisce dalle firme                                                                          |
+| Un dominio senza stato non ha un `system.ts` e non si registra               | [D014](D014-dominio-bancomat.md) — decisione 1                                                                            | inventargli uno stato per riempire il file: un contatore che nessuna schermata mostra, più una migrazione il giorno in cui la forma giusta si vede                      |
+| La commissione del bancomat è un importo fisso, non una percentuale          | [D014](D014-dominio-bancomat.md) — decisione 2                                                                            | una percentuale, che però non produce **mai** il caso "commissione superiore all'importo" — e quel caso è metà del valore della fetta                                   |
+| D011 produce anche l'ingresso del renderer, non solo i tre file dichiarati   | [D011](D011-runtime-e-store.md) — correzione 6                                                                            | lasciare `verify:release` rosso fino a D012, e chiudere D011 senza aver mai eseguito il proprio loop                                                                    |
+| Se il salvataggio finale fallisce, la finestra **non** si chiude             | [D011](D011-runtime-e-store.md) — correzione 13                                                                           | chiudere comunque: comodo, e perde l'unica copia esistente della partita                                                                                                |
+| Il saldo della home mostra i **due pool del giocatore**, non una cifra sola  | [D012](D012-ui-e-i18n.md) — correzione 7                                                                                  | la cifra sola del mockup, sotto cui il messaggio «ti servono 800,00 €, ne hai 0,00 €» è incomprensibile                                                                 |
+| Le chiavi i18n sono **piatte**, non una gerarchia di oggetti                 | [D012](D012-ui-e-i18n.md) — correzione 9                                                                                  | l'annidamento, in cui `atm.withdraw.title` prende il posto di `atm.withdraw` senza che nulla lo dica                                                                    |
+| La navigazione è un `ref`, non un router                                     | [D012](D012-ui-e-i18n.md) — [registro YAGNI](../roadmap-fette.md)                                                         | `vue-router`: una dipendenza, quindi un ADR (ADR 0015), per due destinazioni senza indirizzo                                                                            |
+| jsdom resta fuori: le verifiche a occhio diventano test per un'altra strada  | [D012](D012-ui-e-i18n.md) — correzione 15                                                                                 | `jsdom` + `@vue/test-utils`, cioè due dipendenze e un ADR, per montare componenti che la definizione di fatto non chiede di montare                                     |
+| Il cruscotto ha **cinque** riquadri, non sei: il tetto è un tetto            | [D015](D015-home-bancomat.md) — correzione 1                                                                              | riempire il sesto posto con un numero inventato, che è anche il posto che la fetta 02 userà davvero                                                                     |
+| Il retro della carta porta le affordance del pool, non tre numeri finti      | [D015](D015-home-bancomat.md) — correzione 3                                                                              | plafond, limite e punteggio di credito come li disegna il mockup: dati che nella fetta 01 non esistono                                                                  |
+| L'importo si sceglie fra quattro, e il più piccolo è rifiutato apposta       | [D015](D015-home-bancomat.md) — correzione 5                                                                              | un campo di testo, che apre il confine «chi trasforma una stringa digitata in `Money`» e cosa succede quando non è un numero                                            |
+| jsdom resta fuori una **seconda** volta: si estrae invece di montare         | [D015](D015-home-bancomat.md) — correzione 13                                                                             | tirare il grilletto che il registro YAGNI aveva scritto: due dipendenze e un ADR per provare quattro funzioni pure                                                      |
+| Le righe di una transazione hanno il segno: nasce `signedMoney`              | [D015](D015-home-bancomat.md) — correzione 10                                                                             | un formato solo: «497,50» in un elenco di movimenti non dice da che parte va il denaro                                                                                  |
+| `doc-links` guarda anche il `README.md` della radice, non solo `docs/`       | [D013](D013-verifica-della-fetta.md) — correzione 7                                                                       | lasciarlo scoperto perché «non è un documento di `docs/`»: sarebbe l'unico del progetto con i collegamenti liberi di marcire, e l'unico che un estraneo legge per primo |
+| Il listino sta nell'**azione**, non in una tabella globale in `balance/`     | [ADR 0027](../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)                                               | una regola sola per tutti — coerente per costruzione, e per questo sbagliata: il black market sconta i contanti, l'immobiliare li penalizza                             |
+| Il **selettore** del pagamento è di D017, non di D019                        | [D019](D019-il-pagamento.md) — _Il selettore vero è di D017_                                                              | costruirlo in D019, dove nessuna azione accetta due strumenti: sarebbe provato solo contro un listino finto                                                             |
+| `heat` e `convertibleTo` restano fuori dal listino, con il grilletto scritto | [ADR 0027](../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md) — alternative scartate                        | dichiararli subito: un campo che nessuno legge per tre fette, e un grafo di conversioni per un arco solo                                                                |
+| La validazione dello stato salvato è un **test**, non un tipo né un aiutante | [D020](D020-nessun-sistema-si-fida-del-salvataggio.md)                                                                    | `defineSystem` che chiede un validatore: garantisce che il campo esista, non che funzioni — e cambia il kernel per una regola che il kernel non deve conoscere          |
+| D019 e D020 vanno **prima** di D017, non dentro                              | [README](README.md) — il grafo                                                                                            | infilarle nel caveau: la regola sarebbe scritta dalla stessa persona che scrive il codice da sorvegliare, nello stesso momento                                          |
 
 La ventiduesima è di **D013** e costa una riga di un test: è anche l'unica riga non di test che
 quella delega abbia toccato.
+
+**Le ultime cinque sono del 2026-08-20 e non costano ancora niente**: nessuna riga di codice le applica, e questo è il momento in cui contestarle è gratis. Nascono tutte dalle due domande poste prima di eseguire D017 — come si sceglie con cosa si paga, e chi controlla lo stato che arriva dal disco. Le scelte **di gioco** di quelle sessioni non sono qui perché non sono state prese in autonomia: lo spazio unico del caveau, il tetto a livelli finiti, la varianza zero e la nona voce dell'etichetta sono state decise dall'utente, e stanno nella [scheda del caveau](../design/domini/vault.md) con le alternative scartate.
 
 Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
 recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE` scelti
@@ -364,44 +372,56 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-Il progetto è a uno **STOP**, quindi questo prompt non consegna una delega: consegna una domanda.
-Chi lo usa dopo che la fetta 02 sarà stata decisa lo riscrive con l'ID della delega nuova.
+Lo STOP 2 è superato e la fetta 02 è decisa: questo prompt **consegna una delega**. Ne consegna
+una sola per volta, e l'ID va scelto prima di incollarlo — `D019` o `D020`, che non si toccano.
 
 ```markdown
-Riprendi il progetto Solvent in questa repo. È allo STOP 2: la fetta 01 è conclusa e verificata,
-nessuna delega è aperta, e la decisione sulla fetta 02 non è ancora stata presa.
+Esegui la delega D019 nel progetto Solvent, in questa repo.
 
-Leggi in quest'ordine, e non altro prima di aver finito:
+(Se preferisci partire dall'altra, sostituisci D019 con D020 ovunque: sono indipendenti e
+possono essere fatte in qualunque ordine. Entrambe vanno chiuse prima di D017.)
 
-1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, e le quattro cose che sa solo lui
-2. `docs/delega/D013-verifica-della-fetta.md`, dalla nota di chiusura in giù — il rapporto dello
-   STOP 2 nei suoi cinque punti, il percorso manuale eseguito, e undici correzioni
-3. `docs/roadmap-fette.md` — il registro delle fette e il registro YAGNI, che è il più importante
-   dei due: dice cosa è stato deliberatamente lasciato fuori e cosa lo farà entrare
-4. `docs/prodotto/visione.md` — la casa (l'etichetta, la non dominanza, la saturazione) e le sei
-   leggi, perché la fetta 02 è la prima che serve al gioco e non solo al kernel. **Riscritta il
-   2026-08-20**: se l'hai letta prima di quella data, rileggila
+Leggi in quest'ordine, e non scrivere niente prima di aver finito:
+
+1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, e le quattro cose che sa solo lui.
+   In particolare _Cosa vale per qualunque delega_ e _Le decisioni contestabili_
+2. `docs/delega/D019-il-pagamento.md` — la delega che esegui. Interamente, trappole comprese
+3. `docs/adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md` — l'ADR che la vincola,
+   con le cinque alternative già scartate. Se stai per contraddirne una, la risposta è lì
+4. `docs/roadmap-fette.md`, il **registro YAGNI** — dice cosa è stato deliberatamente lasciato
+   fuori e cosa lo farà entrare. È il documento che ti impedisce di costruire troppo
 5. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
 
-Stato: STOP 1 approvato, STOP 2 pronto da decidere. Da D001 a D016 tutte `Chiusa` e unite a
-`main`. `npm run verify` verde con 503 test su 55 file in 41,4 s; `npm run verify:release` verde.
-Il kernel è 471 righe contro un budget di ~500. Tre ADR restano `Proposta`, e per ognuno è
-scritto perché.
+Stato misurato il 2026-08-20: da D001 a D016 tutte `Chiusa` e unite a `main`, più D013.
+`npm run verify` verde — **503 test su 55 file**. `npm run build` verde — 91 moduli, 564,89 kB.
+Il kernel è 471 righe in `kernel/`, 545 con `balance/`. Ventisette ADR, di cui **sei
+`Proposta`**: 0010, 0022, 0023, 0025, 0026, 0027. Per ognuno è scritto perché.
 
-La fetta 02 è **il caveau**: i contanti hanno una capienza. È il primo vincolo che rende la
-scelta contanti/carta non ovvia, e chiude tre cose che la stanno aspettando — il primo
-`boundedList` che entra davvero nel salvataggio, la capienza vera che `capacityOf` interroga già,
-e ADR 0010, che oggi ha metà meccanismo.
+Aperte ci sono quattro deleghe, e l'ordine conta:
 
-Cosa voglio da questa sessione, prima di qualunque codice:
+- **D019 — il pagamento** e **D020 — la validazione dello stato salvato**: indipendenti fra
+  loro, entrambe prima di D017
+- **D017 — il caveau**: la fetta 02 vera, aspetta le altre due
+- **D018 — la scheda di dominio**: solo documenti, non tocca nessuna delle altre
 
-- **Non aprire una delega senza avermelo chiesto.** Siamo a uno STOP: la decisione è mia.
-- Dimmi **due opzioni** per la forma della fetta 02, con i compromessi, e quale sceglieresti.
-- Dimmi cosa nel rapporto dello STOP 2 ti sembra un problema che va risolto **prima** della
-  fetta 02, se c'è. Due candidati sono già scritti: le ultime operazioni sommerse dallo
-  stipendio, e la regola sulla purezza di `rules.ts` senza meccanismo.
+D019 vale ~140 righe di sorgente e ~220 di test. **Il kernel non si tocca**: metà del sistema
+esisteva già — `accepts`, il rifiuto tipizzato con l'elenco dei pool, e
+`error.ledger.insufficient_funds` che porta già `pool`, `required` e `available`.
+
+Come lavoro:
+
+- **Un ramo `d019-il-pagamento`.** Non si commetta su `main`
+- **La delega si esegue, non si riscrive.** Se il testo è invecchiato o sbagliato, fermati e
+  dimmelo: è successo tre volte e ogni volta ha tolto lavoro invece di aggiungerlo
+- **Il budget di righe è un allarme, non un limite.** Se lo stai raddoppiando, stai risolvendo
+  un problema diverso da quello descritto: dillo invece di continuare
+- **Fuori scope vuol dire fuori scope.** `heat`, `convertibleTo` e il selettore a più opzioni
+  hanno un grilletto scritto e non è scattato
+- **Ogni test nuovo va rotto di proposito almeno una volta.** Un test che non si è mai visto
+  fallire non è una rete, è una decorazione
+- `npm run verify` verde alla fine, con l'**output incollato**. Non «dovrebbe passare»
 - Niente `TODO`, niente `any`, niente scorciatoie presentate come soluzioni. Identificatori in
-  inglese, prosa in italiano.
-
-Quando avremo deciso, la delega si scrive prima del codice, come tutte le altre sedici.
+  inglese, prosa in italiano
+- Alla fine, in fondo alla delega: le **correzioni** rispetto a com'era scritta, e il consuntivo
+  di righe contro il budget. Ogni delega chiusa ne ha da cinque a diciassette
 ```
