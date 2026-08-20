@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { fromString, toString } from '@core/contracts/money'
+import type { Money } from '@core/contracts/money'
+import { fromString, toString, ZERO } from '@core/contracts/money'
 import { POOL_IDS } from '@core/contracts/pools'
 
 import { BALANCE } from '@core/balance/constants'
@@ -27,6 +28,14 @@ let modifiers: Modifiers
 let subject: Income
 let ctx: SystemContext
 
+/**
+ * Quanto spazio c'e' nel pool in arrivo. E' la variabile che D017 mette in mano al reddito, e sta
+ * qui perche' quasi tutti i casi di questo file vogliono che non morda: `null` e' "nessun tetto",
+ * cioe' il comportamento di prima, ed e' l'unica risposta che non cambia cio' che i test di D010
+ * misuravano.
+ */
+let room: Money | null
+
 const tick = (elapsed = ONE_SECOND): void => subject.system.tick?.(ctx, elapsed)
 
 const fund = (pool: 'cash' | 'card', amount: string): void => {
@@ -38,9 +47,10 @@ const total = (): string =>
 
 beforeEach(() => {
   const bus = createBus()
-  ledger = createLedger(bus)
+  ledger = createLedger(bus, () => null)
   modifiers = createModifiers()
-  subject = createIncome(ledger, modifiers)
+  room = null
+  subject = createIncome(ledger, modifiers, () => room)
   ctx = { clock, rng: createRng(1), bus, ledger }
 })
 
@@ -95,6 +105,95 @@ describe('il tick', () => {
   })
 })
 
+/**
+ * D017 — il pezzo che nessuno si aspetta: il reddito può non entrare.
+ *
+ * È il cuore della fetta, non un dettaglio. Un idle in cui i soldi smettono di arrivare **senza
+ * dirlo** è un idle rotto, e la differenza fra «tutto o niente» e «quanto ci sta» è tutta nel
+ * recupero: `recover()` fa un solo `tickAll`, cioè una transazione sola da otto ore di stipendio,
+ * e il Ledger la rifiuterebbe intera perché una transazione è atomica (ADR 0019).
+ */
+describe('il tick quando il caveau non tiene tutto', () => {
+  it('con il caveau pieno non muove un centesimo, e lo dice', () => {
+    room = ZERO
+
+    tick()
+
+    expect(toString(ledger.balance('cash'))).toBe('0')
+    expect(toString(ledger.balance('world'))).toBe('0')
+    // «E lo dice»: il muro senza il messaggio è un numero che smette di salire, e il giocatore
+    // scoprirebbe da solo che il gioco è fermo — se lo scoprisse.
+    expect(toString(subject.withheld())).toBe(BALANCE.INCOME_BASE_PER_SECOND.toString())
+    expect(total()).toBe('0')
+  })
+
+  it('e non emette una transazione da zero euro', () => {
+    // Zero non è un non-evento: sarebbe una transazione valida che non muove niente ed emette lo
+    // stesso, e lo storico si riempirebbe di stipendi da 0,00 € proprio mentre si dice che il
+    // caveau è pieno.
+    room = ZERO
+    let emitted = 0
+    ctx.bus.on('money.posted', () => {
+      emitted += 1
+    })
+
+    tick()
+
+    expect(emitted).toBe(0)
+  })
+
+  it('con il caveau quasi pieno accredita quanto ci sta, e la somma resta zero', () => {
+    // 4,00 € di spazio contro 12,00 € maturati: ne entrano quattro, otto restano fuori. È il caso
+    // che rende «quanto ci sta» diverso da «tutto o niente» anche fuori dal recupero.
+    room = fromString('4')
+
+    tick()
+
+    expect(toString(ledger.balance('cash'))).toBe('4')
+    expect(toString(ledger.balance('world'))).toBe('-4')
+    expect(toString(subject.withheld())).toBe('8')
+    expect(total()).toBe('0')
+  })
+
+  it('e con lo spazio che avanza incassa tutto, senza trattenere niente', () => {
+    room = fromString('99999')
+
+    tick()
+
+    expect(toString(ledger.balance('cash'))).toBe(BALANCE.INCOME_BASE_PER_SECOND.toString())
+    expect(toString(subject.withheld())).toBe('0')
+  })
+
+  it('quello che resta fuori descrive l’ultimo tick, non la partita', () => {
+    room = ZERO
+    tick()
+    expect(toString(subject.withheld())).toBe(BALANCE.INCOME_BASE_PER_SECOND.toString())
+
+    room = null
+    tick()
+
+    expect(toString(subject.withheld())).toBe('0')
+  })
+
+  it('e un caricamento lo azzera: l’ultimo tick era di un’altra sessione', () => {
+    room = ZERO
+    tick()
+
+    subject.system.load({ upgraded: false })
+
+    expect(toString(subject.withheld())).toBe('0')
+  })
+
+  it('lo stesso vale per un azzeramento', () => {
+    room = ZERO
+    tick()
+
+    subject.system.reset('hard')
+
+    expect(toString(subject.withheld())).toBe('0')
+  })
+})
+
 describe('salvare e ricaricare', () => {
   const earnedInOneSecond = (target: Income): string => {
     const before = ledger.balance('cash')
@@ -109,7 +208,7 @@ describe('salvare e ricaricare', () => {
     const expected = earnedInOneSecond(subject)
 
     const reloadedModifiers = createModifiers()
-    const reloaded = createIncome(ledger, reloadedModifiers)
+    const reloaded = createIncome(ledger, reloadedModifiers, () => room)
     reloaded.system.load(saved)
     modifiers = reloadedModifiers
 

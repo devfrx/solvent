@@ -43,6 +43,13 @@ const SAVED_AT = 1_755_600_000_000
  */
 const TICKS_TO_AFFORD = 669
 
+/**
+ * Quanti tick servono ad ampliare il caveau **in contanti**: a 1,20 € per tick, 750 tick fanno
+ * 900,00 €, che è il prezzo del primo ampliamento. È anche il numero che dimostra il muro senza
+ * doverlo dire — 900,00 € stanno dentro il caveau di partenza, e 1.000,00 € no.
+ */
+const TICKS_TO_EXPAND = 750
+
 let directory: string
 let store: SaveStore
 let game: Game
@@ -54,6 +61,12 @@ let game: Game
  * invece che dallo schermo.
  */
 const play = (target: Game): void => {
+  // Prima il caveau, e non per ordine alfabetico: da D017 i contanti hanno un tetto, quindi
+  // ampliarlo è il primo gesto che il giocatore compie davvero — e il livello che ne esce è
+  // l'unico stato di dominio del salvataggio che non sia un booleano.
+  target.registry.tickAll(target.ctx, ticks(TICKS_TO_EXPAND))
+  target.vault.expand('cash')
+
   target.registry.tickAll(target.ctx, ticks(TICKS_TO_AFFORD))
   target.atm.deposit(target.ctx.ledger.balance('cash'))
   target.income.buyUpgrade('card')
@@ -110,14 +123,16 @@ describe('la partita giocata, dal disco e ritorno', () => {
     expect(payload.ledger.balances).toEqual({
       cash: '2.6',
       card: '7.8',
-      world: '-815.4',
-      sink: '800',
+      world: '-1715.4',
+      sink: '1700',
       fees: '5',
       house: '0'
     })
 
-    // Il dominio vero, con l'upgrade comprato — non un sistema finto che ritorna un oggetto.
-    expect(payload.systems).toEqual({ income: { upgraded: true } })
+    // I due domini veri — l'upgrade comprato e il caveau ampliato — non un sistema finto che
+    // ritorna un oggetto. Il livello è anche il primo stato salvato del progetto che non sia un
+    // booleano, quindi il primo che un salvataggio manomesso possa sbagliare in silenzio.
+    expect(payload.systems).toEqual({ income: { upgraded: true }, vault: { level: 1 } })
     expect(payload.rng.cursors).toEqual({ income: 3 })
   })
 

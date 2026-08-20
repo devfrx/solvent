@@ -9,6 +9,7 @@ import type { LoadedSave, SavePayload, SaveResult } from '@core/contracts/save'
 
 import { BALANCE } from '@core/balance/constants'
 import { upgradePrices } from '@core/domains/income/rules'
+import { capacityFor, expansionPrices, MAX_LEVEL } from '@core/domains/vault/rules'
 import { income } from '@core/kernel/Ledger'
 
 import { createGame, type Game } from '../../src/renderer/runtime/createGame'
@@ -123,18 +124,30 @@ describe('il recupero all’avvio', () => {
     expect(store.savedAt).toBe(SAVED_AT)
   })
 
-  it('e non oltre il tetto, per quanto tempo sia passato', async () => {
-    // Cento ore di assenza non devono bloccare l'avvio per minuti: il tetto è otto ore (D008), ed
-    // è lo **stesso** `stepOf` del loop a limitarlo — non una formula offline scritta a parte.
+  it('e non oltre il caveau: chi torna dopo una notte incassa quanto ci sta, non zero', async () => {
+    // **Il caso che la preparazione di D017 ha trovato misurando**, e quello che senza un test
+    // tornerebbe da solo. Il recupero fa **un** `tickAll` con tutti i tick arretrati, cioè una
+    // transazione sola da otto ore di stipendio: il Ledger la rifiuterebbe intera, perché una
+    // transazione è atomica (ADR 0019), e chi è stato via tornerebbe con zero euro **a caveau
+    // vuoto**. Non un muro: un guasto travestito da regola.
+    //
+    // I due tetti restano visibili tutti e due, e sono diversi. Il caveau limita ciò che **entra**;
+    // le otto ore di `RECOVERY_CAP` limitano ciò che **matura**, e da qui in avanti si vedono solo
+    // in quello che resta fuori — se il recupero non fosse limitato, `incomeWithheld` sarebbe molto
+    // più grande.
     const hundredHours = 100 * 3600 * SECOND
     const store = await start({
       load: found(freshPayload(), SAVED_AT),
       wallClock: SAVED_AT + hundredHours
     })
 
-    const capped = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(BALANCE.RECOVERY_CAP)
+    const matured = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(BALANCE.RECOVERY_CAP)
+    const wall = capacityFor(0)
+
     expect(store.status).toBe('playing')
-    expect(toString(game.ctx.ledger.balance('cash'))).toBe(toString(capped))
+    expect(toString(game.ctx.ledger.balance('cash'))).not.toBe('0')
+    expect(toString(game.ctx.ledger.balance('cash'))).toBe(toString(wall))
+    expect(toString(store.incomeWithheld)).toBe(toString(matured.minus(wall)))
   })
 
   it('un salvataggio dal futuro non produce tick', async () => {
@@ -703,13 +716,139 @@ describe('i selettori del bancomat', () => {
     expect(toString(store.atmDefaultAmount)).toBe(toString(largest))
   })
 
-  it('il caveau non ha ancora un tetto, e la schermata lo dice invece di inventarlo', async () => {
-    // Quando la fetta 02 gli darà un valore, questa riga diventerà rossa: è il punto in cui
-    // qualcuno deve decidere cosa disegna la capienza, invece di scoprirlo a schermo.
+  it('il caveau un tetto ce l’ha, e la schermata legge quello che il Ledger fa rispettare', async () => {
+    // La fotografia di prima diceva «il caveau non ha ancora un tetto, e la schermata lo dice
+    // invece di inventarlo». La fetta 02 gliene ha dato uno: sostituita da una fotografia, non da
+    // un buco. La carta resta senza, e per lei è definitivo.
+    //
+    // **Per identità e non per uguaglianza** (INV-18): non due numeri che oggi coincidono, ma lo
+    // **stesso** `Decimal`, prodotto da una funzione sola. Due letture che devono coincidere prima
+    // o poi divergono, ed è la trappola che D015 ha pagato alla correzione 14.
     const store = await start()
 
-    expect(store.cashCapacity).toBeNull()
+    expect(store.cashCapacity).toBe(game.ctx.ledger.capacities('cash'))
+    expect(store.cashCapacity).toBe(capacityFor(0))
     expect(store.cardCapacity).toBeNull()
+  })
+})
+
+describe('i selettori del caveau', () => {
+  const fund = (pool: Pool, amount: string): void => {
+    game.ctx.ledger.transaction(income(pool, fromString(amount)), {
+      reason: 'reason.income.tick'
+    })
+  }
+
+  it('il listino è quello del dominio, e ha due voci: è il primo del gioco', async () => {
+    const store = await start()
+
+    expect(store.expansionPrices).toEqual(expansionPrices(0))
+    expect(store.expansionPrices).toHaveLength(2)
+  })
+
+  it('il livello si conta come lo conta il giocatore, e i livelli finiscono', async () => {
+    const store = await start()
+
+    expect(store.vaultProgress).toEqual({ level: 1, total: MAX_LEVEL + 1 })
+  })
+
+  it('lo spazio libero è il tetto meno quello che c’è', async () => {
+    const store = await start()
+    fund('cash', '400')
+
+    expect(toString(store.vaultRoom ?? fromString('-1'))).toBe(
+      toString(capacityFor(0).minus(fromString('400')))
+    )
+  })
+
+  it('e la barra è una percentuale già pronta, perché un .vue non calcola', async () => {
+    const store = await start()
+    expect(store.vaultFill).toBe('0%')
+
+    fund('cash', toString(capacityFor(0).div(2)))
+
+    expect(store.vaultFill).toBe('50%')
+  })
+
+  it('ampliare sposta il tetto, e lo store se ne accorge: nessun evento lo annuncia', async () => {
+    // La trappola dei mirror, nella sua versione più cara: ampliare **non è** un movimento
+    // economico, quindi il Bus tace. Fino a D017 `cashCapacity` era letto una volta sola alla
+    // costruzione, ed era corretto perché il numero non si muoveva mai.
+    const store = await start()
+    fund('cash', toString(capacityFor(0)))
+
+    expect(store.expandVault('cash').ok).toBe(true)
+
+    expect(store.vaultProgress.level).toBe(2)
+    expect(store.cashCapacity).toBe(capacityFor(1))
+    expect(store.cashCapacity).toBe(game.ctx.ledger.capacities('cash'))
+    expect(store.expansionPrices).toEqual(expansionPrices(1))
+  })
+
+  it('e l’anteprima per strumento dice quello che il comando poi fa', async () => {
+    const store = await start()
+
+    expect(store.canExpandWith('cash')).toBe(false)
+    expect(store.canExpandWith('card')).toBe(false)
+
+    fund('card', toString(capacityFor(0)))
+
+    expect(store.canExpandWith('cash')).toBe(false)
+    expect(store.canExpandWith('card')).toBe(true)
+    expect(store.expandVault('card').ok).toBe(true)
+  })
+
+  it('uno strumento fuori listino non è comprabile, e non è un errore diverso', async () => {
+    const store = await start()
+
+    expect(store.canExpandWith('world')).toBe(false)
+  })
+
+  it('il caveau pieno è uno stato del gioco, e la schermata lo sa', async () => {
+    // «Il caveau pieno è uno stato in cui il giocatore vive», non un errore: se finisse nella
+    // schermata d'errore la fetta sarebbe sbagliata (D017, trappole note).
+    const store = await start()
+    expect(store.vaultIsFull).toBe(false)
+
+    fund('cash', toString(capacityFor(0)))
+
+    expect(store.vaultIsFull).toBe(true)
+    expect(store.vaultFill).toBe('100%')
+    expect(store.status).toBe('playing')
+  })
+
+  it('e un saldo sopra il tetto non disegna una barra fuori dal proprio riquadro', async () => {
+    // Non è teorico: un salvataggio più vecchio della curva delle capienze porta dentro un saldo
+    // che oggi non ci starebbe. «Ci sta meno di niente» non è una quantità, e una barra al 500%
+    // esce dal pannello.
+    const payload = freshPayload()
+    const overflowing: SavePayload = {
+      ...payload,
+      ledger: {
+        ...payload.ledger,
+        balances: { ...payload.ledger.balances, cash: '5000', world: '-5000' }
+      }
+    }
+
+    const store = await start({ load: found(overflowing, SAVED_AT), wallClock: SAVED_AT })
+
+    expect(toString(store.balances.cash)).toBe('5000')
+    expect(store.vaultFill).toBe('100%')
+    expect(toString(store.vaultRoom ?? fromString('-1'))).toBe('0')
+    expect(store.vaultIsFull).toBe(true)
+  })
+
+  it('il caveau ampliato attraversa il salvataggio', async () => {
+    const played = createGame(SEED)
+    played.ctx.ledger.transaction(income('cash', capacityFor(0)), {
+      reason: 'reason.income.tick'
+    })
+    expect(played.vault.expand('cash').ok).toBe(true)
+
+    const store = await start({ load: found(played.save(), SAVED_AT), wallClock: SAVED_AT })
+
+    expect(store.vaultProgress.level).toBe(2)
+    expect(store.cashCapacity).toBe(capacityFor(1))
   })
 })
 
@@ -790,14 +929,16 @@ describe('il cruscotto', () => {
   })
 
   it('e legge allo stesso modo guadagnato e speso, che nessuno conta', async () => {
+    // 900,00 e non 2.000,00: da D017 i contanti hanno un tetto, e un versamento che non ci sta
+    // verrebbe rifiutato per una ragione che non e' quella sotto esame.
     const store = await start()
-    fund('cash', '2000')
+    fund('cash', '900')
     fund('card', '1000')
 
     expect(store.buyUpgrade('card').ok).toBe(true)
     expect(store.confirm('withdraw', fromString('100')).ok).toBe(true)
 
-    expect(toString(store.earned)).toBe('3000')
+    expect(toString(store.earned)).toBe('1900')
     expect(toString(store.spent)).toBe(toString(BALANCE.UPGRADE_PRICE_CARD))
   })
 
@@ -805,7 +946,7 @@ describe('il cruscotto', () => {
     // Non è una coincidenza da verificare: è INV-08 — la somma di tutti i conti fa zero —
     // guardata dal lato del giocatore. Se un giorno non tornasse, il difetto sarebbe nel Ledger.
     const store = await start()
-    fund('cash', '2000')
+    fund('cash', '900')
     fund('card', '1000')
     store.buyUpgrade('card')
     store.confirm('withdraw', fromString('100'))
@@ -813,7 +954,7 @@ describe('il cruscotto', () => {
     const held = store.earned.minus(store.spent).minus(store.feesPaid)
 
     expect(toString(store.netWorth)).toBe(toString(held))
-    expect(toString(store.netWorth)).toBe('2197.5')
+    expect(toString(store.netWorth)).toBe('1097.5')
   })
 })
 

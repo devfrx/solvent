@@ -40,7 +40,11 @@ let directory: string
 let store: SaveStore
 
 const buildState = (): SavePayload => {
-  const ledger = createLedger(createBus())
+  // Senza tetto, e va detto: qui si prova che lo **schema** accetta cio' che il kernel produce,
+  // e 1.234,56 e' un saldo scelto per avere dei decimali, non per stare in un caveau. Con la
+  // capienza di partenza (D017) la prima transazione verrebbe rifiutata e questo giro proverebbe
+  // il round-trip di una partita vuota — che passa sempre e non dimostra niente.
+  const ledger = createLedger(createBus(), () => null)
   ledger.transaction(income('cash', fromString('1234.56')), { reason: 'reason.income.tick' })
   ledger.transaction(transfer('cash', 'card', fromString('400'), fromString('2.50')), {
     reason: 'reason.atm.deposit'

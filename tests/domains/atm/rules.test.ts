@@ -6,11 +6,11 @@ import { BALANCE } from '@core/balance/constants'
 
 import {
   atmFee,
-  capacityOf,
   fitsIn,
   isFeeWithinAmount,
   isValidAmount
 } from '../../../src/core/domains/atm/rules'
+import { capacityFor } from '../../../src/core/domains/vault/rules'
 
 /**
  * Le regole pure del bancomat, provate senza kernel, senza Ledger e senza comandi: è esattamente
@@ -74,11 +74,19 @@ describe('la commissione ci sta dentro', () => {
 })
 
 describe('la capienza di un pool', () => {
-  it('oggi è illimitata per i pool del giocatore — è una fotografia, non un’assunzione', () => {
-    // Quando il caveau della fetta 02 darà una capienza ai contanti, questo test diventa rosso ed
-    // è il modo giusto per accorgersene: la riga qui sotto va aggiornata, non il dominio.
-    expect(capacityOf('cash')).toBeNull()
-    expect(capacityOf('card')).toBeNull()
+  it('il bancomat non la conosce più da sé, e quella che riceve è un numero vero', () => {
+    // La fotografia di prima diceva «oggi è illimitata per i pool del giocatore», e la fetta 02 le
+    // ha tolto la ragione. Sostituita da una fotografia, non da un buco: quella nuova dice che il
+    // tetto dei contanti **esiste**, ed è quello del caveau al livello di partenza.
+    //
+    // `capacityOf` stava qui accanto e non c'è più: leggeva `POOLS`, cioè la capienza di partenza,
+    // che dopo il primo ampliamento è la risposta sbagliata. È stata rifatta invece che affiancata
+    // (INV-18, ADR 0025), e a rispondere adesso è il Ledger con la funzione del caveau.
+    const capacity = capacityFor(0)
+
+    expect(capacity.greaterThan(money('0'))).toBe(true)
+    expect(fitsIn(capacity, money('0'), capacity)).toBe(true)
+    expect(fitsIn(capacity, money('0'), capacity.plus(money('0.01')))).toBe(false)
   })
 
   it('senza tetto ci entra qualunque cosa', () => {

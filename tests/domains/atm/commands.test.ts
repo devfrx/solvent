@@ -13,7 +13,9 @@ import {
   WITHDRAW,
   createAtm,
   previewOf,
-  type Atm
+  type Atm,
+  type AtmOperation,
+  type Destination
 } from '../../../src/core/domains/atm/commands'
 import { atmFee } from '../../../src/core/domains/atm/rules'
 
@@ -48,6 +50,15 @@ const sumOf = (postings: readonly Posting[]): string =>
 
 const balanceOf = (pool: Pool): string => toString(ledger.balance(pool))
 
+/**
+ * Il pool in arrivo come lo vede lo store: tetto e saldo letti dal Ledger, che dopo D017 e'
+ * l'unico a saperlo (INV-18). Scriverlo a mano in ogni chiamata sarebbe una seconda lettura.
+ */
+const into = (operation: AtmOperation): Destination => ({
+  capacity: ledger.capacities(operation.to),
+  current: ledger.balance(operation.to)
+})
+
 const totalOfAccounts = (): string =>
   toString(POOL_IDS.reduce((sum, pool) => sum.plus(ledger.balance(pool)), ZERO))
 
@@ -57,7 +68,10 @@ beforeEach(() => {
   bus.on('money.posted', ({ transaction }) => {
     posted.push(transaction)
   })
-  ledger = createLedger(bus)
+  // Nessun tetto, ed e' una scelta: questo file prova il **bancomat**, non il caveau. Con la
+  // capienza di partenza dei contanti (D017) meta' dei casi si fermerebbe per una ragione che non
+  // e' quella sotto esame, e a provare il tetto c'e' un blocco suo in fondo al file.
+  ledger = createLedger(bus, () => null)
   atm = createAtm(ledger)
 })
 
@@ -91,7 +105,7 @@ describe('l’anteprima', () => {
     // Non "danno lo stesso numero": sono lo **stesso** elenco di movimenti. È la forma più forte
     // che INV-11 possa avere, e rende "due formule per la commissione" impossibile.
     fund('card', '1000')
-    const preview = previewOf(WITHDRAW, money('500'))
+    const preview = previewOf(WITHDRAW, money('500'), into(WITHDRAW))
     expect(preview.ok).toBe(true)
     if (!preview.ok) return
 
@@ -104,7 +118,7 @@ describe('l’anteprima', () => {
     fund('card', '1000')
 
     for (const amount of ['0', '-5', '1', '2.50', '500']) {
-      const preview = previewOf(WITHDRAW, money(amount))
+      const preview = previewOf(WITHDRAW, money(amount), into(WITHDRAW))
       const done = atm.withdraw(money(amount))
 
       expect(done.ok).toBe(preview.ok)
@@ -239,6 +253,58 @@ describe('un deposito riuscito', () => {
   })
 })
 
+describe('il pool in arrivo, quando ha un tetto', () => {
+  /** Un caveau finto: il bancomat non sa da dove venga la risposta, e non deve saperlo (D017). */
+  const withCeiling = (capacity: string, current: string): Destination => ({
+    capacity: money(capacity),
+    current: money(current)
+  })
+
+  it('l’anteprima dice di no prima di premere, con la frase del Ledger', () => {
+    // Un prelievo porta denaro **verso** i contanti: fino a D017 l'anteprima mostrava un elenco di
+    // movimenti che il Ledger avrebbe poi rifiutato. Adesso dice di no subito, con lo **stesso**
+    // codice e le stesse due cifre — non una seconda spiegazione da tenere allineata.
+    const refused = previewOf(WITHDRAW, money('500'), withCeiling('1000', '900'))
+
+    expect(refused.ok).toBe(false)
+    if (refused.ok || refused.error.code !== 'error.ledger.capacity_exceeded') return
+    expect(refused.error.pool).toBe('cash')
+    expect(toString(refused.error.capacity)).toBe('1000')
+    expect(toString(refused.error.fits)).toBe('100')
+  })
+
+  it('e guarda quello che **arriva**, non quello che si è digitato', () => {
+    // La commissione è trattenuta: chi preleva 500,00 € ne riceve 497,50. Con 497,50 € di spazio
+    // l'operazione ci sta, e chiedere sull'importo lordo la rifiuterebbe per due euro e mezzo che
+    // non arrivano mai a destinazione.
+    const fee = toString(atmFee())
+
+    expect(previewOf(WITHDRAW, money('500'), withCeiling('497.5', '0')).ok).toBe(true)
+    expect(previewOf(WITHDRAW, money('500'), withCeiling('497.49', '0')).ok).toBe(false)
+    expect(fee).toBe('2.5')
+  })
+
+  it('senza tetto non chiede niente a nessuno', () => {
+    expect(previewOf(WITHDRAW, money('500'), { capacity: null, current: money('0') }).ok).toBe(true)
+  })
+
+  it('e il comando dice di no allo stesso modo, perché legge il tetto dal Ledger', () => {
+    // INV-18: la capienza che il comando guarda è quella del Ledger, cioè la stessa che il Ledger
+    // fa rispettare. Qui il Ledger ne ha una vera, non quella del `beforeEach` senza tetto.
+    const bus = createBus()
+    const capped = createLedger(bus, (pool) => (pool === 'cash' ? money('1000') : null))
+    capped.transaction(income('cash', money('900')), { reason: 'reason.income.tick' })
+    capped.transaction(income('card', money('1000')), { reason: 'reason.income.tick' })
+
+    const done = createAtm(capped).withdraw(money('500'))
+
+    expect(done.ok).toBe(false)
+    if (done.ok) return
+    expect(done.error.code).toBe('error.ledger.capacity_exceeded')
+    expect(toString(capped.balance('cash'))).toBe('900')
+  })
+})
+
 describe('depositi e prelievi mescolati', () => {
   it('la somma di tutti i conti resta zero, e i rifiuti non la spostano', () => {
     fund('cash', '2000')
@@ -268,7 +334,7 @@ describe('con cosa si paga', () => {
     // il pool del giocatore coinvolto era uno solo. Qui ce ne sono due, e l'elenco parziale morde
     // proprio quello che il giocatore voleva riempire.
     fund('card', '1000')
-    const preview = previewOf(WITHDRAW, money('500'))
+    const preview = previewOf(WITHDRAW, money('500'), into(WITHDRAW))
     if (!preview.ok) return
 
     const refused = ledger.transaction(preview.value, {

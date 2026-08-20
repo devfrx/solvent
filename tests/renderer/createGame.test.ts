@@ -28,8 +28,13 @@ beforeEach(() => {
 })
 
 describe('la registrazione dei sistemi', () => {
-  it('registra income, e una volta sola', () => {
-    expect(game.registry.systems().map((system) => system.id)).toEqual(['income'])
+  it('registra i due sistemi con stato, ognuno una volta sola e nel proprio ordine', () => {
+    // L'ordine non e' quello di registrazione: e' `ORDER`, e il caveau sta in `ECONOMY` (100),
+    // prima di `INCOME` (200). Non e' una preferenza — il caveau non ticchetta, quindi il suo
+    // `order` decide solo salvataggio e caricamento, ed e' li' che conta: al ricaricamento il
+    // livello torna **prima** che il recupero faccia ticchettare otto ore di stipendio contro la
+    // capienza di una partita appena nata.
+    expect(game.registry.systems().map((system) => system.id)).toEqual(['vault', 'income'])
   })
 
   it('non registra atm, che non è un sistema: non ha stato e non ticchetta', () => {
@@ -150,7 +155,7 @@ describe('il reset', () => {
 
     expect(total()).toBe('0')
     expect(toString(game.ctx.ledger.balance('card'))).toBe('0')
-    expect(game.registry.saveAll()).toEqual({ income: { upgraded: false } })
+    expect(game.registry.saveAll()).toEqual({ income: { upgraded: false }, vault: { level: 0 } })
   })
 
   it('hard è una partita nuova, quindi una casualità nuova', () => {
