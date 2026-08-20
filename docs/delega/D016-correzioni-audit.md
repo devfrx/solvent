@@ -1,6 +1,6 @@
 # D016 — Le correzioni dell'audit
 
-- **Stato:** Chiusa — commit `da annotare`. Scritta ed eseguita il 2026-08-20
+- **Stato:** Chiusa — commit `c648639`, ramo `d016-correzioni-audit`. Scritta ed eseguita il 2026-08-20
 - **Dipende da:** D015 (cioè tutto il codice della fetta 01)
 - **Sblocca:** [D013](D013-verifica-della-fetta.md), che è lo STOP 2
 - **ADR vincolanti:** 0001, 0004, 0008, 0011, 0014, 0017, 0018
