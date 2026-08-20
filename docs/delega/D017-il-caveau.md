@@ -151,6 +151,20 @@ permette.
 - [ ] la riga della fetta 02 nel [registro delle fette](../roadmap-fette.md) è corretta: niente
       `boundedList` salvato qui, e il perché
 
+## Lo stile con cui si disegna, e perché è provvisorio
+
+La direzione visiva del progetto **non è chiusa**: viene rifatta da zero a partire da
+`docs/design/mappa-funzionale.md`, che è stata scritta apposta senza nessuna decisione di design
+dentro. Ne discende che la preferenza [P2](../prodotto/preferenze.md) — «lo stile visivo del
+mockup è approvato» — e i token CSS di `App.vue` sono da considerare **provvisori**.
+
+Per questa delega significa una cosa sola, ed è liberatoria: il pannello del caveau si veste come
+quelli accanto, e non si spende un minuto a inventare una forma nuova. Quello che va fatto bene è
+**cosa** mostra — la capienza, quanto manca, e il fatto che il reddito si è fermato — perché è
+l'informazione a sopravvivere al design system, non il CSS che la porta. Lo stile attaccato al
+componente (la difesa contro il difetto A14) resta la regola proprio perché rende il ricambio
+economico: togliere il componente toglierà anche il suo stile.
+
 ## Trappole note
 
 - **A17.** Questa è la prima delega dopo uno STOP, cioè il momento di massimo rischio del progetto:
