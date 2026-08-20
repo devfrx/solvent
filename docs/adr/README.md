@@ -45,8 +45,14 @@ sola — _esiste un meccanismo che la impone, e qualcuno l'ha visto scattare?_ �
 stata pagata, rompendo ognuna di proposito e guardando il rosso. Le rotture sono in fondo a quella
 delega, e la riga di stato di ogni ADR porta la propria.
 
-Restano _Proposta_ tre decisioni, e per due è corretto: **0022** e **0023** descrivono cose che il
-progetto non ha ancora costruito, e diventeranno un fatto con il dominio che le userà. La terza è
+Il **0025** nasce allo STOP 2 con [D017](../delega/D017-il-caveau.md) ed è `Proposta` per la
+ragione giusta: il meccanismo che lo impone non è ancora stato scritto. È la prima decisione
+strutturale della fetta 02, e riguarda un confine del kernel — il Ledger smette di **leggere** la
+capienza di un pool e comincia a **chiederla**, perché il caveau dell'era 1 si amplia e una
+costante compilata non si amplia.
+
+Restano _Proposta_ quattro decisioni, e per tre è corretto: **0022**, **0023** e **0025** descrivono cose che il
+progetto non ha ancora costruito, e diventeranno un fatto con il dominio che le userà. La quarta è
 **0010**, e ha il meccanismo **a metà**: `boundedList<T>(max)` è l'unico costruttore e `max` è
 obbligatorio, ma la seconda frase della decisione — «il validatore del salvataggio rifiuta un array
 che supera il `max` dichiarato» — non ha niente da validare, perché nel payload della versione 1
@@ -82,6 +88,7 @@ fetta 02 a chiuderla.
 | [0022](0022-il-ledger-ha-conti-non-solo-pool.md)                               | Il Ledger ha conti, non solo pool                              | Proposta      | dove vive il denaro di un'entità creata dal giocatore                   | A05             |
 | [0023](0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)                      | Il tempo di gioco è un sistema di dominio                      | Proposta      | chi sa che giorno è, e come lo sanno gli altri                          | —               |
 | [0024](0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md) | Un sistema riceve per costruzione ciò che non sta nel contesto | **Accettata** | come un dominio ottiene ciò che il `SystemContext` non porta            | —               |
+| [0025](0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)                  | La capienza di un pool si chiede, non si legge                 | Proposta      | chi decide quanto tiene un pool, quando il tetto può crescere           | A05             |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è
@@ -124,24 +131,30 @@ Prese seguendo la direttiva _"la soluzione più coerente, professionale, meno pi
 Non bloccano, ma sono strutturali: se una non convince, il momento di dirlo è adesso — dopo tre
 domini costerebbe una migrazione.
 
-| Cosa                                                            | ADR                                                                            | Alternativa scartata                                                                           |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| Ogni transazione bilancia a zero                                | [0020](0020-partita-doppia.md)                                                 | movimenti singoli con categoria: più corto, ma la categoria è un'etichetta che nulla verifica  |
-| Il Ledger espone transazioni, non movimenti                     | [0019](0019-transazioni-atomiche-nel-ledger.md)                                | due `post()` con rollback nel chiamante: rimette la logica del denaro fuori dal Ledger         |
-| I pool dichiarano le proprie affordance come dati               | [0017](0017-il-denaro-e-plurale.md)                                            | un saldo unico con etichette nella UI                                                          |
-| `post()` non esiste: una primitiva sola                         | [0021](0021-una-sola-primitiva-per-il-denaro.md)                               | zucchero a due movimenti, che però rimetterebbe `world` e `sink` nei domini (INV-10)           |
-| Il Ledger avrà conti dinamici, non solo sei pool                | [0022](0022-il-ledger-ha-conti-non-solo-pool.md)                               | il budget di un'attività come stato del dominio: costa zero oggi e rende falsa la regola 6     |
-| Il tempo di gioco è un dominio, non il kernel                   | [0023](0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)                      | un `now` nel `SystemContext`: più diretto, ma aggiunge una chiave a `SavePayload`              |
-| Un sistema riceve per costruzione ciò che il contesto non porta | [0024](0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md) | un singleton in `balance/`: nessun parametro in più, e una dipendenza che sparisce dalle firme |
+| Cosa                                                                 | ADR                                                                            | Alternativa scartata                                                                                                                                           |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ogni transazione bilancia a zero                                     | [0020](0020-partita-doppia.md)                                                 | movimenti singoli con categoria: più corto, ma la categoria è un'etichetta che nulla verifica                                                                  |
+| Il Ledger espone transazioni, non movimenti                          | [0019](0019-transazioni-atomiche-nel-ledger.md)                                | due `post()` con rollback nel chiamante: rimette la logica del denaro fuori dal Ledger                                                                         |
+| I pool dichiarano le proprie affordance come dati                    | [0017](0017-il-denaro-e-plurale.md)                                            | un saldo unico con etichette nella UI                                                                                                                          |
+| `post()` non esiste: una primitiva sola                              | [0021](0021-una-sola-primitiva-per-il-denaro.md)                               | zucchero a due movimenti, che però rimetterebbe `world` e `sink` nei domini (INV-10)                                                                           |
+| Il Ledger avrà conti dinamici, non solo sei pool                     | [0022](0022-il-ledger-ha-conti-non-solo-pool.md)                               | il budget di un'attività come stato del dominio: costa zero oggi e rende falsa la regola 6                                                                     |
+| Il tempo di gioco è un dominio, non il kernel                        | [0023](0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)                      | un `now` nel `SystemContext`: più diretto, ma aggiunge una chiave a `SavePayload`                                                                              |
+| Un sistema riceve per costruzione ciò che il contesto non porta      | [0024](0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md) | un singleton in `balance/`: nessun parametro in più, e una dipendenza che sparisce dalle firme                                                                 |
+| La capienza di un pool si chiede al dominio, non si legge da `POOLS` | [0025](0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)                  | il dominio controlla prima e il kernel non si tocca: costa zero, e sposta l'invariante della capienza fuori dal Ledger — cioè il difetto A05 con un altro nome |
 
-Le prime tre sono ora **in vigore**: D007 le ha scritte. Cambiarle non costa più zero — costa il
-Ledger e i suoi test, che è ancora poco, ma non è più niente. Il momento buono per contestarle era
-prima di D007; il secondo momento buono è prima di D014, che sarà il primo dominio a usarle.
+Le prime quattro sono **in vigore** dalla fetta 01 e sono state usate da due domini: cambiarle
+costa il Ledger, i suoi test e i due domini. I due momenti buoni per contestarle — prima di D007 e
+prima di D014 — sono passati entrambi, e nessuna delle quattro si è rivelata scomoda usandole
+([D013](../delega/D013-verifica-della-fetta.md), punto 3 del rapporto).
 
-Le ultime due non sono in vigore e **non costano ancora niente**: nessuna riga di codice le
+Le due successive non sono in vigore e **non costano ancora niente**: nessuna riga di codice le
 applica. Contestarle oggi costa la modifica di un documento. Il momento in cui smetteranno di
 essere gratuite è il blocco B per il tempo e il blocco D per i conti — la sequenza sta in
 [roadmap-fette.md](../roadmap-fette.md).
+
+L'ultima, il **0025**, è dello STOP 2 e sta nel mezzo: non costa ancora niente perché nessuna riga
+la applica, ma [D017](../delega/D017-il-caveau.md) la applicherà nella sua prima ora. È il momento
+più economico in cui contestarla, ed è adesso.
 
 ## Decisioni deliberatamente rimandate
 

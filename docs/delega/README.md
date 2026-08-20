@@ -82,6 +82,7 @@ flowchart TD
   D014 --> D015
   D015 --> D016["D016 · Le correzioni dell'audit"]
   D016 --> D013["D013 · Verifica della fetta — STOP 2"]
+  D013 --> D017["D017 · Il caveau — fetta 02"]
 ```
 
 **D001 è prima di tutto, e non è un caso.** Le regole devono esistere prima del codice che
@@ -109,10 +110,12 @@ configurato dopo che c'erano già 156 file.
 | [D015](D015-home-bancomat.md)        | La home: bancomat, carta e cruscotto                                  | 725 codice + 321 test   | **Chiusa** |
 | [D016](D016-correzioni-audit.md)     | Le correzioni dell'audit del 2026-08-20                               | 186 codice + 326 test   | **Chiusa** |
 | [D013](D013-verifica-della-fetta.md) | Verifica della fetta — STOP 2                                         | 93 test + 17 di README  | **Chiusa** |
+| [D017](D017-il-caveau.md)            | Il caveau: i contanti hanno una capienza — fetta 02                   | ~250 codice + ~330 test | **Aperta** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede
-dove stanno davvero — D014 accanto a D010, D015 fra D012 e D013, D016 **prima** di D013.
+dove stanno davvero — D014 accanto a D010, D015 fra D012 e D013, D016 **prima** di D013. D017 è la
+prima della **fetta 02** e la prima con il numero al posto giusto: nasce dopo D016 e viene dopo.
 **La numerazione è cronologica, l'ordine è il grafo**: rinumerare romperebbe i riferimenti nei
 commit e nella tracciabilità.
 
