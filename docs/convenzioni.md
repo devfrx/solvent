@@ -82,7 +82,7 @@ Dall'esterno verso l'interno, gruppi separati da una riga vuota, imposto da `imp
 L'ordine non è estetico: se un file del kernel ha un import del gruppo 6 o 7, la violazione si
 vede a colpo d'occhio prima ancora che il lint parli.
 
-## Funzioni pure di dominio
+## Funzioni pure di dominio — R13
 
 I file `rules.ts` contengono **solo** funzioni pure:
 
@@ -93,6 +93,12 @@ I file `rules.ts` contengono **solo** funzioni pure:
 Chi ha bisogno del contesto è `system.ts`, che orchestra: legge dal contesto, chiama le regole
 pure, applica il risultato tramite il Ledger. La separazione è ciò che rende il dominio testabile
 con un seed fisso e senza impalcature.
+
+Il meccanismo è `tests/rules/pure-rules`, ed è **⚠️ parziale e lo dichiara**: cerca le forme in cui
+l'impurità entra — un `ctx` fra i parametri, una lettura dell'ora, un `emit`, un import di valore
+dal kernel — e non dimostra la purezza, che richiederebbe l'analisi del flusso. Fino a
+[D022](delega/D022-il-confine-disegnato-e-il-confine-vero.md) questa regola non aveva né un ID né
+una riga in [tracciabilita.md](tracciabilita.md): per la regola del progetto stesso, non esisteva.
 
 ## Test
 

@@ -117,9 +117,10 @@ delega.
 [D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md) la regola sotto cui nasce il secondo
 dominio con stato, e [D017](delega/D017-il-caveau.md) il caveau vero.
 [D018](delega/D018-la-scheda-di-dominio.md) corre accanto e non tocca nessuna delle altre. Prima
-di tutte viene [D021](delega/D021-un-numero-che-nessuno-conta-non-si-scrive.md), nata dall'audit
-dello STOP 2: è una regola, e le regole vengono prima del codice che governano. Quali deleghe siano
-aperte adesso lo dice [stato.md](stato.md).
+di tutte vengono [D021](delega/D021-un-numero-che-nessuno-conta-non-si-scrive.md) e
+[D022](delega/D022-il-confine-disegnato-e-il-confine-vero.md), nate dall'audit dello STOP 2: sono
+regole, e le regole vengono prima del codice che governano. Quali siano aperte adesso lo dice
+[stato.md](stato.md).
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto — e a dire quali sono, in ogni momento, è

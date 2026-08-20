@@ -13,16 +13,20 @@ Una freccia `A --> B` significa: **A può importare B**. Non esistono frecce all
 
 ```mermaid
 flowchart TD
-  subgraph MAIN["main + preload — Electron"]
+  subgraph PLAT["main + preload — Electron"]
+    MAIN["main/index.ts<br/>la finestra e le tre difese"]
     SAVE["main/save/*<br/>SaveFile · SaveStore · schema<br/>migrations · channels · ipc"]
     PRE["preload/index.ts"]
   end
 
   subgraph REND["renderer — Vue 3 + Pinia"]
-    CMP["components/*.vue"]
+    BOOT["main.ts<br/>il bootstrap"]
+    APP["App.vue<br/>il guscio: i sette stati"]
+    VIEWS["views/*.vue<br/>HomeView · StatsView"]
+    CMP["components/*<br/>sette componenti · rotation · postings"]
     I18N["i18n/*"]
     ST["stores/*"]
-    RT["runtime/*<br/>createGame · loop"]
+    RT["runtime/*<br/>createGame · loop · host"]
   end
 
   subgraph CORE["core — nessun Vue, Pinia o Electron"]
@@ -32,22 +36,39 @@ flowchart TD
     CON["contracts/*<br/>result · money · pools · ledger · lifecycle<br/>bounded · events · save · commands"]
   end
 
+  BOOT --> APP
+  BOOT --> ST
+  BOOT --> RT
+  BOOT --> I18N
+  APP --> VIEWS
+  APP --> ST
+  APP --> I18N
+  VIEWS --> CMP
+  VIEWS --> ST
+  VIEWS --> I18N
   CMP --> ST
   CMP --> I18N
   CMP --> CON
   I18N --> CON
   I18N --> DOM
+  I18N --> KER
+  I18N --> RT
   ST  --> RT
   ST  --> DOM
+  ST  --> KER
+  ST  --> BAL
+  ST  --> CON
   RT  --> DOM
   RT  --> KER
   RT  --> BAL
+  RT  --> CON
   DOM --> BAL
   DOM --> KER
-  BAL --> KER
-  KER --> CON
-  BAL --> CON
   DOM --> CON
+  BAL --> KER
+  BAL --> CON
+  KER --> CON
+  MAIN --> SAVE
   SAVE --> CON
   PRE --> CON
   PRE -->|solo channels.ts| SAVE
@@ -187,7 +208,7 @@ solvent/
                        no-logic-in-vue · no-literal-in-template
 ```
 
-## Le 12 regole e chi le fa rispettare
+## Le regole e chi le fa rispettare
 
 Legenda: **🔒 impossibile** = il tipo o la struttura non permettono di scriverlo.
 **✅ bloccato** = lint o test falliscono. **⚠️ parziale** = euristica, spiegata sotto.
@@ -206,12 +227,20 @@ Legenda: **🔒 impossibile** = il tipo o la struttura non permettono di scriver
 | 10  | Un solo stile di esito                     | `CommandHandler` ritorna `Result` per tipo + lint contro i literal con chiave `success`                    | ⚠️      |
 | 11  | Denaro `Decimal` end-to-end                | `Money = Decimal` è una classe + lint sulle conversioni nei domini                                         | 🔒      |
 | 12  | Nessuna stringa utente hardcoded           | Test di parità i18n (✅) + test euristico sui template `.vue` (⚠️)                                         | ✅ / ⚠️ |
+| 13  | Un file `rules.ts` è puro                  | `tests/rules/pure-rules`: nessun `ctx`, nessun effetto, nessuna lettura dell'ora                           | ⚠️      |
 
 **Quando entra ciascun meccanismo.** Alcune di queste regole sono già in vigore, altre nascono con
 la delega che le usa: la colonna _Delega_ di [tracciabilita.md](tracciabilita.md) dice quale, per
 ognuna. Qui c'è la forma finale del meccanismo, non la data.
 
-### Le due regole non meccanizzabili al 100%
+Il diagramma qui sopra non è un disegno: `tests/rules/import-graph` ricostruisce il grafo di
+import da `src/` e lo confronta con le sue frecce **nei due versi** — un arco reale non disegnato è
+rosso, un arco disegnato che non esiste è rosso, e un file che non appartiene a nessun nodo è rosso
+(regola C13, [D022](delega/D022-il-confine-disegnato-e-il-confine-vero.md)). Modella i **passaggi
+di livello**: un modulo che importa un fratello dello stesso livello è coesione interna, e non si
+disegna.
+
+### Le tre regole non meccanizzabili al 100%
 
 **Regola 10 — `Result` ovunque.** Il tipo copre i comandi, ma non impedisce a una funzione
 qualunque di ritornare `boolean`. Il lint `no-restricted-syntax` vieta i literal di oggetto con
@@ -223,6 +252,11 @@ chiave `success` (in vigore da D001, verificato in `tests/rules/lint-rules`). No
 **Regola 12 — nessuna stringa hardcoded.** La parità fra lingue è un test esatto. Il "nessun
 testo letterale nei template" è un test a regex sui nodi di testo dei `.vue`: cattura il caso
 normale, non le stringhe costruite dinamicamente. Meglio di niente, e onesto su cosa non vede.
+
+**Regola 13 — un `rules.ts` è puro.** Il test cerca le forme in cui l'impurità entra — un `ctx` fra
+i parametri, `Date.now`, un `emit`, un import di valore dal kernel — e non dimostra la purezza, che
+richiederebbe l'analisi del flusso. Una funzione che muta un array ricevuto per argomento gli
+sfugge. Fino a D022 questa regola non aveva nemmeno un ID.
 
 ## Configurazione non negoziabile
 

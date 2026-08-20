@@ -41,20 +41,21 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 
 ## Le 12 regole, per ID
 
-| ID  | Regola                                         | Forza   | Dove è configurata                                                                                      |
-| --- | ---------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------- |
-| R01 | Nessuno store importa un altro store           | ✅      | `eslint.config.js`                                                                                      |
-| R02 | Nessuna lista di sistemi scritta a mano        | ✅      | `Registry.ts` + `tests/rules/registry-completeness` e `-no-special-cases`                               |
-| R03 | `Math.random` solo in `Rng.ts`                 | ✅      | `eslint.config.js` — nessuna eccezione di file                                                          |
-| R04 | Nessun numero magico: di tempo e di denaro     | 🔒      | `Clock.ts` + `eslint.config.js` + `tick-rate` e `domains-no-money-literals`                             |
-| R05 | Nessuna logica di dominio nei `.vue`           | ✅      | `eslint.config.js` + `tests/rules/no-logic-in-vue`                                                      |
-| R06 | Nessun denaro fuori dal Ledger                 | 🔒      | `Ledger.ts` (closure) + `eslint.config.js` — il selettore guarda il **lato sinistro** dell'assegnamento |
-| R07 | Se un sistema ha stato, ha save/load/reset     | 🔒      | `Registry.ts` (tipo)                                                                                    |
-| R08 | Il contratto di salvataggio appartiene al main | 🔒      | `contracts/save.ts` + `main/save/schema.ts`                                                             |
-| R09 | Ogni lista storica ha un limite dichiarato     | 🔒      | `contracts/bounded.ts`                                                                                  |
-| R10 | Un solo stile di esito                         | ⚠️      | `contracts/commands.ts` + `eslint.config.js`                                                            |
-| R11 | Denaro `Decimal` end-to-end                    | 🔒      | `contracts/money.ts` + `eslint.config.js`                                                               |
-| R12 | Nessuna stringa utente hardcoded               | ✅ / ⚠️ | `tests/i18n/parity` + `tests/rules/no-literal-in-template`                                              |
+| ID  | Regola                                         | Forza   | Dove è configurata                                                                                                                          |
+| --- | ---------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| R01 | Nessuno store importa un altro store           | ✅      | `eslint.config.js`                                                                                                                          |
+| R02 | Nessuna lista di sistemi scritta a mano        | ✅      | `Registry.ts` + `tests/rules/registry-completeness` e `-no-special-cases`                                                                   |
+| R03 | `Math.random` solo in `Rng.ts`                 | ✅      | `eslint.config.js` — nessuna eccezione di file                                                                                              |
+| R04 | Nessun numero magico: di tempo e di denaro     | 🔒      | `Clock.ts` + `eslint.config.js` (domini, `balance/modifiers`, **e `renderer/**/*.ts` da D022**) + `tick-rate` e `domains-no-money-literals` |
+| R05 | Nessuna logica di dominio nei `.vue`           | ✅      | `eslint.config.js` + `tests/rules/no-logic-in-vue`                                                                                          |
+| R06 | Nessun denaro fuori dal Ledger                 | 🔒      | `Ledger.ts` (closure) + `eslint.config.js` — il selettore guarda il **lato sinistro** dell'assegnamento                                     |
+| R07 | Se un sistema ha stato, ha save/load/reset     | 🔒      | `Registry.ts` (tipo)                                                                                                                        |
+| R08 | Il contratto di salvataggio appartiene al main | 🔒      | `contracts/save.ts` + `main/save/schema.ts`                                                                                                 |
+| R09 | Ogni lista storica ha un limite dichiarato     | 🔒      | `contracts/bounded.ts`                                                                                                                      |
+| R10 | Un solo stile di esito                         | ⚠️      | `contracts/commands.ts` + `eslint.config.js`                                                                                                |
+| R11 | Denaro `Decimal` end-to-end                    | 🔒      | `contracts/money.ts` + `eslint.config.js`                                                                                                   |
+| R12 | Nessuna stringa utente hardcoded               | ✅ / ⚠️ | `tests/i18n/parity` + `tests/rules/no-literal-in-template`                                                                                  |
+| R13 | Un file `rules.ts` contiene solo funzioni pure | ⚠️      | `tests/rules/pure-rules` — cerca le forme dell'impurità, non dimostra la purezza                                                            |
 
 Regole di configurazione e di processo, con la stessa dignità:
 
@@ -72,6 +73,7 @@ Regole di configurazione e di processo, con la stessa dignità:
 | C10 | Nessun barrel: nessun file che si limiti a ri-esportare   | ✅      | `tests/rules/no-barrel` — guarda il contenuto, non il nome               |
 | C11 | Un fatto contabile ha un posto solo, ed è generato        | ✅ / ⚠️ | `docs/stato.md` + `tests/rules/project-state` e `tests/rules/docs-facts` |
 | C12 | Nessuna riga di tabella vive fuori da una tabella         | ✅      | `tests/rules/markdown-form`                                              |
+| C13 | Il diagramma delle dipendenze coincide con il grafo reale | ✅      | `tests/rules/import-graph` — nei due versi, e nessun file orfano         |
 | P01 | Una fetta verticale alla volta, nessun `TODO` nel codice  | ✅      | `docs/roadmap-fette.md` + `tests/rules/no-todo`                          |
 
 ## Invarianti derivati
@@ -170,15 +172,22 @@ più rimisurato.
    `INV` e `P` usati in **qualunque** documento ha la sua riga qui. Quaranta contro quaranta.
 
    La terza non è meccanizzabile e ha trovato qualcosa: una regola scritta in prosa **senza un
-   ID**, che per costruzione nessun conteggio poteva vedere. «I file `rules.ts` contengono solo
+   ID**, che per costruzione nessun conteggio poteva vedere: «I file `rules.ts` contengono solo
    funzioni pure — nessun `ctx`, nessun effetto, nessuna lettura dell'ora»
-   ([convenzioni.md](convenzioni.md)) è un confine architetturale vero — è ciò che rende un dominio
-   provabile con un seme fisso e senza impalcature — e non ha né riga né meccanismo: la tiene la
-   review, su due file. Il grilletto è nel [registro YAGNI](roadmap-fette.md), ed è il terzo
-   `rules.ts`.
+   ([convenzioni.md](convenzioni.md)). **Adesso ce l'ha**: è la regola **R13**, e il meccanismo è
+   `tests/rules/pure-rules` ([D022](delega/D022-il-confine-disegnato-e-il-confine-vero.md)). Il
+   grilletto del registro YAGNI diceva «il terzo `rules.ts`», che nasce dentro
+   [D017](delega/D017-il-caveau.md): era giusto su quando il problema diventa reale e sbagliato su
+   quando il meccanismo può ancora essere scritto da chi non ha interesse a passarlo.
 
-   Con essa cadono anche i **quattro nomi di file** che [convenzioni.md](convenzioni.md) affida
-   alla review — `PascalCase.ts` per il kernel, `camelCase.ts` per i moduli puri, `NNNN-slug` per
-   gli ADR, `DNNN-slug` per le deleghe. Il punto 5 qui sopra dice che C04 e C05 sono «le due sole
-   righe 👤 del progetto»: è vero delle **righe**, e questa è precisamente la distinzione che
-   D016 avvertiva di non confondere. Del progetto, le regole che dipendono da un occhio sono sette.
+   La stessa domanda inversa, rifatta all'audit dello STOP 2, ne ha trovato un secondo: le
+   **frecce** di [architettura.md](architettura.md) — «A può importare B» — non avevano nessun
+   meccanismo che confrontasse il disegno con il grafo vero, e il disegno ne aveva persi sei più
+   quattro nodi. È la regola **C13**.
+
+   Restano i **quattro nomi di file** che [convenzioni.md](convenzioni.md) affida alla review —
+   `PascalCase.ts` per il kernel, `camelCase.ts` per i moduli puri, `NNNN-slug` per gli ADR,
+   `DNNN-slug` per le deleghe. Il punto 5 qui sopra dice che C04 e C05 sono «le due sole righe 👤
+   del progetto»: è vero delle **righe**, e questa è precisamente la distinzione che D016
+   avvertiva di non confondere. Del progetto, le regole che dipendono da un occhio sono **sei**:
+   erano sette, e R13 ne ha tolta una.
