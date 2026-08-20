@@ -41,8 +41,9 @@ leggi che tengono il gioco bilanciato stanno in [prodotto/visione.md](../prodott
 | D012 — guscio e parole   | **chiusa**, commit `fb45d71`                                             |
 | D015 — home e bancomat   | **chiusa**, commit `3aa3460`                                             |
 | D016 — correzioni audit  | **chiusa**, commit `c648639`, unita a `main` da D013                     |
+| D013 — verifica, STOP 2  | **chiusa**, commit `c5d534c`                                             |
 | Kernel                   | **finito** — 471 righe in `kernel/`, **545 con `balance/`** (D003–D008)  |
-| Persistenza nel main     | **finita** — 244 righe in `src/main/` e `src/preload/`                   |
+| Persistenza nel main     | **finita** — 246 righe in `src/main/` e `src/preload/`                   |
 | Codice di dominio        | **`income` 104 righe, `atm` 64** — i due della fetta 01                  |
 | Fetta 01                 | **conclusa** — verificata da D013, lo STOP 2, otto passi manuali su otto |
 | Renderer                 | **1.729 righe**, di cui 439 di CSS e 369 sotto `i18n/`                   |

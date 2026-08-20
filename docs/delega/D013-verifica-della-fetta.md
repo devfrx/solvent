@@ -1,6 +1,6 @@
 # D013 — Verifica della fetta (STOP 2)
 
-- **Stato:** **Chiusa** — 2026-08-20, commit `DA-ANNOTARE`, ramo `d013-verifica-della-fetta`.
+- **Stato:** **Chiusa** — 2026-08-20, commit `c5d534c`, ramo `d013-verifica-della-fetta`.
   Preparata per l'esecuzione lo stesso giorno, con la fetta 01 davanti
 - **Dipende da:** D016 (cioè tutto). Le quindici deleghe che la precedono sono tutte `Chiusa`
 - **Sblocca:** la decisione sulla fetta 02
