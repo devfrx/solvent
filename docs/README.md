@@ -20,6 +20,7 @@ Mappa di tutto ciò che è scritto, a cosa serve, e quanto ci si può fidare che
 | [design/flusso-tick.md](design/flusso-tick.md)                     | cosa succede fra un frame e un cambiamento di saldo                                 | **vivo**        |
 | [design/flusso-salvataggio.md](design/flusso-salvataggio.md)       | chi possiede il contratto di salvataggio, e come si migra                           | **vivo**        |
 | [design/ciclo-di-vita.md](design/ciclo-di-vita.md)                 | in quali stati può trovarsi l'applicazione                                          | **vivo**        |
+| [design/mappa-funzionale.md](design/mappa-funzionale.md)           | cosa fa il software e cosa deve reggere l'interfaccia, per chi progetta il design   | snapshot        |
 | [design/mockups/](design/mockups/)                                 | com'è fatta la schermata, e in quali stati                                          | snapshot        |
 | [delega/PASSAGGIO-DI-CONSEGNE.md](delega/PASSAGGIO-DI-CONSEGNE.md) | dove siamo, cosa non fare, qual è il prossimo passo — per chi arriva ora            | **vivo**        |
 | [delega/](delega/)                                                 | i pacchetti di lavoro: cosa fare, cosa non fare, quando è finito                    | si **chiudono** |
@@ -93,9 +94,14 @@ Con [D016](delega/D016-correzioni-audit.md) il gioco **non perde più la partita
 audit dell'intera codebase e di questi documenti, il 2026-08-20, ha trovato diciassette difetti, di
 cui uno critico — chiudere la finestra dalla schermata d'errore scriveva una partita vuota sopra il
 salvataggio del giocatore. Con le correzioni sono nati due meccanismi per due regole che stavano
-solo in prosa (C09, C10) e un invariante nuovo (INV-17). La prossima delega è
-[D013 — Verifica della fetta](delega/D013-verifica-della-fetta.md), che è lo **STOP 2**: nessun
-codice nuovo, e la decisione sulla fetta 02.
+solo in prosa (C09, C10) e un invariante nuovo (INV-17).
+
+Con [D013](delega/D013-verifica-della-fetta.md) la fetta 01 è **conclusa**, e il progetto è allo
+**STOP 2**. Nessun codice di gioco nuovo: un terzo round-trip che gioca una partita vera e la fa
+attraversare il disco, un `README.md` alla radice, gli otto passi del percorso manuale eseguiti
+davvero, e cinque ADR che passano ad _Accettata_ dopo aver visto scattare il proprio meccanismo. Ha
+trovato tre cose che nessun gate poteva vedere, e il rapporto è in fondo a quella delega. La
+domanda adesso è se parte la **fetta 02**, e con quale forma.
 
 Gli ADR restano in stato _Proposta_ finché il codice non li impone davvero: passano ad _Accettata_
 delega per delega, non per decreto. Con D002 sono passati
@@ -113,5 +119,17 @@ delega per delega, non per decreto. Con D002 sono passati
 [0024](adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md), con D011
 [0001](adr/0001-simulazione-nel-renderer-core-puro.md) e
 [0009](adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md), con D012
-[0011](adr/0011-i18n-obbligatoria-con-parita-verificata.md) e con D015
-[0018](adr/0018-la-home-e-un-atm.md).
+[0011](adr/0011-i18n-obbligatoria-con-parita-verificata.md), con D015
+[0018](adr/0018-la-home-e-un-atm.md) e con D013
+[0008](adr/0008-nome-e-identita-del-prodotto.md),
+[0012](adr/0012-controlli-sul-codice-morto-sempre-accesi.md),
+[0013](adr/0013-prettier-e-autorita-sulla-formattazione.md),
+[0014](adr/0014-una-fetta-verticale-alla-volta.md) e
+[0015](adr/0015-criterio-di-ammissione-delle-dipendenze.md).
+
+Restano _Proposta_ in tre, e per ognuna è scritto perché:
+[0022](adr/0022-il-ledger-ha-conti-non-solo-pool.md) e
+[0023](adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md) descrivono cose che il progetto non ha
+ancora costruito, e [0010](adr/0010-liste-storiche-limitate-alla-definizione.md) ha **metà**
+meccanismo — il costruttore con il `max` obbligatorio esiste, il validatore che lo fa rispettare non
+ha ancora nessun array da validare.

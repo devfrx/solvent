@@ -1,6 +1,8 @@
 # ADR 0008 — Un solo nome, deciso prima del primo file
 
-- **Stato:** Proposta — richiede la scelta dell'utente
+- **Stato:** **Accettata** — [D013](../delega/D013-verifica-della-fetta.md): il nome è stato scelto
+  allo STOP 1, e `tests/rules/product-identity` lo tiene identico in `package.json`,
+  `electron-builder.yml` e a runtime nel main. Visto rosso: `expected 'Bankroll' to be 'Solvent'`
 - **Data:** 2026-08-19
 
 ## Contesto

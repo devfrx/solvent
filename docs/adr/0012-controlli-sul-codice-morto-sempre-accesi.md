@@ -1,6 +1,8 @@
 # ADR 0012 — `noUnusedLocals` e `noUnusedParameters` non si spengono mai
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — [D013](../delega/D013-verifica-della-fetta.md): i due flag sono in
+  `tsconfig.base.json` e non sono mai stati spenti. Visto rosso su una costante mai letta:
+  `error TS6133: 'unusedByDesign' is declared but its value is never read`
 - **Data:** 2026-08-19
 - **Copre il difetto:** A14 (`theme.css` morto per 1.067 righe, API morte in `usePlayerStore`)
 

@@ -30,8 +30,10 @@ Ogni delega dichiara un ordine di grandezza. Non è un limite contrattuale: è u
 Se la delega del Registry dichiara ~140 righe e ne stai scrivendo 400, non hai sforato un budget:
 stai risolvendo un problema diverso da quello descritto. Fermati e dillo, invece di continuare.
 
-Il kernel intero — D003 fino a D008 — sta in 535 righe (il dettaglio, e come ci è arrivato, è
-[nell'indice](#indice)). È una specifica, non una speranza.
+Il kernel intero — D003 fino a D008 — dichiarava ~500 righe e ne misura **545** (il dettaglio, e
+come ci è arrivato, è [nell'indice](#indice)). È una specifica, non una speranza: il 9% di
+sforamento ha un nome per ogni riga, ed è per questo che si può dire com'è successo invece di
+scoprirlo alla fine.
 
 ## Ciclo di vita
 
@@ -89,24 +91,24 @@ configurato dopo che c'erano già 156 file.
 
 ## Indice
 
-| ID                                   | Titolo                                                                | Budget                  | Stato         |
-| ------------------------------------ | --------------------------------------------------------------------- | ----------------------- | ------------- |
-| [D001](D001-tooling-e-gate.md)       | Tooling, regole e gate di qualità                                     | 191 config + 265 test   | **Chiusa**    |
-| [D002](D002-contratti.md)            | Contratti: `Result`, `Money`, `bounded`, eventi, salvataggio, comandi | 113 codice + 417 test   | **Chiusa**    |
-| [D003](D003-kernel-clock.md)         | Kernel: Clock                                                         | 20 codice + 116 test    | **Chiusa**    |
-| [D004](D004-kernel-rng.md)           | Kernel: Rng                                                           | 55 codice + 172 test    | **Chiusa**    |
-| [D005](D005-kernel-bus.md)           | Kernel: Bus                                                           | 67 codice + 303 test    | **Chiusa**    |
-| [D006](D006-kernel-registry.md)      | Kernel: Registry                                                      | 124 codice + 406 test   | **Chiusa**    |
-| [D007](D007-kernel-ledger.md)        | Kernel: Ledger — pool, transazioni atomiche, partita doppia           | 197 codice + 420 test   | **Chiusa**    |
-| [D008](D008-balance.md)              | Balance: costanti, modificatori, bersagli                             | 70 codice + 154 test    | **Chiusa**    |
-| [D009](D009-persistenza-main.md)     | Persistenza nel processo main                                         | 259 codice + 591 test   | **Chiusa**    |
-| [D010](D010-dominio-income.md)       | Dominio: income                                                       | 102 codice + 302 test   | **Chiusa**    |
-| [D014](D014-dominio-bancomat.md)     | Dominio: bancomat — deposita, preleva, commissione                    | 65 codice + 548 test    | **Chiusa**    |
-| [D011](D011-runtime-e-store.md)      | Runtime e store                                                       | 379 codice + 774 test   | **Chiusa**    |
-| [D012](D012-ui-e-i18n.md)            | Il guscio, le parole e il reddito                                     | 1.060 codice + 740 test | **Chiusa**    |
-| [D015](D015-home-bancomat.md)        | La home: bancomat, carta e cruscotto                                  | 725 codice + 321 test   | **Chiusa**    |
-| [D016](D016-correzioni-audit.md)     | Le correzioni dell'audit del 2026-08-20                               | 186 codice + 326 test   | **Chiusa**    |
-| [D013](D013-verifica-della-fetta.md) | Verifica della fetta — STOP 2                                         | ~120 test + README      | **Preparata** |
+| ID                                   | Titolo                                                                | Budget                  | Stato      |
+| ------------------------------------ | --------------------------------------------------------------------- | ----------------------- | ---------- |
+| [D001](D001-tooling-e-gate.md)       | Tooling, regole e gate di qualità                                     | 191 config + 265 test   | **Chiusa** |
+| [D002](D002-contratti.md)            | Contratti: `Result`, `Money`, `bounded`, eventi, salvataggio, comandi | 113 codice + 417 test   | **Chiusa** |
+| [D003](D003-kernel-clock.md)         | Kernel: Clock                                                         | 20 codice + 116 test    | **Chiusa** |
+| [D004](D004-kernel-rng.md)           | Kernel: Rng                                                           | 55 codice + 172 test    | **Chiusa** |
+| [D005](D005-kernel-bus.md)           | Kernel: Bus                                                           | 67 codice + 303 test    | **Chiusa** |
+| [D006](D006-kernel-registry.md)      | Kernel: Registry                                                      | 124 codice + 406 test   | **Chiusa** |
+| [D007](D007-kernel-ledger.md)        | Kernel: Ledger — pool, transazioni atomiche, partita doppia           | 197 codice + 420 test   | **Chiusa** |
+| [D008](D008-balance.md)              | Balance: costanti, modificatori, bersagli                             | 70 codice + 154 test    | **Chiusa** |
+| [D009](D009-persistenza-main.md)     | Persistenza nel processo main                                         | 259 codice + 591 test   | **Chiusa** |
+| [D010](D010-dominio-income.md)       | Dominio: income                                                       | 102 codice + 302 test   | **Chiusa** |
+| [D014](D014-dominio-bancomat.md)     | Dominio: bancomat — deposita, preleva, commissione                    | 65 codice + 548 test    | **Chiusa** |
+| [D011](D011-runtime-e-store.md)      | Runtime e store                                                       | 379 codice + 774 test   | **Chiusa** |
+| [D012](D012-ui-e-i18n.md)            | Il guscio, le parole e il reddito                                     | 1.060 codice + 740 test | **Chiusa** |
+| [D015](D015-home-bancomat.md)        | La home: bancomat, carta e cruscotto                                  | 725 codice + 321 test   | **Chiusa** |
+| [D016](D016-correzioni-audit.md)     | Le correzioni dell'audit del 2026-08-20                               | 186 codice + 326 test   | **Chiusa** |
+| [D013](D013-verifica-della-fetta.md) | Verifica della fetta — STOP 2                                         | 93 test + 17 di README  | **Chiusa** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede
@@ -127,8 +129,11 @@ strada: la definizione di fatto arriva tutta insieme alla fine. Il taglio passa 
 che non sono due schermate ma due momenti — gli **stati** e il reddito da una parte, la **home**
 col bancomat dall'altra.
 
-Il kernel — D003, D004, D005, D006, D007, D008 — è **finito**, e sta in **535 righe**: Clock 20,
-Rng 55, Bus 67, Registry 126, Ledger 197, Balance 70. Il budget iniziale era ~500, poi ~560 quando
+Il kernel — D003, D004, D005, D006, D007, D008 — è **finito**, e a D008 stava in **535 righe**:
+Clock 20, Rng 55, Bus 67, Registry 126, Ledger 197, Balance 70. Rimisurato a
+[D013](D013-verifica-della-fetta.md) fa **545**, e le dieci righe in più sono due: sei al Clock, che
+a D011 ha preso `ticksToMilliseconds` e il tipo `Milliseconds` per il loop, e quattro a `balance/`,
+con `ATM_FEE` e i quattro importi rapidi. Il budget iniziale era ~500, poi ~560 quando
 gli ADR 0017/0019/0020 hanno fatto crescere il Ledger, poi ~530 perché le prime quattro deleghe
 erano uscite sotto la stima, poi ~555 quando il Ledger ha ripreso quei 25 e qualcosa in più. Il
 Balance è rientrato di venti. Nessuna delle cinque cifre è stata subita: ognuna è dichiarata dov'è

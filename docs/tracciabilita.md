@@ -108,10 +108,11 @@ contro una violazione reale è quasi sempre una regola che non funziona.
 
 ## Cosa questa tabella NON copre
 
-Le sei righe oneste, perché una matrice di tracciabilità che si dichiara completa è la prima
-cosa che invecchia male. Erano «tre» davanti a un elenco di quattro fin da prima di D015, e a
-[D016](delega/D016-correzioni-audit.md) sono sei: è esattamente il difetto che questo documento
-avverte di cercare — un numero scritto una volta e mai più rimisurato.
+Le sette righe oneste, perché una matrice di tracciabilità che si dichiara completa è la prima
+cosa che invecchia male. Erano «tre» davanti a un elenco di quattro fin da prima di D015, sei a
+[D016](delega/D016-correzioni-audit.md) e sette da [D013](delega/D013-verifica-della-fetta.md): è
+esattamente il difetto che questo documento avverte di cercare — un numero scritto una volta e mai
+più rimisurato.
 
 1. **R10 fuori dai comandi.** Il lint vieta i literal con chiave `success`, ma non impedisce a una
    funzione qualsiasi di ritornare `boolean`. Copre la seconda convenzione, non il degrado.
@@ -157,3 +158,25 @@ avverte di cercare — un numero scritto una volta e mai più rimisurato.
 
    La riga che stava qui — _R02 finché il bootstrap non esiste_ — **è chiusa**: `createGame.ts`
    esiste da D011, e `registry-completeness` fa un confronto secco.
+
+7. **La tabella censisce ciò che qualcuno ha messo in tabella.** È la lezione di
+   [D016](delega/D016-correzioni-audit.md), e [D013](delega/D013-verifica-della-fetta.md) l'ha
+   applicata come verifica invece che come racconto, in tre direzioni.
+
+   Le prime due sono verdi e meccanizzabili, e sono state eseguite: ogni meccanismo nominato qui
+   esiste come file — nessuna riga punta al vuoto — e ognuno dei quaranta identificatori `R`, `C`,
+   `INV` e `P` usati in **qualunque** documento ha la sua riga qui. Quaranta contro quaranta.
+
+   La terza non è meccanizzabile e ha trovato qualcosa: una regola scritta in prosa **senza un
+   ID**, che per costruzione nessun conteggio poteva vedere. «I file `rules.ts` contengono solo
+   funzioni pure — nessun `ctx`, nessun effetto, nessuna lettura dell'ora»
+   ([convenzioni.md](convenzioni.md)) è un confine architetturale vero — è ciò che rende un dominio
+   provabile con un seme fisso e senza impalcature — e non ha né riga né meccanismo: la tiene la
+   review, su due file. Il grilletto è nel [registro YAGNI](roadmap-fette.md), ed è il terzo
+   `rules.ts`.
+
+   Con essa cadono anche i **quattro nomi di file** che [convenzioni.md](convenzioni.md) affida
+   alla review — `PascalCase.ts` per il kernel, `camelCase.ts` per i moduli puri, `NNNN-slug` per
+   gli ADR, `DNNN-slug` per le deleghe. Il punto 5 qui sopra dice che C04 e C05 sono «le due sole
+   righe 👤 del progetto»: è vero delle **righe**, e questa è precisamente la distinzione che
+   D016 avvertiva di non confondere. Del progetto, le regole che dipendono da un occhio sono sette.

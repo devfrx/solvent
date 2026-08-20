@@ -16,7 +16,9 @@ Questo documento dice quali sono, cosa garantisce ciascuno, e cosa nessuno di es
 | G5  | `npm run build`        | l'applicazione si compila davvero, main e renderer                                              | decine di secondi |
 
 Rimisurati a [D016](delega/D016-correzioni-audit.md) chiusa su Windows, con 497 test: i quattro
-gate fanno 16 + 10 + 6 + 7, e `verify` sta fra **42 e 45 s** su due esecuzioni. Sono tempi **di
+gate fanno 16 + 10 + 6 + 7, e `verify` sta fra **42 e 45 s** su due esecuzioni. A
+[D013](delega/D013-verifica-della-fetta.md), con 503 test su 55 file, la catena intera misura
+**41,4 s**: sei test in più non si vedono, perché ciò che domina non sono i test. Sono tempi **di
 parete**, quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena
 tre `npm run`.
 
@@ -35,8 +37,8 @@ Due comandi, non uno, ed è deliberato:
 
 **Perché separati.** Il tempo atteso è parte della specifica: un gate lento viene aggirato. I
 quattro veloci stanno **sotto il minuto** — venticinque secondi a D006, trentuno a D007, fra
-ventisette e trenta a D008, ventotto e ventinove a D009, trentacinque a D012, fra **quarantadue e
-quarantacinque a D016** — e si eseguono a ogni modifica; la compilazione costa un ordine di
+ventisette e trenta a D008, ventotto e ventinove a D009, trentacinque a D012, fra quarantadue e
+quarantacinque a D016 e **quarantuno a D013** — e si eseguono a ogni modifica; la compilazione costa un ordine di
 grandezza in più e serve prima di un rilascio, non prima di un salvataggio. Se `verify` supera il
 minuto, è un problema da risolvere, non da tollerare, e il rimedio è già censito nel
 [registro YAGNI](roadmap-fette.md): togliere l'avvio di `npm` ripetuto, non togliere un gate.
@@ -104,7 +106,16 @@ stato dell'Rng con almeno uno stream avanzato, e una lista limitata con almeno u
 
 Da D009 il giro esiste, in `tests/save/kernel-roundtrip`, e c'è un caso che verifica che lo stato
 di partenza sia davvero non banale — cinque conti su sei mossi, due stream avanzati di quantità
-diverse, un sistema con stato. **La lista limitata manca**, e non per dimenticanza: nel payload
+diverse, un sistema con stato.
+
+Da [D013](delega/D013-verifica-della-fetta.md) i round-trip sono **tre**, e rispondono a tre
+domande che non si coprono a vicenda: `roundtrip` prova il confine del main con payload scritti a
+mano, `kernel-roundtrip` prova che lo schema accetti ciò che il kernel produce — con un sistema
+finto, perché a D009 nessun dominio esisteva — e `game-roundtrip` prova **la partita**: un
+`createGame()` che gioca davvero, il disco vero, e un secondo `createGame()` che rilegge. L'ultimo
+è l'unico che vede la differenza fra «i byte sono tornati» e «il gioco è tornato»: lo stato salvato
+è dato, e il gioco è quel dato **più** ciò che il `load` ricostruisce — qui il moltiplicatore
+dell'upgrade, che nel salvataggio non c'è. **La lista limitata manca**, e non per dimenticanza: nel payload
 della versione 1 non c'è nessun array, e la voce ha un grilletto nel
 [registro YAGNI](roadmap-fette.md). Entra con il caveau della fetta 02, insieme al primo
 `boundedList` che finisce davvero nel salvataggio.
@@ -136,7 +147,12 @@ Detto qui perché un elenco di gate produce l'illusione opposta:
 
 - **Che il gioco sia bilanciato.** `targets.ts` verifica intervalli che abbiamo scelto noi. Se
   l'intervallo è sbagliato, il test è verde e il gioco è noioso.
-- **Che la UI sia usabile.** Nessun test lo misura.
+- **Che la UI sia usabile.** Nessun test lo misura, e
+  [D013](delega/D013-verifica-della-fetta.md) ha riscosso questa riga con un caso preciso: le
+  ultime operazioni mostrano davvero i tre movimenti di un deposito — INV-11 è verde, e a ragione —
+  ma il reddito emette una transazione ogni tick, dieci al secondo, quindi quei tre movimenti
+  restano visibili meno di mezzo secondo. Ogni test che li riguarda passa. A vederlo è servito
+  guardare lo schermo mentre il tempo passava, che è la cosa che nessun gate fa.
 - **Che le traduzioni siano giuste.** Il test verifica che ci siano, non che vogliano dire qualcosa.
 - **Che l'architettura regga alla decima fetta.** Lo dimostra solo la decima fetta. È il motivo per
   cui la prima è una sola (ADR 0014).
