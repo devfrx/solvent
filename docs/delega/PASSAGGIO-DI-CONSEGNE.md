@@ -30,46 +30,24 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                             |                                                                                                                                     |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                      | **approvato** — nome, stile, dipendenze, architettura                                                                               |
-| D001 — tooling e gate       | **chiusa**, commit `e275f59`                                                                                                        |
-| D002 — contratti            | **chiusa**, commit `288367e`                                                                                                        |
-| D003 — kernel: Clock        | **chiusa**, commit `f398a47`                                                                                                        |
-| D004 — kernel: Rng          | **chiusa**, commit `a87d8cf`                                                                                                        |
-| D005 — kernel: Bus          | **chiusa**, commit `e9cf441`                                                                                                        |
-| D006 — kernel: Registry     | **chiusa**, commit `39b8520`                                                                                                        |
-| D007 — kernel: Ledger       | **chiusa**, commit `f9a0c59`                                                                                                        |
-| D008 — balance              | **chiusa**, commit `e01e885`                                                                                                        |
-| D009 — persistenza main     | **chiusa**, commit `256f622`                                                                                                        |
-| D010 — dominio income       | **chiusa**, commit `b98f025`                                                                                                        |
-| D014 — dominio bancomat     | **chiusa**, commit `a0b3b9f`                                                                                                        |
-| D011 — runtime e store      | **chiusa**, commit `dbf821c`                                                                                                        |
-| D012 — guscio e parole      | **chiusa**, commit `fb45d71`                                                                                                        |
-| D015 — home e bancomat      | **chiusa**, commit `3aa3460`                                                                                                        |
-| D016 — correzioni audit     | **chiusa**, commit `c648639`, unita a `main` da D013                                                                                |
-| D013 — verifica, STOP 2     | **chiusa**, commit `c5d534c`                                                                                                        |
-| D021 — l'audit dello STOP 2 | **aperta** — scritta il 2026-08-20 dall'audit di tutta la codebase e di tutti i documenti                                           |
-| D019 — il pagamento         | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                                                                       |
-| D020 — la validazione       | **aperta** — scritta il 2026-08-20, e viene **prima** di D017                                                                       |
-| D017 — il caveau            | **aperta e preparata** — scritta e misurata allo STOP 2, non ancora eseguita                                                        |
-| D018 — la scheda dominio    | **aperta** — solo documenti, non tocca nessuna delle altre                                                                          |
-| Kernel                      | **finito** — 471 righe in `kernel/`, **545 con `balance/`** (D003–D008)                                                             |
-| Persistenza nel main        | **finita** — 246 righe in `src/main/` e `src/preload/`                                                                              |
-| Codice di dominio           | **`income` 104 righe, `atm` 64** — i due della fetta 01                                                                             |
-| Fetta 01                    | **conclusa** — verificata da D013, lo STOP 2, otto passi manuali su otto                                                            |
-| Renderer                    | **1.729 righe**, di cui 439 di CSS e 369 sotto `i18n/`                                                                              |
-| `npm run verify`            | **verde** — 503 test su 55 file, 41,4 s                                                                                             |
-| `npm run verify:release`    | **verde** — il renderer compila: 91 moduli, 564,89 kB                                                                               |
-| Prossimo passo              | **[D019](D019-il-pagamento.md)** o **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)** — non si toccano, in qualunque ordine |
+|                          |                                                                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                          |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                 |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md) |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                      |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                |
+| Domini                   | i due della fetta 01: `income` ha stato e ticchetta, `atm` è due comandi e basta                                                       |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
+| `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 565,00 kB (misurato il 2026-08-20)                                                         |
+| Prossimo passo           | **[D019](D019-il-pagamento.md)** o **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)** — non si toccano, in qualunque ordine    |
 
-I conteggi di riga sono **righe di codice, commenti e righe vuote escluse**, ed è lo stesso metodo
-per tutti: la riga che diceva che il kernel «usa un altro metodo» era sbagliata, e a scoprirlo è
-stata D013. Il 535 di D008 e il budget di ~500 misurano le **sei deleghe D003–D008**, cioè i cinque
-moduli di `kernel/` **più `balance/`**; oggi quell'insieme fa **545**, cresciuto di dieci righe —
-sei al Clock per il loop di D011, quattro a `balance/` per il bancomat. La cartella
-`src/core/kernel/` da sola fa 471, ed è un numero da non confrontare con ~500: sono due insiemi
-diversi, entrambi veri.
+**Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
+[D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
+e generato, [stato.md](../stato.md), e nessun documento vivo li ripete (regola C11). È la stessa
+mossa del Registry contro le cinque liste: non si controlla che due cose coincidano, si fa in modo
+che ce ne sia una sola.
 
 I contratti sono in `src/core/contracts/`, Clock, Rng, Bus, Registry e Ledger in
 `src/core/kernel/`, i numeri di gioco in `src/core/balance/`, lo schema del salvataggio e i tre
@@ -110,6 +88,24 @@ una delega chiusa è un documento storico: nessuno la rilegge.
   si chiude **senza scrivere**, perché quello che c'è in memoria non è la partita di nessuno.
 - **Nessun barrel** (C10) e **nessuna parola vietata nei nomi** (C09): due regole che stavano solo
   in prosa e adesso hanno un test — `tests/rules/no-barrel` e `tests/rules/forbidden-words`.
+- **Se apri o chiudi una delega, o aggiungi un ADR, `docs/stato.md` va rigenerato** — altrimenti il
+  gate è rosso, ed è voluto (C11). Il comando è `npx vitest run tests/rules/project-state -u`. Quel
+  file **non si scrive a mano**: lo produce `tests/helpers/projectState.ts` leggendo il repo.
+- **Non scrivere in un documento vivo un numero che `stato.md` conta.** Quanti ADR ci sono, quali
+  sono `Proposta`, quante deleghe sono aperte, quanti documenti: se ti serve dirlo, **linka**
+  invece di ricopiare (C11). Vale per i documenti vivi, non per ADR e deleghe, che raccontano il
+  momento in cui sono stati scritti.
+- **Se sposti un confine fra livelli, il diagramma di [architettura.md](../architettura.md) cambia
+  nello stesso commit** — e adesso non è più disciplina: `tests/rules/import-graph` confronta il
+  disegno con il grafo di import vero **nei due versi**, e pretende che ogni file di `src/`
+  appartenga a un nodo (C13). Una cartella nuova va aggiunta anche alla mappa dentro quel test.
+- **Un file `rules.ts` è puro, e c'è un test** (R13): niente `ctx`, niente `Date.now`, niente
+  `emit`, niente import di valore da `Bus`, `Ledger` o `Registry`. Gli import di **soli tipi**
+  passano.
+- **`no-magic-numbers` copre adesso anche `src/renderer/**/*.ts`** (R04). Un numero di gioco nella
+  UI va in `balance/`; un numero di presentazione prende un nome.
+- **Nessuna riga che comincia con `|` fuori da una tabella** (C12). Sembra pedante finché non
+  spezzi una tabella in due con un paragrafo e la voce diventa invisibile: è successo.
 
 **Le deleghe aperte sono quelle che [stato.md](../stato.md) elenca**, e l'ordine in cui si
 eseguono è il grafo in [README.md](README.md). [D013](D013-verifica-della-fetta.md) è chiusa e la
@@ -119,19 +115,23 @@ passo_ in fondo.
 Il rapporto dello STOP 2 sta in fondo a quella delega, insieme a undici correzioni. Le quattro cose
 che chi arriva adesso deve sapere, e che nessun'altra pagina dice:
 
-1. **Il kernel non è sotto budget: è il 9% sopra**, e va saputo perché la prima risposta di D013
-   diceva il contrario. 545 righe contro ~500 per le sei deleghe D003–D008; le 471 di
-   `src/core/kernel/` sono un altro insieme, senza `balance/`. Lo sforamento è dichiarato riga per
-   riga in [README.md](README.md).
+1. **Il kernel non è sotto budget: è sopra di circa il 9%**, e va saputo perché la prima risposta
+   di D013 diceva il contrario. Il budget di ~500 righe misurava le **sei** deleghe D003–D008, cioè
+   `kernel/` **più** `balance/`: la sola cartella `kernel/` è un altro insieme, e confrontarla con
+   ~500 è l'errore che è già stato fatto una volta. Le due misure stanno in
+   [stato.md](../stato.md), e lo sforamento è dichiarato riga per riga in [README.md](README.md).
 2. **Le ultime operazioni sono sommerse dallo stipendio.** Il reddito emette una transazione per
    tick, dieci al secondo: un deposito resta visibile meno di mezzo secondo sulla home, e il
    registro da venti della schermata Statistiche è tutto stipendio dopo due secondi. Ogni test
    è verde, e a ragione — nessuno di loro guarda lo schermo mentre il tempo passa. È nel
    [registro YAGNI](../roadmap-fette.md) con il grilletto della fetta 02.
-3. **Una regola del progetto non ha ancora un meccanismo.** «I file `rules.ts` contengono solo
-   funzioni pure» ([convenzioni.md](../convenzioni.md)) è un confine vero, senza ID e senza riga in
-   [tracciabilita.md](../tracciabilita.md): la tiene la review, su due file. Il grilletto è il
-   terzo `rules.ts`.
+3. **Le regole che dipendono da un occhio sono sei, ed erano sette.** «I file `rules.ts`
+   contengono solo funzioni pure» era l'unica regola scritta senza ID e senza meccanismo: adesso è
+   **R13**, con `tests/rules/pure-rules`
+   ([D022](D022-il-confine-disegnato-e-il-confine-vero.md)). Le sei che restano sono C04, C05 e i
+   quattro nomi di file che [convenzioni.md](../convenzioni.md) affida alla review; sono elencate
+   in fondo a [tracciabilita.md](../tracciabilita.md), sotto _Cosa questa tabella non copre_. Se
+   diventano sette, è un segnale.
 4. **Uno stato `Proposta` non è una dimenticanza: è una decisione che il codice non impone
    ancora.** Quali siano in questo momento lo dice [stato.md](../stato.md), che li conta; il
    perché di ciascuna sta nel suo ADR. Gli altri sono `Accettata`, e ognuno ha accanto il rosso
@@ -163,6 +163,9 @@ Da lì in avanti valgono due cose:
 
 - **I collegamenti non si rompono più in silenzio**: `tests/rules/doc-links` verifica ogni
   link e ogni ancora fra i documenti, ed è un gate come gli altri (regola C07).
+- **E dal terzo audit, nemmeno i conteggi**: quanti ADR, quali `Proposta`, quante deleghe, quanti
+  documenti stanno in [stato.md](../stato.md), che è **generato** e verificato (C11). Un documento
+  vivo che li ripete è rosso, e nessuna riga di tabella può vivere fuori da una tabella (C12).
 - **I documenti non appartengono tutti alla stessa specie, e non è un difetto.** Alcuni descrivono ciò che c'è
   (architettura, tracciabilità, glossario); altri **vincolano** ciò che verrà
   ([design/flusso-tick.md](../design/flusso-tick.md), le deleghe aperte). I secondi parlano di
@@ -170,9 +173,19 @@ Da lì in avanti valgono due cose:
   quello il difetto.
 
 Quel primo audit **non** copriva ciò che è cambiato dopo D008. Il secondo — 2026-08-20, tutta la
-codebase e tutti i documenti — è quello che ha prodotto [D016](D016-correzioni-audit.md), e la sua
-copertura è dichiarata lì. Da lì in poi vale la stessa avvertenza di sempre: quello che è cambiato
-dopo, nessuno l'ha ancora guardato.
+codebase e tutti i documenti — è quello che ha prodotto [D016](D016-correzioni-audit.md).
+
+Il **terzo** è dello stesso giorno, poche ore dopo, e ha prodotto
+[D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) e
+[D022](D022-il-confine-disegnato-e-il-confine-vero.md). Ha trovato dodici difetti, **nessuno nel
+codice sorgente**: sette erano conteggi invecchiati — la stessa classe che D016 aveva appena
+corretto a mano — e tre erano confini architetturali che nessun meccanismo verificava. La lezione
+sta tutta in questo: la correzione di D016 era un **aggiornamento**, e un aggiornamento protegge il
+giorno in cui lo si esegue e nessun altro. Le coperture sono dichiarate in fondo a D021.
+
+Da lì in poi vale la stessa avvertenza di sempre: quello che è cambiato dopo, nessuno l'ha ancora
+guardato — con una differenza, adesso: sette delle dodici classi trovate non possono più tornare in
+silenzio, perché un gate le vede.
 
 ## Le sei cose da non fare
 
@@ -205,8 +218,21 @@ Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: all
 
 ## Il prossimo passo, in concreto
 
-**Lo STOP 2 è stato riportato, e la fetta 02 ha due deleghe scritte e nessuna eseguita.**
-La fetta 01 è conclusa e verificata. Nessuna delle due parte finché l'utente non dà il via.
+**Lo STOP 2 è stato riportato, e le regole che governano la fetta 02 sono già in vigore.**
+La fetta 01 è conclusa e verificata. [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) e
+[D022](D022-il-confine-disegnato-e-il-confine-vero.md) sono **chiuse**: sono nate da un audit
+dell'intera codebase e di tutti i documenti, e hanno messo un meccanismo sotto cinque confini che
+prima teneva la review. Non costruiscono gioco — costruiscono il pavimento su cui la fetta 02
+cammina, e la ragione per cui vengono prima è quella di D001 e D020: le regole devono esistere
+prima del codice che governano.
+
+Quello che ne discende per chi esegue adesso sta in _Cosa vale per qualunque delega_: sono sei
+righe, e la più facile da dimenticare è la prima — chiudere una delega significa **rigenerare
+`docs/stato.md`**, o il gate è rosso.
+
+**Il codice di gioco non è stato toccato**: cinque righe in tutto, in `eslint.config.js` e in
+`rotation.ts`. Le deleghe della fetta 02 partono esattamente da dove le ha lasciate lo STOP 2, e
+nessuna delle loro misure è cambiata.
 
 **Prima [D019 — Il pagamento](D019-il-pagamento.md).** Non c'era, ed è nata da una domanda posta
 prima di eseguire il caveau: come sceglie il giocatore con cosa paga? La risposta è che non sceglie
@@ -390,17 +416,19 @@ Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 
 1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, e le quattro cose che sa solo lui.
    In particolare _Cosa vale per qualunque delega_ e _Le decisioni contestabili_
-2. `docs/delega/D019-il-pagamento.md` — la delega che esegui. Interamente, trappole comprese
-3. `docs/adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md` — l'ADR che la vincola,
+2. `docs/stato.md` — quanti sono gli ADR, le deleghe e i documenti, e in che stato. È **generato**:
+   non si scrive a mano, e quando ne cambi uno si rigenera con
+   `npx vitest run tests/rules/project-state -u`
+3. `docs/delega/D019-il-pagamento.md` — la delega che esegui. Interamente, trappole comprese
+4. `docs/adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md` — l'ADR che la vincola,
    con le cinque alternative già scartate. Se stai per contraddirne una, la risposta è lì
-4. `docs/roadmap-fette.md`, il **registro YAGNI** — dice cosa è stato deliberatamente lasciato
+5. `docs/roadmap-fette.md`, il **registro YAGNI** — dice cosa è stato deliberatamente lasciato
    fuori e cosa lo farà entrare. È il documento che ti impedisce di costruire troppo
-5. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
+6. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
 
-Stato misurato il 2026-08-20: da D001 a D016 tutte `Chiusa` e unite a `main`, più D013.
-`npm run verify` verde — **503 test su 55 file**. `npm run build` verde — 91 moduli, 564,89 kB.
-Il kernel è 471 righe in `kernel/`, 545 con `balance/`. Quanti sono gli ADR e quali di loro sono
-ancora `Proposta` lo dice [stato.md](../stato.md); per ognuno il perché sta nel suo ADR.
+Stato al 2026-08-20: `npm run verify` e `npm run verify:release` **verdi**, il renderer compila
+(91 moduli, 565,00 kB). Quante deleghe siano chiuse, quanti ADR ci siano e quali siano ancora
+`Proposta` lo dice [stato.md](../stato.md), che è generato: per ognuno il perché sta nel suo ADR.
 
 Le deleghe aperte le elenca [stato.md](../stato.md). L'ordine conta, ed è questo:
 
@@ -427,6 +455,10 @@ Come lavoro:
 - `npm run verify` verde alla fine, con l'**output incollato**. Non «dovrebbe passare»
 - Niente `TODO`, niente `any`, niente scorciatoie presentate come soluzioni. Identificatori in
   inglese, prosa in italiano
+- **Chiudere la delega significa rigenerare `docs/stato.md`**: `npx vitest run tests/rules/project-state -u`.
+  Se non lo fai, il gate è rosso — ed è voluto (C11). Quel file non si scrive a mano
+- **Se sposti un confine fra livelli, il diagramma di `docs/architettura.md` cambia nello stesso
+  commit**, e `tests/rules/import-graph` lo verifica nei due versi (C13)
 - Alla fine, in fondo alla delega: le **correzioni** rispetto a com'era scritta, e il consuntivo
   di righe contro il budget. Ogni delega chiusa ne ha da cinque a diciassette
 ```
