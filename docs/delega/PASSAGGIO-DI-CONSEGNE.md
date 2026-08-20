@@ -41,7 +41,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
 | `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 569,02 kB (rimisurato a [D019](D019-il-pagamento.md))                                      |
-| Prossimo passo           | **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)**, poi **[D017](D017-il-caveau.md)**: D019 è chiusa                           |
+| Prossimo passo           | **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)**, **preparata**; poi **[D017](D017-il-caveau.md)**                           |
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -441,6 +441,10 @@ Le deleghe aperte le elenca [stato.md](../stato.md). L'ordine conta, ed è quest
 
 D020 vale ~70 righe di test e **zero di sorgente**: è una regola che nasce prima del codice che
 governa, come D001. Il kernel non si tocca, e nemmeno `defineSystem`.
+
+È **preparata per l'esecuzione**: il test è già stato scritto una volta, misurato e ritirato. I
+dodici punti in fondo alla delega dicono cosa ha trovato — fra cui che la trappola principale, come
+era scritta, non si riproduceva. Leggili prima di ricominciare da capo.
 
 Come lavoro:
 

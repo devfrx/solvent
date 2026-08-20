@@ -1,7 +1,9 @@
 # D020 — Nessun sistema si fida del proprio salvataggio
 
-- **Stato:** Aperta — scritta il 2026-08-20, studiando la validazione dello stato caricato prima di
-  eseguire [D017](D017-il-caveau.md)
+- **Stato:** Aperta — scritta il 2026-08-20 studiando la validazione dello stato caricato prima di
+  eseguire [D017](D017-il-caveau.md), e **preparata per l'esecuzione** subito dopo
+  [D019](D019-il-pagamento.md): il test è stato scritto davvero, eseguito, e poi ritirato. Ne
+  restano le misure. Vedi _Cosa la preparazione ha verificato_
 - **Dipende da:** D013 (tutta la fetta 01). **Non** dipende da [D019](D019-il-pagamento.md): sono
   due lavori che non si toccano
 - **Sblocca:** [D017](D017-il-caveau.md), che porta il **secondo** dominio con stato. E ogni dominio
@@ -53,7 +55,11 @@ esistere prima del codice che governano.**
   l'errore tradotto in due lingue e **non scrive sul disco**: è la correzione di
   [D016](D016-correzioni-audit.md), e questa delega non la tocca.
 - **`income` valida già**, ed è il caso di prova che dimostra che il test passa quando deve.
-- **Venti test di regola** in `tests/rules/`, con `registry-completeness` come modello più vicino.
+- **Ventisei test di regola** in `tests/rules/`. Attenzione: **nessuno di loro esegue il gioco**
+  — ventitré leggono i sorgenti come testo, e l'unico import di valore da `src/` è `POOLS`,
+  cioè dati. `registry-completeness` non è quindi il modello più vicino: è uno scanner di
+  sorgenti, e questo test è un comportamento. Il modello per la parte che costruisce una
+  partita è `tests/save/game-roundtrip`. Vedi il punto 4 della preparazione.
 
 ## Da produrre
 
@@ -82,12 +88,24 @@ Il punto 2 è quello che conta, ed è la ragione per cui il test non si acconten
 un `load` scritto male quasi sempre controlla che l'oggetto esista e non che i campi abbiano il tipo
 giusto. `{ upgraded: 'sì' }` è il salvataggio che passa i controlli pigri.
 
-`loadAll` salta i sistemi il cui `id` non compare nella mappa: la spazzatura va passata **sotto
-l'id del sistema**, o il test è verde senza aver provato niente. È la trappola principale di questa
-delega.
+`loadAll` salta i sistemi il cui `id` non compare nella mappa, quindi la spazzatura va passata
+**sotto l'id del sistema**, e gli id si **derivano da `registry.systems()`** invece di scriverli.
+Scritti a mano, uno sbagliato o invecchiato prova un altro sistema o nessuno — e la preparazione ha
+misurato che in quel caso il test diventa **rosso**, non verde, perché pretende un fallimento che
+non arriva. Rosso per la ragione sbagliata è comunque un'ora persa: vedi il punto 2 della
+preparazione.
 
 Un sistema il cui stato salvato non ha campi non ha niente da mutare al punto 2, e per lui valgono
-solo il 3 e il 4. Oggi non ce n'è nessuno; il test lo dichiari invece di fallire.
+solo il 3 e il 4. Oggi non ce n'è nessuno; il test lo dichiari invece di fallire. La forma già usata
+nel progetto è il `verdictOf` di `tests/rules/registry-completeness`: una funzione pura dei numeri,
+provata direttamente, così il caso che oggi non si presenta è comunque coperto. Costa una decina di
+righe, ed è dentro il budget (punto 3 della preparazione).
+
+**Il tipo sbagliato si sceglie per `typeof`, e `typeof` non distingue un array da un oggetto.** Per
+un booleano la lista giusta esce da sé — `0`, `1.5`, `'x'`, `''`, `null`, `undefined`, `{}`, `[]` —
+ma il giorno in cui uno stato salvato avrà un campo **array**, `{}` verrà scartato come «stesso
+tipo» e quel campo sarà provato peggio degli altri. Il test lo dichiari adesso, invece di scoprirlo
+allora: il primo array salvato ha già un grilletto nel [registro YAGNI](../roadmap-fette.md).
 
 ## Invarianti
 
@@ -121,7 +139,13 @@ solo il 3 e il 4. Oggi non ce n'è nessuno; il test lo dichiari invece di fallir
 - [ ] la spazzatura è passata sotto l'`id` del sistema, e un commento dice perché — altrimenti il
       prossimo che lo legge lo "semplifica"
 - [ ] `docs/tracciabilita.md`: INV-20 ha la sua riga e il suo meccanismo
-- [ ] `docs/architettura.md`: la regola compare fra quelle fatte rispettare da un test
+- [ ] `docs/architettura.md`: si **estende la riga 7** della tabella «Le regole e chi le fa
+      rispettare» — il tipo garantisce che un `load` esista, e non dice niente su cosa quel `load`
+      accetta. Non si aggiunge una quattordicesima riga: quella tabella è numerata R01..R13 e INV-20
+      è un invariante, non una regola con un ID (punto 8 della preparazione)
+- [ ] `docs/stato.md` rigenerato con `npx vitest run tests/rules/project-state -u`: un file in più
+      sotto `tests/` cambia un conteggio, ed è la delega in cui è più facile dimenticarlo perché non
+      tocca `src/` (punto 9 della preparazione)
 
 Il [registro YAGNI](../roadmap-fette.md) è **già** aggiornato, scrivendo questa delega: la voce
 «meccanismo condiviso per validare lo stato salvato» è stata sostituita da quella dell'**aiutante**,
@@ -130,9 +154,12 @@ posta lì, e la risposta è questa delega.
 
 ## Trappole note
 
-- **Il test verde che non ha provato niente.** `loadAll` salta gli id assenti dalla mappa: una
-  spazzatura passata come `{}` non raggiunge nessun `load`, e il test è verde. Si scopre solo
-  rompendo `income` di proposito, che è la seconda spunta della definizione di fatto.
+- **Il test che non ha provato niente — ma non diventa verde, diventa rosso.** `loadAll` salta gli
+  id assenti dalla mappa: `loadAll({})` ritorna `ok({ ignored: [] })` e `loadAll({ guasto: … })`
+  ritorna `ok({ ignored: ['guasto'] })`. Un test che **pretende un fallimento** se ne accorge subito.
+  La trappola resta reale in una forma sola: gli id scritti a mano, uno dei quali sbagliato o
+  invecchiato. A chiuderla non è il commento — è **derivare gli id da `registry.systems()`**, e il
+  commento serve a dire perché quella derivazione non si «semplifica» (punto 2 della preparazione).
 - **La tentazione di aggiungere il campo al tipo.** `defineSystem` che chiede un validatore
   sembra più forte perché lo ferma il compilatore. Garantisce che il campo esista, non che
   funzioni: un validatore che ritorna sempre `true` compila benissimo. Ed è una modifica al
@@ -140,3 +167,103 @@ posta lì, e la risposta è questa delega.
 - **A17.** È una delega di settanta righe che tocca il punto in cui entra tutto ciò che viene da
   fuori. La voglia di «già che ci sono» qui si chiama zod, aiutanti e schemi dichiarativi: tutti
   hanno un grilletto scritto, e nessuno è scattato.
+
+## Cosa la preparazione ha verificato
+
+Fatta il 2026-08-20, subito dopo [D019](D019-il-pagamento.md), e non è stata una rilettura: il test
+è stato **scritto davvero**, eseguito, rotto di proposito e poi **ritirato**. Nel repo non è rimasta
+una riga; sono rimaste le misure. Dodici punti, e il secondo riscrive la trappola principale.
+
+**1. La regola morde, e morde anche contro un `load` pigro.** Tolta la validazione dal `load` di
+`income`, due casi diventano rossi — è la seconda spunta della definizione di fatto, ed è verificata.
+Poi la misura che conta di più: sostituito il controllo di tipo con quello **pigro** che un dominio
+scrive per sbaglio — «l'oggetto esiste ed è un oggetto» invece di «il campo è un booleano» — gli
+stessi due casi restano rossi. È esattamente il difetto descritto in _Come il test trova la
+spazzatura_, e adesso si sa che il punto 2 lo prende davvero.
+
+**2. La trappola principale, come era scritta, non si riproduce.** La delega diceva: «una spazzatura
+passata come `{}` non raggiunge nessun `load`, e il test è verde». Misurato: `loadAll({})` ritorna
+`ok({ ignored: [] })` e `loadAll({ guasto: … })` ritorna `ok({ ignored: ['guasto'] })` — ma un test
+che **pretende un fallimento** diventa **rosso**, non verde. Provato mettendo davvero la spazzatura
+sotto un id inventato: rosso. La trappola resta reale in una forma sola — gli id scritti a mano, uno
+dei quali sbagliato — e a chiuderla non è il commento chiesto dalla definizione di fatto: è
+**derivare gli id da `registry.systems()`**. Il commento serve a spiegare perché quella derivazione
+non si semplifica, ed è per quello che va scritto. Il testo della delega è stato corretto in due
+punti.
+
+**3. Il budget è giusto, e non è una stima.** Il test scritto davvero misura **67 righe di codice**
+contro le ~70 dichiarate, con il metodo di `codeLines`. Produce sette casi `it` ed esegue in 10 ms:
+non sposta il gate. C'è margine per la decina di righe del `verdictOf` del punto 6.
+
+**4. `registry-completeness` non è il modello più vicino, e la scoperta riguarda dove va il file.**
+In `tests/rules/` ci sono **26** file, **23** dei quali leggono i sorgenti come testo tramite
+`tests/helpers/sources`; l'unico import di valore da `src/` in tutta la cartella è `POOL_IDS` e
+`POOLS`, cioè **dati**. **Nessuno costruisce una partita.** Questo test sarebbe il primo, e va
+dichiarato come scelta invece di capitarci dentro — la stessa cosa che `import-graph` fa quando
+dichiara cosa il diagramma modella e cosa no.
+
+La scelta è comunque **restare in `tests/rules/`**, e la ragione è la stessa che fa rifiutare il
+campo in `defineSystem`: INV-20 è un **comportamento**, e la sua versione leggibile dai sorgenti —
+«ogni `load` contiene un `throw`» — sarebbe la forma aggirabile con tre righe finte. Che questa
+regola si possa provare **solo** eseguendo è il suo tratto, non un incidente. La prima riga del
+commento del file lo dica.
+
+**5. Oggi c'è un sistema con stato solo, e il suo stato ha un campo solo.** `registry.saveAll()` dà
+`{ income: { upgraded: false } }`. Ne discendono due cose che chi esegue deve avere in mente: il
+punto 2 della delega gira su **un** campo booleano, e la controprova del punto 4 pesa quanto il
+punto 2 — con un campo solo, «valida bene» e «rifiuta tutto» sono a un passo. La regola diventa
+davvero interessante con il caveau, che è esattamente il motivo per cui viene prima.
+
+**6. Il caso «sistema senza campi» ha già la sua forma nel progetto, e costa poco.** È il `verdictOf`
+di `registry-completeness`: una funzione pura provata direttamente, così il caso che oggi non si
+presenta è coperto lo stesso. Una decina di righe, dentro il budget del punto 3. Senza, l'unica
+scrittura possibile è un `expect(fields.length).toBeGreaterThan(0)` che **fallisce** invece di
+dichiarare — che è proprio ciò che la delega chiede di non fare.
+
+**7. La spazzatura si sceglie per `typeof`, e `typeof` ha un buco dichiarato.** Per un booleano la
+lista esce da sé e va bene. Ma `typeof []` è `'object'` come `typeof {}`: il giorno in cui uno stato
+salvato avrà un campo **array** — il primo `boundedList` che finisce sul disco, che ha un grilletto
+nel [registro YAGNI](../roadmap-fette.md) — `{}` verrà scartato come «stesso tipo» e quel campo sarà
+provato peggio degli altri. Il limite si dichiara nel file, come fanno le altre regole ⚠️.
+
+**8. La definizione di fatto chiedeva una riga in `architettura.md` che non ha dove andare.** Quella
+pagina ha «Le regole e chi le fa rispettare», numerata **1..13**, cioè R01..R13. INV-20 non è una
+regola con un ID: è un invariante, e il suo posto è la tabella degli invarianti di
+[tracciabilita.md](../tracciabilita.md), che la delega già chiede. In `architettura.md` la riga
+giusta è la **7** — «Se un sistema ha stato, ha save/load/reset» — che oggi dice cosa il tipo
+garantisce e tace su ciò che il tipo **non** garantisce: quale stato quel `load` accetta. Si estende
+quella riga. Inventarne una quattordicesima creerebbe una R14 che nessun documento ha deciso.
+
+**9. Aggiungere un file sotto `tests/` rende rosso `project-state`.** Misurato: i file di test
+passano da 61 a 62, e `docs/stato.md` li conta. È voluto (C11) e si rigenera con
+`npx vitest run tests/rules/project-state -u`. La definizione di fatto non lo diceva, ed è la delega
+in cui è più facile dimenticarlo: non tocca `src/`, quindi «non ho cambiato niente da contare»
+sembra vero. Adesso è una spunta.
+
+**10. Il conteggio «venti test di regola» era invecchiato: sono 26.** Corretto nel testo, insieme
+alla riga sul modello. Un numero scritto una volta e mai più rimisurato è il difetto che questo
+progetto insegue da tre audit.
+
+**11. `isStateful` non è esportato dal Registry, e non serve esportarlo.** Il test rifà la stessa
+domanda in una riga — `system.save !== undefined` — e il tipo la restringe correttamente, perché
+`Stateless.save` è `never`. Esportarlo sarebbe una modifica a `src/`, che questa delega vieta a se
+stessa: una riga ripetuta in un test è più onesta di un'apertura del kernel fatta per comodità di
+chi lo prova.
+
+**12. Un vicino trovato per strada: `tracciabilita.md` diceva «Le 12 regole, per ID» sopra una
+tabella che ne elenca 13.** R13 è arrivata con [D022](D022-il-confine-disegnato-e-il-confine-vero.md)
+e il titolo è rimasto indietro. `tests/rules/docs-facts` non lo vede, e non è un buco: «regole» è
+fuori dal suo elenco di cose contate **apposta**, perché includerla produceva una ventina di falsi
+positivi. È il difetto di D021 sopravvissuto in un punto cieco dichiarato. Il numero è stato **tolto
+dal titolo** invece che aggiornato — aggiornarlo lo avrebbe fatto scadere di nuovo alla prossima
+regola.
+
+### Cosa la preparazione **non** ha cambiato
+
+- **Il fuori scope resta intero.** Nessun aiutante condiviso, niente zod in `core/`, nessun campo
+  richiesto da `defineSystem`. Scrivendo il test la voglia non è mai arrivata: con un sistema solo
+  non c'è niente da condividere.
+- **Il budget resta ~70 righe di test e zero di sorgente**, ed è stato confermato da una misura
+  invece che da una stima.
+- **L'ordine resta quello.** D020 prima di [D017](D017-il-caveau.md): la regola esiste prima del
+  secondo dominio con stato, che è il primo che potrebbe dimenticarsene.

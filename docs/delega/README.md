@@ -50,6 +50,13 @@ corretta dove è invecchiata. È successo a [D009](D009-persistenza-main.md),
 lavoro invece di aggiungerlo: quasi tutto ciò che quelle deleghe chiedevano di costruire esisteva
 già.
 
+Da [D017](D017-il-caveau.md) la preparazione ha smesso di essere una rilettura ed è diventata una
+**misura**: si fa davvero il cambiamento, si guarda cosa diventa rosso, e poi si torna indietro
+lasciando solo le misure nel testo della delega. D017 ci ha trovato un difetto nella propria
+decisione di gioco; [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) ci ha trovato una
+trappola che, come era scritta, non si riproduceva. Il costo è mezz'ora e il ritorno è che nessuna
+delle due parte da un testo che si scoprirà sbagliato a metà lavoro.
+
 Una delega chiusa è un **documento storico**, non una fonte di verità sul codice corrente. Le
 firme che contiene descrivono ciò che è stato chiesto, non ciò che c'è: per quello si legge il
 codice. È la ragione per cui i documenti vivi ([architettura](../architettura.md),
@@ -112,6 +119,10 @@ caveau è il **secondo** dominio con stato, e oggi niente obbliga un dominio a c
 salvataggio che riceve. Se la regola nascesse dentro D017, la scriverebbe la stessa persona che
 scrive il codice da sorvegliare, nello stesso momento: non sorveglierebbe niente. Zero righe di
 sorgente, settanta di test.
+
+**È preparata**, e la preparazione ha scritto il test per davvero prima di ritirarlo: il budget ha
+retto alla misura, e la trappola principale della delega è stata riscritta perché come era formulata
+non si riproduceva. I dodici punti stanno in fondo a quella delega.
 
 **D021 e D022 lo usano per la terza e la quarta volta.** D021 lo applica ai documenti, D022 ai
 confini del codice che oggi tiene la review — le frecce di [architettura.md](../architettura.md),
