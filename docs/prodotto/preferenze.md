@@ -118,8 +118,9 @@ anche l'unico punto in cui il gioco può permettersi un vezzo visivo senza ralle
   scadenza, punteggio di credito. Girare la carta è un'azione utile, non un gioco.
 - Rispetta `prefers-reduced-motion`: la rotazione resta possibile, l'inerzia e l'animazione di
   ritorno no.
-- Il livello che cresce (o l'era di prestige) cambia il materiale della carta: standard, oro,
-  nero. È il progresso reso visibile su un oggetto invece che su una barra.
+- Il livello che cresce cambia il materiale della carta: standard, oro, nero. È il progresso reso
+  visibile su un oggetto invece che su una barra. Cosa lo faccia crescere è una domanda aperta —
+  non il prestige, che la visione ha tolto.
 
 **Fatto in [D015](../delega/D015-home-bancomat.md)**, con due correzioni.
 

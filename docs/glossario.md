@@ -20,13 +20,13 @@ Non si dice mai "frame" per intendere "tick": il frame è la UI, il tick è la s
 
 ## Sistemi
 
-| Termine                              | Significato                                                                                                                   |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| **Sistema**                          | un'unità di simulazione registrata nel Registry. Ha un `id`, un `order`, e può avere `tick`, `save`, `load`, `reset`, `stats` |
-| **Sistema con stato**                | un sistema che ha `save`. Se ce l'ha, ha per forza anche `load` e `reset`: lo impone il tipo                                  |
-| **Ordine** _(`order`)_               | la posizione del sistema nella sequenza di tick. È una costante nominata, mai un numero sparso                                |
-| **Contesto** _(`ctx`)_               | l'insieme di Clock, Rng, Bus e Ledger passato a ogni `tick`. Non è un singleton: arriva per parametro. Da D007 sono quattro   |
-| **Ambito di reset** _(`ResetScope`)_ | `soft` = prestige, alcuni sistemi conservano lo stato. `hard` = partita nuova, tutti azzerano                                 |
+| Termine                              | Significato                                                                                                                                                                 |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sistema**                          | un'unità di simulazione registrata nel Registry. Ha un `id`, un `order`, e può avere `tick`, `save`, `load`, `reset`, `stats`                                               |
+| **Sistema con stato**                | un sistema che ha `save`. Se ce l'ha, ha per forza anche `load` e `reset`: lo impone il tipo                                                                                |
+| **Ordine** _(`order`)_               | la posizione del sistema nella sequenza di tick. È una costante nominata, mai un numero sparso                                                                              |
+| **Contesto** _(`ctx`)_               | l'insieme di Clock, Rng, Bus e Ledger passato a ogni `tick`. Non è un singleton: arriva per parametro. Da D007 sono quattro                                                 |
+| **Ambito di reset** _(`ResetScope`)_ | `hard` = partita nuova, tutti azzerano. `soft` = alcuni sistemi conservano lo stato — **senza chiamante** da quando la visione ha tolto il prestige: vedi il registro YAGNI |
 
 ## Denaro
 
@@ -112,18 +112,22 @@ Un evento non chiede: notifica. Se serve una risposta, è un comando o un selett
 Non sono ancora implementati — stanno qui perché il nome va deciso una volta sola, prima che tre
 domini ne inventino tre varianti. Le meccaniche sono in [prodotto/visione.md](prodotto/visione.md).
 
-| Termine         | Significato                                                                             |
-| --------------- | --------------------------------------------------------------------------------------- |
-| **Contanti**    | il pool `cash`. Si dice "contanti", mai "liquidi", mai "soldi veri"                     |
-| **Carta**       | il pool `card` e il conto che le sta dietro. Sono la stessa cosa: non si distinguono    |
-| **Fiches**      | il pool `chips`. Mai "gettoni", mai "chip"                                              |
-| **Caveau**      | ciò che limita la capienza dei contanti. Mai "cassaforte", mai "vault"                  |
-| **Calore**      | quanto l'attività irregolare ha attirato attenzione. Sale col volume, scende col tempo  |
-| **Indagine**    | ciò che scatta quando il calore supera la soglia. Ha conseguenze reali, non è un avviso |
-| **Reputazione** | quanto i contatti del black market si fidano. Apre trattative, non sconti               |
-| **Era**         | un ciclo di prestige. Un'era **cambia le regole**, non solo i numeri                    |
-| **Lotto**       | ciò su cui si punta al buio nelle aste di box. Mai "box", mai "container"               |
-| **Perizia**     | la stima del valore di un lotto o di un oggetto. Riduce l'incertezza, non la elimina    |
+| Termine         | Significato                                                                                                                                                                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Contanti**    | il pool `cash`. Si dice "contanti", mai "liquidi", mai "soldi veri"                                                                                                                                                                         |
+| **Carta**       | il pool `card` e il conto che le sta dietro. Sono la stessa cosa: non si distinguono                                                                                                                                                        |
+| **Fiches**      | il pool `chips`. Mai "gettoni", mai "chip"                                                                                                                                                                                                  |
+| **Caveau**      | ciò che limita la capienza dei contanti. Mai "cassaforte", mai "vault"                                                                                                                                                                      |
+| **Calore**      | quanto l'attività irregolare ha attirato attenzione. Sale col volume, scende col tempo                                                                                                                                                      |
+| **Indagine**    | ciò che scatta quando il calore supera la soglia. Ha conseguenze reali, non è un avviso                                                                                                                                                     |
+| **Reputazione** | quanto i contatti del black market si fidano. Apre trattative, non sconti                                                                                                                                                                   |
+| **Era**         | **non è un termine di gioco.** Quattro fasi — contanti, capitale, impresa, rete — che vivono solo in [roadmap-fette.md](roadmap-fette.md) per indovinare cosa il giocatore farà per primo. Mai a schermo, mai nel codice, mai in una delega |
+| **Requisito**   | ciò che serve per usare uno strumento. Visibile e su cui si può agire, mai un contatore nascosto. I domini non si "sbloccano": hanno requisiti                                                                                              |
+| **Etichetta**   | le otto voci che ogni strumento dichiara — rendimento, varianza, liquidità, calore, attenzione, pozza, pagamento, requisito                                                                                                                 |
+| **Pozza**       | quanto uno strumento regge prima che l'attrito morda. Mai "capienza" fuori dai pool, mai "cap"                                                                                                                                              |
+| **Traguardo**   | un obiettivo visibile che **non apre niente**. Mai "achievement", mai "sblocco"                                                                                                                                                             |
+| **Lotto**       | ciò su cui si punta al buio nelle aste di box. Mai "box", mai "container"                                                                                                                                                                   |
+| **Perizia**     | la stima del valore di un lotto o di un oggetto. Riduce l'incertezza, non la elimina                                                                                                                                                        |
 
 ## Processo
 

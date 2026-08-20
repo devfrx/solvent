@@ -83,7 +83,11 @@ flowchart TD
   D015 --> D016["D016 · Le correzioni dell'audit"]
   D016 --> D013["D013 · Verifica della fetta — STOP 2"]
   D013 --> D017["D017 · Il caveau — fetta 02"]
+  D013 --> D018["D018 · La scheda di dominio"]
 ```
+
+**D017 e D018 non si toccano**, ed è il primo caso del progetto: una scrive codice, l'altra solo
+documenti, e nessuna aspetta l'altra. Il grafo lo mostra facendole partire entrambe da D013.
 
 **D001 è prima di tutto, e non è un caso.** Le regole devono esistere prima del codice che
 governano. Se il lint arriva dopo, il primo codice nasce fuori regola e la prima cosa che si fa è
@@ -111,6 +115,7 @@ configurato dopo che c'erano già 156 file.
 | [D016](D016-correzioni-audit.md)     | Le correzioni dell'audit del 2026-08-20                               | 186 codice + 326 test   | **Chiusa** |
 | [D013](D013-verifica-della-fetta.md) | Verifica della fetta — STOP 2                                         | 93 test + 17 di README  | **Chiusa** |
 | [D017](D017-il-caveau.md)            | Il caveau: i contanti hanno una capienza — fetta 02                   | ~250 codice + ~330 test | **Aperta** |
+| [D018](D018-la-scheda-di-dominio.md) | La scheda di dominio: la forma, e le prime tre compilate              | ~510 di documentazione  | **Aperta** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede
@@ -118,6 +123,13 @@ dove stanno davvero — D014 accanto a D010, D015 fra D012 e D013, D016 **prima*
 prima della **fetta 02** e la prima con il numero al posto giusto: nasce dopo D016 e viene dopo.
 **La numerazione è cronologica, l'ordine è il grafo**: rinumerare romperebbe i riferimenti nei
 commit e nella tracciabilità.
+
+**D018 è la prima delega che non appartiene a nessuna fetta.** Nasce il 2026-08-20 dalla
+riscrittura della [visione](../prodotto/visione.md) e dall'audit del kernel che ne è seguito, e non
+costruisce gioco: costruisce la **scheda** che ogni dominio futuro dovrà compilare prima di essere
+scritto, con dentro le dodici domande sul kernel che l'audit ha dovuto fare a mano. È anche la prima
+con un budget di sole righe di documentazione, e la prima in cui **zero righe di codice** è una
+condizione di correttezza invece di una stima.
 
 **Perché D016 sta prima dello STOP 2.** D013 riporta che la fetta regge; l'audit ha trovato un
 difetto di perdita dati. Riportare un verdetto con quel difetto aperto sarebbe riportare un

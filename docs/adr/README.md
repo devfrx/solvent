@@ -48,12 +48,12 @@ delega, e la riga di stato di ogni ADR porta la propria.
 Il **0025** nasce allo STOP 2 con [D017](../delega/D017-il-caveau.md) ed è `Proposta` per la
 ragione giusta: il meccanismo che lo impone non è ancora stato scritto. È la prima decisione
 strutturale della fetta 02, e riguarda un confine del kernel — il Ledger smette di **leggere** la
-capienza di un pool e comincia a **chiederla**, perché il caveau dell'era 1 si amplia e una
-costante compilata non si amplia.
+capienza di un pool e comincia a **chiederla**, perché il caveau si amplia e una costante compilata
+non si amplia.
 
-Restano _Proposta_ quattro decisioni, e per tre è corretto: **0022**, **0023** e **0025** descrivono cose che il
-progetto non ha ancora costruito, e diventeranno un fatto con il dominio che le userà. La quarta è
-**0010**, e ha il meccanismo **a metà**: `boundedList<T>(max)` è l'unico costruttore e `max` è
+Restano _Proposta_ cinque decisioni, e per quattro è corretto: **0022**, **0023**, **0025** e
+**0026** descrivono cose che il progetto non ha ancora costruito, e diventeranno un fatto con la
+delega che le userà. La quinta è **0010**, e ha il meccanismo **a metà**: `boundedList<T>(max)` è l'unico costruttore e `max` è
 obbligatorio, ma la seconda frase della decisione — «il validatore del salvataggio rifiuta un array
 che supera il `max` dichiarato» — non ha niente da validare, perché nel payload della versione 1
 non c'è nessun array. La lista delle ultime operazioni ha il suo limite ed è un mirror che riparte
@@ -89,6 +89,7 @@ fetta 02 a chiuderla.
 | [0023](0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)                      | Il tempo di gioco è un sistema di dominio                      | Proposta      | chi sa che giorno è, e come lo sanno gli altri                          | —               |
 | [0024](0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md) | Un sistema riceve per costruzione ciò che non sta nel contesto | **Accettata** | come un dominio ottiene ciò che il `SystemContext` non porta            | —               |
 | [0025](0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)                  | La capienza di un pool si chiede, non si legge                 | Proposta      | chi decide quanto tiene un pool, quando il tetto può crescere           | A05             |
+| [0026](0026-la-precisione-del-denaro-e-dichiarata.md)                          | La precisione del denaro è dichiarata, non ereditata           | Proposta      | fin dove il denaro resta esatto, e chi ha scelto quel limite            | —               |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è

@@ -64,8 +64,9 @@ Un conto appartiene a **un** dominio, e il prefisso è quel dominio. È ciò che
 
 ## Quando
 
-**Non adesso.** Il grilletto è il primo dominio che ha un budget per entità — l'Impresa, era 3
-della visione. Fino a quel momento sei conti bastano, e costruire la mappa aperta prima sarebbe
+**Non adesso.** Il grilletto è il primo dominio che ha un budget per entità — l'Impresa, blocco D
+del [registro delle fette](../roadmap-fette.md). Fino a quel momento sei conti bastano, e
+costruire la mappa aperta prima sarebbe
 generalizzazione speculativa, cioè la cosa che il [registro YAGNI](../roadmap-fette.md) esiste
 per fermare.
 

@@ -172,7 +172,7 @@ Il reset non è un caso particolare del caricamento: è una terza operazione, co
 ```mermaid
 stateDiagram-v2
     [*] --> InGioco
-    InGioco --> ResetSoft: prestige
+    InGioco --> ResetSoft: nessun chiamante<br/>(vedi registro YAGNI)
     InGioco --> ResetHard: partita nuova
     ResetSoft --> InGioco: i sistemi che conservano<br/>mantengono il loro stato
     ResetHard --> InGioco: tutti i sistemi azzerano<br/>incluso il seed dell'Rng
@@ -185,6 +185,13 @@ componente Vue (difetto A09), ed è il motivo per cui `reset` è nel tipo `Syste
 **`soft` non è "un hard più leggero".** Ogni sistema decide cosa conserva, e lo decide nel proprio
 file — non in una lista di eccezioni centralizzata, che è la forma in cui questo si degrada.
 
+**Oggi `soft` non ha un chiamante**, ed è onesto dirlo qui invece di lasciarlo scoprire a chi legge
+il codice. Il prestige era il suo unico significato dichiarato, e la
+[visione](../prodotto/visione.md) riscritta il 2026-08-20 lo toglie. Il valore resta nel tipo con
+una domanda aperta nel [registro YAGNI](../roadmap-fette.md): o prende un significato nuovo —
+ricominciare **con lo stesso mondo**, contro `hard` che ne semina uno diverso — o esce. Non gliene
+va inventato uno prima che serva.
+
 ### Il canale `reset` del main è un'altra cosa
 
 Il diagramma qui sopra è tutto nel renderer: `ResetScope` vive in `contracts/lifecycle.ts`, che
@@ -192,5 +199,5 @@ INV-03 **non** concede al main. Il terzo canale IPC non porta quindi nessun ambi
 sola: **cancella il file di salvataggio**. Cancellare un file che non c'è è `ok`, non un errore.
 
 Sono due operazioni con lo stesso nome, e vanno tenute distinte: il reset del renderer decide cosa
-il gioco conserva, quello del main decide cosa resta sul disco. Un prestige chiama il primo e non
-il secondo.
+il gioco conserva, quello del main decide cosa resta sul disco. Un reset parziale chiamerebbe il
+primo e non il secondo.
