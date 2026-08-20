@@ -135,6 +135,14 @@ come era formulata non si riproduceva — i dodici punti stanno in fondo a quell
 ha aggiunto una cosa che nemmeno la preparazione aveva visto: un `load` che rifiuta **tutto** passa
 i punti 2 e 3, e a fermarlo è solo la controprova.
 
+**D017 è chiusa, e con lei la fetta 02.** Le tre deleghe che si erano infilate davanti — D019, D020
+e D023 — hanno pagato: il listino c'era, la regola sul salvataggio c'era, il kit c'era, e nessuna
+delle tre è stata riaperta eseguendo il caveau. Quello che invece la delega **non** ha raccolto è il
+raggruppamento dello stipendio nelle ultime operazioni: il suo grilletto era «la fetta 02», la fetta
+è conclusa, e quel lavoro non stava né nella tabella _Da produrre_ di D017 né nella sua definizione
+di fatto. La voce resta nel [registro YAGNI](../roadmap-fette.md) con un grilletto nuovo, ed è
+scritto perché — vedi la correzione 12 di [D017](D017-il-caveau.md).
+
 **D023 si infila fra D020 e D017, ed è la terza volta che una domanda posta al momento giusto
 sposta il grafo.** L'utente ha consegnato un design vero, fatto a foglio bianco da Claude Design, e
 la domanda è nata da sé: il caveau è la **prima schermata nuova** dopo la fetta 01, e una schermata
@@ -197,7 +205,7 @@ configurato dopo che c'erano già 156 file.
 | [D019](D019-il-pagamento.md)                              | Il pagamento: il listino di un'azione, e chi lo sceglie               | 87 codice + 204 test      | **Chiusa** |
 | [D020](D020-nessun-sistema-si-fida-del-salvataggio.md)    | Nessun sistema si fida del proprio salvataggio                        | 70 test, zero di sorgente | **Chiusa** |
 | [D023](D023-il-design-system.md)                          | Il design system: un livello che non sa che gioco è                   | 346 codice + 129 test     | **Chiusa** |
-| [D017](D017-il-caveau.md)                                 | Il caveau: i contanti hanno una capienza — fetta 02                   | ~330 codice + ~410 test   | **Aperta** |
+| [D017](D017-il-caveau.md)                                 | Il caveau: i contanti hanno una capienza — fetta 02                   | 347 codice + 508 test     | **Chiusa** |
 | [D018](D018-la-scheda-di-dominio.md)                      | La scheda di dominio: la forma, e le prime tre compilate              | ~510 di documentazione    | **Aperta** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015

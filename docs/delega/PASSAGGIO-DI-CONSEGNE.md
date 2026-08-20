@@ -37,11 +37,11 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md) |
 | Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                      |
 | Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                |
-| Domini                   | i due della fetta 01: `income` ha stato e ticchetta, `atm` è due comandi e basta                                                       |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi e basta                                  |
 | Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
-| `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 569,02 kB (rimisurato a [D019](D019-il-pagamento.md))                                      |
-| Prossimo passo           | **[D017](D017-il-caveau.md)**, **preparata** — la fetta 02 vera. D019, D020 e D023 sono chiuse                                         |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
+| Prossimo passo           | **[D018](D018-la-scheda-di-dominio.md)**. La fetta 02 è **conclusa**: D017, D019, D020 e D023 sono chiuse                              |
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -51,10 +51,11 @@ che ce ne sia una sola.
 
 I contratti sono in `src/core/contracts/`, Clock, Rng, Bus, Registry e Ledger in
 `src/core/kernel/`, i numeri di gioco in `src/core/balance/`, lo schema del salvataggio e i tre
-canali IPC in `src/main/save/`, i due domini in `src/core/domains/`. In `src/renderer/` ci sono il
+canali IPC in `src/main/save/`, i tre domini in `src/core/domains/`. In `src/renderer/` ci sono il
 bootstrap, il loop, l'unico store, il guscio `App.vue`, le due viste sotto `views/`, nove pezzi
 sotto `components/` — sette componenti e due moduli puri, la rotazione della carta e la scelta dei
-movimenti da mostrare — e le parole del gioco sotto `i18n/`. Ogni delega chiusa ha in fondo le
+movimenti da mostrare — il kit che non sa che gioco è sotto `ui/`, e le parole del gioco sotto
+`i18n/`. Ogni delega chiusa ha in fondo le
 **correzioni** rispetto a com'era scritta: [D002](D002-contratti.md) ne ha sette,
 [D003](D003-kernel-clock.md) cinque, [D004](D004-kernel-rng.md) sei,
 [D005](D005-kernel-bus.md) cinque, [D006](D006-kernel-registry.md) sei,
@@ -63,7 +64,8 @@ movimenti da mostrare — e le parole del gioco sotto `i18n/`. Ogni delega chius
 [D014](D014-dominio-bancomat.md) undici, [D011](D011-runtime-e-store.md) quattordici,
 [D012](D012-ui-e-i18n.md) e [D015](D015-home-bancomat.md) diciassette,
 [D016](D016-correzioni-audit.md) sette,
-[D019](D019-il-pagamento.md) tredici, [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) nove, [D023](D023-il-design-system.md) undici. Leggile prima di fidarti del
+[D019](D019-il-pagamento.md) tredici, [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) nove,
+[D023](D023-il-design-system.md) undici, [D017](D017-il-caveau.md) sedici. Leggile prima di fidarti del
 testo di una delega ancora aperta — alcune di quelle correzioni riguardano proprio deleghe che non
 sono ancora state eseguite.
 
@@ -296,37 +298,59 @@ Le quattro cose che chi arriva adesso deve sapere:
    `vue-eslint-parser` sono adesso dichiarati a mano. La causa vera è aperta, ed è la correzione 8
    di [D023](D023-il-design-system.md).
 
-**Adesso [D017 — Il caveau](D017-il-caveau.md).** È **Aperta**, **preparata per l'esecuzione** e **ri-preparata il 2026-08-21**, perché fra la sua scrittura e oggi si sono chiuse tre deleghe: il
-costo del cambiamento è stato misurato mettendo davvero una capienza a `POOLS.cash` e guardando
-cosa diventa rosso, e la misura ha trovato un difetto nella delega stessa — il recupero dopo
-un'assenza incassava **zero** invece di quanto ci sta. La decisione di gioco è stata riscritta
-prima che esistesse una riga di codice. I punti misurati stanno in [D017](D017-il-caveau.md), sotto
-_Cosa la preparazione ha verificato_.
+**[D017 — Il caveau](D017-il-caveau.md) è chiusa, e con lei la fetta 02.** Il primo muro del gioco è
+acceso: i contanti hanno una capienza, la capienza si sposta, e quando è piena il reddito **non
+entra e lo dice**. Le sedici correzioni stanno in fondo alla delega; le quattro che chi arriva
+adesso deve sapere sono queste:
 
-Il caveau è anche l'unico dominio con una **[scheda](../design/domini/vault.md)** già compilata, ed
-è servita: compilarla ha aggiunto la nona voce all'etichetta della visione — la **tracciabilità**,
-che la legge 1 nominava e l'etichetta non misurava.
+1. **Il Ledger non legge più la capienza: la chiede, e la espone.** `createLedger(bus, capacities)`
+   riceve una funzione ([ADR 0025](../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md), ora
+   `Accettata`), e `Ledger.capacities` è **la stessa** che la UI interroga — quindi INV-18 si
+   verifica per identità e non confrontando due numeri che oggi coincidono. `capacityOf` in
+   `domains/atm/rules.ts` **non esiste più**: leggeva `POOLS`, cioè la capienza di partenza, che
+   dopo il primo ampliamento è la risposta sbagliata.
+2. **Il valore predefinito di `createLedger` è additivo e ha morso lo stesso.** Tre file di test
+   costruivano un Ledger nudo e ci mettevano più denaro di quanto il caveau tenga: hanno smesso di
+   provare quello che provavano, e due su tre restavano **verdi**. Dove il tetto non è l'oggetto del
+   test si passa `() => null`, con scritto perché. «Additivo» significa _compila_, non _prova ancora
+   la stessa cosa_.
+3. **`domains/* --> domains/*` non è ancora mai stata disegnata, e D017 ha scelto due volte di non
+   aprirla.** Il reddito ha bisogno di sapere quanto spazio c'è nel caveau e il bancomat se un
+   prelievo ci sta: in tutti e due i casi la risposta arriva **per argomento**, e a consegnarla è
+   chi ha entrambi sotto mano — il bootstrap e lo store. Nessun lint lo impedirebbe, quindi è una
+   cosa che si sceglie ogni volta: è scritta in prosa in [architettura.md](../architettura.md),
+   sotto _Frecce vietate_.
+4. **Il raggruppamento dello stipendio non è stato costruito, e il suo grilletto era «la fetta
+   02».** Non stava nella tabella _Da produrre_ di D017 né nella sua definizione di fatto, e il
+   caveau non è il posto dove si decide quali righe una schermata mostra. La voce è ancora nel
+   [registro YAGNI](../roadmap-fette.md), con un grilletto nuovo — la prima delega che tocca
+   `components/postings.ts` — e con un argomento in più: a caveau pieno il reddito **si ferma**,
+   quindi lo storico smette di riempirsi di stipendio proprio quando c'è qualcos'altro da leggerci.
 
-Il rapporto è in fondo a [D013](D013-verifica-della-fetta.md), nei cinque punti che lo STOP 2
-chiede. Non si riparte da zero: si riparte da lì.
+**Resta [D018 — La scheda di dominio](D018-la-scheda-di-dominio.md)**, ed è l'unica delega aperta.
+Non appartiene a nessuna fetta e non costruisce gioco: costruisce la **forma** che ogni dominio
+futuro dovrà compilare prima di essere scritto. Adesso ha un vantaggio che non aveva ieri — il
+caveau esiste, quindi le dodici domande sul kernel si rispondono **leggendo il codice** invece di
+immaginarlo, e la sua [scheda](../design/domini/vault.md) si è già corretta da sola contro quel
+codice, smentendo tre delle proprie righe. Quelle tre dicono quali domande la forma deve fare.
 
-Tre cose che chi apre la fetta 02 deve avere in mente prima di scrivere una riga:
+Tre cose che chi apre la fetta 03 deve avere in mente prima di scrivere una riga:
 
-1. **A17 comincia adesso.** Il kernel è pagato, tutto sembra facile, e la tentazione è aprire
-   cinque domini insieme. È esattamente così che sono nati i ventiquattro sistemi del progetto
-   precedente. Una fetta alla volta ([ADR 0014](../adr/0014-una-fetta-verticale-alla-volta.md),
-   adesso `Accettata`).
-2. **La fetta 02 chiude tre voci che aspettano lei**, e vale la pena saperlo prima di scoprirle
-   una alla volta: il primo `boundedList` che entra davvero nel salvataggio — e con esso
-   [ADR 0010](../adr/0010-liste-storiche-limitate-alla-definizione.md), che ha metà meccanismo —
-   la capienza vera dei pool, che `capacityOf` interroga già senza sapere la risposta, e il
-   raggruppamento dello stipendio nelle ultime operazioni.
-3. **Il gioco si fa girare senza Electron**, e adesso si sa che è una strada buona: `npm run build`,
-   la pagina di `out/renderer/` servita da un server statico, le tre funzioni di `SaveApi` finte al
-   posto del preload. In una pagina di browser il loop **gira**, quindi il saldo sale davvero — la
-   finestra di Electron in questo ambiente non compone frame, ma non è una proprietà
-   dell'ambiente. Il modo esatto è nella nota di chiusura di
-   [D013](D013-verifica-della-fetta.md).
+1. **A17 non è finita con la fetta 02.** Il caveau apre il black market, le aste e il calore, e
+   nessuno dei tre si è toccato. Una fetta alla volta
+   ([ADR 0014](../adr/0014-una-fetta-verticale-alla-volta.md)).
+2. **La fetta 03 ha una domanda in meno e una risposta diversa.** «Il progresso offline è limitato
+   dal caveau, non dal tetto» era un'ipotesi con un numero inventato; adesso è una misura: otto ore
+   di assenza valgono 1.000,00 € al primo livello e 250.000,00 € all'ultimo, contro i 345.600,00 €
+   che `RECOVERY_CAP` permetterebbe. Il tetto di otto ore va ri-derivato **in tempo di gioco**, e il
+   recupero deve avanzare a blocchi invece che in un `tickAll` solo — ma quel `tickAll` solo adesso
+   non fa più tornare a casa con zero, ed è il motivo per cui `roomIn` esiste.
+3. **Il gioco si fa girare senza Electron**, e D017 l'ha rifatto per guardare la schermata nei due
+   temi: `npm run build`, la pagina di `out/renderer/` servita da un server statico, le tre funzioni
+   di `SaveApi` finte al posto del preload — con dentro un salvataggio che ha già dei soldi, così
+   ogni stato si **costruisce** invece di aspettarlo. In questo ambiente la finestra non compone
+   frame, quindi il loop non gira: i colori si rileggono dal DOM, che è più severo di un occhio. Il
+   modo esatto è nella nota di chiusura di [D017](D017-il-caveau.md).
 
 Quanto ci mette `verify`, e con quanti test, lo dice [qualita.md](../qualita.md) con la data
 accanto: è l'unico posto del progetto in cui un tempo si scrive, e questa pagina lo ripeteva
@@ -448,6 +472,12 @@ interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto co
 | Un pool fuori listino è rifiutato col codice del Ledger, non con uno nuovo   | [D019](D019-il-pagamento.md) — correzione 3                                                                               | un `error.income.*` suo: due frasi per una situazione sola, e il giocatore ne leggerebbe una diversa a seconda di quale delle due strade lo rifiuta                     |
 | Il prezzo resta sul pulsante; la riga sopra porta strumento e ragione        | [D019](D019-il-pagamento.md) — correzione 8                                                                               | l'importo nel riquadro del pagamento e «Compra» nudo: toglie la ripetizione e contraddice il mockup approvato allo STOP 1                                               |
 | Con un'opzione sola il pagamento è **una** chiave i18n, non due              | [D019](D019-il-pagamento.md) — correzione 9                                                                               | le due che l'ADR 0027 prevedeva — _con cosa si paga_ e _perché non gli altri_ — che con un listino di uno sono la stessa frase                                          |
+| Il caveau ha **cinque** livelli, da 1.000,00 € a 250.000,00 €                | [D017](D017-il-caveau.md) — `balance/constants.ts`                                                                        | una curva senza tetto che si strozza da sola: in un idle «costa più di quanto renda» è un bersaglio mobile, da ritarare a ogni cambio di reddito                        |
+| Lo sconto della carta è **sotto** la commissione del bancomat                | [D017](D017-il-caveau.md) — `targets.ts`, `vault_card_discount`                                                           | uno sconto più grande: senza il calore la carta non paga niente in cambio della traccia, e i contanti diventerebbero una voce di listino che nessuno sceglie mai        |
+| Il Ledger **espone** la funzione delle capienze, non la riceve soltanto      | [D017](D017-il-caveau.md) — correzione 5                                                                                  | lasciarla solo in ingresso: INV-18 tornerebbe un confronto fra due numeri che oggi coincidono, che è la forma debole che la definizione di fatto vieta                  |
+| Il reddito riceve lo **spazio** per costruzione, non importa il caveau       | [D017](D017-il-caveau.md) — correzione 3                                                                                  | `income` che importa `vault/rules`: nessun gate lo fermerebbe, e sarebbe il primo accoppiamento fra domini in un gioco che ne ha diciassette                            |
+| Il caveau sta in `ORDER.ECONOMY`, e non apre una fase nuova                  | [D017](D017-il-caveau.md) — correzione 9                                                                                  | una terza fase per un sistema che non ticchetta; e l'ordine conta davvero in un punto — `ECONOMY` carica prima di `INCOME`, cioè prima che il recupero ticchetti        |
+| Quanto resta fuori dal tick è un **importo**, non un `sì/no`                 | [D017](D017-il-caveau.md) — correzione 7                                                                                  | un booleano: farebbe sparire il caveau **quasi** pieno, che è il caso che il giocatore incontra per primo                                                               |
 
 La ventiduesima è di **D013** e costa una riga di un test: è anche l'unica riga non di test che
 quella delega abbia toccato.
@@ -463,12 +493,13 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-Questo prompt **consegna una delega**, e una sola per volta. D019, D020 e
-[D023](D023-il-design-system.md) sono chiuse; l'ID adesso è **D017**, il caveau — la fetta 02 vera,
-quella che le aspettava tutte.
+Questo prompt **consegna una delega**, e una sola per volta. D019, D020, D023 e adesso
+[D017](D017-il-caveau.md) sono chiuse, e con D017 si chiude la **fetta 02**; l'ID adesso è
+**D018**, la scheda di dominio — l'unica delega aperta, e la prima che non appartiene a nessuna
+fetta.
 
 ```markdown
-Esegui la delega D017 nel progetto Solvent, in questa repo.
+Esegui la delega D018 nel progetto Solvent, in questa repo.
 
 Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 
@@ -477,49 +508,49 @@ Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 2. `docs/stato.md` — quanti sono gli ADR, le deleghe e i documenti, e in che stato. È **generato**:
    non si scrive a mano, e quando ne cambi uno si rigenera con
    `npx vitest run tests/rules/project-state -u`
-3. `docs/delega/D017-il-caveau.md` — la delega che esegui. Interamente, trappole comprese
-4. `docs/design/domini/vault.md` — la **scheda del caveau**: le decisioni di gioco che la delega
-   non deve prendere da sola, e le alternative già scartate
-5. `docs/adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md` e
-   `docs/adr/0028-il-kit-ui-non-sa-che-gioco-e.md` — la capienza, e il livello che disegna.
-   Se stai per contraddirne uno, la risposta è lì
-6. `docs/roadmap-fette.md`, il **registro YAGNI** — in particolare _Nel design, e non ancora nel
-   codice_: è l'elenco di ciò che il canvas mostra e che non si costruisce adesso
+3. `docs/delega/D018-la-scheda-di-dominio.md` — la delega che esegui. Interamente
+4. `docs/design/domini/vault.md` — l'**unica scheda che esiste**, ed è anche l'unica che si è già
+   riletta contro il codice: in fondo c'è _Cosa l'esecuzione ha smentito_, che è il pezzo di cui
+   D018 deve capire se è una sezione della forma o un caso isolato
+5. `docs/delega/D017-il-caveau.md`, le **sedici correzioni** in fondo: sono il codice che le dodici
+   domande sul kernel dovranno descrivere, e le tre righe della scheda che il codice ha smentito
+6. `docs/prodotto/visione.md` — l'etichetta a nove voci e la legge della non dominanza
 7. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
 
-Stato al 2026-08-20: `npm run verify` e `npm run verify:release` **verdi**. Quante deleghe siano
-chiuse e quanti ADR ci siano lo dice [stato.md](../stato.md), che è generato.
+Stato: `npm run verify` e `npm run verify:release` **verdi**. La fetta 02 è **conclusa** —
+D017 l'ha chiusa il 2026-08-21 — e D018 è l'unica delega aperta rimasta.
 
 Attenzione a due cose del punto di partenza:
 
-- `main` è indietro di tre deleghe — né D019, né D020, né D023 sono state fuse. Il ramo nuovo
-  parte dalla punta di `d023-design-system`, non da `main`
+- `main` è indietro di quattro deleghe — né D019, né D020, né D023, né D017 sono state fuse. Il
+  ramo nuovo parte dalla punta di `d017-il-caveau`, non da `main`
 - **`npm install` non funziona in questa repo**, e non è colpa tua: `electron-vite@5` regge `vite`
   fino alla 7 e il progetto è sulla 8. L'unico comando che installa è `npm ci --legacy-peer-deps`,
   che però ignora i peer. È la correzione 8 di `docs/delega/D023-il-design-system.md`
 
-D017 vale ~330 righe di sorgente e ~410 di test, ed è la prima delega della fetta 02 che sposta un
-confine del kernel: `capacityOf` smette di chiedere senza sapere la risposta.
+D018 vale ~510 righe di **documentazione** e **zero di codice**, ed è la prima delega in cui zero
+righe di sorgente sono una condizione di correttezza invece di una stima.
 
-Tre cose che le deleghe appena chiuse ti hanno già preparato, e che non vanno rifatte:
+Tre cose che D017 ti ha già preparato, e che non vanno rifatte:
 
-- il `load` del caveau deve rifiutare un salvataggio che non riconosce, **campo per campo**: il
-  controllo pigro «è un oggetto» non basta, ed è misurato (D020)
-- non c'è niente da aggiungere a `tests/rules/stateful-systems-reject-garbage`: i sistemi si
-  derivano dal Registry, quindi registrare il caveau lo mette sotto la regola da solo
-- **non si disegna niente di nuovo.** Il kit di `src/renderer/ui/` ha superficie, etichetta, cifra,
-  targhetta, pulsante e prosa. Un pezzo nuovo entra quando lo disegnano **due** componenti, e non
-  può nascere fuori da `ui/`: R15 rifiuta un colore scritto altrove
+- **il caveau esiste davvero**, quindi le dodici domande sul kernel si rispondono leggendo
+  `src/core/domains/vault/` invece di immaginarlo
+- **la scheda del caveau si è già corretta da sola**, e le tre righe che ha smentito dicono quali
+  domande la forma deve fare per non sbagliare di nuovo
+- **`domains/* --> domains/*` non è ancora mai stata disegnata**, e D017 ha scelto due volte di non
+  aprirla: se la scheda deve chiedere «da quali domini dipende», la risposta giusta oggi è
+  «nessuno, e a collegarli è il bootstrap»
 
 Come lavoro:
 
-- **Un ramo `d017-il-caveau`.** Non si commetta su `main`
+- **Un ramo `d018-la-scheda-di-dominio`.** Non si commetta su `main`
 - **La delega si esegue, non si riscrive.** Se il testo è invecchiato o sbagliato, fermati e
-  dimmelo: è successo tre volte e ogni volta ha tolto lavoro invece di aggiungerlo
+  dimmelo: è successo quattro volte e ogni volta ha tolto lavoro invece di aggiungerlo
 - **Il budget di righe è un allarme, non un limite.** Se lo stai raddoppiando, stai risolvendo
   un problema diverso da quello descritto: dillo invece di continuare
-- **Fuori scope vuol dire fuori scope.** L'inventario del caveau, il primo `boundedList` e le
-  schermate dei domini che non esistono hanno un grilletto scritto, e non è scattato
+- **Fuori scope vuol dire fuori scope.** Le schede dei domini che non hanno codice si compilano a
+  metà o non si compilano: una scheda che descrive ciò che credevamo di scrivere è peggio di
+  nessuna scheda, e il caveau lo ha appena dimostrato
 - **Ogni test nuovo va rotto di proposito almeno una volta.** Un test che non si è mai visto
   fallire non è una rete, è una decorazione
 - `npm run verify` verde alla fine, con l'**output incollato**. Non «dovrebbe passare»
@@ -529,8 +560,6 @@ Come lavoro:
   Se non lo fai, il gate è rosso — ed è voluto (C11). Quel file non si scrive a mano
 - **Se sposti un confine fra livelli, il diagramma di `docs/architettura.md` cambia nello stesso
   commit**, e `tests/rules/import-graph` lo verifica nei due versi (C13)
-- **Guarda la schermata a occhio, nei due temi.** Nessun gate lo fa, e due temi con un occhio solo
-  è come nascono le righe di CSS morto
 - Alla fine, in fondo alla delega: le **correzioni** rispetto a com'era scritta, e il consuntivo
   di righe contro il budget. Ogni delega chiusa ne ha da cinque a diciassette
 ```

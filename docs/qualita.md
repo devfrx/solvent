@@ -21,13 +21,16 @@ bene: `verify` non paga l'avvio di `npm` due volte per lo stesso gate. Sono temp
 quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre
 `npm run`.
 
-**Rimisurata a [D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md)**, stesso giorno e
-stessa macchina: la catena intera **34,7 s**, con **564 test**. Era 34,9 s con 558 test a
-[D019](delega/D019-il-pagamento.md), e prima ancora 35,3 s: non sta scendendo — è la stessa misura
-ripetuta, e la differenza sta dentro la variazione fra due esecuzioni. Il numero di test sta qui e
-non in [stato.md](stato.md) per la stessa ragione del tempo: non è derivabile dal repo senza
-eseguirli. Fino a D019 lo portava il [passaggio di consegne](delega/PASSAGGIO-DI-CONSEGNE.md), che
-lo aveva scaduto di due deleghe; adesso quella pagina punta qui invece di ricopiarlo.
+**Rimisurata a [D017](delega/D017-il-caveau.md)**, il 2026-08-21 e sulla stessa macchina: la catena
+intera **36,4 s**, con **678 test**. Era 34,7 s con 564 test a
+[D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md), 34,9 s con 558 a
+[D019](delega/D019-il-pagamento.md), e prima ancora 35,3 s. Centoquattordici test in più costano un
+secondo e mezzo, che è dentro la variazione fra due esecuzioni: il tempo non sta crescendo con i
+test, sta fermo — e la ragione è che quasi tutto il minuto lo pagano `typecheck` e `lint`, non
+`test`. Il numero di test sta qui e non in [stato.md](stato.md) per la stessa ragione del tempo: non
+è derivabile dal repo senza eseguirli. Fino a D019 lo portava il
+[passaggio di consegne](delega/PASSAGGIO-DI-CONSEGNE.md), che lo aveva scaduto di due deleghe;
+adesso quella pagina punta qui invece di ricopiarlo.
 
 **Quanti siano i file, invece, questa pagina non lo dice più.** Fino a D019 diceva «558 test in 61
 file», e i file di test [stato.md](stato.md) li **conta**: era un fatto contabile ripetuto in un
@@ -83,8 +86,10 @@ misura sola.
 `verify:release` è **verde** da D011: `build` compila `out/main/index.js`, `out/preload/index.cjs`
 e `out/renderer/`.
 
-**Il peso del renderer, misurato a [D023](delega/D023-il-design-system.md).** Il modulo compilato è
-**574,99 kB** e il foglio di stile **19,20 kB**; accanto ci sono adesso **cinque file di carattere**
+**Il peso del renderer, rimisurato a [D017](delega/D017-il-caveau.md).** Il modulo compilato è
+**601,78 kB** e il foglio di stile **20,46 kB** — erano 574,99 e 19,20 a
+[D023](delega/D023-il-design-system.md), e la differenza è il caveau: un dominio, un pannello con la
+sua barra, sei chiavi in due lingue. Accanto ci sono **cinque file di carattere**
 in `woff2`, **116 kB** in tutto, che prima non c'erano ([ADR 0029](adr/0029-due-caratteri-e-stanno-nel-bundle.md)).
 Solo `woff2` e solo il sottoinsieme `latin`: presi come i pacchetti li offrono sarebbero stati nove
 file, perché ognuno dichiara anche un `woff` per i motori che il `woff2` non lo leggono — e qui il
@@ -104,15 +109,20 @@ ma da qui in avanti ogni delega deve tenerlo verde.
 | **i18n**               | `tests/i18n/`    | nessuna chiave manca in nessuna lingua, i segnaposto coincidono, ogni chiave si risolve                                                                                                                                                                             | che le traduzioni siano corrette                                |
 | **Regole strutturali** | `tests/rules/`   | Registry completo, nessuna logica nei `.vue`, identità del prodotto coerente, nessun `TODO`, nessun barrel, nessuna parola vietata nei nomi, nessun sistema che si fida del proprio salvataggio, il kit UI che non conosce il gioco e nessun colore fuori dai token | ciò che è dichiarato ⚠️ in [tracciabilita.md](tracciabilita.md) |
 
-**Non esistono test end-to-end sulla UI in questa fetta.** I `.vue` sono **dieci** — il guscio, due
-viste, sette componenti — e la riga che stava qui ne diceva due: era il numero di D012, mai
-rimisurato ([D016](delega/D016-correzioni-audit.md)).
+**Non esistono test end-to-end sulla UI in questa fetta.** Quanti siano i `.vue` questa pagina non
+lo dice più, e li conta [stato.md](stato.md): la riga che stava qui ne diceva due, poi dieci, e
+tutte e due le volte era una misura ferma a una delega prima — la seconda ha attraversato
+[D023](delega/D023-il-design-system.md), che di componenti ne ha aggiunti sei in un colpo solo.
+È la regola C11 applicata a un conteggio che nessun gate guarda: `tests/rules/docs-facts` cerca un
+numero accanto ad «ADR», «documenti» o «markdown», e «`.vue`» è fuori da quell'elenco.
 
-Il numero è cambiato, la decisione no, e vale la pena dire perché. Non è la quantità di componenti
-a rendere utile uno strumento E2E: è lo **stato proprio** che hanno. Qui i dieci leggono un
-selettore e inviano un comando, e le due sole parti davvero sbagliabili — la matematica della
+Il numero è cambiato due volte, la decisione no, e vale la pena dire perché. Non è la quantità di
+componenti a rendere utile uno strumento E2E: è lo **stato proprio** che hanno. Qui leggono un
+selettore e inviano un comando, e le sole parti davvero sbagliabili — la matematica della
 rotazione della carta e la scelta di quali movimenti mostrare — sono uscite in
-`components/rotation.ts` e `components/postings.ts`, pure e provate senza montare niente. Il
+`components/rotation.ts` e `components/postings.ts`, pure e provate senza montare niente. Il caveau
+non ha fatto eccezione: la percentuale della barra della capienza è nata **nello store**, non nel
+template, perché un `.vue` non calcola (R05). Il
 grilletto resta quello del [registro YAGNI](roadmap-fette.md): il primo comportamento di un
 componente che **non** si riesce a estrarre in una funzione pura. Allora sarà un ADR.
 
@@ -145,8 +155,16 @@ finto, perché a D009 nessun dominio esisteva — e `game-roundtrip` prova **la 
 è dato, e il gioco è quel dato **più** ciò che il `load` ricostruisce — qui il moltiplicatore
 dell'upgrade, che nel salvataggio non c'è. **La lista limitata manca**, e non per dimenticanza: nel payload
 della versione 1 non c'è nessun array, e la voce ha un grilletto nel
-[registro YAGNI](roadmap-fette.md). Entra con il caveau della fetta 02, insieme al primo
-`boundedList` che finisce davvero nel salvataggio.
+[registro YAGNI](roadmap-fette.md). Questa riga diceva «entra con il caveau della fetta 02», e il
+caveau è arrivato senza portarla: [D017](delega/D017-il-caveau.md) gli dà una **capienza**, non un
+inventario, e senza oggetti da conservare non c'è nessun array. Il grilletto è il primo dominio che
+possiede **cose** — black market o aste di box.
+
+Quello che il caveau ha portato è un'altra cosa, e vale la pena saperlo qui: `game-roundtrip` gioca
+adesso una partita che **amplia il caveau**, quindi il primo stato di dominio salvato che non sia un
+booleano attraversa il disco. È anche il primo che un salvataggio manomesso possa sbagliare in
+silenzio — un livello frazionario non fa rumore, produce una capienza sbagliata — ed è la ragione
+per cui il suo `load` guarda più del `typeof`.
 
 ## Definizione di fatto
 

@@ -1,6 +1,9 @@
 # ADR 0025 — La capienza di un pool si chiede, non si legge
 
-- **Stato:** Proposta — il meccanismo nasce con [D017](../delega/D017-il-caveau.md)
+- **Stato:** **Accettata** — [D017](../delega/D017-il-caveau.md): `Capacities`,
+  `createLedger(bus, capacities = poolCapacity)`, e `Ledger.capacities` esposta perché la UI legga
+  la stessa funzione (INV-18). Rotta di proposito in tre modi — il Ledger che torna a leggere
+  `POOLS`, l'involucro al posto della funzione vera, e la capienza che si sposta a metà partita
 - **Data:** 2026-08-20
 
 ## Contesto
@@ -82,13 +85,25 @@ ampliato: il dato non sparisce, smette di essere l'ultima parola.
 - `capacityOf()` in `domains/atm/rules.ts` diventa il posto sbagliato: risponde leggendo `POOLS`,
   cioè la capienza di partenza, mentre la UI vuole quella vera. Chi esegue [D017](../delega/D017-il-caveau.md)
   lo troverà come primo attrito, ed è dichiarato qui perché non sembri una scoperta.
-- **Sparisce l'unico mock di modulo del progetto**, e non era stato previsto scrivendo questo ADR:
-  l'ha trovato la preparazione di [D017](../delega/D017-il-caveau.md). Oggi
-  `tests/kernel/ledger-capacity` sostituisce `@core/contracts/pools` con `vi.mock`, e il suo
-  commento lo dichiara — «è l'unico file di test del progetto che sostituisce un modulo, ed è per
+- **È sparito l'unico mock di modulo del progetto**, e non era stato previsto scrivendo questo ADR:
+  l'ha trovato la preparazione di [D017](../delega/D017-il-caveau.md), e D017 l'ha eseguito. Fino ad
+  allora `tests/kernel/ledger-capacity` sostituiva `@core/contracts/pools` con `vi.mock`, e il suo
+  commento lo dichiarava — «è l'unico file di test del progetto che sostituisce un modulo, ed è per
   questo che sta da solo». Con le capienze per parametro basta passare una funzione. Una decisione
   strutturale che **cancella** un'eccezione invece di aggiungerne una è il segnale che il confine
   scelto era già quello giusto: è la stessa forma del fix di radice di
   [D016](../delega/D016-correzioni-audit.md), che toglieva codice invece di aggiungerne.
+- **Il valore predefinito è costato tre file di test**, e D017 l'aveva dichiarato come trappola
+  prima di incontrarlo: `tests/save/kernel-roundtrip` costruiva un Ledger nudo e ci accreditava
+  1.234,56 € per avere dei decimali, `tests/domains/atm/commands` ne metteva 2.000 € sui contanti
+  per far girare depositi e prelievi, e `tests/renderer/store` altrettanto per il cruscotto. Con la
+  capienza di partenza accesa la prima transazione veniva rifiutata, e da lì in poi quei file
+  provavano il round-trip e il cruscotto di una partita **vuota**: verdi in due casi su tre, e
+  senza dimostrare più niente. Il rimedio è una riga dove il tetto non è l'oggetto del test —
+  `createLedger(bus, () => null)`, con scritto perché — e un importo più piccolo dove lo è. La
+  lezione è che «additivo» significa _compila_, non _prova ancora la stessa cosa_.
+- **Il Ledger espone la funzione che ha ricevuto**, ed è l'aggiunta che D017 ha fatto a questa
+  decisione. Senza, INV-18 sarebbe una coincidenza da verificare confrontando due numeri; con,
+  è un confronto per **identità** — e la UI non ha più un secondo posto da cui leggere il tetto.
 - Il giorno in cui un secondo pool avrà una capienza variabile — le fiches del casinò, un
   portafoglio crypto — non c'è niente da riaprire: la funzione risponde per `pool`.

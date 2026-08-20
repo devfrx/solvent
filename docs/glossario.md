@@ -64,9 +64,12 @@ I sei che esistono, cioè quelli in `POOL_IDS` (`contracts/pools.ts`):
 
 Il nome è deciso, il pool no: **`chips`** — le fiches del casinò, del giocatore, convertibili solo
 verso `cash` e a spread — **non è in `POOL_IDS`**. Entra col dominio che lo usa, ed è una riga del
-[registro YAGNI](roadmap-fette.md). Vale per le proprietà quanto per i pool: la capienza di `cash`
-e gli interessi di `card` sono descritti qui e sono `null`/`false` nel codice finché non esiste il
-dominio che li rende veri.
+[registro YAGNI](roadmap-fette.md). Vale per le proprietà quanto per i pool: una proprietà
+descritta qui resta `null`/`false` nel codice finché non esiste il dominio che la rende vera.
+Gli interessi di `card` sono ancora così; **la capienza di `cash` non più** — il caveau esiste da
+[D017](delega/D017-il-caveau.md), e `POOLS.cash.capacity` porta la capienza **di partenza**. Dopo il
+primo ampliamento a rispondere non è più quel dato ma una funzione, che il Ledger riceve e la UI
+interroga ([ADR 0025](adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md), INV-18).
 
 "Cash" è il nome di un pool, non un sinonimo di "denaro". Il denaro è `Money`. I pool non-giocatore
 non compaiono mai nella UI, ma entrano nel salvataggio: senza, la somma non farebbe zero al
@@ -124,7 +127,7 @@ domini ne inventino tre varianti. Le meccaniche sono in [prodotto/visione.md](pr
 | **Contanti**    | il pool `cash`. Si dice "contanti", mai "liquidi", mai "soldi veri"                                                                                                                                                                         |
 | **Carta**       | il pool `card` e il conto che le sta dietro. Sono la stessa cosa: non si distinguono                                                                                                                                                        |
 | **Fiches**      | il pool `chips`. Mai "gettoni", mai "chip"                                                                                                                                                                                                  |
-| **Caveau**      | ciò che limita la capienza dei contanti. Mai "cassaforte", mai "vault"                                                                                                                                                                      |
+| **Caveau**      | ciò che limita la capienza dei contanti. In italiano si scrive così: mai "cassaforte". `vault` resta il nome **in inglese** del dominio e del `SystemId`, come ogni identificatore (C08)                                                    |
 | **Calore**      | quanto l'attività irregolare ha attirato attenzione. Sale col volume, scende col tempo                                                                                                                                                      |
 | **Indagine**    | ciò che scatta quando il calore supera la soglia. Ha conseguenze reali, non è un avviso                                                                                                                                                     |
 | **Reputazione** | quanto i contatti del black market si fidano. Apre trattative, non sconti                                                                                                                                                                   |

@@ -1,10 +1,11 @@
 # D017 — Il caveau: i contanti hanno una capienza
 
-- **Stato:** Aperta — scritta il 2026-08-20 allo STOP 2 e **preparata per l'esecuzione** lo stesso
-  giorno: la preparazione ha misurato il costo del cambiamento e ha trovato un difetto nella delega
-  stessa. **Ri-preparata il 2026-08-21**, dopo che tre deleghe si sono chiuse fra la scrittura e
-  l'esecuzione: la misura è stata rifatta sul codice di adesso e il testo corretto dove era
-  invecchiato. Vedi _Cosa la preparazione ha verificato_, punti 9 e seguenti
+- **Stato:** **Chiusa** — eseguita il 2026-08-21 sul ramo `d017-il-caveau`. Scritta il 2026-08-20
+  allo STOP 2 e **preparata per l'esecuzione** lo stesso giorno: la preparazione ha misurato il costo
+  del cambiamento e ha trovato un difetto nella delega stessa. **Ri-preparata il 2026-08-21**, dopo
+  che tre deleghe si sono chiuse fra la scrittura e l'esecuzione: la misura è stata rifatta sul
+  codice di adesso e il testo corretto dove era invecchiato. Vedi _Cosa la preparazione ha
+  verificato_, punti 9 e seguenti, e in fondo le **sedici correzioni** rispetto a com'era scritta
 - **Dipende da:** D013 (cioè tutta la fetta 01) e tre deleghe che si sono chiuse dopo che questa
   era già scritta:
   - **[D019](D019-il-pagamento.md)** porta il listino — senza, l'ampliamento nascerebbe con un pool
@@ -343,36 +344,36 @@ permette.
 
 ## Definizione di fatto
 
-- [ ] `npm run verify` verde, con l'**output incollato**
-- [ ] `npm run verify:release` verde
-- [ ] test: il Ledger rifiuta un accredito che supera la capienza **corrente**, non quella di
+- [x] `npm run verify` verde, con l'**output incollato**
+- [x] `npm run verify:release` verde
+- [x] test: il Ledger rifiuta un accredito che supera la capienza **corrente**, non quella di
       partenza — cioè dopo un ampliamento il tetto è cambiato davvero
-- [ ] test: il `tick` del reddito con il caveau **pieno** non muove un centesimo e lo dice; con
+- [x] test: il `tick` del reddito con il caveau **pieno** non muove un centesimo e lo dice; con
       il caveau **quasi** pieno accredita quanto ci sta, e la somma dei conti resta zero
-- [ ] test: **il recupero dopo otto ore in un caveau più piccolo del maturato accredita quanto ci
+- [x] test: **il recupero dopo otto ore in un caveau più piccolo del maturato accredita quanto ci
       sta, non zero.** È il caso che la preparazione ha trovato misurando, ed è quello che senza un
       test tornerebbe da solo: `recover()` fa un `tickAll` solo, quindi una transazione sola
-- [ ] test: la capienza mostrata dalla UI e quella che il Ledger fa rispettare vengono dalla
+- [x] test: la capienza mostrata dalla UI e quella che il Ledger fa rispettare vengono dalla
       **stessa** funzione (INV-18), verificato per identità e non per uguaglianza — è la trappola
       che [D015](D015-home-bancomat.md) ha pagato alla correzione 14
-- [ ] test: il caveau ampliato attraversa il salvataggio, e `tests/save/game-roundtrip` lo include
+- [x] test: il caveau ampliato attraversa il salvataggio, e `tests/save/game-roundtrip` lo include
       nella partita che gioca
-- [ ] test di bilanciamento: il muro morde dentro l'intervallo dichiarato in `targets.ts`
-- [ ] ogni test nuovo è stato rotto di proposito almeno una volta
-- [ ] verifica a mano: il caveau si riempie, il reddito si ferma **e si vede che si è fermato**,
+- [x] test di bilanciamento: il muro morde dentro l'intervallo dichiarato in `targets.ts`
+- [x] ogni test nuovo è stato rotto di proposito almeno una volta
+- [x] verifica a mano: il caveau si riempie, il reddito si ferma **e si vede che si è fermato**,
       il bancomat lo svuota, il gioco riparte
-- [ ] [ADR 0025](../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md) passa ad `Accettata`
-- [ ] test: il `load` del caveau rifiuta un salvataggio che non riconosce **campo per campo**, e
+- [x] [ADR 0025](../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md) passa ad `Accettata`
+- [x] test: il `load` del caveau rifiuta un salvataggio che non riconosce **campo per campo**, e
       `tests/rules/stateful-systems-reject-garbage` lo copre da sé appena il sistema è registrato
       (INV-20, punto 10 della preparazione)
-- [ ] il pannello non scrive un colore e non spegne un pulsante: il kit di `src/renderer/ui/` e le
+- [x] il pannello non scrive un colore e non spegne un pulsante: il kit di `src/renderer/ui/` e le
       regole R15 e INV-21 lo impongono, ma vale guardarlo a occhio **nei due temi**
-- [ ] `docs/tracciabilita.md`: INV-18 ha la sua riga e il suo meccanismo
-- [ ] i tre test-fotografia del punto 2 della preparazione sono stati **riscritti**, non
+- [x] `docs/tracciabilita.md`: INV-18 ha la sua riga e il suo meccanismo
+- [x] i tre test-fotografia del punto 2 della preparazione sono stati **riscritti**, non
       cancellati: una fotografia si sostituisce con una fotografia
-- [ ] l'`order` del caveau è dichiarato e motivato in una riga, e se apre una fase nuova di
+- [x] l'`order` del caveau è dichiarato e motivato in una riga, e se apre una fase nuova di
       `ORDER` la voce esce dal [registro YAGNI](../roadmap-fette.md)
-- [ ] la riga della fetta 02 nel [registro delle fette](../roadmap-fette.md) è corretta: niente
+- [x] la riga della fetta 02 nel [registro delle fette](../roadmap-fette.md) è corretta: niente
       `boundedList` salvato qui, e il perché
 
 ## Lo stile con cui si disegna
@@ -416,3 +417,184 @@ Il colore dei contanti e quello della carta **esistono già** come ruoli (`--col
   decide dopo quanti secondi il giocatore incontra il muro la prima volta, e quel numero è
   l'esperienza dei primi minuti di gioco. `targets.ts` è il posto dove si dichiara l'intervallo
   accettabile, e un test lo fa rispettare.
+
+---
+
+## Cosa è stato verificato a mano, e come
+
+La finestra di Electron in questo ambiente non compone frame, quindi il gioco è stato guardato con
+il metodo della nota di chiusura di [D015](D015-home-bancomat.md): `npm run build`, la pagina di
+`out/renderer/` servita da un server statico, e al posto del preload le tre funzioni di `SaveApi`
+scritte a mano, con dentro un salvataggio che ha già dei soldi. Il loop non gira — senza frame non
+c'è `requestAnimationFrame` — quindi ogni stato è stato costruito dal salvataggio invece che
+aspettato, il che ha anche il vantaggio di essere ripetibile.
+
+Guardato **nei due temi**, e ogni colore riletto dal DOM invece che a occhio, perché è la sola cosa
+che un occhio non sa fare:
+
+| Cosa                                   | Scuro                                         | Chiaro                             |
+| -------------------------------------- | --------------------------------------------- | ---------------------------------- |
+| Il pieno della barra, caveau non pieno | `#a8ae63` — è `--color-cash`                  | `#616733` — è `--color-cash`       |
+| Il pieno della barra, caveau **pieno** | `#e07d5f` — è `--color-loss`                  | `#a63e28` — è `--color-loss`       |
+| Il vuoto della barra e il suo bordo    | `--color-sunken` + `--color-line`             | gli stessi due token               |
+| «Caveau 1 di 5» e la cifra del tetto   | `--color-ink-3`, JetBrains Mono               | gli stessi                         |
+| La frase del caveau pieno              | `--color-loss`                                | lo stesso                          |
+| I due pulsanti «Amplia»                | mai `disabled`, smorzati con `--color-sunken` | mai `disabled`, lo stesso smorzato |
+
+**Nessun valore letterale**: ogni colore risolve a un token, in tutti e due i temi. Le uniche due
+cifre scritte in `CashPanel.vue` sono `height: 100%` sul riempimento e `1px` sul bordo, che sono
+misure e non colori.
+
+Il giro completo, in ordine, con un salvataggio da 990,00 € in contanti e il caveau al primo livello:
+
+1. **Il muro morde.** Il saldo si ferma a 1.000,00 €, «Spazio libero» va a 0,00 €, la barra diventa
+   rossa e compare «Il caveau è pieno: lo stipendio non entra più. Deposita sul conto.» — che è la
+   metà della fetta che nessun test può guardare.
+2. **Il listino è a due voci**, e si legge prima di premere: «Con Contanti — Amplia 900,00 €» e
+   «Con Carta — Amplia 898,00 €». Con 1.000,00 € in contanti e 10,00 € sulla carta il primo è acceso
+   e il secondo smorzato, ed è la prima volta nel progetto che «con cosa paghi» è una domanda con
+   due risposte.
+3. **L'ampliamento sposta il tetto.** Premuto quello in contanti: «Caveau 2 di 5», capienza
+   5.000,00 €, contanti a 100,00 €, la barra torna verde al 2%, il listino passa a
+   4.500,00 / 4.498,00 €, e nelle ultime operazioni compare «Caveau ampliato — Contanti −900,00 €».
+4. **Il parziale si vede.** Subito dopo resta scritto «Il caveau non tiene tutto: 2,00 € di
+   stipendio non è entrato» — il tick a cavallo del muro aveva incassato 10,00 € dei 12,00 €
+   maturati. È il caso intermedio, quello che un booleano avrebbe fatto sparire.
+5. **Il bancomat dice di no prima**, e con la frase del Ledger: a caveau pieno, «Preleva» mostra al
+   posto della scomposizione «Contanti non tiene più di 1.000,00 €: ci stanno ancora 0,00 €». Prima
+   di questa delega mostrava la scomposizione esatta di un'operazione che sarebbe stata rifiutata
+   premendo.
+
+## Correzioni rispetto a com'era scritta
+
+**1. Il listino non è un costo: `expansionCost(level)` non esiste.** La tabella _Da produrre_
+chiedeva `expansionCost(level)`, cioè **un** numero, e due sezioni più in là la delega spiegava che
+l'ampliamento è il primo listino a **due** voci. Le due cose non stanno insieme. Al loro posto ci
+sono `expansionPrices(level)` e `expansionPriceFor(level, pool)`, che sono la forma di `income` — la
+stessa che D019 ha costruito — applicata a un livello invece che a un upgrade.
+
+**2. `canExpand` prende tre argomenti, non due.** Per la stessa ragione: con un listino il prezzo
+deve arrivare **dentro l'opzione**, altrimenti la funzione se lo ripesca da sola ed è una seconda
+lettura da tenere allineata a quella del comando (INV-19). La firma è
+`canExpand(state, option, available)`, gemella di `canBuyUpgrade`.
+
+**3. `roomIn` sta dove la delega lo mette, ma il reddito non lo importa: lo riceve.** La tabella lo
+colloca in `vault/rules.ts` — ed è lì — e dice che è «ciò che permette al reddito di accreditare il
+parziale». Non dice come ci arrivi. Un `import` da `income` a `vault` sarebbe stato il **primo
+accoppiamento fra domini del progetto**, cioè esattamente il precedente che il punto 8 della
+preparazione chiede di non aprire per il bancomat. La stessa risposta vale per il reddito, e vale di
+più: `createIncome(ledger, modifiers, room)`, e a costruire quella funzione è il bootstrap, l'unico
+posto che ha entrambi i domini sotto mano (ADR 0024).
+
+**4. Il punto 8 è stato accolto, e costa `atm/commands.ts`, che non era nella tabella.** Un prelievo
+porta denaro verso i contanti: senza sapere se ci sta, l'anteprima mostra la scomposizione esatta di
+un'operazione che il Ledger poi rifiuta. `previewOf` riceve adesso il pool di destinazione — tetto e
+saldo — e risponde con lo **stesso** codice e le stesse due cifre che darebbe il Ledger. Nessun
+dominio importa un altro dominio: a consegnare i due numeri è lo store, e per il comando il Ledger
+stesso.
+
+**5. Il Ledger non riceve soltanto la funzione delle capienze: la espone.** L'ADR 0025 si fermava a
+`createLedger(bus, capacities)`. Con quella sola metà, INV-18 — «la capienza che il Ledger fa
+rispettare è la stessa che la UI mostra» — sarebbe rimasta una coincidenza da verificare
+confrontando due numeri, che è la forma debole che la definizione di fatto vieta esplicitamente
+(«per identità e non per uguaglianza»). `Ledger.capacities` è la funzione che il Ledger ha ricevuto,
+e la UI legge da lì.
+
+**6. La capienza di partenza è una costante esportata, non un numero dentro `POOLS`.** La delega
+diceva che `cash.capacity` smette di essere `null`, e non diceva che quel numero serve anche a
+`balance/`: la curva delle capienze comincia dal livello zero. Scritto due volte sarebbe stato lo
+stesso difetto di INV-18 sul primo gradino, quindi è `CASH_START_CAPACITY` in `contracts/pools.ts`,
+letta dal pool e dalla curva. Un numero di gioco fuori da `balance/` è il prezzo, ed è obbligato:
+`contracts/` non può importare `balance/`.
+
+**7. «E lo dice» è un numero, non un booleano.** La definizione di fatto chiede che il tick a caveau
+pieno «non muova un centesimo e lo dica». `income` espone adesso `withheld()`: quanto dell'ultimo
+tick non è entrato. Un `sì/no` avrebbe fatto sparire il caso intermedio — il caveau **quasi** pieno,
+in cui una parte entra — che è quello che il giocatore incontra per primo e che vive in modo diverso.
+Non si salva: descrive l'ultimo tick, non la partita.
+
+**8. Il tick non emette più una transazione da zero euro.** Con il caveau pieno, accreditare zero
+sarebbe una transazione perfettamente valida che non muove niente ed emette lo stesso: lo storico si
+riempirebbe di stipendi da 0,00 € proprio mentre si dice al giocatore che i soldi non arrivano. È la
+stessa ragione per cui `isValidAmount` esiste nel bancomat.
+
+**9. `ECONOMY`, per una ragione più forte di quella proposta.** Il punto 6 della preparazione
+proponeva `ECONOMY` perché il caveau «è infrastruttura economica come il bancomat», e osservava che
+senza `tick` l'ordine conta poco. Conta in un punto, e lì è decisivo: `ECONOMY` viene **prima** di
+`INCOME`, quindi al ricaricamento il caveau ritrova il proprio livello prima che il recupero faccia
+ticchettare otto ore di stipendio. Con l'ordine opposto quello stipendio si misurerebbe contro la
+capienza di una partita appena nata. Nessuna fase nuova, e la voce del registro YAGNI resta dov'è.
+
+**10. Il valore predefinito di `createLedger` ha morso al contrario.** La trappola dichiarata dice:
+«un test che costruisce un Ledger senza capienze prova il comportamento di prima». È successo il
+rovescio, ed è peggio — **tre file** costruivano un Ledger nudo e ci mettevano più denaro di quanto
+il caveau tenga: `kernel-roundtrip` 1.234,56 € per avere dei decimali, `atm/commands` e
+`renderer/store` 2.000 € per far girare depositi e cruscotto. Con il tetto acceso la prima
+transazione veniva rifiutata, e da lì in poi quei file provavano il round-trip e il cruscotto di una
+partita **vuota**: due su tre restavano verdi. «Additivo» significa _compila_, non _prova ancora la
+stessa cosa_.
+
+**11. La riga del registro YAGNI sui pool era sbagliata, e lo diceva con sicurezza.** Prometteva che
+«la fetta 02 darà un valore alla capienza senza toccare quel file», dove il file è `atm/rules.ts`. È
+stato toccato: `capacityOf` **non esiste più**. Leggeva `POOLS`, cioè la capienza di partenza, che
+dopo il primo ampliamento è la risposta sbagliata — ed è dichiarato nelle conseguenze dell'ADR 0025,
+che quella riga non aveva letto.
+
+**12. Il raggruppamento dello stipendio: il grilletto è scattato, e questa delega non l'ha
+raccolto.** Il [passaggio di consegne](PASSAGGIO-DI-CONSEGNE.md) elenca tre voci che «aspettano la
+fetta 02», e questa è la terza. Non sta nella tabella _Da produrre_ di D017, non sta nella sua
+definizione di fatto, e il caveau non è il posto in cui si decide quali righe una schermata mostra.
+La voce resta nel [registro YAGNI](../roadmap-fette.md) con un grilletto nuovo — la prima delega che
+tocca `components/postings.ts` — e con un argomento in più a favore, che la fetta ha appena
+prodotto: a caveau pieno il reddito **si ferma**, quindi lo storico smette di riempirsi di stipendio
+proprio quando c'è qualcos'altro da leggerci.
+
+**13. Due mutazioni sono rimaste verdi al primo giro, e sono due buchi veri.** Rompere di proposito
+ha prodotto venticinque mutazioni; ventitré sono diventate rosse subito. Le altre due: la barra che
+non si ferma al 100% — nessun test aveva un saldo **sopra** il tetto, che invece un salvataggio più
+vecchio della curva produce — e la doppia lettura della capienza nello store, che al livello zero dà
+lo stesso oggetto e quindi non si distingue. La prima ha adesso un test; la seconda è stata tolta
+alla radice, lasciando **una** sola lettura invece di verificarne due.
+
+**14. La scheda del caveau ha smentito tre proprie righe.** L'obbligo che si era data — rileggersi
+contro il codice il giorno dell'esecuzione — è stato pagato, e ha trovato che «conseguenza per D017:
+nessuna» era vera per la forma e non per il posto, che il bancomat «non cambia di una riga» ne ha
+cambiate quindici, e che «il reddito accredita quanto ci sta» costa una firma, un bootstrap e nove
+test. Nessuna decisione **di gioco** è cambiata, ed è il risultato migliore che una scheda compilata
+prima del codice potesse dare.
+
+**15. `docs/qualita.md` prometteva che il primo `boundedList` entrasse col caveau.** Non è vero e non
+poteva esserlo — il [registro delle fette](../roadmap-fette.md) l'aveva già corretto scrivendo D017,
+e quella riga era rimasta indietro. È la classe di difetto che nessun gate vede: `doc-links` guarda i
+collegamenti, `docs-facts` i conteggi, e nessuno dei due sa dire se una frase descrive ancora il
+codice di ieri. Trovata rileggendo, come le sei di D019.
+
+**16. I documenti riscritti a macchina sono passati a CRLF, e `doc-links` è diventato rosso.** Le
+ancore non risolvevano più: la regex dei titoli non prende un titolo che finisce con un ritorno a
+capo. Non è un aneddoto — è un gate che ha visto in otto collegamenti un danno invisibile a occhio,
+ed è la ragione per cui `format:check` e i test di regola non si eseguono «alla fine».
+
+## Consuntivo, contro il budget
+
+Righe di **codice** con il metodo di `codeLines` — commenti e righe vuote escluse, lo stesso di
+[stato.md](../stato.md) — misurate contro la punta di `d023-design-system`:
+
+| Cosa              | Budget | Consuntivo | Scarto       |
+| ----------------- | ------ | ---------- | ------------ |
+| Sorgente (`src/`) | ~330   | **347**    | +5%          |
+| Test (`tests/`)   | ~410   | **508**    | +24%         |
+| Documentazione    | —      | ~330       | non a budget |
+
+**Il sorgente è dentro la stima**, ed è la parte che la preparazione aveva misurato davvero: il ramo
+del reddito, la firma del kernel, il selettore del pagamento. Le 347 righe sono il caveau (102 fra
+`types`, `rules` e `system`), il pannello (+85), lo store (+57), il bancomat (+18, che il budget non
+prevedeva), il bootstrap (+11), il reddito (+13), le parole (+27), il bilanciamento (+26) e cinque
+righe di Ledger.
+
+**I test sforano del 24%, e la ragione si scrive in una riga**: due file che non esistevano —
+`tests/domains/vault/rules` e `.../system`, 249 righe fra loro — più i due blocchi che coprono le
+decisioni prese eseguendo, cioè l'anteprima del bancomat contro un pool con un tetto (+40) e i
+selettori del caveau nello store (+89). Il budget era stato scritto quando il punto 8 della
+preparazione era ancora una domanda aperta. Non è il raddoppio che il
+[passaggio di consegne](PASSAGGIO-DI-CONSEGNE.md) chiede di segnalare come «stai risolvendo un
+problema diverso»: è lo stesso problema, con due risposte in più da provare.

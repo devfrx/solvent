@@ -45,11 +45,12 @@ sola — _esiste un meccanismo che la impone, e qualcuno l'ha visto scattare?_ �
 stata pagata, rompendo ognuna di proposito e guardando il rosso. Le rotture sono in fondo a quella
 delega, e la riga di stato di ogni ADR porta la propria.
 
-Il **0025** nasce allo STOP 2 con [D017](../delega/D017-il-caveau.md) ed è `Proposta` per la
-ragione giusta: il meccanismo che lo impone non è ancora stato scritto. È la prima decisione
-strutturale della fetta 02, e riguarda un confine del kernel — il Ledger smette di **leggere** la
-capienza di un pool e comincia a **chiederla**, perché il caveau si amplia e una costante compilata
-non si amplia.
+Il **0025** nasce allo STOP 2 con [D017](../delega/D017-il-caveau.md) ed è stato `Proposta` per la
+ragione giusta finché il meccanismo che lo impone non è stato scritto. Adesso c'è, ed è
+`Accettata`: è la seconda decisione strutturale della fetta 02, e riguarda un confine del kernel —
+il Ledger ha smesso di **leggere** la capienza di un pool e ha cominciato a **chiederla**, perché il
+caveau si amplia e una costante compilata non si amplia. Nel farlo ha **cancellato** l'unico mock di
+modulo del progetto, che è il segnale migliore che un confine possa dare di sé.
 
 Il **0027** nasce lo stesso giorno, ed è l'unico del progetto che non decide una cosa nuova: finisce
 una vecchia. L'[ADR 0017](0017-il-denaro-e-plurale.md) aveva scritto che «non esistono azioni che
@@ -68,10 +69,11 @@ un ADR sull'aspetto senza il CSS che lo applica non decide niente.
 Quali decisioni siano ancora _Proposta_ lo dice [stato.md](../stato.md), che le conta invece di
 ricordarsele. Qui c'è il **perché**, che è la sola cosa che un conteggio non può dire.
 
-Per quasi tutte è la ragione ovvia: **0022**, **0023**, **0025** e **0026** descrivono cose che il
+Per quasi tutte è la ragione ovvia: **0022**, **0023** e **0026** descrivono cose che il
 progetto non ha ancora costruito, e diventeranno un fatto con la delega che le userà. Il **0027**
-era fra loro fino a [D019](../delega/D019-il-pagamento.md), che l'ha costruito: è la prima
-decisione della fetta 02 a passare ad _Accettata_.
+era fra loro fino a [D019](../delega/D019-il-pagamento.md), e il **0025** fino a
+[D017](../delega/D017-il-caveau.md): sono le due decisioni della fetta 02 passate ad _Accettata_,
+ognuna dalla delega che l'ha costruita.
 L'eccezione è **0010**, che ha il meccanismo **a metà**: `boundedList<T>(max)` è l'unico costruttore e `max` è
 obbligatorio, ma la seconda frase della decisione — «il validatore del salvataggio rifiuta un array
 che supera il `max` dichiarato» — non ha niente da validare, perché nel payload della versione 1
@@ -107,7 +109,7 @@ fetta 02 a chiuderla.
 | [0022](0022-il-ledger-ha-conti-non-solo-pool.md)                               | Il Ledger ha conti, non solo pool                              | Proposta      | dove vive il denaro di un'entità creata dal giocatore                   | A05             |
 | [0023](0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)                      | Il tempo di gioco è un sistema di dominio                      | Proposta      | chi sa che giorno è, e come lo sanno gli altri                          | —               |
 | [0024](0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md) | Un sistema riceve per costruzione ciò che non sta nel contesto | **Accettata** | come un dominio ottiene ciò che il `SystemContext` non porta            | —               |
-| [0025](0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)                  | La capienza di un pool si chiede, non si legge                 | Proposta      | chi decide quanto tiene un pool, quando il tetto può crescere           | A05             |
+| [0025](0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)                  | La capienza di un pool si chiede, non si legge                 | **Accettata** | chi decide quanto tiene un pool, quando il tetto può crescere           | A05             |
 | [0026](0026-la-precisione-del-denaro-e-dichiarata.md)                          | La precisione del denaro è dichiarata, non ereditata           | Proposta      | fin dove il denaro resta esatto, e chi ha scelto quel limite            | —               |
 | [0027](0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)               | Il listino è dell'azione, la scelta è del giocatore            | Accettata     | chi decide con cosa si paga, e dove vive il prezzo di ogni strumento    | A05             |
 | [0028](0028-il-kit-ui-non-sa-che-gioco-e.md)                                   | Il kit UI non sa che gioco è                                   | **Accettata** | dove vive lo stile, e cosa gli è vietato sapere                         | A14             |
@@ -175,9 +177,11 @@ applica. Contestarle oggi costa la modifica di un documento. Il momento in cui s
 essere gratuite è il blocco B per il tempo e il blocco D per i conti — la sequenza sta in
 [roadmap-fette.md](../roadmap-fette.md).
 
-L'ultima, il **0025**, è dello STOP 2 e sta nel mezzo: non costa ancora niente perché nessuna riga
-la applica, ma [D017](../delega/D017-il-caveau.md) la applicherà nella sua prima ora. È il momento
-più economico in cui contestarla, ed è adesso.
+L'ultima, il **0025**, era dello STOP 2 e stava nel mezzo: non costava ancora niente perché nessuna
+riga la applicava. [D017](../delega/D017-il-caveau.md) l'ha applicata, e adesso il prezzo si può
+scrivere invece di stimarlo: costa una firma del kernel, un campo in più sul `Ledger`, una riga del
+bootstrap — e **restituisce** il `vi.mock` che `tests/kernel/ledger-capacity` teneva. Contestarla
+oggi costa più di ieri e molto meno di domani.
 
 ## Decisioni deliberatamente rimandate
 

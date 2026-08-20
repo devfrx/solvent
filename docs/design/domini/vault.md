@@ -1,19 +1,20 @@
 # Caveau — scheda di dominio
 
-- **Stato:** **metà di gioco completa**. La metà kernel non è qui: la compila
-  [D018](../../delega/D018-la-scheda-di-dominio.md), leggendo il codice che
-  [D017](../../delega/D017-il-caveau.md) avrà scritto
-- **Data:** 2026-08-20
+- **Stato:** **metà di gioco completa, e riletta contro il codice** il 2026-08-21, quando
+  [D017](../../delega/D017-il-caveau.md) è stata eseguita. Cosa è cambiato sta in fondo, sotto
+  _Cosa l'esecuzione ha smentito_. La metà kernel non è qui: la compila
+  [D018](../../delega/D018-la-scheda-di-dominio.md), leggendo il codice che adesso esiste
+- **Data:** 2026-08-20, riletta il 2026-08-21
 - **Costruito da:** [D017](../../delega/D017-il-caveau.md), fetta 02 — ma solo per i **contanti**.
   Oggetti, ingombro e perquisizione arrivano con le fette successive
 - **A monte:** la casa e le quattro forme di saturazione nella
   [visione](../../prodotto/visione.md), il blocco 3 della
   [mappa funzionale](../mappa-funzionale.md)
 
-Questa scheda è la prima compilata, ed è anche l'unica che descrive un dominio **che non esiste
-ancora**. Ne discende un obbligo: quando D017 sarà eseguita, la scheda va riletta contro il codice
-e corretta dove ha sbagliato. Una scheda che descrive ciò che credevamo di scrivere è peggio di
-nessuna scheda.
+Questa scheda è la prima compilata, ed è stata l'unica a descrivere un dominio **che non esisteva
+ancora**. L'obbligo che si era data — «quando D017 sarà eseguita, la scheda va riletta contro il
+codice e corretta dove ha sbagliato» — **è stato pagato**, e quello che ne è uscito sta in fondo.
+Una scheda che descrive ciò che credevamo di scrivere è peggio di nessuna scheda.
 
 ---
 
@@ -110,14 +111,28 @@ cose diverse.
 ## L'ampliamento
 
 - **Livelli finiti, con un tetto dichiarato.** Il caveau arriva a un ultimo livello e lì si ferma.
-  Il giocatore lo vede dal primo secondo — «caveau 3 di 8» — e sa che i contanti hanno una fine.
-- Ogni livello dà più spazio e costa di più.
+  Il giocatore lo vede dal primo secondo — «caveau 1 di 5» — e sa che i contanti hanno una fine.
+  Quanti siano è la lunghezza dell'elenco delle capienze, non un numero scritto accanto: la cifra
+  che stava qui, «3 di 8», era un esempio, e [D017](../../delega/D017-il-caveau.md) ne ha scelti
+  cinque.
+- Ogni livello dà più spazio e costa di più. **E ogni prezzo sta appena sotto la capienza del
+  livello da cui si paga**: per pagare in contanti bisogna poterli tenere, quindi il caveau va
+  quasi riempito prima di potersi ampliare. È il muro che insegna sé stesso, ed è una scelta di
+  D017 che questa scheda non aveva previsto.
 - **Si paga in contanti o con la carta, a prezzi diversi.** Il meccanismo — il **listino** di
   un'azione — è dell'[ADR 0027](../../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)
   e lo costruisce [D019](../../delega/D019-il-pagamento.md); il caveau è il primo a offrirne due.
   La taratura ha un vincolo: senza il calore, lo strumento più economico vincerebbe sempre, quindi
   la differenza di prezzo va misurata contro la **commissione del bancomat** — pagare con la carta
   conviene solo se lo sconto supera quanto costa portarci i contanti.
+
+  **Come è stata risolta**, perché la riga qui sopra dice il criterio e non la risposta: lo sconto
+  della carta è di **due euro** a ogni livello, cioè **sotto** i 2,50 € di `ATM_FEE`. Ne discende
+  che chi ha i contanti li spende, perché convertirli costerebbe più di quanto lo sconto faccia
+  risparmiare, e chi ha già del denaro sulla carta paga con quella. Con cosa paghi è **dove hai i
+  soldi**, e nessuna delle due voci è arredamento. Uno sconto più grande — cinquanta euro, per dire
+  — ucciderebbe i contanti in un colpo solo. È la taratura più fragile della fetta, ed è la prima
+  cosa da rifare quando il calore darà alla carta un prezzo da pagare.
 
 **Perché livelli finiti e non una curva che si strozza da sola.** L'alternativa era non mettere
 nessun tetto e lasciare che il costo crescesse più in fretta della capienza, così che il muro
@@ -232,11 +247,11 @@ _Lo spazio_. Costa zero oggi e costa una riscrittura fra tre fette.
 
 ## Domande aperte
 
-| Domanda                                                       | Chi la chiude                                                                                                                                                                                                                                              |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Quanto costa con ognuno dei due strumenti**                 | [D017](../../delega/D017-il-caveau.md), eseguendola, e il numero va tarato contro `ATM_FEE`. Il **meccanismo** invece è chiuso: [ADR 0027](../../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md) e [D019](../../delega/D019-il-pagamento.md) |
-| **I numeri**: quanti livelli, quale curva di capienza e costo | [D017](../../delega/D017-il-caveau.md), eseguendola. Vanno in `balance/constants.ts`, con il bersaglio in `balance/targets.ts`                                                                                                                             |
-| **L'ingombro degli oggetti**: come si dichiara                | il primo dominio che produce oggetti — black market o aste di box                                                                                                                                                                                          |
+| Domanda                                                       | Chi la chiude                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~Quanto costa con ognuno dei due strumenti~~                 | **chiusa** da [D017](../../delega/D017-il-caveau.md): la carta costa **due euro in meno** a ogni livello, e quel numero è tarato contro `ATM_FEE` invece che scelto — sopra la commissione i contanti diventerebbero una voce che nessuno sceglie. Lo verifica `vault_card_discount` in `targets.ts` |
+| ~~I numeri: quanti livelli, quale curva di capienza e costo~~ | **chiusa** da [D017](../../delega/D017-il-caveau.md): **cinque** livelli, da 1.000,00 € a 250.000,00 €, con ogni prezzo appena sotto la capienza del livello da cui si paga. Il bersaglio è `seconds_to_first_wall`: il muro morde fra i 60 e i 120 secondi di gioco                                 |
+| **L'ingombro degli oggetti**: come si dichiara                | il primo dominio che produce oggetti — black market o aste di box                                                                                                                                                                                                                                    |
 
 ---
 
@@ -255,3 +270,32 @@ D018 le troverà scritte:
 - **Il caveau ha stato** — il livello — quindi ha `save`, `load` e `reset`.
 - **Il caveau non ticchetta e non usa l'Rng.** Discende dalla varianza zero: senza furto casuale
   non c'è niente che debba accadere da solo.
+
+Tutte e due sono state confermate dal codice: `vault/system.ts` non ha un `tick`, il tipo lo
+permette, e lo stato salvato è un numero solo.
+
+---
+
+## Cosa l'esecuzione ha smentito
+
+Tre cose, e nessuna delle tre è una decisione di gioco che sia cambiata.
+
+**1. «Conseguenza per D017: nessuna» era vera per la forma, non per il posto.** La sezione _Lo
+spazio_ prometteva che la capienza consegnata al Ledger fosse «una funzione che il caveau
+possiede», e così è — `capacityFor(level)`, in `vault/rules.ts`, con il livello stretto fra zero e
+il massimo. Il giorno degli oggetti la sottrazione entra lì dentro e nient'altro si muove, esattamente
+come scritto. Quello che la scheda non poteva sapere è **chi la chiama**: non il caveau, ma il
+bootstrap, che la consegna al Ledger insieme a `poolCapacity` per tutti gli altri pool
+([ADR 0025](../../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)).
+
+**2. Il collegamento con il bancomat era descritto e non c'era.** La tabella _A quali due domini si
+collega_ dice che il bancomat «è la valvola» e «non cambia di una riga per diventarlo». È cambiato
+di quindici: l'anteprima di un prelievo deve sapere se il denaro in arrivo **ci sta**, altrimenti
+mostra una scomposizione esatta di un'operazione che il Ledger poi rifiuta. La capienza gli arriva
+per argomento — nessun dominio ne importa un altro — ma la riga «non cambia» era ottimista.
+
+**3. «Il reddito accredita quanto ci sta» costa più di quanto la scheda lasciasse intendere.** La
+frase è giusta e la decisione di gioco pure. Quello che non si vedeva è che il reddito, per farlo,
+deve **sapere quanto ci sta prima di chiedere** — cioè ricevere lo spazio per costruzione, il che
+tocca la firma di `createIncome`, il bootstrap e nove test. È la parte più cara della delega, ed è
+anche l'unica che senza la scheda sarebbe stata scoperta a giocare.

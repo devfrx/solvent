@@ -170,8 +170,10 @@ negativo; commissione che si mangia l'intero importo.
 dentro oltre al denaro (oggetti, con condizione e provenienza).
 **Deve decidere:** quando smettere di accumulare contanti e portarli in banca, accettando la
 traccia.
-**Può andare male:** pieno. Il reddito continua ad arrivare e non c'è dove metterlo. Furto e
-perquisizione lo svuotano.
+**Può andare male:** pieno. Il reddito **smette di entrare** — accredita quanto ci sta, e il resto
+non entra ([D017](../delega/D017-il-caveau.md)) — e la schermata lo dice invece di lasciarlo
+scoprire da un numero che non sale. La perquisizione lo svuota; il furto no, per scelta: la varianza
+del caveau è zero ([scheda](domini/vault.md)).
 **Pesa:** medio. È un contenitore con un tetto **e** un inventario di oggetti eterogenei.
 
 #### 4. Calore
@@ -544,11 +546,15 @@ saperlo per capire da dove si parte — **non è un vincolo di design**.
 - i sei messaggi di rifiuto spiegato elencati in 3.3
 - italiano e inglese completi
 
-**Deciso ma non ancora costruito**, nell'ordine: caveau con capienza (fetta 02), progresso offline
-(03), calore e black market (04), prestiti e punteggio di credito (05), indagine (06). Poi
-i blocchi: negozio e aste; calendario, depositi e affitti; immobiliare e mercato; impresa, crypto
-e casinò; indagini, eventi e albero delle abilità.
+**Deciso ma non ancora costruito**, nell'ordine: progresso offline (03), calore e black market
+(04), prestiti e punteggio di credito (05), indagine (06). Poi i blocchi: negozio e aste;
+calendario, depositi e affitti; immobiliare e mercato; impresa, crypto e casinò; indagini, eventi e
+albero delle abilità. Il **caveau con capienza** è uscito da questo elenco: la fetta 02 l'ha
+costruito ([D017](../delega/D017-il-caveau.md)) — per i **contanti** soltanto, perché gli oggetti
+nascono col black market e senza di loro un inventario è un contenitore vuoto.
 
-**Nota sullo stile attuale:** esiste un'estetica provvisoria, adottata per far funzionare la prima
-fetta. È **esplicitamente in discussione** e non va considerata un punto di partenza: la direzione
-visiva del progetto è da decidere, ed è per questo che questo documento non ne parla.
+**Nota sullo stile:** questa riga diceva che l'estetica era provvisoria e la direzione visiva da
+decidere. Non è più vero da [D023](../delega/D023-il-design-system.md): il design system esiste, sta
+in `src/renderer/ui/`, ha due temi completi e non sa che gioco è
+([ADR 0028](../adr/0028-il-kit-ui-non-sa-che-gioco-e.md)). Questo documento continua a non parlarne,
+ma per la ragione opposta — non perché la risposta manchi, perché sta altrove.
