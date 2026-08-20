@@ -146,7 +146,7 @@ configurato dopo che c'erano già 156 file.
 | [D015](D015-home-bancomat.md)                             | La home: bancomat, carta e cruscotto                                  | 725 codice + 321 test                             | **Chiusa**   |
 | [D016](D016-correzioni-audit.md)                          | Le correzioni dell'audit del 2026-08-20                               | 186 codice + 326 test                             | **Chiusa**   |
 | [D013](D013-verifica-della-fetta.md)                      | Verifica della fetta — STOP 2                                         | 93 test + 17 di README                            | **Chiusa**   |
-| [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) | Un numero che nessuno conta non si scrive                             | ~330 test + ~130 di documentazione                | **In corso** |
+| [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) | Un numero che nessuno conta non si scrive                             | 672 test + 56 generate                            | **Chiusa**   |
 | [D022](D022-il-confine-disegnato-e-il-confine-vero.md)    | Il confine disegnato è il confine vero                                | ~220 test + ~35 di documentazione + 5 di sorgente | **In corso** |
 | [D019](D019-il-pagamento.md)                              | Il pagamento: il listino di un'azione, e chi lo sceglie               | ~140 codice + ~220 test                           | **Aperta**   |
 | [D020](D020-nessun-sistema-si-fida-del-salvataggio.md)    | Nessun sistema si fida del proprio salvataggio                        | ~70 test, zero di sorgente                        | **Aperta**   |

@@ -1,9 +1,8 @@
 # D021 — Un numero che nessuno conta non si scrive
 
-- **Stato:** In corso — scritta ed **eseguita** il 2026-08-20 dall'audit dell'intera codebase e di
-  tutti i documenti, fatto allo STOP 2 dopo la chiusura di
-  [D013](D013-verifica-della-fetta.md). La definizione di fatto è verde; manca il commit di
-  chiusura, che è l'ultimo passo e va annotato qui
+- **Stato:** Chiusa — commit `289c2f1`, ramo `d021-un-numero-che-nessuno-conta-non-si-scrive`.
+  Scritta ed eseguita il 2026-08-20 dall'audit dell'intera codebase e di tutti i documenti, fatto
+  allo STOP 2 dopo la chiusura di [D013](D013-verifica-della-fetta.md)
 - **Dipende da:** D013 (tutta la fetta 01). **Non** dipende da nessuna delega aperta
 - **Sblocca:** tutto ciò che aggiunge documenti, cioè ogni delega futura. In particolare
   [D017](D017-il-caveau.md) e [D018](D018-la-scheda-di-dominio.md), che insieme ne aggiungono
