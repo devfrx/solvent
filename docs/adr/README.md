@@ -33,7 +33,10 @@ Sono passate ad _Accettata_: **0006** e **0007** con [D002](../delega/D002-contr
 [D010](../delega/D010-dominio-income.md).
 
 **0001** e **0009** con [D011](../delega/D011-runtime-e-store.md): la simulazione gira davvero nel
-renderer, e il passo fisso con accumulatore esiste.
+renderer, e il passo fisso con accumulatore esiste. **0011** con
+[D012](../delega/D012-ui-e-i18n.md), **0018** con [D015](../delega/D015-home-bancomat.md): la home
+ha le due zone nell'ordine dichiarato, la commissione si vede prima della conferma, e il tetto dei
+riquadri è un test.
 
 Le altre restano _Proposta_ perché il meccanismo è a metà: **0010** aspetta il primo `boundedList`
 che entra davvero nel salvataggio — la lista delle ultime operazioni ha il suo limite, ma è un
@@ -60,7 +63,7 @@ mirror che riparte vuoto e non attraversa il disco. Metà meccanismo non è una 
 | [0015](0015-criterio-di-ammissione-delle-dipendenze.md)                        | Criterio di ammissione delle dipendenze                        | Proposta      | ogni `npm install` da qui in avanti                                     | —               |
 | [0016](0016-il-bus-e-sincrono-e-fire-and-forget.md)                            | Il Bus è sincrono, fire-and-forget, non event sourcing         | **Accettata** | la forma di ogni handler e di ogni sistema                              | —               |
 | [0017](0017-il-denaro-e-plurale.md)                                            | Il denaro è plurale: pool con affordance diverse               | **Accettata** | ogni azione che muove denaro, in ogni dominio                           | —               |
-| [0018](0018-la-home-e-un-atm.md)                                               | La home è un ATM, non una dashboard                            | Proposta      | la schermata principale e la navigazione                                | —               |
+| [0018](0018-la-home-e-un-atm.md)                                               | La home è un ATM, non una dashboard                            | **Accettata** | la schermata principale e la navigazione                                | —               |
 | [0019](0019-transazioni-atomiche-nel-ledger.md)                                | Il Ledger applica transazioni atomiche                         | **Accettata** | la primitiva di ogni movimento di denaro                                | —               |
 | [0020](0020-partita-doppia.md)                                                 | Ogni transazione bilancia a zero                               | **Accettata** | come si scrive ogni riga di economia, e come si misura il bilanciamento | —               |
 | [0021](0021-una-sola-primitiva-per-il-denaro.md)                               | Una sola primitiva per il denaro: `post()` non esiste          | **Accettata** | come un dominio chiede un movimento di denaro                           | —               |

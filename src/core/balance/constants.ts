@@ -17,6 +17,13 @@ import { clock, seconds } from '@core/kernel/Clock'
 const RECOVERY_HOURS = 8
 const SECONDS_PER_HOUR = 3600
 
+/**
+ * Il più grande degli importi rapidi del bancomat, che è anche quello con cui la schermata si
+ * apre. Sta in una costante sua invece di essere ripescato in fondo alla lista: due letture dello
+ * stesso numero sono due letture che prima o poi divergono.
+ */
+const ATM_LARGEST = fromString('500')
+
 export const BALANCE = {
   /**
    * Il reddito della prima fonte, prima di qualunque modificatore. È dichiarato **al secondo**
@@ -47,6 +54,22 @@ export const BALANCE = {
    * sposta da solo.
    */
   ATM_FEE: fromString('2.50'),
+
+  /**
+   * Gli importi che il bancomat offre. Non è una comodità dell'interfaccia: **sono l'unico modo di
+   * scegliere un importo** nella fetta 01, e la scala che hanno decide quanto la commissione fissa
+   * si fa sentire. Letti in fila raccontano da soli la regola del bancomat — 1,00 € è rifiutato
+   * perché la commissione se lo mangia, 10,00 € ne perde un quarto, 500,00 € lo 0,5% — che è ciò
+   * che rende "prelevare grosso conviene" una cosa che si vede invece di una nota nel manuale.
+   *
+   * Il primo esiste **perché fallisce**: senza, il rifiuto dell'anteprima (ADR 0018 — con un
+   * motivo, non con un pulsante spento) sarebbe raggiungibile solo da un test, e un ramo che
+   * nessuno può vedere a schermo è un ramo che marcisce.
+   */
+  ATM_AMOUNTS: [fromString('1'), fromString('10'), fromString('100'), ATM_LARGEST],
+
+  /** Un bancomat non si apre sulla propria opzione peggiore. */
+  ATM_DEFAULT_AMOUNT: ATM_LARGEST,
 
   /**
    * ADR 0009 — il tetto ai tick di recupero. Riaprire il gioco dopo giorni non deve bloccare

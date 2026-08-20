@@ -9,13 +9,14 @@ Questo documento dice quali sono, cosa garantisce ciascuno, e cosa nessuno di es
 
 | #   | Comando                | Cosa garantisce                                                                                 | Tempo reale       |
 | --- | ---------------------- | ----------------------------------------------------------------------------------------------- | ----------------- |
-| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, R12, INV-13 + codice morto (C01) | ~13 s             |
-| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                       | ~10 s             |
+| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, R12, INV-13 + codice morto (C01) | ~12 s             |
+| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                       | ~8 s              |
 | G3  | `npm run format:check` | il codice è formattato (C02)                                                                    | ~6 s              |
-| G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint        | ~7 s              |
+| G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint        | ~8 s              |
 | G5  | `npm run build`        | l'applicazione si compila davvero, main e renderer                                              | decine di secondi |
 
-Rimisurati a D012 chiusa su Windows, con 436 test. Sono tempi **di parete**, quindi comprendono
+Rimisurati a D015 chiusa su Windows, con 477 test: `verify` sta a **26 s**, e i quattro gate
+presi da soli fanno 12 + 8 + 6 + 8. Sono tempi **di parete**, quindi comprendono
 l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre `npm run`. La parte di
 lavoro vero è meno della metà del totale.
 
@@ -29,7 +30,8 @@ Due comandi, non uno, ed è deliberato:
 
 **Perché separati.** Il tempo atteso è parte della specifica: un gate lento viene aggirato. I
 quattro veloci stanno **sotto il minuto** — venticinque secondi a D006, trentuno a D007, fra
-ventisette e trenta a D008, ventotto e ventinove a D009, **trentacinque a D012** — e si
+ventisette e trenta a D008, ventotto e ventinove a D009, trentacinque a D012, **ventisei a
+D015** — e si
 eseguono a ogni modifica; la compilazione costa un ordine di grandezza in più e serve prima di
 un rilascio, non prima di un salvataggio. Se `verify` supera il minuto, è un problema da risolvere, non da
 tollerare, e il rimedio è già censito nel [registro YAGNI](roadmap-fette.md): togliere l'avvio di

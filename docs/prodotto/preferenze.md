@@ -59,8 +59,10 @@ crescono e il bancomat no. Quindi il cruscotto della home ha un **tetto di sei r
 verificato da un test. Il settimo non si aggiunge: sostituisce, oppure va nella schermata
 Statistiche. Vedi [ADR 0018](../adr/0018-la-home-e-un-atm.md).
 
-**Come si applica:** il bancomat sta in alto e non si comprime. La schermata Statistiche esiste
-dal primo giorno, altrimenti il settimo riquadro non ha dove andare.
+**Come si applica:** fatto in [D015](../delega/D015-home-bancomat.md). Il bancomat sta in alto e
+non si comprime; la schermata Statistiche esiste dal primo giorno, altrimenti il settimo riquadro
+non ha dove andare. I riquadri sono **cinque** e il tetto è sei: un posto libero, perché una quota
+riempita con un numero inventato non è un tetto. A contarli è `tests/rules/home-tiles`.
 
 ---
 
@@ -109,6 +111,12 @@ anche l'unico punto in cui il gioco può permettersi un vezzo visivo senza ralle
   ritorno no.
 - Il livello che cresce (o l'era di prestige) cambia il materiale della carta: standard, oro,
   nero. È il progresso reso visibile su un oggetto invece che su una barra.
+
+**Fatto in [D015](../delega/D015-home-bancomat.md)**, con una correzione: il retro non porta
+plafond, limite e punteggio di credito, perché nella fetta 01 la carta non presta soldi e nessuno
+ha un punteggio — mostrarli sarebbe stato inventarli. Porta le tre dichiarazioni vere dello
+strumento, lette da `POOLS`: tracciabilità, capienza, commissione per operazione. Girare la carta
+serve, che è ciò che questa preferenza chiede; i tre numeri arrivano con l'era che li crea.
 
 ---
 

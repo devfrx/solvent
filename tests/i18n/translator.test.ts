@@ -5,7 +5,12 @@ import { fromString } from '@core/contracts/money'
 import { milliseconds } from '@core/kernel/Clock'
 
 import type { Locale, MessageKey, Wording } from '../../src/renderer/i18n'
-import { createTranslations, createTranslator, LOCALES } from '../../src/renderer/i18n'
+import {
+  createTranslations,
+  createTranslator,
+  LOCALES,
+  traceabilityKey
+} from '../../src/renderer/i18n'
 import { it as italian } from '../../src/renderer/i18n/it'
 
 /**
@@ -160,5 +165,59 @@ describe('i nomi dei pool', () => {
 
     expect(words.poolName('fees')).toBe('fees')
     expect(words.poolName('world')).toBe('world')
+  })
+})
+
+describe('le righe di una transazione', () => {
+  it('portano il proprio verso davanti: un importo senza segno non dice da che parte va', () => {
+    // Il riquadro «cosa succede» mostra tre movimenti che sommano a zero: «497,50» non dice se
+    // sono arrivati o partiti, «+ 497,50» sì. È il motivo per cui i formati sono due.
+    speaking('it')
+
+    expect(plain(words.signedMoney(fromString('497.5')))).toBe('+497,50 €')
+    expect(plain(words.signedMoney(fromString('-500')))).toBe('-500,00 €')
+  })
+
+  it('ma non davanti allo zero, che non va da nessuna parte', () => {
+    speaking('it')
+
+    expect(plain(words.signedMoney(fromString('0')))).toBe('0,00 €')
+  })
+
+  it('e un saldo resta senza segno: il più davanti al patrimonio sarebbe rumore', () => {
+    speaking('it')
+
+    expect(plain(words.money(fromString('1284.6')))).toBe('1.284,60 €')
+  })
+})
+
+describe('il rifiuto del bancomat', () => {
+  it('dice quanto costa e quanto ci sarebbe stato, non un codice', () => {
+    // ADR 0018 — sopra la capienza, o sotto la commissione, il prelievo viene rifiutato **con un
+    // motivo**. Il motivo è questa frase, e senza le due cifre non spiega niente.
+    speaking('it')
+
+    const said = plain(
+      words.failure({
+        code: 'error.atm.fee_exceeds_amount',
+        amount: fromString('1'),
+        fee: fromString('2.50')
+      })
+    )
+
+    expect(said).toContain('1,00 €')
+    expect(said).toContain('2,50 €')
+    expect(said).not.toContain('error.')
+  })
+})
+
+describe('la tracciabilità di un pool', () => {
+  it('sono le due facce della stessa dichiarazione, non due frasi scritte a mano', () => {
+    // P4 — la carta è tracciabile, i contanti no. A dirlo è `POOLS`, e questa funzione lo traduce:
+    // il giorno in cui un pool cambia dichiarazione, la frase cambia da sola.
+    speaking('it')
+
+    expect(words.text(traceabilityKey('card'))).toBe('Ogni movimento è registrato')
+    expect(words.text(traceabilityKey('cash'))).toBe('Nessuna traccia')
   })
 })

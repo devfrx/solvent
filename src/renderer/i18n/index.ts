@@ -4,6 +4,7 @@ import type { Reason } from '@core/contracts/ledger'
 import type { Money } from '@core/contracts/money'
 import { toDisplayNumber } from '@core/contracts/money'
 import type { Pool } from '@core/contracts/pools'
+import { POOLS } from '@core/contracts/pools'
 import type { SaveError } from '@core/contracts/save'
 
 import type { AtmError } from '@core/domains/atm/commands'
@@ -74,12 +75,16 @@ export type ScreenKey =
   | 'app.duration.hours'
   | 'app.duration.minutes'
   | 'app.duration.and'
-  | 'balance.panel.title'
-  | 'balance.panel.rate'
   | 'common.buy'
   | 'common.level'
   | 'pool.cash'
   | 'pool.card'
+  | 'pool.unlimited'
+  | 'pool.traced'
+  | 'pool.untraced'
+  | 'pool.traceability'
+  | 'pool.capacity'
+  | 'income.per_second'
   | 'income.upgrade.overtime.name'
   | 'income.upgrade.overtime.desc'
   | 'income.upgrade.owned'
@@ -87,21 +92,30 @@ export type ScreenKey =
   | 'stats.saved_at.never'
   | 'stats.operations.title'
   | 'stats.operations.empty'
-  // Da qui in giù le mostra D015 (docs/design/mockups/home-atm.html): entrano adesso perché il
-  // dizionario nasce completo, e il test di parità toglie il "poi traduco".
+  // La home (docs/design/mockups/home-atm.html). Le chiavi di questo blocco sono nate con D012,
+  // che ha scritto il dizionario intero in un tempo solo perché una lingua completata in due
+  // tempi è il difetto A13; D015 le ha usate, e dove il mockup si contraddiceva le ha corrette.
+  | 'home.zone.atm'
+  | 'home.zone.dashboard'
+  | 'home.tile.income'
+  | 'home.tile.net_worth'
+  | 'home.tile.earned'
+  | 'home.tile.spent'
+  | 'home.tile.fees'
   | 'atm.account.title'
   | 'atm.cash.title'
   | 'atm.cash.capacity'
   | 'atm.deposit'
   | 'atm.withdraw'
+  | 'atm.deposit.title'
   | 'atm.withdraw.title'
-  | 'atm.withdraw.breakdown'
+  | 'atm.breakdown'
   | 'atm.fee'
-  | 'atm.confirm'
+  | 'atm.fee.per_operation'
+  | 'atm.deposit.confirm'
+  | 'atm.withdraw.confirm'
   | 'atm.recent.title'
   | 'card.tier.gold'
-  | 'card.back.limit_used'
-  | 'card.back.credit_score'
   | 'card.hint.drag'
 
 export type MessageKey = Reason | ErrorCode | ScreenKey
@@ -129,6 +143,15 @@ export const POOL_KEYS: Readonly<Record<Pool, MessageKey | null>> = {
   house: null
 }
 
+/**
+ * Se i movimenti di un pool lasciano traccia, detto a parole. È la metà visibile di P4 — la
+ * dualità contanti/carta — e sta qui invece che in due componenti perché le due frasi sono le due
+ * facce della stessa dichiarazione: `POOLS[pool].traceable`. Scritte in due posti, prima o poi una
+ * delle due resterebbe indietro.
+ */
+export const traceabilityKey = (pool: Pool): MessageKey =>
+  POOLS[pool].traceable ? 'pool.traced' : 'pool.untraced'
+
 /** Le due unità che servono a dire "3 ore e 12 minuti", e non hanno niente a che fare coi tick. */
 const SECONDS_PER_MINUTE = 60
 const MINUTES_PER_HOUR = 60
@@ -140,7 +163,19 @@ const MINUTES_PER_HOUR = 60
  * legge per numeri (P2).
  */
 const CURRENCY = {
-  currency: { style: 'currency', currency: 'EUR', useGrouping: 'always' }
+  currency: { style: 'currency', currency: 'EUR', useGrouping: 'always' },
+  /**
+   * Lo stesso formato con il segno **sempre** davanti, zero escluso. Serve alle righe di una
+   * transazione, dove il verso è l'informazione: «497,50» non dice se sono arrivati o partiti,
+   * «+ 497,50» sì. Fuori di lì un saldo con il più davanti sarebbe rumore, quindi sono due
+   * formati e non uno.
+   */
+  signed: {
+    style: 'currency',
+    currency: 'EUR',
+    useGrouping: 'always',
+    signDisplay: 'exceptZero'
+  }
 } as const
 
 const TIMESTAMP = {
@@ -184,6 +219,8 @@ export interface Translator {
   readonly count: (key: MessageKey, amount: number) => string
   /** ADR 0006 — il confine di presentazione, l'unico posto autorizzato a convertire un `Money`. */
   readonly money: (amount: Money) => string
+  /** Lo stesso importo con il proprio verso davanti: è la riga di una transazione, non un saldo. */
+  readonly signedMoney: (amount: Money) => string
   readonly instant: (at: number) => string
   readonly duration: (elapsed: Milliseconds) => string
   readonly poolName: (pool: Pool) => string
@@ -214,6 +251,8 @@ export const createTranslator = (wording: Wording): Translator => {
   const count = (key: MessageKey, amount: number): string => wording.count(key, amount)
 
   const money = (amount: Money): string => wording.number(toDisplayNumber(amount), 'currency')
+
+  const signedMoney = (amount: Money): string => wording.number(toDisplayNumber(amount), 'signed')
 
   const instant = (at: number): string => wording.date(new Date(at), 'short')
 
@@ -284,7 +323,7 @@ export const createTranslator = (wording: Wording): Translator => {
     }
   }
 
-  return { text, count, money, instant, duration, poolName, failure }
+  return { text, count, money, signedMoney, instant, duration, poolName, failure }
 }
 
 /** Dentro un componente, le quattro funzioni le porta `useI18n()`. Fuori, le porta un test. */

@@ -3,13 +3,18 @@ import { computed, ref, shallowRef } from 'vue'
 
 import type { BoundedList } from '@core/contracts/bounded'
 import { boundedList, pushBounded } from '@core/contracts/bounded'
-import type { Balances, Transaction } from '@core/contracts/ledger'
+import type { CommandHandler } from '@core/contracts/commands'
+import type { Balances, Posting, Transaction } from '@core/contracts/ledger'
 import type { Money } from '@core/contracts/money'
+import { ZERO } from '@core/contracts/money'
+import { POOL_IDS, POOLS } from '@core/contracts/pools'
 import type { Result } from '@core/contracts/result'
 import type { SaveError } from '@core/contracts/save'
 
 import { BALANCE } from '@core/balance/constants'
-import type { AtmError } from '@core/domains/atm/commands'
+import type { AtmError, AtmOperation } from '@core/domains/atm/commands'
+import { DEPOSIT, previewOf, WITHDRAW } from '@core/domains/atm/commands'
+import { atmFee, capacityOf } from '@core/domains/atm/rules'
 import type { IncomeError } from '@core/domains/income/commands'
 import { canBuyUpgrade, incomePerSecond, upgradeCost } from '@core/domains/income/rules'
 import type { IncomeState } from '@core/domains/income/types'
@@ -32,6 +37,11 @@ import { createLoop, stepOf } from '@renderer/runtime/loop'
  * un'eccezione alla riga sopra — quei numeri non li calcola questo file, li chiedono alle regole
  * pure del dominio. Passano da qui perché un `.vue` non può importarle (R05), e perché due
  * anteprime che devono coincidere con il comando prima o poi divergono se sono in due posti.
+ *
+ * Da D015 espone anche quelli del bancomat e del cruscotto. Due sole cose qui dentro fanno
+ * dell'aritmetica — il patrimonio netto e l'ordine delle ultime operazioni — e sono presentazione,
+ * non gioco: un `.vue` non può sommare (R05), e il registro YAGNI diceva che quel selettore sarebbe
+ * nato col pannello che lo consuma. È questo.
  */
 
 /**
@@ -55,6 +65,37 @@ export type GameFailure = SaveError | GameLoadError
  * entrambe.
  */
 export type FailurePhase = 'loading' | 'saving'
+
+/**
+ * Le due direzioni del bancomat viste dalla UI. Un componente non può nominare `DEPOSIT` e
+ * `WITHDRAW`, che vivono in `domains/atm/commands` e sono fuori dalla sua portata (R05, e il lint
+ * non distingue un import di tipo): quello che può nominare è una di queste due parole, e la
+ * traduzione in operazione la fa questo file.
+ *
+ * L'elenco è la definizione del tipo, non una copia da tenere allineata: chi disegna i due
+ * pulsanti itera **questo**, e una terza direzione comparirebbe a schermo senza che nessuno se ne
+ * ricordi.
+ */
+export const ATM_KINDS = ['deposit', 'withdraw'] as const
+
+export type AtmOperationKind = (typeof ATM_KINDS)[number]
+
+/**
+ * L'operazione e il comando che le corrisponde, **appaiati una volta sola**. Se anteprima e
+ * comando leggessero due tabelle diverse, un giorno il pulsante «Deposita» mostrerebbe l'anteprima
+ * di un prelievo: due letture che devono coincidere prima o poi divergono, ed è la stessa ragione
+ * per cui `atmFee()` è una funzione invece di un numero (D014).
+ */
+interface AtmDirection {
+  readonly operation: AtmOperation
+  readonly command: CommandHandler<Money, Balances, AtmError>
+}
+
+/**
+ * Quante operazioni mostra la home. Poche righe (ADR 0018): il registro intero è della schermata
+ * Statistiche, che ha spazio per tutte e venti.
+ */
+const RECENT_ON_HOME = 4
 
 /**
  * R09 · ADR 0010 — la lista nasce con il suo limite, dichiarato qui dove si legge.
@@ -146,6 +187,81 @@ export const useGameStore = defineStore('game', () => {
 
   /** Se l'upgrade è già stato comprato. Alla UI serve il fatto, non lo stato del sistema. */
   const owned = computed<boolean>(() => upgrade.value.upgraded)
+
+  /**
+   * I numeri del bancomat. Tutti costanti per tutta la partita, tutti dentro uno `shallowRef` per
+   * la ragione di `cost`: un `Money` esposto **nudo** da uno store Pinia viene proxato alla
+   * lettura, e da lì in poi non è più il `Decimal` che il dominio ha prodotto.
+   *
+   * `fee` non è il 2,50 copiato dal mockup: è `atmFee()`, la stessa funzione che l'anteprima e il
+   * comando leggono. Due letture della commissione sarebbero due commissioni.
+   */
+  const fee = shallowRef<Money>(atmFee())
+  const amounts = shallowRef(BALANCE.ATM_AMOUNTS)
+  const defaultAmount = shallowRef<Money>(BALANCE.ATM_DEFAULT_AMOUNT)
+
+  /**
+   * Il tetto fisico dei due strumenti, `null` finché non ne hanno uno. Oggi rispondono entrambi
+   * "illimitato" ed è corretto: il valore del caveau arriva con la fetta 02, e `capacityOf` non
+   * cambierà — cambierà `POOLS`.
+   */
+  const cashCapacity = shallowRef<Money | null>(capacityOf('cash'))
+  const cardCapacity = shallowRef<Money | null>(capacityOf('card'))
+
+  const directions: Readonly<Record<AtmOperationKind, AtmDirection>> = {
+    deposit: { operation: DEPOSIT, command: game.atm.deposit },
+    withdraw: { operation: WITHDRAW, command: game.atm.withdraw }
+  }
+
+  /**
+   * INV-11 nella sua forma più forte: l'anteprima **è** l'operazione. Questa funzione non calcola
+   * niente e non conosce la commissione — chiama `previewOf`, che costruisce i movimenti che il
+   * comando applicherà. Non due elenchi da tenere allineati: uno solo.
+   *
+   * Ritorna un `Result` perché l'anteprima sa già dire di no, e allora la UI mostra il codice
+   * tradotto invece di spegnere un pulsante (ADR 0018).
+   */
+  const preview = (kind: AtmOperationKind, amount: Money): Result<readonly Posting[], AtmError> =>
+    previewOf(directions[kind].operation, amount)
+
+  /** L'altra metà della coppia, dalla stessa riga della tabella: qui il denaro si muove davvero. */
+  const confirm = (kind: AtmOperationKind, amount: Money): Result<Balances, AtmError> =>
+    directions[kind].command(amount)
+
+  /**
+   * I numeri del cruscotto, e sono **saldi letti**, non contatori tenuti da qualcuno: la partita
+   * doppia li ha già contati tutti (ADR 0020). Quanto è entrato nel gioco sta in `world` col segno
+   * opposto, quanto è uscito in `sink`, quanto è stato trattenuto in `fees` — tre conti che la UI
+   * non nomina mai e non vede mai (ADR 0017), ma il cui saldo è esattamente la domanda che il
+   * giocatore si fa.
+   *
+   * Sono `computed` e non mirror, e la differenza conta: qui la sorgente è `balances`, che un
+   * evento sostituisce intero a ogni transazione. Il registro dei modificatori, che nessun evento
+   * annuncia, resta un mirror (`readIncome`).
+   *
+   * I tre reggono un'identità che vale la pena conoscere: `earned - spent - feesPaid` è
+   * `netWorth`, sempre, ed è INV-08 vista dal cruscotto.
+   */
+  const netWorth = computed<Money>(() =>
+    POOL_IDS.filter((pool) => POOLS[pool].player).reduce(
+      (total, pool) => total.plus(balances.value[pool]),
+      ZERO
+    )
+  )
+  // `ZERO.minus(...)` e non `.neg()`: l'opposto di zero, in decimal.js come in JavaScript, è
+  // **meno zero** — e una partita appena nata mostrerebbe «-0,00 €» sul primo riquadro.
+  const earned = computed<Money>(() => ZERO.minus(balances.value.world))
+  const spent = computed<Money>(() => balances.value.sink)
+  const feesPaid = computed<Money>(() => balances.value.fees)
+
+  /**
+   * Le operazioni dalla più recente: un estratto conto si legge dall'alto, e `pushBounded` accoda
+   * in fondo. La home ne mostra poche, la schermata Statistiche tutte quelle che ci sono.
+   */
+  const operations = computed<readonly Transaction[]>(() => [...history.value.items].reverse())
+  const recentOperations = computed<readonly Transaction[]>(() =>
+    operations.value.slice(0, RECENT_ON_HOME)
+  )
 
   /**
    * Il mirror. `balances` arriva già completo e coerente dentro l'evento: il Ledger lo emette una
@@ -320,8 +436,6 @@ export const useGameStore = defineStore('game', () => {
     if (bought.ok) readIncome()
     return bought
   }
-  const deposit = (amount: Money): Result<Balances, AtmError> => game.atm.deposit(amount)
-  const withdraw = (amount: Money): Result<Balances, AtmError> => game.atm.withdraw(amount)
 
   return {
     status,
@@ -335,14 +449,25 @@ export const useGameStore = defineStore('game', () => {
     incomePerSecond: rate,
     upgradeCost: cost,
     canBuyUpgrade: purchasable,
+    atmFee: fee,
+    atmAmounts: amounts,
+    atmDefaultAmount: defaultAmount,
+    cashCapacity,
+    cardCapacity,
+    preview,
+    confirm,
+    netWorth,
+    earned,
+    spent,
+    feesPaid,
+    operations,
+    recentOperations,
     start,
     newGame,
     retry,
     close,
     closeWithoutSaving,
     buyUpgrade,
-    deposit,
-    withdraw,
     isRunning: loop.isRunning
   }
 })
