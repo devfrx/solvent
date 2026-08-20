@@ -1,13 +1,19 @@
 # D017 — Il caveau: i contanti hanno una capienza
 
-- **Stato:** Aperta — scritta il 2026-08-20 allo STOP 2, e **preparata per l'esecuzione** lo
-  stesso giorno: la preparazione ha misurato il costo del cambiamento e ha trovato un difetto
-  nella delega stessa. Vedi _Cosa la preparazione ha verificato_
-- **Dipende da:** D013 (cioè tutta la fetta 01), **[D019](D019-il-pagamento.md)** che porta il
-  listino — senza, l'ampliamento nascerebbe con un pool scritto nel sorgente e da correggere subito
-  dopo — e **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)**, che mette la regola sotto cui
-  il caveau nasce: è il **secondo** dominio con stato, e il suo `load` deve rifiutare un
-  salvataggio che non riconosce
+- **Stato:** Aperta — scritta il 2026-08-20 allo STOP 2 e **preparata per l'esecuzione** lo stesso
+  giorno: la preparazione ha misurato il costo del cambiamento e ha trovato un difetto nella delega
+  stessa. **Ri-preparata il 2026-08-21**, dopo che tre deleghe si sono chiuse fra la scrittura e
+  l'esecuzione: la misura è stata rifatta sul codice di adesso e il testo corretto dove era
+  invecchiato. Vedi _Cosa la preparazione ha verificato_, punti 9 e seguenti
+- **Dipende da:** D013 (cioè tutta la fetta 01) e tre deleghe che si sono chiuse dopo che questa
+  era già scritta:
+  - **[D019](D019-il-pagamento.md)** porta il listino — senza, l'ampliamento nascerebbe con un pool
+    scritto nel sorgente e da correggere subito dopo
+  - **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)** mette la regola sotto cui il caveau
+    nasce: è il **secondo** dominio con stato, e il suo `load` deve rifiutare un salvataggio che
+    non riconosce
+  - **[D023](D023-il-design-system.md)** porta il kit UI: il pannello del caveau si compone da
+    `src/renderer/ui/` e non scrive né un colore né un pulsante spento
 - **Sblocca:** la fetta 02: il primo muro del gioco, e il primo confine del kernel che si sposta
   dopo la fetta 01
 - **Il dominio è stato studiato prima:** [design/domini/vault.md](../design/domini/vault.md), la
@@ -132,7 +138,14 @@ codice.
 
 Fatta il 2026-08-20, subito dopo aver scritto la delega, e non è stata una rilettura: il costo del
 cambiamento è stato **misurato** mettendo davvero una capienza a `POOLS.cash` e guardando cosa
-diventa rosso. Sette punti, e il primo ha riscritto il cuore della delega.
+diventa rosso. Il primo punto ha riscritto il cuore della delega.
+
+**Ripetuta il 2026-08-21**, dopo che [D019](D019-il-pagamento.md),
+[D020](D020-nessun-sistema-si-fida-del-salvataggio.md) e [D023](D023-il-design-system.md) si sono
+chiuse fra la scrittura e l'esecuzione: la stessa misura, rifatta sul codice di adesso. I punti da 9
+in poi sono di quel giro. Il numero di punti non si scrive più qui — davanti a un elenco di otto
+diceva «sette», che è il difetto di [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md)
+sopravvissuto dentro una delega ancora aperta.
 
 **1. Il rifiuto atomico e il recupero si scontrano, e la decisione di gioco era sbagliata.** Con
 `POOLS.cash.capacity = 5000`, `tests/renderer/store` dice `expected '0' to be '345600'`: il
@@ -204,6 +217,33 @@ ignorante di chi gli risponde, la funzione resta pura e provabile con una capien
 dominio impara il nome di un altro. Chi esegue decida, ma sappia che sta scegliendo un precedente,
 non un import.
 
+**9. La misura è stata rifatta, e il cuore della delega non è invecchiato.** Con
+`POOLS.cash.capacity` a 5.000 €, i test rossi sono **quattro**: i tre cartelli del punto 2, più
+`tests/renderer/store` → «e non oltre il tetto, per quanto tempo sia passato», che è il punto 1. Il
+messaggio è **identico** a quello di allora — `expected '0' to be '345600'` — quindi né il listino di
+D019 né il design system di D023 hanno spostato il difetto del recupero. I tre cartelli portano
+ancora le frasi esatte che la tabella del punto 2 cita: sono state ricontrollate una per una.
+
+**10. Il caveau è il primo dominio che nasce sotto INV-20, e la delega non lo diceva.**
+[D020](D020-nessun-sistema-si-fida-del-salvataggio.md) è nata apposta per questo giorno: il caveau è
+il **secondo** dominio con stato, e il suo `load` deve rifiutare un salvataggio che non riconosce —
+**campo per campo**, non con il controllo pigro «è un oggetto», che è stato misurato e non basta.
+Non c'è niente da aggiungere a `tests/rules/stateful-systems-reject-garbage`: i sistemi si derivano
+dal Registry, quindi registrare `vault` lo mette sotto la regola da solo. Ne discende che un `load`
+scritto male qui **non passa i gate**, e che questa è la prima volta che il progetto lo può dire.
+
+**11. Il livello del design system cambia la metà applicativa della delega, non quella di dominio.**
+`CashPanel.vue` è già stato migrato al kit da [D023](D023-il-design-system.md) e mostra ancora
+«Illimitata»: la riga della tabella _Applicazione_ resta valida parola per parola, cambia solo con
+cosa si scrive. La sezione _Lo stile con cui si disegna_ è stata riscritta: diceva che P2 era
+provvisoria, e non lo è più.
+
+**12. Il punto 5 è vero con una sfumatura.** `vi.mock` compare in due file, non in uno:
+`ledger-capacity` sostituisce `@core/contracts/pools`, cioè un modulo **del progetto**, e
+`tests/save/preload` sostituisce `electron`, cioè un pacchetto esterno che in un test di Node non
+esiste. Il commento di `ledger-capacity` dice «l'unico file di test del progetto che sostituisce un
+modulo» e intende il primo caso. L'argomento dell'ADR 0025 regge intero: quel mock sparisce.
+
 ### Cosa ne discende per il budget
 
 La stima **era** ~250 righe di sorgente e ~330 di test, e non era una svista: il punto 1 aggiunge
@@ -221,7 +261,13 @@ al punto 1, che è la sola parte di questa delega scoperta dopo averla scritta.
   caveau pieno diventa obbligatorio invece che comodo, e non cambia di una riga.
 - **`tests/kernel/ledger-capacity`** prova già il rifiuto e il valore di `fits`.
 - **Il rifiuto è una frase, non un pulsante spento** ([ADR 0018](../adr/0018-la-home-e-un-atm.md)),
-  e la home lo fa già: qui c'è un rifiuto in più da vestire, non un modo nuovo di vestirlo.
+  e da [D023](D023-il-design-system.md) non è più una buona abitudine: `UiButton` non sa spegnersi
+  (**INV-21**). Qui c'è un rifiuto in più da vestire, non un modo nuovo di vestirlo.
+- **La regola che sorveglia il `load` del caveau esiste già**, ed è nata per questo giorno:
+  [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) e **INV-20**. Registrare il sistema lo mette
+  sotto la regola da solo — vedi il punto 10 della preparazione.
+- **Il kit UI** di `src/renderer/ui/`: il pannello del caveau si compone da lì, e nessun colore si
+  scrive a mano (**R15**).
 
 ## Da produrre
 
@@ -316,6 +362,11 @@ permette.
 - [ ] verifica a mano: il caveau si riempie, il reddito si ferma **e si vede che si è fermato**,
       il bancomat lo svuota, il gioco riparte
 - [ ] [ADR 0025](../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md) passa ad `Accettata`
+- [ ] test: il `load` del caveau rifiuta un salvataggio che non riconosce **campo per campo**, e
+      `tests/rules/stateful-systems-reject-garbage` lo copre da sé appena il sistema è registrato
+      (INV-20, punto 10 della preparazione)
+- [ ] il pannello non scrive un colore e non spegne un pulsante: il kit di `src/renderer/ui/` e le
+      regole R15 e INV-21 lo impongono, ma vale guardarlo a occhio **nei due temi**
 - [ ] `docs/tracciabilita.md`: INV-18 ha la sua riga e il suo meccanismo
 - [ ] i tre test-fotografia del punto 2 della preparazione sono stati **riscritti**, non
       cancellati: una fotografia si sostituisce con una fotografia
@@ -324,19 +375,29 @@ permette.
 - [ ] la riga della fetta 02 nel [registro delle fette](../roadmap-fette.md) è corretta: niente
       `boundedList` salvato qui, e il perché
 
-## Lo stile con cui si disegna, e perché è provvisorio
+## Lo stile con cui si disegna
 
-La direzione visiva del progetto **non è chiusa**: viene rifatta da zero a partire da
-`docs/design/mappa-funzionale.md`, che è stata scritta apposta senza nessuna decisione di design
-dentro. Ne discende che la preferenza [P2](../prodotto/preferenze.md) — «lo stile visivo del
-mockup è approvato» — e i token CSS di `App.vue` sono da considerare **provvisori**.
+**Questa sezione diceva il contrario fino al 2026-08-20**, ed è la cosa più invecchiata della
+delega: diceva che la direzione visiva non era chiusa, che [P2](../prodotto/preferenze.md) era
+provvisoria e che i token vivevano in `App.vue`. Adesso il design system esiste
+([D023](D023-il-design-system.md)), P2 è stata riscritta, e il blocco non scoped di `App.vue` non
+c'è più.
 
-Per questa delega significa una cosa sola, ed è liberatoria: il pannello del caveau si veste come
-quelli accanto, e non si spende un minuto a inventare una forma nuova. Quello che va fatto bene è
-**cosa** mostra — la capienza, quanto manca, e il fatto che il reddito si è fermato — perché è
-l'informazione a sopravvivere al design system, non il CSS che la porta. Lo stile attaccato al
-componente (la difesa contro il difetto A14) resta la regola proprio perché rende il ricambio
-economico: togliere il componente toglierà anche il suo stile.
+Per il caveau significa tre cose, e tutte e tre tolgono lavoro:
+
+- **Il pannello si compone dal kit**, `src/renderer/ui/`: superficie, etichetta, cifra, prosa,
+  pulsante, targhetta. Non si inventa una forma nuova, e non si scrive un colore — **R15** rifiuta
+  un `#hex` fuori da `ui/tokens.css`, quindi non è disciplina.
+- **Il pulsante «amplia» non può spegnersi.** `UiButton` non ha `disabled` e non lo scrive
+  (**INV-21**): se l'ampliamento non si può pagare, si passa `muted` per l'anteprima e `reason` per
+  la frase. È la regola che questa delega già voleva — «il rifiuto è una frase, non un pulsante
+  spento» — e adesso è imposta invece che ricordata.
+- **La barra della capienza è il primo pezzo davvero nuovo**, ed è l'unica cosa che `CashPanel`
+  aspettava: nasce con un numero vero invece che vuota. Se la disegnano **due** componenti entra in
+  `ui/`; finché è uno solo resta in `CashPanel` con il suo stile scoped.
+
+Il colore dei contanti e quello della carta **esistono già** come ruoli (`--color-cash`,
+`--color-card`) e la home li usa: il caveau non ne sceglie di nuovi.
 
 ## Trappole note
 

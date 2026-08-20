@@ -52,7 +52,14 @@ già.
 
 Da [D017](D017-il-caveau.md) la preparazione ha smesso di essere una rilettura ed è diventata una
 **misura**: si fa davvero il cambiamento, si guarda cosa diventa rosso, e poi si torna indietro
-lasciando solo le misure nel testo della delega. D017 ci ha trovato un difetto nella propria
+lasciando solo le misure nel testo della delega.
+
+**E si rifà, se nel frattempo il codice si è mosso.** D017 è stata scritta allo STOP 2 e da allora
+si sono chiuse D019, D020 e D023: la sua preparazione è stata ripetuta il 2026-08-21 sulla stessa
+riga di `POOLS.cash`, e il difetto del recupero è risultato **identico** — stesso messaggio, stesso
+numero. Quello che era invecchiato non era la misura: era la prosa attorno, e in particolare una
+sezione intera che dichiarava provvisoria una direzione visiva ormai chiusa. Una misura ripetuta
+costa dieci minuti; una sezione sbagliata letta da chi esegue costa una mattina. D017 ci ha trovato un difetto nella propria
 decisione di gioco; [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) ci ha trovato una
 trappola che, come era scritta, non si riproduceva. Il costo è mezz'ora e il ritorno è che nessuna
 delle due parte da un testo che si scoprirà sbagliato a metà lavoro.
