@@ -1,8 +1,8 @@
 # D022 — Il confine disegnato è il confine vero
 
-- **Stato:** In corso — scritta ed **eseguita** il 2026-08-20 dall'audit dello STOP 2, gemella di
-  [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md). La definizione di fatto è verde;
-  manca il commit di chiusura, che è l'ultimo passo e va annotato qui
+- **Stato:** Chiusa — commit `183737e`, ramo `d022-il-confine-disegnato-e-il-confine-vero`.
+  Scritta ed eseguita il 2026-08-20 dall'audit dello STOP 2, gemella di
+  [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md)
 - **Dipende da:** D013 (tutta la fetta 01). **Non** dipende da D021: una guarda i documenti,
   l'altra i confini del codice, e non si toccano
 - **Sblocca:** [D017](D017-il-caveau.md), che sposta tre confini insieme — `capacityOf` esce da
