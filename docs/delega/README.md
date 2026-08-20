@@ -83,6 +83,8 @@ flowchart TD
   D015 --> D016["D016 · Le correzioni dell'audit"]
   D016 --> D013["D013 · Verifica della fetta — STOP 2"]
   D013 --> D021["D021 · Un numero che nessuno conta non si scrive"]
+  D013 --> D022["D022 · Il confine disegnato è il confine vero"]
+  D022 --> D017
   D013 --> D019["D019 · Il pagamento — fetta 02"]
   D013 --> D020["D020 · Nessun sistema si fida del salvataggio"]
   D019 --> D017["D017 · Il caveau — fetta 02"]
@@ -106,7 +108,12 @@ salvataggio che riceve. Se la regola nascesse dentro D017, la scriverebbe la ste
 scrive il codice da sorvegliare, nello stesso momento: non sorveglierebbe niente. Zero righe di
 sorgente, settanta di test.
 
-**D021 lo usa per la terza volta, e stavolta il «codice» sono i documenti.** Nasce dall'audit dello
+**D021 e D022 lo usano per la terza e la quarta volta.** D021 lo applica ai documenti, D022 ai
+confini del codice che oggi tiene la review — le frecce di [architettura.md](../architettura.md),
+la purezza dei `rules.ts`, dove nasce un numero che il giocatore vede. Sono gemelle e non si
+toccano: una legge documenti, l'altra sorgenti.
+
+**Su D021, in dettaglio.** Nasce dall'audit dello
 STOP 2, che ha trovato dodici difetti — nessuno nel sorgente, sette della stessa forma: un numero
 vero quando è stato scritto e mai più riguardato. La correzione di
 [D016](D016-correzioni-audit.md) era stata un aggiornamento, e un aggiornamento protegge il giorno
@@ -121,29 +128,30 @@ configurato dopo che c'erano già 156 file.
 
 ## Indice
 
-| ID                                                        | Titolo                                                                | Budget                             | Stato        |
-| --------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------- | ------------ |
-| [D001](D001-tooling-e-gate.md)                            | Tooling, regole e gate di qualità                                     | 191 config + 265 test              | **Chiusa**   |
-| [D002](D002-contratti.md)                                 | Contratti: `Result`, `Money`, `bounded`, eventi, salvataggio, comandi | 113 codice + 417 test              | **Chiusa**   |
-| [D003](D003-kernel-clock.md)                              | Kernel: Clock                                                         | 20 codice + 116 test               | **Chiusa**   |
-| [D004](D004-kernel-rng.md)                                | Kernel: Rng                                                           | 55 codice + 172 test               | **Chiusa**   |
-| [D005](D005-kernel-bus.md)                                | Kernel: Bus                                                           | 67 codice + 303 test               | **Chiusa**   |
-| [D006](D006-kernel-registry.md)                           | Kernel: Registry                                                      | 124 codice + 406 test              | **Chiusa**   |
-| [D007](D007-kernel-ledger.md)                             | Kernel: Ledger — pool, transazioni atomiche, partita doppia           | 197 codice + 420 test              | **Chiusa**   |
-| [D008](D008-balance.md)                                   | Balance: costanti, modificatori, bersagli                             | 70 codice + 154 test               | **Chiusa**   |
-| [D009](D009-persistenza-main.md)                          | Persistenza nel processo main                                         | 259 codice + 591 test              | **Chiusa**   |
-| [D010](D010-dominio-income.md)                            | Dominio: income                                                       | 102 codice + 302 test              | **Chiusa**   |
-| [D014](D014-dominio-bancomat.md)                          | Dominio: bancomat — deposita, preleva, commissione                    | 65 codice + 548 test               | **Chiusa**   |
-| [D011](D011-runtime-e-store.md)                           | Runtime e store                                                       | 379 codice + 774 test              | **Chiusa**   |
-| [D012](D012-ui-e-i18n.md)                                 | Il guscio, le parole e il reddito                                     | 1.060 codice + 740 test            | **Chiusa**   |
-| [D015](D015-home-bancomat.md)                             | La home: bancomat, carta e cruscotto                                  | 725 codice + 321 test              | **Chiusa**   |
-| [D016](D016-correzioni-audit.md)                          | Le correzioni dell'audit del 2026-08-20                               | 186 codice + 326 test              | **Chiusa**   |
-| [D013](D013-verifica-della-fetta.md)                      | Verifica della fetta — STOP 2                                         | 93 test + 17 di README             | **Chiusa**   |
-| [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) | Un numero che nessuno conta non si scrive                             | ~330 test + ~130 di documentazione | **In corso** |
-| [D019](D019-il-pagamento.md)                              | Il pagamento: il listino di un'azione, e chi lo sceglie               | ~140 codice + ~220 test            | **Aperta**   |
-| [D020](D020-nessun-sistema-si-fida-del-salvataggio.md)    | Nessun sistema si fida del proprio salvataggio                        | ~70 test, zero di sorgente         | **Aperta**   |
-| [D017](D017-il-caveau.md)                                 | Il caveau: i contanti hanno una capienza — fetta 02                   | ~330 codice + ~410 test            | **Aperta**   |
-| [D018](D018-la-scheda-di-dominio.md)                      | La scheda di dominio: la forma, e le prime tre compilate              | ~510 di documentazione             | **Aperta**   |
+| ID                                                        | Titolo                                                                | Budget                                            | Stato        |
+| --------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------- | ------------ |
+| [D001](D001-tooling-e-gate.md)                            | Tooling, regole e gate di qualità                                     | 191 config + 265 test                             | **Chiusa**   |
+| [D002](D002-contratti.md)                                 | Contratti: `Result`, `Money`, `bounded`, eventi, salvataggio, comandi | 113 codice + 417 test                             | **Chiusa**   |
+| [D003](D003-kernel-clock.md)                              | Kernel: Clock                                                         | 20 codice + 116 test                              | **Chiusa**   |
+| [D004](D004-kernel-rng.md)                                | Kernel: Rng                                                           | 55 codice + 172 test                              | **Chiusa**   |
+| [D005](D005-kernel-bus.md)                                | Kernel: Bus                                                           | 67 codice + 303 test                              | **Chiusa**   |
+| [D006](D006-kernel-registry.md)                           | Kernel: Registry                                                      | 124 codice + 406 test                             | **Chiusa**   |
+| [D007](D007-kernel-ledger.md)                             | Kernel: Ledger — pool, transazioni atomiche, partita doppia           | 197 codice + 420 test                             | **Chiusa**   |
+| [D008](D008-balance.md)                                   | Balance: costanti, modificatori, bersagli                             | 70 codice + 154 test                              | **Chiusa**   |
+| [D009](D009-persistenza-main.md)                          | Persistenza nel processo main                                         | 259 codice + 591 test                             | **Chiusa**   |
+| [D010](D010-dominio-income.md)                            | Dominio: income                                                       | 102 codice + 302 test                             | **Chiusa**   |
+| [D014](D014-dominio-bancomat.md)                          | Dominio: bancomat — deposita, preleva, commissione                    | 65 codice + 548 test                              | **Chiusa**   |
+| [D011](D011-runtime-e-store.md)                           | Runtime e store                                                       | 379 codice + 774 test                             | **Chiusa**   |
+| [D012](D012-ui-e-i18n.md)                                 | Il guscio, le parole e il reddito                                     | 1.060 codice + 740 test                           | **Chiusa**   |
+| [D015](D015-home-bancomat.md)                             | La home: bancomat, carta e cruscotto                                  | 725 codice + 321 test                             | **Chiusa**   |
+| [D016](D016-correzioni-audit.md)                          | Le correzioni dell'audit del 2026-08-20                               | 186 codice + 326 test                             | **Chiusa**   |
+| [D013](D013-verifica-della-fetta.md)                      | Verifica della fetta — STOP 2                                         | 93 test + 17 di README                            | **Chiusa**   |
+| [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) | Un numero che nessuno conta non si scrive                             | ~330 test + ~130 di documentazione                | **In corso** |
+| [D022](D022-il-confine-disegnato-e-il-confine-vero.md)    | Il confine disegnato è il confine vero                                | ~220 test + ~35 di documentazione + 5 di sorgente | **In corso** |
+| [D019](D019-il-pagamento.md)                              | Il pagamento: il listino di un'azione, e chi lo sceglie               | ~140 codice + ~220 test                           | **Aperta**   |
+| [D020](D020-nessun-sistema-si-fida-del-salvataggio.md)    | Nessun sistema si fida del proprio salvataggio                        | ~70 test, zero di sorgente                        | **Aperta**   |
+| [D017](D017-il-caveau.md)                                 | Il caveau: i contanti hanno una capienza — fetta 02                   | ~330 codice + ~410 test                           | **Aperta**   |
+| [D018](D018-la-scheda-di-dominio.md)                      | La scheda di dominio: la forma, e le prime tre compilate              | ~510 di documentazione                            | **Aperta**   |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede

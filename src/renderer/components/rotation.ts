@@ -33,6 +33,9 @@ const TAP_TRAVEL = 6
 const HALF_TURN = 180
 const FULL_TURN = 360
 
+/** Oltre un quarto di giro dal mezzo giro, chi guarda vede l'altra faccia. */
+const QUARTER_TURN = 90
+
 /**
  * Le due posizioni di riposo. Il fronte non è dritto ma leggermente girato: una carta perfettamente
  * frontale sembra un'immagine, una carta di tre quarti sembra un oggetto — ed è l'unico oggetto
@@ -60,7 +63,7 @@ export const draggedTo = (from: Rotation, across: number, down: number): Rotatio
  */
 export const facing = (rotation: Rotation): Face => {
   const turned = ((rotation.y % FULL_TURN) + FULL_TURN) % FULL_TURN
-  return Math.abs(turned - HALF_TURN) < FULL_TURN / 4 ? 'back' : 'front'
+  return Math.abs(turned - HALF_TURN) < QUARTER_TURN ? 'back' : 'front'
 }
 
 const opposite = (face: Face): Face => (face === 'front' ? 'back' : 'front')

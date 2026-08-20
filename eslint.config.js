@@ -235,8 +235,16 @@ export default ts.config(
   },
 
   // ------------------------------------------------------------- R04 — nessun numero magico
+  //
+  // Il renderer e' entrato con D022: i numeri che il giocatore *vede* avevano cominciato ad
+  // atterrare nello store — quante operazioni mostra la home, quante ne conserva il registro — e
+  // sono decisioni di prodotto come quelle di dominio. Il perimetro copriva solo il posto in cui
+  // il problema nasce; adesso copre anche quello in cui stava arrivando (AUD-011).
+  //
+  // I `.vue` restano fuori: un template contiene numeri di presentazione veri, e il costo va
+  // misurato prima di pagarlo. Il grilletto e' il primo numero di gioco trovato dentro un template.
   {
-    files: ['src/core/domains/**/*.ts', 'src/core/balance/modifiers.ts'],
+    files: ['src/core/domains/**/*.ts', 'src/core/balance/modifiers.ts', 'src/renderer/**/*.ts'],
     rules: {
       '@typescript-eslint/no-magic-numbers': [
         'error',
