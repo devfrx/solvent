@@ -16,6 +16,17 @@ import { createSaveStore } from './save/SaveStore'
 
 const WINDOW = { width: 1180, height: 760 } as const
 
+/**
+ * C03 · ADR 0008 — lo stesso `appId` di `electron-builder.yml`, e va detto anche a runtime.
+ *
+ * Senza, su Windows la finestra si raggruppa nella barra delle applicazioni sotto l'identità di
+ * Electron e le notifiche non sono attribuite al prodotto: è il difetto A15 nella forma che il
+ * registro dei rischi prevede — «un quinto posto dove appare il nome, non coperto dal test».
+ * Adesso è coperto: due costanti che devono coincidere e che nessuno confronta prima o poi non
+ * coincidono più, quindi a confrontarle è `tests/rules/product-identity`.
+ */
+const APP_ID = 'com.solvent.game'
+
 const createWindow = (): void => {
   const window = new BrowserWindow({
     width: WINDOW.width,
@@ -45,6 +56,8 @@ const createWindow = (): void => {
 }
 
 void app.whenReady().then(() => {
+  app.setAppUserModelId(APP_ID)
+
   // La cartella la decide Electron: è l'unico punto in cui `app` incontra la persistenza.
   mountSaveIpc(ipcMain, createSaveStore(createSaveFile(app.getPath('userData'))))
 

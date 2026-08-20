@@ -285,6 +285,84 @@ describe('la chiusura', () => {
   })
 })
 
+/**
+ * INV-17 — il salvataggio si scrive solo da uno stato in cui il modello in memoria è quello vero.
+ *
+ * È il difetto che l'audit del 2026-08-20 ha trovato, ed è di quelli che nessuno vede finché non
+ * succede a lui: davanti alla schermata d'errore il gesto naturale è chiudere la finestra, non
+ * scegliere fra due pulsanti. Prima di questa delega quel gesto scriveva una partita azzerata
+ * **sopra** il salvataggio del giocatore — mentre la schermata gli prometteva che il file non era
+ * stato toccato.
+ */
+describe('chiudere da uno stato che non ha una partita da salvare', () => {
+  const corrupt = (): Promise<SaveResult<LoadedSave>> =>
+    Promise.resolve({ ok: false, error: { code: 'error.save.corrupt' } })
+
+  it('dalla schermata d’errore non scrive niente, e la finestra si chiude lo stesso', async () => {
+    const store = await start({ load: corrupt })
+    expect(store.status).toBe('failed')
+    expect(store.failedDuring).toBe('loading')
+
+    stage.requestClose()
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(stage.written()).toEqual([])
+    expect(stage.isClosed()).toBe(true)
+  })
+
+  it('e nemmeno mentre il caricamento è ancora in corso', async () => {
+    // La finestra qui è ancora più stretta, ma il file su disco è **buono**: è la partita vera,
+    // e la memoria non l'ha ancora vista.
+    let release: (result: SaveResult<LoadedSave>) => void = () => undefined
+    const pending = new Promise<SaveResult<LoadedSave>>((resolve) => {
+      release = resolve
+    })
+
+    stage = createStage({ load: () => pending })
+    provideRuntime({ game, host: stage.host })
+    const store = useGameStore()
+    const started = store.start()
+    expect(store.status).toBe('loading')
+
+    stage.requestClose()
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(stage.written()).toEqual([])
+    expect(stage.isClosed()).toBe(true)
+
+    release({ ok: true, value: { present: false } })
+    await started
+  })
+
+  it('ma da un salvataggio fallito sì: lì la partita è in memoria e non è mai arrivata al disco', async () => {
+    let attempts = 0
+    const store = await start({
+      save: () => {
+        attempts += 1
+        return Promise.resolve({
+          ok: false,
+          error: { code: 'error.save.io', cause: 'disco pieno' }
+        })
+      }
+    })
+
+    stage.requestClose()
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(store.status).toBe('failed')
+    expect(store.failedDuring).toBe('saving')
+
+    // Il giocatore chiude di nuovo invece di premere «Riprova»: è la stessa cosa, e deve riprovare.
+    stage.requestClose()
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(attempts).toBe(2)
+  })
+})
+
 describe('una partita nuova dopo un errore', () => {
   it('azzera, cancella il file e riparte', async () => {
     const store = await start({

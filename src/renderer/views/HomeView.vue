@@ -5,7 +5,7 @@ import AtmPanel from '@renderer/components/AtmPanel.vue'
 import BankCard3d from '@renderer/components/BankCard3d.vue'
 import CashPanel from '@renderer/components/CashPanel.vue'
 import IncomePanel from '@renderer/components/IncomePanel.vue'
-import PostingRows from '@renderer/components/PostingRows.vue'
+import OperationList from '@renderer/components/OperationList.vue'
 import StatTile from '@renderer/components/StatTile.vue'
 import { traceabilityKey, useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
@@ -70,13 +70,7 @@ const { text, money } = useTranslator()
 
   <section class="panel">
     <p class="caption">{{ text('atm.recent.title') }}</p>
-    <p v-if="recentOperations.length === 0" class="empty">{{ text('stats.operations.empty') }}</p>
-    <ol v-else class="operations">
-      <li v-for="(entry, index) of recentOperations" :key="index">
-        <p class="reason">{{ text(entry.reason) }}</p>
-        <PostingRows :postings="entry.postings" />
-      </li>
-    </ol>
+    <OperationList :operations="recentOperations" />
   </section>
 </template>
 
@@ -100,26 +94,5 @@ const { text, money } = useTranslator()
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-}
-
-.empty {
-  margin: 8px 0 0;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.operations {
-  margin: 10px 0 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.reason {
-  margin: 0 0 3px;
-  font-size: 12px;
-  font-weight: 600;
 }
 </style>

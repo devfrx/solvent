@@ -4,6 +4,7 @@ import { ref } from 'vue'
 
 import type { MessageKey } from './i18n'
 import { useTranslator } from './i18n'
+import type { GameStatus } from './stores/game'
 import { useGameStore } from './stores/game'
 import HomeView from './views/HomeView.vue'
 import StatsView from './views/StatsView.vue'
@@ -19,6 +20,18 @@ import StatsView from './views/StatsView.vue'
  * partita nuova, e un salvataggio finale fallito, dove la partita è ancora tutta in memoria e la
  * finestra è rimasta aperta apposta — lì la seconda uscita è chiudere sapendo cosa si perde.
  */
+
+/**
+ * Gli stati in cui il tavolo da gioco resta a schermo. `recovering` è fra questi, e non è un
+ * dettaglio: prima di questa delega il recupero **sostituiva** la schermata, quindi ogni ritorno
+ * dalla finestra nascosta smontava la home — e con lei l'importo scelto al bancomat e il verso
+ * della carta. Un alt-tab di due secondi azzerava ciò che il giocatore aveva appena impostato.
+ *
+ * Adesso il recupero è un **velo**: dice che sta succedendo qualcosa senza portare via ciò che
+ * c'era sotto. La macchina a stati non cambia — `Sospeso → Recupero → InGioco` resta il percorso
+ * unico di docs/design/ciclo-di-vita.md — cambia solo come il guscio la veste.
+ */
+const PLAYABLE: readonly GameStatus[] = ['playing', 'suspended', 'recovering']
 
 const store = useGameStore()
 const { status, failure, failedDuring, awayFor } = storeToRefs(store)
@@ -71,7 +84,7 @@ const startOver = (): void => void store.newGame()
       </div>
     </template>
 
-    <template v-else-if="status === 'playing' || status === 'suspended'">
+    <template v-else-if="PLAYABLE.includes(status)">
       <nav class="tabs">
         <button
           v-for="name of SCREENS"
@@ -88,15 +101,15 @@ const startOver = (): void => void store.newGame()
         <HomeView v-if="screen === 'home'" />
         <StatsView v-else />
       </div>
-    </template>
 
-    <div v-else-if="status === 'recovering'" class="center">
-      <span class="ring" aria-hidden="true"></span>
-      <p class="headline">{{ text('app.loading.catchup') }}</p>
-      <p v-if="awayFor > 0" class="detail">
-        {{ text('app.loading.away_for', { duration: duration(awayFor) }) }}
-      </p>
-    </div>
+      <div v-if="status === 'recovering'" class="center veil">
+        <span class="ring" aria-hidden="true"></span>
+        <p class="headline">{{ text('app.loading.catchup') }}</p>
+        <p v-if="awayFor > 0" class="detail">
+          {{ text('app.loading.away_for', { duration: duration(awayFor) }) }}
+        </p>
+      </div>
+    </template>
 
     <div v-else-if="status === 'closing'" class="center">
       <span class="ring" aria-hidden="true"></span>
@@ -112,15 +125,21 @@ const startOver = (): void => void store.newGame()
 
 <style>
 /**
- * P2 — le costanti dello stile approvato, estratte in token come quella preferenza chiede.
+ * P2 — le costanti dello stile approvato, estratte in token come quella preferenza chiede, e le
+ * poche **primitive** che più di un componente disegna allo stesso modo.
  *
  * Il verde è **solo** il denaro che entra e l'azione primaria: un secondo verde toglie al primo
  * il suo significato. Le cifre sono tabulari ovunque compaia un importo, altrimenti un saldo che
  * sale fa ballare la riga.
  *
- * Non è scoped, e in tutto il progetto è l'unico blocco che non lo è: i token servono a ogni
- * componente, e il resto dello stile sta attaccato a chi lo usa — così togliere un componente
+ * Non è scoped, e in tutto il progetto è l'unico blocco che non lo è: ciò che sta qui serve a
+ * ogni componente, e il resto dello stile sta attaccato a chi lo usa — così togliere un componente
  * toglie anche il suo CSS, che è la difesa contro le 1.067 righe morte del difetto A14.
+ *
+ * Il confine fra le due cose è questo: una primitiva entra qui quando la disegnano **due**
+ * componenti. `.refusal` ci è entrata con l'audit del 2026-08-20, che l'ha trovata copiata in
+ * `AtmPanel` e in `IncomePanel` con il valore di `--danger` **ricopiato a mano** in quattro righe
+ * di `rgba()`: cambiare il token avrebbe spostato il testo e lasciato indietro sfondo e bordo.
  */
 :root {
   --bg: #0f1115;
@@ -194,6 +213,27 @@ button {
   color: var(--text);
   border-color: var(--line);
 }
+
+/*
+ * Un rifiuto spiegato (ADR 0018): un pulsante spento non dice niente, una riga rossa sì. Nuda
+ * dentro un riquadro che è già suo, `boxed` quando deve staccarsi dal pannello.
+ *
+ * Sfondo e bordo si **derivano** dal token invece di ricopiarne il valore: `color-mix` è ciò che
+ * rende il rosso una cosa sola anche quando è trasparente.
+ */
+.refusal {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--danger);
+}
+
+.refusal.boxed {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+}
 </style>
 
 <style scoped>
@@ -228,6 +268,16 @@ button {
   flex-direction: column;
   gap: 14px;
   padding: 18px;
+}
+
+/*
+ * Il velo del recupero: copre il tavolo senza smontarlo. `fixed` e non `absolute` perché il
+ * guscio scorre — un velo ancorato al flusso scivolerebbe via insieme alla schermata.
+ */
+.veil {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
 }
 
 .center {

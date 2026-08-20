@@ -99,7 +99,7 @@ solvent/
 ├─ vitest.config.ts
 ├─ docs/
 │  ├─ architettura.md             # questo file
-│  └─ adr/0001..0020-*.md
+│  └─ adr/0001..0024-*.md
 ├─ src/
 │  ├─ main/
 │  │  ├─ index.ts
@@ -118,8 +118,7 @@ solvent/
 │  │  │  ├─ Rng.ts                # unico posto dove Math.random e' consentito
 │  │  │  ├─ Bus.ts                # sincrono: niente code, niente storico, niente attese
 │  │  │  ├─ Registry.ts
-│  │  │  ├─ Ledger.ts
-│  │  │  └─ index.ts
+│  │  │  └─ Ledger.ts
 │  │  ├─ balance/
 │  │  │  ├─ constants.ts
 │  │  │  ├─ modifiers.ts          # unico registro dei moltiplicatori
@@ -146,7 +145,7 @@ solvent/
 │  └─ renderer/
 │     ├─ index.html
 │     ├─ main.ts
-│     ├─ App.vue                  # il guscio: i 7 stati, la navigazione, i token di stile
+│     ├─ App.vue                  # il guscio: i 7 stati, la navigazione, i token e le primitive
 │     ├─ runtime/
 │     │  ├─ createGame.ts         # registra i sistemi, monta il contesto
 │     │  ├─ host.ts               # l'unico file che tocca il browser
@@ -164,13 +163,14 @@ solvent/
 │     │  ├─ AtmPanel.vue          # importo, importi rapidi, anteprima, conferma
 │     │  ├─ PostingRows.vue       # i movimenti di una transazione, riga per riga
 │     │  ├─ postings.ts           # quali movimenti il giocatore vede - pura
+│     │  ├─ OperationList.vue     # l'estratto conto: le due viste ne mostrano quantita' diverse
 │     │  └─ StatTile.vue          # il riquadro del cruscotto: e' cio' che il test conta
 │     └─ i18n/
 │        ├─ index.ts              # chiavi tipizzate, Translator, GameError
 │        ├─ it.ts
 │        └─ en.ts
 └─ tests/
-   ├─ helpers/         sources (lettura dei sorgenti per i test di regola)
+   ├─ helpers/         sources (lettura dei sorgenti per i test di regola) - host (il finto browser)
    ├─ contracts/       result · money · pools · ledger · bounded · events · save · commands
    ├─ kernel/          clock · rng · bus · registry · ledger
    ├─ domains/         income/ rules - commands - system

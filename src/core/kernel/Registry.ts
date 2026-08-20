@@ -167,7 +167,11 @@ export const createRegistry = (): Registry => {
       registered.sort(byOrder)
     },
 
-    systems: () => registered,
+    // Una copia, come fa il Ledger con i movimenti di una transazione: `readonly` ferma il
+    // compilatore, non un cast, e due file dello stesso kernel non possono rispondere in modo
+    // diverso alla stessa domanda. Si chiama fuori dal tick, quindi la copia non costa niente
+    // dove conta.
+    systems: () => [...registered],
 
     tickAll: (ctx, elapsed) => {
       for (const system of registered) system.tick?.(ctx, elapsed)

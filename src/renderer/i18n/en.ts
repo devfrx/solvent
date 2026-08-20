@@ -29,6 +29,7 @@ export const en: Dictionary = {
   'app.duration.hours': '{n} hour | {n} hours',
   'app.duration.minutes': '{n} minute | {n} minutes',
   'app.duration.and': '{first} and {second}',
+  'app.duration.under_a_minute': 'less than a minute',
 
   'common.buy': 'Buy — {cost}',
   'common.level': 'lv. {level}',
@@ -48,7 +49,7 @@ export const en: Dictionary = {
 
   'stats.saved_at.title': 'Last save',
   'stats.saved_at.never': 'Never: this game has not been written to disk yet.',
-  'stats.operations.title': 'Recent operations',
+  'stats.operations.title': 'Operations log',
   'stats.operations.empty': 'Nothing to show yet.',
 
   'home.zone.atm': 'ATM',

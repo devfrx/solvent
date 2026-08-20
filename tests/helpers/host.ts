@@ -73,6 +73,10 @@ export const createStage = (options: StageOptions = {}): Stage => {
       }
     },
 
+    // Il finto browser non ha un documento a cui dichiarare una lingua: la riga vera vive in
+    // `host.ts`, che è il confine e non ha test (docs/tracciabilita.md).
+    setLanguage: () => undefined,
+
     onVisibilityChange: (handler): Unsubscribe => {
       visibility = handler
       return () => {

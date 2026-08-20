@@ -343,8 +343,17 @@ export const useGameStore = defineStore('game', () => {
     play()
   }
 
-  /** `Errore → InGioco`: il file illeggibile si cancella solo qui, e solo perché l'utente sceglie. */
+  /**
+   * `Errore → Caricamento → InGioco`: il file illeggibile si cancella solo qui, e solo perché
+   * l'utente sceglie.
+   *
+   * Si passa da `loading` invece di restare in `failed` con un `failure` già azzerato: quella
+   * combinazione non sta nel diagramma, e il guscio — che rende la schermata d'errore su
+   * `failed && failure !== null` — cadeva nel ramo finale mostrando comunque il caricamento. Ora
+   * è lo stato a dirlo, invece di essere il guscio a indovinarlo.
+   */
   const newGame = async (): Promise<void> => {
+    status.value = 'loading'
     game.reset('hard')
     history.value = boundedList<Transaction>(HISTORY_MAX)
     savedAt.value = null
@@ -359,15 +368,50 @@ export const useGameStore = defineStore('game', () => {
   }
 
   /**
+   * Chiudere **senza** scrivere. Ci si arriva da due strade, e fanno lo stesso gesto: il giocatore
+   * sceglie di perdere i progressi non salvati, oppure non c'è nessuna partita da salvare
+   * (INV-17). La prima è una scelta e ha un pulsante suo — la finestra è rimasta aperta apposta
+   * per lasciargliela; la seconda non si vede, perché non c'è niente da decidere.
+   */
+  const closeWithoutSaving = (): void => {
+    loop.stop()
+    host.close()
+  }
+
+  /**
+   * INV-17 — se il `Game` in memoria è la partita **vera**, cioè l'unica da cui valga la pena
+   * scrivere.
+   *
+   * In `startup`, in `loading` e in `failed` per un **caricamento** il gioco non è mai stato
+   * caricato: quello che c'è in memoria è una partita nuova, azzerata, che non rappresenta
+   * nessuno. Scriverla sul disco cancellerebbe il salvataggio del giocatore — proprio mentre la
+   * schermata d'errore gli sta promettendo che il file non è stato toccato.
+   *
+   * `failed` per un **salvataggio** invece è autoritativo, e per la ragione opposta: lì la partita
+   * è tutta in memoria e non è mai arrivata sul disco. È lo stesso stato da cui riparte `retry`.
+   */
+  const isAuthoritative = (): boolean =>
+    status.value === 'playing' ||
+    status.value === 'suspended' ||
+    status.value === 'recovering' ||
+    (status.value === 'failed' && failedDuring.value === 'saving')
+
+  /**
    * `InGioco → Chiusura`: la finestra è già stata trattenuta da `onClosing`, e si chiude **dopo**
    * che il main ha confermato la scrittura.
    *
    * Se la scrittura fallisce la finestra **non** si chiude: si passa in `failed`, dove la partita
    * è ancora in memoria e ancora salvabile. Chiudere comunque sarebbe comodo e perderebbe l'unica
    * copia esistente, quindi è una scelta esplicita del giocatore: `closeWithoutSaving`.
+   *
+   * La precondizione sta qui e non in `onClosing`: è questa funzione l'unica che sa **cosa** sta
+   * per scrivere, e una guardia messa in chi la chiama sarebbe la stessa omissione spostata di un
+   * file — il giorno in cui un secondo chiamante compare, la guardia non lo copre.
    */
   const close = async (): Promise<void> => {
     if (status.value === 'closing') return
+    if (!isAuthoritative()) return closeWithoutSaving()
+
     status.value = 'closing'
     loop.stop()
 
@@ -379,28 +423,15 @@ export const useGameStore = defineStore('game', () => {
   }
 
   /**
-   * L'altra uscita dal salvataggio fallito, e l'unica che perde qualcosa: si chiude sapendo di
-   * buttare via i progressi non scritti. Esiste perché la scelta sia del giocatore invece che
-   * una conseguenza — la finestra è rimasta aperta apposta per lasciargliela.
-   */
-  const closeWithoutSaving = (): void => {
-    loop.stop()
-    host.close()
-  }
-
-  /**
    * «Riprova» è una parola sola davanti a due cause diverse: si ricarica se il caricamento è
    * fallito, si riscrive se è fallito il salvataggio. La scelta sta qui e non nel componente,
    * che altrimenti dovrebbe sapere cosa significa ciascuno stato.
+   *
+   * Il secondo ramo è `close()` e basta: da `failed` per un salvataggio la partita in memoria è
+   * quella vera, e adesso a saperlo è `isAuthoritative` invece di una riga che riportava lo stato
+   * a `playing` per convincere `close` a scrivere.
    */
-  const retry = async (): Promise<void> => {
-    if (failedDuring.value !== 'saving') return start()
-    // `close` si rifiuta di ripartire da `closing`, e da `failed` non saprebbe cosa fare: si
-    // torna nello stato da cui la chiusura era partita, che è anche quello vero — la partita
-    // non ha mai smesso di esistere.
-    status.value = 'playing'
-    return close()
-  }
+  const retry = async (): Promise<void> => (failedDuring.value === 'saving' ? close() : start())
 
   /**
    * `InGioco → Sospeso → Recupero`. Il loop **non** si ferma: a finestra nascosta il browser

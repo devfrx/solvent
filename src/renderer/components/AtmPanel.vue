@@ -124,7 +124,7 @@ const submit = (): void => {
       {{ text(WORDING[kind].confirm) }}
     </button>
 
-    <p v-if="refusal !== null" class="refusal">{{ failure(refusal) }}</p>
+    <p v-if="refusal !== null" class="refusal boxed">{{ failure(refusal) }}</p>
   </section>
 </template>
 
@@ -172,18 +172,8 @@ const submit = (): void => {
   margin-top: 14px;
 }
 
-.refusal {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--danger);
-}
-
-.panel > .refusal {
+/* Il rifiuto è una primitiva condivisa (`App.vue`): qui resta solo lo stacco dal pannello. */
+.refusal.boxed {
   margin-top: 10px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: rgba(248, 113, 113, 0.1);
-  border: 1px solid rgba(248, 113, 113, 0.25);
 }
 </style>

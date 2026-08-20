@@ -28,7 +28,8 @@ import { it as italian } from '../../src/renderer/i18n/it'
  * solo a schermo.
  */
 
-const MINUTE = 60 * 1000
+const SECOND = 1000
+const MINUTE = 60 * SECOND
 const HOUR = 60 * MINUTE
 
 /**
@@ -132,6 +133,19 @@ describe('le forme che una lingua decide da sé', () => {
 
     expect(words.duration(milliseconds(3 * HOUR + 12 * MINUTE))).toBe('3 hours and 12 minutes')
     expect(words.duration(milliseconds(HOUR + MINUTE))).toBe('1 hour and 1 minute')
+  })
+
+  it('i due zeri che l’aritmetica produce e nessuna lingua pronuncia', () => {
+    // Sotto il minuto è la risposta di ogni alt-tab: la schermata di recupero diceva «Sei stato
+    // via 0 minuti». L'ora tonda diceva «3 ore e 0 minuti».
+    speaking('it')
+    expect(words.duration(milliseconds(2 * SECOND))).toBe('meno di un minuto')
+    expect(words.duration(milliseconds(0))).toBe('meno di un minuto')
+    expect(words.duration(milliseconds(3 * HOUR))).toBe('3 ore')
+
+    speaking('en')
+    expect(words.duration(milliseconds(2 * SECOND))).toBe('less than a minute')
+    expect(words.duration(milliseconds(HOUR))).toBe('1 hour')
   })
 
   it('il denaro si scrive come lo scrive la lingua', () => {

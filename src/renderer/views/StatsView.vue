@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
-import PostingRows from '@renderer/components/PostingRows.vue'
+import OperationList from '@renderer/components/OperationList.vue'
 import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
 
@@ -30,13 +30,7 @@ const { text, instant } = useTranslator()
 
   <section class="panel">
     <p class="caption">{{ text('stats.operations.title') }}</p>
-    <p v-if="operations.length === 0" class="empty">{{ text('stats.operations.empty') }}</p>
-    <ol v-else class="operations">
-      <li v-for="(entry, index) of operations" :key="index">
-        <p class="reason">{{ text(entry.reason) }}</p>
-        <PostingRows :postings="entry.postings" />
-      </li>
-    </ol>
+    <OperationList :operations="operations" />
   </section>
 </template>
 
@@ -44,26 +38,5 @@ const { text, instant } = useTranslator()
 .saved {
   margin: 8px 0 0;
   font-size: 15px;
-}
-
-.empty {
-  margin: 8px 0 0;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.operations {
-  margin: 10px 0 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.reason {
-  margin: 0 0 3px;
-  font-size: 12px;
-  font-weight: 600;
 }
 </style>

@@ -58,41 +58,44 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 
 Regole di configurazione e di processo, con la stessa dignità:
 
-| ID  | Regola                                                    | Forza | Dove                                                      |
-| --- | --------------------------------------------------------- | ----- | --------------------------------------------------------- |
-| C01 | `noUnusedLocals` e `noUnusedParameters` sempre accesi     | ✅    | `tsconfig.base.json`                                      |
-| C02 | Il codice è sempre formattato                             | ✅    | `package.json` → `format:check`                           |
-| C03 | Un solo nome per il prodotto, ovunque                     | ✅    | `tests/rules/product-identity`                            |
-| C04 | `.gitignore` copre gli artefatti, `*.tsbuildinfo` incluso | 👤    | `.gitignore`                                              |
-| C05 | Nessun entitlement o permesso non usato                   | 👤    | `electron-builder.yml`                                    |
-| C06 | Ogni `eslint-disable` porta la propria motivazione        | ✅    | `tests/rules/eslint-disable`                              |
-| C07 | Ogni collegamento fra documenti risolve, ancore incluse   | ✅    | `tests/rules/doc-links`                                   |
-| C08 | Identificatori in inglese, prosa in italiano              | ⚠️    | `tests/rules/english-identifiers` — lista, non dizionario |
-| P01 | Una fetta verticale alla volta, nessun `TODO` nel codice  | ✅    | `docs/roadmap-fette.md` + `tests/rules/no-todo`           |
+| ID  | Regola                                                    | Forza | Dove                                                           |
+| --- | --------------------------------------------------------- | ----- | -------------------------------------------------------------- |
+| C01 | `noUnusedLocals` e `noUnusedParameters` sempre accesi     | ✅    | `tsconfig.base.json`                                           |
+| C02 | Il codice è sempre formattato                             | ✅    | `package.json` → `format:check`                                |
+| C03 | Un solo nome per il prodotto, ovunque                     | ✅    | `tests/rules/product-identity`                                 |
+| C04 | `.gitignore` copre gli artefatti, `*.tsbuildinfo` incluso | 👤    | `.gitignore`                                                   |
+| C05 | Nessun entitlement o permesso non usato                   | 👤    | `electron-builder.yml`                                         |
+| C06 | Ogni `eslint-disable` porta la propria motivazione        | ✅    | `tests/rules/eslint-disable`                                   |
+| C07 | Ogni collegamento fra documenti risolve, ancore incluse   | ✅    | `tests/rules/doc-links`                                        |
+| C08 | Identificatori in inglese, prosa in italiano              | ⚠️    | `tests/rules/english-identifiers` — lista, non dizionario      |
+| C09 | Nessuna parola vietata nei nomi di file e cartelle        | ⚠️    | `tests/rules/forbidden-words` — i nomi, non gli identificatori |
+| C10 | Nessun barrel: nessun file che si limiti a ri-esportare   | ✅    | `tests/rules/no-barrel` — guarda il contenuto, non il nome     |
+| P01 | Una fetta verticale alla volta, nessun `TODO` nel codice  | ✅    | `docs/roadmap-fette.md` + `tests/rules/no-todo`                |
 
 ## Invarianti derivati
 
 Conseguenze delle decisioni che vale la pena verificare direttamente, perché la loro rottura
 segnala che un confine si sta spostando.
 
-| ID     | Invariante                                                                | Da       | Verifica                                                                 |
-| ------ | ------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------ |
-| INV-01 | `src/core/**` dipende solo da `decimal.js`                                | ADR 0015 | `tests/rules/core-deps` — allowlist, non esprimibile in ESLint           |
-| INV-02 | `src/core/**` non importa mai `vue`, `pinia`, `electron`                  | ADR 0001 | `no-restricted-imports`                                                  |
-| INV-03 | `src/main/**` importa da `core/` solo `contracts/save.ts`                 | ADR 0004 | `no-restricted-imports` + `tests/rules/main-save-only`                   |
-| INV-04 | Il denaro attraversa il confine di persistenza come stringa               | ADR 0006 | schema `zod` + `tests/save/roundtrip`                                    |
-| INV-05 | Ogni `System` registrato compare in save, load, reset e stats             | ADR 0002 | `tests/rules/registry-completeness`                                      |
-| INV-06 | La dimensione massima del salvataggio è calcolabile a priori              | ADR 0010 | somma dei `max` dichiarati                                               |
-| INV-07 | Ogni `Reason` e ogni `code` di errore ha una chiave in ogni lingua        | ADR 0011 | `tests/i18n/parity`                                                      |
-| INV-08 | **La somma di tutti i conti è sempre zero**, anche dopo un caricamento    | ADR 0020 | `tests/kernel/ledger` (invariante su 1.000 transazioni)                  |
-| INV-09 | Nessuna transazione è mai applicata parzialmente                          | ADR 0019 | `tests/kernel/ledger` (fallimento indotto sull'ultimo movimento)         |
-| INV-10 | Nessun dominio nomina a mano i pool non-giocatore                         | ADR 0020 | `tests/rules/domains-no-internal-pools` — i conti si derivano da `POOLS` |
-| INV-11 | La commissione in anteprima è lo **stesso valore** che il comando applica | ADR 0018 | `tests/domains/atm` — l'anteprima è l'elenco dei movimenti               |
-| INV-12 | Il cruscotto della home non supera i **sei** riquadri                     | ADR 0018 | `tests/rules/home-tiles` — ⚠️ conta i tag, e rifiuta un `v-for` su uno   |
-| INV-13 | Il renderer non può usare le API di Node                                  | ADR 0001 | `tsconfig.web.json` senza tipi `node` — 🔒, non compila                  |
-| INV-14 | Nessun gate sparisce dalla catena `verify`                                | ADR 0013 | `tests/rules/gates`                                                      |
-| INV-15 | Il Bus è sincrono: nessuna attesa, nessuna coda dentro `emit`             | ADR 0016 | `tests/rules/bus-synchronous` — la firma `void` da sola non basta        |
-| INV-16 | Il preload espone tre funzioni, non `ipcRenderer`                         | ADR 0004 | `tests/save/preload` — guarda l'oggetto esposto, non il sorgente         |
+| ID     | Invariante                                                                | Da       | Verifica                                                                    |
+| ------ | ------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------- |
+| INV-01 | `src/core/**` dipende solo da `decimal.js`                                | ADR 0015 | `tests/rules/core-deps` — allowlist, non esprimibile in ESLint              |
+| INV-02 | `src/core/**` non importa mai `vue`, `pinia`, `electron`                  | ADR 0001 | `no-restricted-imports`                                                     |
+| INV-03 | `src/main/**` importa da `core/` solo `contracts/save.ts`                 | ADR 0004 | `no-restricted-imports` + `tests/rules/main-save-only`                      |
+| INV-04 | Il denaro attraversa il confine di persistenza come stringa               | ADR 0006 | schema `zod` + `tests/save/roundtrip`                                       |
+| INV-05 | Ogni `System` registrato compare in save, load, reset e stats             | ADR 0002 | `tests/rules/registry-completeness`                                         |
+| INV-06 | La dimensione massima del salvataggio è calcolabile a priori              | ADR 0010 | somma dei `max` dichiarati                                                  |
+| INV-07 | Ogni `Reason` e ogni `code` di errore ha una chiave in ogni lingua        | ADR 0011 | `tests/i18n/parity`                                                         |
+| INV-08 | **La somma di tutti i conti è sempre zero**, anche dopo un caricamento    | ADR 0020 | `tests/kernel/ledger` (invariante su 1.000 transazioni)                     |
+| INV-09 | Nessuna transazione è mai applicata parzialmente                          | ADR 0019 | `tests/kernel/ledger` (fallimento indotto sull'ultimo movimento)            |
+| INV-10 | Nessun dominio nomina a mano i pool non-giocatore                         | ADR 0020 | `tests/rules/domains-no-internal-pools` — i conti si derivano da `POOLS`    |
+| INV-11 | La commissione in anteprima è lo **stesso valore** che il comando applica | ADR 0018 | `tests/domains/atm` — l'anteprima è l'elenco dei movimenti                  |
+| INV-12 | Il cruscotto della home non supera i **sei** riquadri                     | ADR 0018 | `tests/rules/home-tiles` — ⚠️ conta i tag, e rifiuta un `v-for` su uno      |
+| INV-13 | Il renderer non può usare le API di Node                                  | ADR 0001 | `tsconfig.web.json` senza tipi `node` — 🔒, non compila                     |
+| INV-14 | Nessun gate sparisce dalla catena `verify`                                | ADR 0013 | `tests/rules/gates`                                                         |
+| INV-15 | Il Bus è sincrono: nessuna attesa, nessuna coda dentro `emit`             | ADR 0016 | `tests/rules/bus-synchronous` — la firma `void` da sola non basta           |
+| INV-16 | Il preload espone tre funzioni, non `ipcRenderer`                         | ADR 0004 | `tests/save/preload` — guarda l'oggetto esposto, non il sorgente            |
+| INV-17 | Il salvataggio si scrive **solo** da uno stato che ha una partita vera    | ADR 0004 | `tests/renderer/store` — chiudere da `Errore` o da `Caricamento` non scrive |
 
 ## Le regole di lint si verificano da sole
 
@@ -105,10 +108,10 @@ contro una violazione reale è quasi sempre una regola che non funziona.
 
 ## Cosa questa tabella NON copre
 
-Le cinque righe oneste, perché una matrice di tracciabilità che si dichiara completa è la prima
-cosa che invecchia male. Erano «tre» davanti a un elenco di quattro fin da prima di D015: è
-esattamente il difetto che questo documento avverte di cercare — un numero scritto una volta e mai
-più rimisurato.
+Le sei righe oneste, perché una matrice di tracciabilità che si dichiara completa è la prima
+cosa che invecchia male. Erano «tre» davanti a un elenco di quattro fin da prima di D015, e a
+[D016](delega/D016-correzioni-audit.md) sono sei: è esattamente il difetto che questo documento
+avverte di cercare — un numero scritto una volta e mai più rimisurato.
 
 1. **R10 fuori dai comandi.** Il lint vieta i literal con chiave `success`, ma non impedisce a una
    funzione qualsiasi di ritornare `boolean`. Copre la seconda convenzione, non il degrado.
@@ -121,13 +124,28 @@ più rimisurato.
    e rifiuta un `v-for` sullo stesso tag — la scorciatoia che trasformerebbe sei riquadri in sedici
    lasciando il conto a uno. Un `v-for` su un **contenitore** che ne avvolge uno le sfugge ancora:
    per prenderlo servirebbe rendere il componente, cioè jsdom ([registro YAGNI](roadmap-fette.md)).
-4. **C04 e C05** dipendono dalla review. Sono le due sole righe 👤 del progetto, ed è deliberato:
-   meccanizzarle costerebbe più di quanto valgano. Se diventano tre, è un segnale.
-5. **`runtime/host.ts` non ha test.** È l'unico file del progetto senza, ed è una conseguenza
-   dichiarata del confine: quel file **è** il browser — `window`, `document`,
+4. **C09 fuori dai nomi.** `tests/rules/forbidden-words` guarda i nomi di file e cartelle sotto
+   `src/`, non gli identificatori: dentro un identificatore le stesse parole sono spesso
+   legittime — `handler` è il nome standard di una callback e compare in `Bus.ts` e in `host.ts` a
+   ragione — e una regola che gridasse al lupo lì verrebbe disattivata. Non copre nemmeno
+   `tests/`, e la ragione sta nel [glossario](glossario.md#parole-vietate).
+5. **C04 e C05** dipendono dalla review. Sono le due sole righe 👤 del progetto, ed è deliberato:
+   meccanizzarle costerebbe più di quanto valgano. Se diventano tre, è un segnale. Le due che
+   erano righe 👤 **senza nemmeno il simbolo** — le parole vietate e il divieto di barrel, scritte
+   in prosa e mai messe in tabella — hanno preso un meccanismo con
+   [D016](delega/D016-correzioni-audit.md): erano quattro, e il contatore non le vedeva perché
+   contava solo ciò che era già in tabella.
+6. **Tre file non hanno test**, e sono la stessa cosa tre volte: il guscio esterno che tocca la
+   piattaforma. `src/renderer/runtime/host.ts` **è** il browser — `window`, `document`,
    `requestAnimationFrame`, `performance` — e tutto ciò che sta sopra lo riceve per costruzione,
-   quindi gira in `node` senza jsdom. Che gli eventi giusti siano agganciati lo dice la lettura,
-   non un test.
+   quindi gira in `node` senza jsdom. `src/renderer/main.ts` e `src/main/index.ts` sono i due
+   bootstrap: montano Vue e aprono la finestra di Electron, cioè fanno esattamente le cose che un
+   test non può osservare senza diventare l'applicazione. Che gli eventi giusti siano agganciati lo
+   dice la lettura, non un test.
+
+   Fino a [D016](delega/D016-correzioni-audit.md) questa riga diceva «è l'unico file del progetto
+   senza», e ne contava uno su tre. Non cambia la scelta: cambia quanto è grande la superficie che
+   quella scelta lascia scoperta, che è la sola cosa che una riga onesta debba dire.
 
    La riga che stava qui diceva che il grilletto era D012 — «jsdom entra con i test di
    componente». **Non è successo**, e la ragione è buona: la definizione di fatto di D012 non

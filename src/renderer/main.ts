@@ -2,7 +2,7 @@ import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 
 import App from './App.vue'
-import { createTranslations } from './i18n'
+import { createTranslations, DEFAULT_LOCALE } from './i18n'
 import { createGame } from './runtime/createGame'
 import { createBrowserHost } from './runtime/host'
 import { provideRuntime, useGameStore } from './stores/game'
@@ -15,7 +15,13 @@ import { provideRuntime, useGameStore } from './stores/game'
  * costruisce un `Game`, e due `createGame()` sarebbero due partite che non si vedono.
  */
 
-provideRuntime({ game: createGame(), host: createBrowserHost() })
+const host = createBrowserHost()
+
+// La lingua del documento la decide `DEFAULT_LOCALE` come tutte le altre parole: scritta a mano in
+// `index.html` sarebbe l'unica che non lo segue (R12).
+host.setLanguage(DEFAULT_LOCALE)
+
+provideRuntime({ game: createGame(), host })
 
 const app = createApp(App)
 app.use(createPinia())

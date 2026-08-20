@@ -30,6 +30,7 @@ export const it: Dictionary = {
   'app.duration.hours': '{n} ora | {n} ore',
   'app.duration.minutes': '{n} minuto | {n} minuti',
   'app.duration.and': '{first} e {second}',
+  'app.duration.under_a_minute': 'meno di un minuto',
 
   'common.buy': 'Compra — {cost}',
   'common.level': 'liv. {level}',
@@ -49,7 +50,7 @@ export const it: Dictionary = {
 
   'stats.saved_at.title': 'Ultimo salvataggio',
   'stats.saved_at.never': 'Mai: questa partita non è ancora stata scritta su disco.',
-  'stats.operations.title': 'Ultime operazioni',
+  'stats.operations.title': 'Registro delle operazioni',
   'stats.operations.empty': 'Ancora niente da mostrare.',
 
   'home.zone.atm': 'Bancomat',
