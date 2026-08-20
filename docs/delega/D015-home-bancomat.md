@@ -1,6 +1,7 @@
 # D015 — La home: bancomat, carta e cruscotto
 
-- **Stato:** **Chiusa**, commit `3aa3460` — nata il 2026-08-19 dallo spezzamento di [D012](D012-ui-e-i18n.md)
+- **Stato:** **Chiusa** — 2026-08-20, commit `3aa3460`, ramo `d015-home-bancomat`. Nata il
+  2026-08-19 dallo spezzamento di [D012](D012-ui-e-i18n.md)
 - **Dipende da:** D012, D014
 - **Sblocca:** D013
 - **ADR vincolanti:** 0001, 0007, 0011, 0017, 0018
