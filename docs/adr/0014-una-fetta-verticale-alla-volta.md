@@ -1,6 +1,8 @@
 # ADR 0014 — Una fetta verticale alla volta
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — [D013](../delega/D013-verifica-della-fetta.md): la fetta 01 è arrivata
+  in fondo da sola, in sedici deleghe, e nel codice non c'è un `TODO`. Visto rosso mettendone uno:
+  `expected [ 'src\core\domains\income\rules.ts' ] to deeply equal []`
 - **Data:** 2026-08-19
 - **Copre il difetto:** A17 (24 sistemi costruiti prima che esistesse un modo di collegarli)
 

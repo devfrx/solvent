@@ -1,6 +1,9 @@
 # ADR 0015 — Criterio di ammissione delle dipendenze
 
-- **Stato:** Proposta — richiede l'approvazione delle tre dipendenze elencate
+- **Stato:** **Accettata** — [D013](../delega/D013-verifica-della-fetta.md): le tre dipendenze sono
+  state approvate allo STOP 1 e sono ancora tre. Il criterio ha morso davvero due volte — `vue-router`
+  e `jsdom` sono rimasti fuori — e INV-01 è visto rosso importando `vue-i18n` sotto `core/`:
+  `expected [ 'vue-i18n' ] to deeply equal []`
 - **Data:** 2026-08-19
 
 ## Contesto

@@ -1,6 +1,8 @@
 # ADR 0013 — Prettier è l'unica autorità sulla formattazione
 
-- **Stato:** Proposta
+- **Stato:** **Accettata** — [D013](../delega/D013-verifica-della-fetta.md): `format:check` è nella
+  catena `verify`, e `tests/rules/gates` impedisce che ne esca (INV-14). Visto rosso su tre spazi
+  di troppo: `Code style issues found in the above file`
 - **Data:** 2026-08-19
 - **Copre il difetto:** A16 (154 file su 156 che il formattatore avrebbe riscritto)
 

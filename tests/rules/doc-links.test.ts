@@ -62,7 +62,15 @@ const linksOf = (doc: string): Link[] =>
       }
     })
 
-const links = sourceFiles('docs', ['.md']).flatMap(linksOf)
+/**
+ * `docs/` più il `README.md` della radice, che non sta sotto `docs/` e che senza questa riga
+ * sarebbe l'unico documento del progetto con i collegamenti scoperti — nato in
+ * [D013](../../docs/delega/D013-verifica-della-fetta.md), cioè dopo il meccanismo che avrebbe
+ * dovuto guardarlo.
+ */
+const documents = [...sourceFiles('docs', ['.md']), 'README.md']
+
+const links = documents.flatMap(linksOf)
 
 describe('i collegamenti fra documenti', () => {
   it('il rilevatore trova i link e ignora ciò che non lo è', () => {

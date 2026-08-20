@@ -38,9 +38,21 @@ renderer, e il passo fisso con accumulatore esiste. **0011** con
 ha le due zone nell'ordine dichiarato, la commissione si vede prima della conferma, e il tetto dei
 riquadri è un test.
 
-Le altre restano _Proposta_ perché il meccanismo è a metà: **0010** aspetta il primo `boundedList`
-che entra davvero nel salvataggio — la lista delle ultime operazioni ha il suo limite, ma è un
-mirror che riparte vuoto e non attraversa il disco. Metà meccanismo non è una decisione in vigore.
+**0008**, **0012**, **0013**, **0014** e **0015** con
+[D013](../delega/D013-verifica-della-fetta.md), che è lo STOP 2. Sono le cinque che il codice
+imponeva **già** senza che nessuno l'avesse dichiarato: la domanda posta a ciascuna è stata una
+sola — _esiste un meccanismo che la impone, e qualcuno l'ha visto scattare?_ — e la seconda metà è
+stata pagata, rompendo ognuna di proposito e guardando il rosso. Le rotture sono in fondo a quella
+delega, e la riga di stato di ogni ADR porta la propria.
+
+Restano _Proposta_ tre decisioni, e per due è corretto: **0022** e **0023** descrivono cose che il
+progetto non ha ancora costruito, e diventeranno un fatto con il dominio che le userà. La terza è
+**0010**, e ha il meccanismo **a metà**: `boundedList<T>(max)` è l'unico costruttore e `max` è
+obbligatorio, ma la seconda frase della decisione — «il validatore del salvataggio rifiuta un array
+che supera il `max` dichiarato» — non ha niente da validare, perché nel payload della versione 1
+non c'è nessun array. La lista delle ultime operazioni ha il suo limite ed è un mirror che riparte
+vuoto: non attraversa il disco. Metà meccanismo non è una decisione in vigore, ed è il caveau della
+fetta 02 a chiuderla.
 
 ## Le decisioni
 
@@ -53,14 +65,14 @@ mirror che riparte vuoto e non attraversa il disco. Metà meccanismo non è una 
 | [0005](0005-rng-seedato-con-stream-per-dominio.md)                             | PRNG seedato con stream per dominio                            | **Accettata** | ogni sorgente di casualità del gioco                                    | A03             |
 | [0006](0006-decimal-end-to-end-per-il-denaro.md)                               | Il denaro è `Decimal` end-to-end                               | **Accettata** | il tipo di ogni valore monetario                                        | A11             |
 | [0007](0007-result-come-unico-stile-di-esito.md)                               | `Result<T,E>` come unico stile di esito                        | **Accettata** | la firma di ogni operazione che può fallire                             | A12             |
-| [0008](0008-nome-e-identita-del-prodotto.md)                                   | Un solo nome, deciso prima del primo file                      | Proposta      | `appId`, percorso salvataggi, chiavi di registro                        | A15             |
+| [0008](0008-nome-e-identita-del-prodotto.md)                                   | Un solo nome, deciso prima del primo file                      | **Accettata** | `appId`, percorso salvataggi, chiavi di registro                        | A15             |
 | [0009](0009-passo-fisso-e-tipi-branded-per-il-tempo.md)                        | Passo fisso a 10 tick/s, tempo con tipi branded                | **Accettata** | la firma di ogni `tick`, il progresso offline                           | A04             |
 | [0010](0010-liste-storiche-limitate-alla-definizione.md)                       | Una lista storica nasce già con il suo limite                  | Proposta      | la dimensione massima del salvataggio                                   | A10             |
 | [0011](0011-i18n-obbligatoria-con-parita-verificata.md)                        | i18n dal primo giorno, parità verificata da un test            | **Accettata** | ogni stringa mostrata all'utente                                        | A13             |
-| [0012](0012-controlli-sul-codice-morto-sempre-accesi.md)                       | `noUnusedLocals` / `noUnusedParameters` sempre accesi          | Proposta      | la sopravvivenza del codice morto                                       | A14             |
-| [0013](0013-prettier-e-autorita-sulla-formattazione.md)                        | Prettier è l'unica autorità sulla formattazione                | Proposta      | il diff di ogni commit                                                  | A16             |
-| [0014](0014-una-fetta-verticale-alla-volta.md)                                 | Una fetta verticale alla volta                                 | Proposta      | l'ordine di tutto il lavoro futuro                                      | A17             |
-| [0015](0015-criterio-di-ammissione-delle-dipendenze.md)                        | Criterio di ammissione delle dipendenze                        | Proposta      | ogni `npm install` da qui in avanti                                     | —               |
+| [0012](0012-controlli-sul-codice-morto-sempre-accesi.md)                       | `noUnusedLocals` / `noUnusedParameters` sempre accesi          | **Accettata** | la sopravvivenza del codice morto                                       | A14             |
+| [0013](0013-prettier-e-autorita-sulla-formattazione.md)                        | Prettier è l'unica autorità sulla formattazione                | **Accettata** | il diff di ogni commit                                                  | A16             |
+| [0014](0014-una-fetta-verticale-alla-volta.md)                                 | Una fetta verticale alla volta                                 | **Accettata** | l'ordine di tutto il lavoro futuro                                      | A17             |
+| [0015](0015-criterio-di-ammissione-delle-dipendenze.md)                        | Criterio di ammissione delle dipendenze                        | **Accettata** | ogni `npm install` da qui in avanti                                     | —               |
 | [0016](0016-il-bus-e-sincrono-e-fire-and-forget.md)                            | Il Bus è sincrono, fire-and-forget, non event sourcing         | **Accettata** | la forma di ogni handler e di ogni sistema                              | —               |
 | [0017](0017-il-denaro-e-plurale.md)                                            | Il denaro è plurale: pool con affordance diverse               | **Accettata** | ogni azione che muove denaro, in ogni dominio                           | —               |
 | [0018](0018-la-home-e-un-atm.md)                                               | La home è un ATM, non una dashboard                            | **Accettata** | la schermata principale e la navigazione                                | —               |
@@ -91,9 +103,13 @@ I codici `A01`–`A17` sono i difetti misurati nell'audit del progetto precedent
 
 ## Decisioni approvate dall'utente
 
-Approvate il **2026-08-19**. Restano in stato _Proposta_ finché non esiste il meccanismo che le
-impone. Approvata non è Accettata: la differenza è che una è una volontà e l'altra è un fatto
-verificabile.
+Approvate il **2026-08-19**. Restavano in stato _Proposta_ finché non esisteva il meccanismo che
+le impone: approvata non è Accettata, perché una è una volontà e l'altra è un fatto verificabile.
+
+Da [D013](../delega/D013-verifica-della-fetta.md) tutte e quattro sono **fatti**, e l'ultima a
+diventarlo è stata la più silenziosa: il nome del prodotto era approvato dal 2026-08-19 e imposto
+da un test da D001, ma la riga di stato dell'ADR 0008 diceva ancora «richiede la scelta
+dell'utente». La scelta era stata fatta; nessuno era tornato a scriverlo.
 
 | Cosa                         | ADR                                                                        | Esito                                                         |
 | ---------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------- |
