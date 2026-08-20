@@ -3,8 +3,8 @@
 - **Stato:** **Chiusa** — scritta il 2026-08-20 studiando la validazione dello stato caricato prima
   di eseguire [D017](D017-il-caveau.md), **preparata per l'esecuzione** subito dopo
   [D019](D019-il-pagamento.md) — il test scritto davvero, eseguito e poi ritirato — ed eseguita lo
-  stesso giorno: ramo `d020-validazione-del-salvataggio`. Vedi _Cosa la preparazione ha verificato_
-  e _Come è andata_ in fondo
+  stesso giorno: commit `5186f11`, ramo `d020-validazione-del-salvataggio`. Vedi _Cosa la
+  preparazione ha verificato_ e _Come è andata_ in fondo
 - **Dipende da:** D013 (tutta la fetta 01). **Non** dipende da [D019](D019-il-pagamento.md): sono
   due lavori che non si toccano
 - **Sblocca:** [D017](D017-il-caveau.md), che porta il **secondo** dominio con stato. E ogni dominio
@@ -271,7 +271,7 @@ regola.
 
 ## Come è andata
 
-Eseguita il 2026-08-20, sul ramo `d020-validazione-del-salvataggio`.
+Eseguita il 2026-08-20, sul ramo `d020-validazione-del-salvataggio`, commit `5186f11`.
 
 **Budget.** Dichiarate ~70 righe di test e **zero di sorgente**. Misurate **70 righe di test** —
 righe di codice, commenti e righe vuote escluse, con il metodo di `codeLines` — e **zero di
