@@ -213,8 +213,10 @@ da verificare invece che da ricopiare:
 `npm run verify:release` **verde**: `out/main/index.js` 12,23 kB, `out/preload/index.cjs`
 1,00 kB, `out/renderer/` 91 moduli, 564,89 kB di JavaScript e 10,65 kB di CSS.
 
-`verify` intero misura **41,4 s** su questa macchina, dentro l'intervallo 42–45 dichiarato a
-[D016](D016-correzioni-audit.md) e sei test più grosso. La soglia di [qualita.md](../qualita.md)
+`verify` intero misura **41,4 s** su questa macchina: appena **sotto** l'intervallo 42–45
+dichiarato a [D016](D016-correzioni-audit.md), pur con sei test in più. Non è un miglioramento —
+è la variazione fra due esecuzioni della stessa catena, che [qualita.md](../qualita.md) dichiara
+essere ormai più grande della crescita fra due deleghe. La soglia di [qualita.md](../qualita.md)
 resta il minuto, e resta il margine più stretto del progetto: la voce del
 [registro YAGNI](../roadmap-fette.md) che propone di togliere i sei `npm run` incatenati portava
 ancora la cifra di D007 ed è stata rimisurata qui.
