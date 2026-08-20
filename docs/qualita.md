@@ -21,6 +21,13 @@ bene: `verify` non paga l'avvio di `npm` due volte per lo stesso gate. Sono temp
 quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre
 `npm run`.
 
+**Rimisurata a [D019](delega/D019-il-pagamento.md)**, stesso giorno e stessa macchina: la catena
+intera **34,9 s**, con **558 test in 61 file**. Non è scesa — è la stessa misura ripetuta, e la
+differenza sta dentro la variazione fra due esecuzioni. Il numero di test sta qui e non in
+[stato.md](stato.md) per la stessa ragione del tempo: non è derivabile dal repo senza eseguirli.
+Fino a D019 lo portava il [passaggio di consegne](delega/PASSAGGIO-DI-CONSEGNE.md), che lo aveva
+scaduto di due deleghe; adesso quella pagina punta qui invece di ricopiarlo.
+
 **Questa è l'unica misura del progetto che resta affidata a un occhio, ed è dichiarato.** Un tempo
 dipende dalla macchina, quindi non può stare in [stato.md](stato.md) con gli altri fatti contabili
 (regola C11): nessun gate può verificarlo, e l'unica difesa è la data qui accanto. Se la data è

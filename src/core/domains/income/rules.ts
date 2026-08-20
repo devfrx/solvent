@@ -1,4 +1,6 @@
 import type { Money } from '@core/contracts/money'
+import type { PaymentOption, PriceList } from '@core/contracts/payment'
+import type { Pool } from '@core/contracts/pools'
 
 import { BALANCE } from '@core/balance/constants'
 import type { Modifier, ModifierTarget, Modifiers } from '@core/balance/modifiers'
@@ -38,21 +40,43 @@ export const incomeOver = (clock: Clock, modifiers: Modifiers, elapsed: Ticks): 
   clock.perSecondToPerTick(incomePerSecond(modifiers)).mul(elapsed)
 
 /**
- * Il prezzo dell'upgrade. Una funzione e non la costante nuda perché l'anteprima della UI e il
- * comando che esegue devono leggere lo **stesso** posto: due letture che devono coincidere sono
- * due letture che prima o poi divergono.
+ * Il listino dell'upgrade: per ogni strumento che lo compra, quanto costa con quello (ADR 0027).
+ *
+ * Oggi ha **una** voce, e va bene così: un listino di uno non è un caso speciale. È anche la prova
+ * che la forma regge il caso più stretto — chi legge non trova un ramo che distingue "un'opzione"
+ * da "più opzioni", trova una lista.
+ *
+ * È una funzione e non la costante nuda per la ragione di sempre in questo dominio: l'anteprima
+ * della UI e il comando che paga devono leggere lo **stesso** posto, e due letture che devono
+ * coincidere prima o poi divergono. Qui vale doppio, perché adesso quel posto genera anche
+ * `accepts` (INV-19).
  */
-export const upgradeCost = (): Money => BALANCE.UPGRADE_COST
+export const upgradePrices = (): PriceList => [{ pool: 'card', price: BALANCE.UPGRADE_PRICE_CARD }]
 
 /**
- * L'anteprima del pulsante: comprabile se non è già stato comprato e se la carta basta.
+ * L'opzione del listino per uno strumento, `null` se il listino non lo offre.
  *
- * `available` è il saldo della **carta**, l'unico strumento accettato. Il confronto sui fondi è
- * un'anteprima, non la decisione: a decidere è il Ledger quando il comando esegue. I due devono
- * dare la stessa risposta, e c'è un test che li mette uno di fronte all'altro.
+ * Il `null` è un esito e non un guasto: «con questo non si paga» è una risposta legittima sia alla
+ * domanda che la UI fa prima di mostrare un prezzo, sia a quella che il comando fa prima di pagare.
  */
-export const canBuyUpgrade = (state: IncomeState, available: Money): boolean =>
-  !state.upgraded && available.greaterThanOrEqualTo(upgradeCost())
+export const upgradePriceFor = (pool: Pool): PaymentOption | null =>
+  upgradePrices().find((option) => option.pool === pool) ?? null
+
+/**
+ * L'anteprima del pulsante: comprabile se non è già stato comprato e se quello strumento basta.
+ *
+ * Il prezzo arriva **per argomento**, dentro l'opzione, e l'opzione viene dal listino. Se questa
+ * funzione se lo ripescasse da sola sarebbe una seconda lettura da tenere allineata con quella del
+ * comando, che è esattamente ciò che INV-19 vieta. `available` è il saldo di quello stesso pool.
+ *
+ * Il confronto sui fondi resta un'anteprima, non la decisione: a decidere è il Ledger quando il
+ * comando esegue, e c'è un test che mette i due uno di fronte all'altro.
+ */
+export const canBuyUpgrade = (
+  state: IncomeState,
+  option: PaymentOption,
+  available: Money
+): boolean => !state.upgraded && available.greaterThanOrEqualTo(option.price)
 
 /**
  * Il modificatore che l'upgrade registra: un `mult` su **tutte** le fonti di reddito, non un

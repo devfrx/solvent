@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { fromString } from '@core/contracts/money'
+import type { PaymentOption } from '@core/contracts/payment'
+import { POOL_IDS, POOLS } from '@core/contracts/pools'
 
 import { BALANCE } from '@core/balance/constants'
 import { createModifiers } from '@core/balance/modifiers'
@@ -12,8 +14,9 @@ import {
   canBuyUpgrade,
   incomeOver,
   incomePerSecond,
-  upgradeCost,
-  upgradeModifier
+  upgradeModifier,
+  upgradePriceFor,
+  upgradePrices
 } from '../../../src/core/domains/income/rules'
 import { read } from '../../helpers/sources'
 
@@ -23,6 +26,16 @@ import { read } from '../../helpers/sources'
  */
 
 const noModifiers = createModifiers()
+
+/**
+ * L'opzione della carta, presa **dal listino** invece di essere scritta qui: un'opzione ricopiata
+ * proverebbe che questo file è coerente con se stesso, che non è la domanda.
+ */
+const cardOption = (): PaymentOption => {
+  const option = upgradePriceFor('card')
+  if (option === null) throw new Error('il listino dell’upgrade non offre la carta')
+  return option
+}
 
 describe('il reddito', () => {
   it('senza modificatori è quello dichiarato in constants.ts', () => {
@@ -68,11 +81,33 @@ describe('il reddito', () => {
   })
 })
 
-describe('l’upgrade', () => {
-  it('costa quanto dice constants.ts', () => {
-    expect(upgradeCost().toString()).toBe(BALANCE.UPGRADE_COST.toString())
+describe('il listino dell’upgrade', () => {
+  it('offre la carta, al prezzo che sta in constants.ts', () => {
+    expect(upgradePrices()).toEqual([{ pool: 'card', price: BALANCE.UPGRADE_PRICE_CARD }])
   })
 
+  it('e il prezzo è **lo stesso oggetto** della costante, non un numero uguale', () => {
+    // Identità e non uguaglianza: una copia con lo stesso valore passerebbe un `toEqual` e
+    // lascerebbe che le due si muovano separatamente. È la trappola pagata da D015 alla
+    // correzione 14, ed è la forma in cui INV-19 può rompersi senza far rumore.
+    expect(cardOption().price).toBe(BALANCE.UPGRADE_PRICE_CARD)
+  })
+
+  it('interrogato per uno strumento ritorna la sua voce, e null per gli altri', () => {
+    expect(upgradePriceFor('card')).toEqual({ pool: 'card', price: BALANCE.UPGRADE_PRICE_CARD })
+    expect(upgradePriceFor('cash')).toBeNull()
+  })
+
+  it('non offre nessuno dei conti che strumenti non sono (ADR 0020)', () => {
+    // `world`, `sink`, `fees` e `house` sono contabilità interna e non si scelgono: un listino che
+    // ne offrisse uno metterebbe un conto non-giocatore davanti agli occhi del giocatore.
+    for (const pool of POOL_IDS.filter((id) => !POOLS[id].player)) {
+      expect(upgradePriceFor(pool)).toBeNull()
+    }
+  })
+})
+
+describe('l’upgrade', () => {
   it('registra un mult su tutte le fonti, non un reddito base nuovo', () => {
     expect(upgradeModifier()).toEqual({
       id: UPGRADE_MODIFIER_ID,
@@ -82,14 +117,15 @@ describe('l’upgrade', () => {
     })
   })
 
-  it('è comprabile solo se non è già comprato e se la carta basta', () => {
-    const cost = upgradeCost()
+  it('è comprabile solo se non è già comprato e se lo strumento scelto basta', () => {
+    const option = cardOption()
+    const price = option.price
     const fresh = { upgraded: false }
 
-    expect(canBuyUpgrade(fresh, cost)).toBe(true)
-    expect(canBuyUpgrade(fresh, cost.plus(fromString('0.01')))).toBe(true)
-    expect(canBuyUpgrade(fresh, cost.minus(fromString('0.01')))).toBe(false)
-    expect(canBuyUpgrade({ upgraded: true }, cost.mul(10))).toBe(false)
+    expect(canBuyUpgrade(fresh, option, price)).toBe(true)
+    expect(canBuyUpgrade(fresh, option, price.plus(fromString('0.01')))).toBe(true)
+    expect(canBuyUpgrade(fresh, option, price.minus(fromString('0.01')))).toBe(false)
+    expect(canBuyUpgrade({ upgraded: true }, option, price.mul(10))).toBe(false)
   })
 })
 

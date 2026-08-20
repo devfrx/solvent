@@ -47,6 +47,8 @@ export const en: Dictionary = {
   'income.upgrade.overtime.desc': 'Raises the income of every source.',
   'income.upgrade.owned': 'Already running',
 
+  'payment.only_with': 'Paid with {pool} only',
+
   'stats.saved_at.title': 'Last save',
   'stats.saved_at.never': 'Never: this game has not been written to disk yet.',
   'stats.operations.title': 'Operations log',

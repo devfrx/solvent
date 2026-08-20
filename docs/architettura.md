@@ -33,7 +33,7 @@ flowchart TD
     DOM["domains/*<br/>rules · system"]
     BAL["balance/*<br/>constants · modifiers · targets"]
     KER["kernel/*<br/>Clock · Rng · Bus · Registry · Ledger"]
-    CON["contracts/*<br/>result · money · pools · ledger · lifecycle<br/>bounded · events · save · commands"]
+    CON["contracts/*<br/>result · money · pools · ledger · lifecycle<br/>bounded · events · save · commands · payment"]
   end
 
   BOOT --> APP
@@ -149,6 +149,7 @@ solvent/
 │  │  │  ├─ money.ts              # Money = Decimal + le uniche conversioni
 │  │  │  ├─ pools.ts              # Pool · PoolProps · POOLS come dati
 │  │  │  ├─ ledger.ts             # Posting · Transaction · TransactionMeta · Balances · LedgerError
+│  │  │  ├─ payment.ts            # PaymentOption · PriceList — il listino di un'azione (ADR 0027)
 │  │  │  ├─ lifecycle.ts          # ResetScope — la parola che Registry e Ledger si scambiano
 │  │  │  ├─ bounded.ts            # boundedList<T>(max) — regola 9
 │  │  │  ├─ events.ts             # interface GameEvents — unico file
@@ -192,7 +193,7 @@ solvent/
 │        └─ en.ts
 └─ tests/
    ├─ helpers/         sources (lettura dei sorgenti per i test di regola) - host (il finto browser)
-   ├─ contracts/       result · money · pools · ledger · bounded · events · save · commands
+   ├─ contracts/       result · money · pools · ledger · bounded · events · save · commands · payment
    ├─ kernel/          clock · rng · bus · registry · ledger
    ├─ domains/         income/ rules - commands - system
    ├─ save/            schema - roundtrip - kernel-roundtrip - migrations - ipc - preload

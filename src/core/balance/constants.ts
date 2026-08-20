@@ -32,8 +32,16 @@ export const BALANCE = {
    */
   INCOME_BASE_PER_SECOND: fromString('12'),
 
-  /** L'unico upgrade della fetta 01. Si paga **solo** con la carta: è D010 a dichiararlo. */
-  UPGRADE_COST: fromString('800'),
+  /**
+   * Quanto costa l'upgrade **con la carta**, che è l'unico strumento che il suo listino offre
+   * (ADR 0027). Lo strumento sta nel nome perché il prezzo è per strumento: il caveau della fetta
+   * 02 ne avrà due, uno in contanti e uno sulla carta, e saranno due costanti — non una con uno
+   * sconto calcolato da qualche parte.
+   *
+   * Fino a D019 si chiamava `UPGRADE_COST` e il commento diceva «si paga solo con la carta»: era
+   * vero, e a dirlo era una frase. Adesso lo dice il listino, e questo numero è una delle sue voci.
+   */
+  UPGRADE_PRICE_CARD: fromString('800'),
 
   /**
    * Di quanto l'upgrade moltiplica il reddito di tutte le fonti. È un `mult` su `income.all`, non

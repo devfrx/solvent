@@ -87,6 +87,32 @@ prezzo mostrato e quello addebitato vengono dalla stessa funzione (INV-19). Lo c
 `income`, che accetta **un** solo strumento: l'ampliamento del caveau è il primo a offrirne due, e
 con esso arriva il selettore vero.
 
+**D019 è chiusa, e quello che ha lasciato è questo.** Non si riscrive: si usa.
+
+- `contracts/payment.ts` — `PaymentOption { pool, price }` e `PriceList`. Nessuna funzione: è
+  vocabolario. Il campo del calore **non c'è**, e il suo grilletto resta la fetta 04.
+- Il listino è una **funzione pura del dominio** (`income/rules.ts`: `upgradePrices`,
+  `upgradePriceFor`), e i prezzi vengono da `balance/constants.ts` — uno per strumento, con lo
+  strumento nel nome (`UPGRADE_PRICE_CARD`). Il caveau ne dichiarerà **due**.
+- **`accepts` non si scrive più a mano**: `UPGRADE_PAYMENT.accepts` è
+  `upgradePrices().map((option) => option.pool)`. L'ampliamento faccia lo stesso, o le due
+  dichiarazioni torneranno a poter divergere.
+- Il comando riceve il **pool** e ricalcola il prezzo dal listino; un pool fuori listino è rifiutato
+  con `error.ledger.pool_not_accepted` e l'elenco di quelli buoni. Nessun comando riceve un prezzo.
+- Nello store: `upgradePrices` (uno `shallowRef`, o Pinia proxa i `Decimal` e l'identità di INV-19
+  salta) e `canBuyUpgradeWith(pool)`, che è l'anteprima **per strumento**.
+- In `IncomePanel.vue`: un `v-for` sul listino, e la chiave `payment.only_with` che con un'opzione
+  sola dice il **perché** al posto del nome dello strumento.
+
+**Il selettore è tuo, e con esso una decisione di gioco che D019 non poteva prendere**: cosa fa la
+UI quando il giocatore **ha** lo strumento ma non abbastanza. Oggi il pulsante non si spegne, si
+smorza, e a spiegare è il rifiuto del Ledger con le due cifre — che con un'opzione sola è la cosa
+giusta, perché non c'è nessun altro posto dove guardare. Con due, «non ti bastano i contanti»
+convive con «la carta invece basta», e le risposte possibili sono almeno tre: mostrare entrambe e
+lasciar scegliere, ordinare le opzioni mettendo davanti quella pagabile, oppure indicare la via del
+bancomat. L'[ADR 0027](../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md) ne esclude
+una sola — la conversione automatica — e lascia aperte le altre.
+
 **Contanti o carta, a prezzi diversi.** Il numero non è deciso qui — va in `balance/` e va scelto
 giocando — ma la sua **taratura** ha un vincolo che vale la pena scrivere prima: il calore non
 esiste ancora, quindi lo strumento più economico non paga niente in cambio e vincerebbe sempre. La
@@ -180,9 +206,12 @@ non un import.
 
 ### Cosa ne discende per il budget
 
-La stima resta **~250 righe di sorgente e ~330 di test**, e non è una svista: il punto 1 aggiunge
+La stima **era** ~250 righe di sorgente e ~330 di test, e non era una svista: il punto 1 aggiunge
 lavoro a `income` e ne toglie altrove — il mock che sparisce (punto 5) e i tre test che si
-riscrivono invece di nascere (punto 2). Se il consuntivo sforerà, sforerà per la ragione dichiarata
+riscrivono invece di nascere (punto 2). È salita a **~330 e ~410** quando
+[D019](D019-il-pagamento.md) è nata: il selettore del pagamento a due opzioni è di questa delega, e
+la riga qui sopra è rimasta indietro di una sessione — corretta da D019 stessa, che è la delega che
+quel budget lo ha cambiato. Se il consuntivo sforerà, sforerà per la ragione dichiarata
 al punto 1, che è la sola parte di questa delega scoperta dopo averla scritta.
 
 ## Cosa trovi già fatto

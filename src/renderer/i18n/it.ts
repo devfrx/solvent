@@ -48,6 +48,8 @@ export const it: Dictionary = {
   'income.upgrade.overtime.desc': 'Aumenta il reddito di tutte le fonti.',
   'income.upgrade.owned': 'Già in funzione',
 
+  'payment.only_with': 'Si paga solo con: {pool}',
+
   'stats.saved_at.title': 'Ultimo salvataggio',
   'stats.saved_at.never': 'Mai: questa partita non è ancora stata scritta su disco.',
   'stats.operations.title': 'Registro delle operazioni',

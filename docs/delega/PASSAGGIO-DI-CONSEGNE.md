@@ -40,8 +40,8 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Domini                   | i due della fetta 01: `income` ha stato e ticchetta, `atm` è due comandi e basta                                                       |
 | Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
-| `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 565,00 kB (misurato il 2026-08-20)                                                         |
-| Prossimo passo           | **[D019](D019-il-pagamento.md)** o **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)** — non si toccano, in qualunque ordine    |
+| `npm run verify:release` | **verde** — il renderer compila: 91 moduli, 569,02 kB (rimisurato a [D019](D019-il-pagamento.md))                                      |
+| Prossimo passo           | **[D020](D020-nessun-sistema-si-fida-del-salvataggio.md)**, poi **[D017](D017-il-caveau.md)**: D019 è chiusa                           |
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -62,7 +62,8 @@ movimenti da mostrare — e le parole del gioco sotto `i18n/`. Ogni delega chius
 [D009](D009-persistenza-main.md) dieci, [D010](D010-dominio-income.md) dieci,
 [D014](D014-dominio-bancomat.md) undici, [D011](D011-runtime-e-store.md) quattordici,
 [D012](D012-ui-e-i18n.md) e [D015](D015-home-bancomat.md) diciassette,
-[D016](D016-correzioni-audit.md) sette. Leggile prima di fidarti del
+[D016](D016-correzioni-audit.md) sette,
+[D019](D019-il-pagamento.md) tredici. Leggile prima di fidarti del
 testo di una delega ancora aperta — alcune di quelle correzioni riguardano proprio deleghe che non
 sono ancora state eseguite.
 
@@ -234,7 +235,7 @@ righe, e la più facile da dimenticare è la prima — chiudere una delega signi
 `rotation.ts`. Le deleghe della fetta 02 partono esattamente da dove le ha lasciate lo STOP 2, e
 nessuna delle loro misure è cambiata.
 
-**Prima [D019 — Il pagamento](D019-il-pagamento.md).** Non c'era, ed è nata da una domanda posta
+**[D019 — Il pagamento](D019-il-pagamento.md) è chiusa**, e questa è la sua storia: non c'era, ed è nata da una domanda posta
 prima di eseguire il caveau: come sceglie il giocatore con cosa paga? La risposta è che non sceglie
 — `income` compra il suo upgrade con il pool scritto nel sorgente — e che
 l'[ADR 0017](../adr/0017-il-denaro-e-plurale.md) prometteva il contrario dalla fetta 01. Il caveau
@@ -275,10 +276,11 @@ Tre cose che chi apre la fetta 02 deve avere in mente prima di scrivere una riga
    dell'ambiente. Il modo esatto è nella nota di chiusura di
    [D013](D013-verifica-della-fetta.md).
 
-`verify` sta a **41,4 s** con 503 test, `verify:release` aggiunge la compilazione. La soglia
-dichiarata in [qualita.md](../qualita.md) è il minuto: è il margine più stretto del progetto, e il
-rimedio è già censito nel [registro YAGNI](../roadmap-fette.md) — togliere l'avvio ripetuto di
-`npm`, non togliere un gate.
+Quanto ci mette `verify`, e con quanti test, lo dice [qualita.md](../qualita.md) con la data
+accanto: è l'unico posto del progetto in cui un tempo si scrive, e questa pagina lo ripeteva
+scaduto di due deleghe. La soglia è il minuto, è il margine più stretto del progetto, e il rimedio
+è già censito nel [registro YAGNI](../roadmap-fette.md) — togliere l'avvio ripetuto di `npm`, non
+togliere un gate.
 
 ## Come si lavora
 
@@ -392,7 +394,7 @@ interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto co
 La ventiduesima è di **D013** e costa una riga di un test: è anche l'unica riga non di test che
 quella delega abbia toccato.
 
-**Le ultime cinque sono del 2026-08-20 e non costano ancora niente**: nessuna riga di codice le applica, e questo è il momento in cui contestarle è gratis. Nascono tutte dalle due domande poste prima di eseguire D017 — come si sceglie con cosa si paga, e chi controlla lo stato che arriva dal disco. Le scelte **di gioco** di quelle sessioni non sono qui perché non sono state prese in autonomia: lo spazio unico del caveau, il tetto a livelli finiti, la varianza zero e la nona voce dell'etichetta sono state decise dall'utente, e stanno nella [scheda del caveau](../design/domini/vault.md) con le alternative scartate.
+**Le ultime cinque sono del 2026-08-20, e tre di loro sono entrate in vigore con [D019](D019-il-pagamento.md).** Il listino dentro l'azione, il selettore rimandato a D017, il calore e `convertibleTo` lasciati fuori: adesso costano `contracts/payment.ts`, il dominio `income`, lo store e un componente — poco, ma non più zero. Le altre due, quelle di D020, non costano ancora niente: nessuna riga di codice le applica, e quello è il momento in cui contestarle è gratis. Nascono tutte dalle due domande poste prima di eseguire D017 — come si sceglie con cosa si paga, e chi controlla lo stato che arriva dal disco. Le scelte **di gioco** di quelle sessioni non sono qui perché non sono state prese in autonomia: lo spazio unico del caveau, il tetto a livelli finiti, la varianza zero e la nona voce dell'etichetta sono state decise dall'utente, e stanno nella [scheda del caveau](../design/domini/vault.md) con le alternative scartate.
 
 Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
 recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE` scelti
@@ -404,13 +406,11 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 ## Prompt pronto per una sessione nuova
 
 Lo STOP 2 è superato e la fetta 02 è decisa: questo prompt **consegna una delega**. Ne consegna
-una sola per volta, e l'ID va scelto prima di incollarlo — `D019` o `D020`, che non si toccano.
+una sola per volta. [D019](D019-il-pagamento.md) è chiusa, quindi l'ID adesso è `D020`; dopo di
+quella tocca a [D017](D017-il-caveau.md), che le aspettava entrambe.
 
 ```markdown
-Esegui la delega D019 nel progetto Solvent, in questa repo.
-
-(Se preferisci partire dall'altra, sostituisci D019 con D020 ovunque: sono indipendenti e
-possono essere fatte in qualunque ordine. Entrambe vanno chiuse prima di D017.)
+Esegui la delega D020 nel progetto Solvent, in questa repo.
 
 Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 
@@ -419,37 +419,38 @@ Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 2. `docs/stato.md` — quanti sono gli ADR, le deleghe e i documenti, e in che stato. È **generato**:
    non si scrive a mano, e quando ne cambi uno si rigenera con
    `npx vitest run tests/rules/project-state -u`
-3. `docs/delega/D019-il-pagamento.md` — la delega che esegui. Interamente, trappole comprese
-4. `docs/adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md` — l'ADR che la vincola,
-   con le cinque alternative già scartate. Se stai per contraddirne una, la risposta è lì
+3. `docs/delega/D020-nessun-sistema-si-fida-del-salvataggio.md` — la delega che esegui.
+   Interamente, trappole comprese
+4. `docs/adr/0002-registry-unica-lista-di-sistemi.md` e
+   `docs/adr/0004-il-main-e-proprietario-del-contratto-di-salvataggio.md` — gli ADR che
+   la delega tocca. Se stai per contraddirne uno, la risposta è lì
 5. `docs/roadmap-fette.md`, il **registro YAGNI** — dice cosa è stato deliberatamente lasciato
    fuori e cosa lo farà entrare. È il documento che ti impedisce di costruire troppo
 6. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
 
 Stato al 2026-08-20: `npm run verify` e `npm run verify:release` **verdi**, il renderer compila
-(91 moduli, 565,00 kB). Quante deleghe siano chiuse, quanti ADR ci siano e quali siano ancora
+(91 moduli, 569,02 kB). Quante deleghe siano chiuse, quanti ADR ci siano e quali siano ancora
 `Proposta` lo dice [stato.md](../stato.md), che è generato: per ognuno il perché sta nel suo ADR.
 
 Le deleghe aperte le elenca [stato.md](../stato.md). L'ordine conta, ed è questo:
 
-- **D019 — il pagamento** e **D020 — la validazione dello stato salvato**: indipendenti fra
-  loro, entrambe prima di D017
-- **D017 — il caveau**: la fetta 02 vera, aspetta le altre due
+- **D020 — la validazione dello stato salvato**: viene prima di D017. D019, l'altra che veniva
+  prima, è chiusa
+- **D017 — il caveau**: la fetta 02 vera, aspetta D020
 - **D018 — la scheda di dominio**: solo documenti, non tocca nessuna delle altre
 
-D019 vale ~140 righe di sorgente e ~220 di test. **Il kernel non si tocca**: metà del sistema
-esisteva già — `accepts`, il rifiuto tipizzato con l'elenco dei pool, e
-`error.ledger.insufficient_funds` che porta già `pool`, `required` e `available`.
+D020 vale ~70 righe di test e **zero di sorgente**: è una regola che nasce prima del codice che
+governa, come D001. Il kernel non si tocca, e nemmeno `defineSystem`.
 
 Come lavoro:
 
-- **Un ramo `d019-il-pagamento`.** Non si commetta su `main`
+- **Un ramo `d020-validazione-del-salvataggio`.** Non si commetta su `main`
 - **La delega si esegue, non si riscrive.** Se il testo è invecchiato o sbagliato, fermati e
   dimmelo: è successo tre volte e ogni volta ha tolto lavoro invece di aggiungerlo
 - **Il budget di righe è un allarme, non un limite.** Se lo stai raddoppiando, stai risolvendo
   un problema diverso da quello descritto: dillo invece di continuare
-- **Fuori scope vuol dire fuori scope.** `heat`, `convertibleTo` e il selettore a più opzioni
-  hanno un grilletto scritto e non è scattato
+- **Fuori scope vuol dire fuori scope.** L'aiutante condiviso per i validatori e il campo
+  richiesto da `defineSystem` hanno un grilletto scritto, e non è scattato
 - **Ogni test nuovo va rotto di proposito almeno una volta.** Un test che non si è mai visto
   fallire non è una rete, è una decorazione
 - `npm run verify` verde alla fine, con l'**output incollato**. Non «dovrebbe passare»

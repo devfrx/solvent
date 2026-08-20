@@ -8,6 +8,7 @@ import type { Pool } from '@core/contracts/pools'
 import type { LoadedSave, SavePayload, SaveResult } from '@core/contracts/save'
 
 import { BALANCE } from '@core/balance/constants'
+import { upgradePrices } from '@core/domains/income/rules'
 import { income } from '@core/kernel/Ledger'
 
 import { createGame, type Game } from '../../src/renderer/runtime/createGame'
@@ -404,17 +405,59 @@ describe('i comandi', () => {
 })
 
 describe('i selettori del reddito', () => {
-  /** L'upgrade si paga **solo** con la carta (D010), e il reddito entra in contanti. */
+  /** Il listino dell'upgrade offre **solo** la carta (ADR 0027), e il reddito entra in contanti. */
   const fundCard = (amount: string): void => {
     game.ctx.ledger.transaction(income('card', fromString(amount)), {
       reason: 'reason.income.tick'
     })
   }
 
-  it('il prezzo è quello del dominio, non un numero ricopiato', async () => {
+  it('il listino è quello del dominio, non una tabella ricopiata', async () => {
     const store = await start()
 
-    expect(toString(store.upgradeCost)).toBe(toString(BALANCE.UPGRADE_COST))
+    expect(store.upgradePrices).toEqual(upgradePrices())
+  })
+
+  it('e i suoi prezzi sono **gli stessi oggetti**, non copie proxate da Pinia', async () => {
+    // Il punto di INV-19: se lo store consegnasse alla UI una copia reattiva del `Decimal`, il
+    // prezzo mostrato e quello addebitato sarebbero due valori uguali con due vite separate. È
+    // anche la ragione per cui questo campo è uno `shallowRef` invece di un `ref`.
+    const store = await start()
+
+    expect(store.upgradePrices[0]?.price).toBe(BALANCE.UPGRADE_PRICE_CARD)
+  })
+
+  it('l’anteprima è per strumento: la carta sì, i contanti mai', async () => {
+    const store = await start()
+    game.ctx.ledger.transaction(income('cash', fromString('5000')), {
+      reason: 'reason.income.tick'
+    })
+
+    // Cinquemila euro in contanti non comprano un upgrade che il listino non offre in contanti:
+    // non è il saldo a decidere, è con cosa si paga.
+    expect(store.canBuyUpgradeWith('cash')).toBe(false)
+    expect(store.canBuyUpgradeWith('card')).toBe(false)
+
+    fundCard('800')
+    expect(store.canBuyUpgradeWith('card')).toBe(true)
+  })
+
+  it('e comprare con uno strumento fuori dal listino è rifiutato con l’elenco giusto', async () => {
+    const store = await start()
+    game.ctx.ledger.transaction(income('cash', fromString('5000')), {
+      reason: 'reason.income.tick'
+    })
+
+    const bought = store.buyUpgrade('cash')
+
+    expect(bought.ok).toBe(false)
+    if (bought.ok) return
+    expect(bought.error).toEqual({
+      code: 'error.ledger.pool_not_accepted',
+      pool: 'cash',
+      accepted: upgradePrices().map((option) => option.pool)
+    })
+    expect(store.upgraded).toBe(false)
   })
 
   it('il reddito al secondo è quello base finché non si compra', async () => {
@@ -429,7 +472,7 @@ describe('i selettori del reddito', () => {
     const store = await start()
     fundCard('800')
 
-    expect(store.buyUpgrade().ok).toBe(true)
+    expect(store.buyUpgrade('card').ok).toBe(true)
 
     const boosted = BALANCE.INCOME_BASE_PER_SECOND.mul(BALANCE.UPGRADE_MULTIPLIER)
     expect(toString(store.incomePerSecond)).toBe(toString(boosted))
@@ -445,7 +488,7 @@ describe('i selettori del reddito', () => {
     const store = await start({ load: found(upgraded, SAVED_AT), wallClock: SAVED_AT })
 
     expect(store.upgraded).toBe(true)
-    expect(store.canBuyUpgrade).toBe(false)
+    expect(store.canBuyUpgradeWith('card')).toBe(false)
     const boosted = BALANCE.INCOME_BASE_PER_SECOND.mul(BALANCE.UPGRADE_MULTIPLIER)
     expect(toString(store.incomePerSecond)).toBe(toString(boosted))
   })
@@ -453,7 +496,7 @@ describe('i selettori del reddito', () => {
   it('una partita nuova riporta indietro anche il reddito', async () => {
     const store = await start()
     fundCard('800')
-    store.buyUpgrade()
+    store.buyUpgrade('card')
 
     await store.newGame()
 
@@ -471,8 +514,8 @@ describe('l’anteprima e il comando dicono la stessa cosa', () => {
 
   /** Quando i due divergono si spegne un pulsante che avrebbe funzionato, o viceversa. */
   const agreeOn = (store: ReturnType<typeof useGameStore>): boolean => {
-    const foreseen = store.canBuyUpgrade
-    const actual = store.buyUpgrade()
+    const foreseen = store.canBuyUpgradeWith('card')
+    const actual = store.buyUpgrade('card')
     expect(actual.ok).toBe(foreseen)
     return foreseen
   }
@@ -485,14 +528,14 @@ describe('l’anteprima e il comando dicono la stessa cosa', () => {
 
   it('con un centesimo in meno del prezzo: ancora no', async () => {
     const store = await start()
-    fundCard(toString(BALANCE.UPGRADE_COST.minus(fromString('0.01'))))
+    fundCard(toString(BALANCE.UPGRADE_PRICE_CARD.minus(fromString('0.01'))))
 
     expect(agreeOn(store)).toBe(false)
   })
 
   it('con il prezzo esatto: sì', async () => {
     const store = await start()
-    fundCard(toString(BALANCE.UPGRADE_COST))
+    fundCard(toString(BALANCE.UPGRADE_PRICE_CARD))
 
     expect(agreeOn(store)).toBe(true)
   })
@@ -751,11 +794,11 @@ describe('il cruscotto', () => {
     fund('cash', '2000')
     fund('card', '1000')
 
-    expect(store.buyUpgrade().ok).toBe(true)
+    expect(store.buyUpgrade('card').ok).toBe(true)
     expect(store.confirm('withdraw', fromString('100')).ok).toBe(true)
 
     expect(toString(store.earned)).toBe('3000')
-    expect(toString(store.spent)).toBe(toString(BALANCE.UPGRADE_COST))
+    expect(toString(store.spent)).toBe(toString(BALANCE.UPGRADE_PRICE_CARD))
   })
 
   it('i numeri si tengono fra loro: guadagnato meno speso meno commissioni fa il patrimonio', async () => {
@@ -764,7 +807,7 @@ describe('il cruscotto', () => {
     const store = await start()
     fund('cash', '2000')
     fund('card', '1000')
-    store.buyUpgrade()
+    store.buyUpgrade('card')
     store.confirm('withdraw', fromString('100'))
 
     const held = store.earned.minus(store.spent).minus(store.feesPaid)

@@ -89,6 +89,10 @@ export type ScreenKey =
   | 'income.upgrade.overtime.name'
   | 'income.upgrade.overtime.desc'
   | 'income.upgrade.owned'
+  // Il pagamento (ADR 0027). Una chiave sola, e non è provvisorio: finché un listino ha una
+  // voce sola non c'è una scelta da etichettare, c'è una ragione da dare. Le parole del
+  // selettore nascono con il primo listino a due voci, che è il caveau della fetta 02.
+  | 'payment.only_with'
   | 'stats.saved_at.title'
   | 'stats.saved_at.never'
   | 'stats.operations.title'

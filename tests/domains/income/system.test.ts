@@ -86,7 +86,7 @@ describe('il tick', () => {
 
   it('con l’upgrade comprato passa dal modificatore', () => {
     fund('card', '1000')
-    expect(subject.buyUpgrade().ok).toBe(true)
+    expect(subject.buyUpgrade('card').ok).toBe(true)
 
     tick()
 
@@ -104,7 +104,7 @@ describe('salvare e ricaricare', () => {
 
   it('riproduce lo stesso reddito per tick, upgrade compreso', () => {
     fund('card', '1000')
-    subject.buyUpgrade()
+    subject.buyUpgrade('card')
     const saved: IncomeSave = subject.system.save()
     const expected = earnedInOneSecond(subject)
 
@@ -140,7 +140,7 @@ describe('salvare e ricaricare', () => {
 describe('azzerare', () => {
   it('riporta il reddito al valore iniziale, upgrade incluso', () => {
     fund('card', '1000')
-    subject.buyUpgrade()
+    subject.buyUpgrade('card')
 
     subject.system.reset('hard')
     tick()
@@ -151,7 +151,7 @@ describe('azzerare', () => {
 
   it('toglie la propria sorgente dal registro, non l’intero registro', () => {
     fund('card', '1000')
-    subject.buyUpgrade()
+    subject.buyUpgrade('card')
     modifiers.register({
       id: 'altro.dominio',
       target: 'other.all',

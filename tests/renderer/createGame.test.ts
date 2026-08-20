@@ -63,7 +63,7 @@ describe('una partita è un’istanza sola di ciascuna cosa', () => {
       reason: 'reason.income.tick'
     })
 
-    const bought = game.income.buyUpgrade()
+    const bought = game.income.buyUpgrade('card')
 
     expect(bought.ok).toBe(true)
     expect(toString(game.ctx.ledger.balance('card'))).toBe('200')
@@ -71,7 +71,7 @@ describe('una partita è un’istanza sola di ciascuna cosa', () => {
   })
 
   it('e senza fondi su quel Ledger l’upgrade non si compra', () => {
-    const bought = game.income.buyUpgrade()
+    const bought = game.income.buyUpgrade('card')
 
     expect(bought.ok).toBe(false)
     if (bought.ok) return
@@ -92,7 +92,7 @@ describe('il salvataggio', () => {
     game.ctx.ledger.transaction(income('card', fromString('900')), {
       reason: 'reason.income.tick'
     })
-    game.income.buyUpgrade()
+    game.income.buyUpgrade('card')
     game.ctx.rng.stream('income').next()
 
     const saved: SavePayload = game.save()
@@ -144,7 +144,7 @@ describe('il reset', () => {
     game.ctx.ledger.transaction(income('card', fromString('900')), {
       reason: 'reason.income.tick'
     })
-    game.income.buyUpgrade()
+    game.income.buyUpgrade('card')
 
     game.reset('hard')
 

@@ -7,6 +7,8 @@ import type { CommandHandler } from '@core/contracts/commands'
 import type { Balances, Posting, Transaction } from '@core/contracts/ledger'
 import type { Money } from '@core/contracts/money'
 import { ZERO } from '@core/contracts/money'
+import type { PriceList } from '@core/contracts/payment'
+import type { Pool } from '@core/contracts/pools'
 import { POOL_IDS, POOLS } from '@core/contracts/pools'
 import type { Result } from '@core/contracts/result'
 import type { SaveError } from '@core/contracts/save'
@@ -16,7 +18,12 @@ import type { AtmError, AtmOperation } from '@core/domains/atm/commands'
 import { DEPOSIT, previewOf, WITHDRAW } from '@core/domains/atm/commands'
 import { atmFee, capacityOf } from '@core/domains/atm/rules'
 import type { IncomeError } from '@core/domains/income/commands'
-import { canBuyUpgrade, incomePerSecond, upgradeCost } from '@core/domains/income/rules'
+import {
+  canBuyUpgrade,
+  incomePerSecond,
+  upgradePriceFor,
+  upgradePrices
+} from '@core/domains/income/rules'
 import type { IncomeState } from '@core/domains/income/types'
 import type { Milliseconds } from '@core/kernel/Clock'
 import { milliseconds } from '@core/kernel/Clock'
@@ -168,22 +175,31 @@ export const useGameStore = defineStore('game', () => {
   }
 
   /**
-   * Il prezzo, letto dalla **stessa** funzione che il comando chiama quando paga (D010): non una
-   * seconda lettura da tenere allineata.
+   * Il listino dell'upgrade — con quali strumenti si compra, e a che prezzo con ognuno — letto
+   * dalla **stessa** funzione che il comando interroga quando paga (INV-19, ADR 0027). Non una
+   * seconda tabella da tenere allineata: la stessa, chiamata da due parti.
    *
-   * È un `shallowRef` pur non cambiando mai, e la ragione è la stessa dei saldi al contrario: un
-   * `Money` esposto nudo da uno store Pinia viene avvolto in un proxy reattivo alla lettura, e da
-   * lì in poi non è più il `Decimal` che il dominio ha prodotto.
+   * È un `shallowRef` pur non cambiando mai, e qui la ragione vale doppio: un `Money` esposto nudo
+   * da uno store Pinia viene avvolto in un proxy reattivo alla lettura, e da lì in poi non è più
+   * **lo stesso oggetto** che il dominio ha prodotto — che è esattamente ciò che INV-19 pretende.
    */
-  const cost = shallowRef<Money>(upgradeCost())
+  const prices = shallowRef<PriceList>(upgradePrices())
 
   /**
-   * L'anteprima del pulsante. Il saldo che guarda è quello della **carta**, l'unico strumento
-   * che `UPGRADE_PAYMENT` accetta (D010): a decidere resta il Ledger quando il comando esegue,
-   * e che i due diano la stessa risposta lo verifica un test — perché quando divergono si
-   * spegne un pulsante che avrebbe funzionato.
+   * L'anteprima del pulsante, **per strumento**. Il prezzo non lo decide questa funzione: lo prende
+   * dal listino, cioè dallo stesso posto da cui lo prende il comando. Un pool che il listino non
+   * offre risponde `false`, perché con quello non c'è niente da comprare.
+   *
+   * È una funzione e non una `computed` perché la domanda ha un argomento. Con un'opzione sola la
+   * differenza non si vede; con le due del caveau sì, e allora servirà una risposta per ciascuna.
+   *
+   * A decidere resta il Ledger quando il comando esegue, e che i due diano la stessa risposta lo
+   * verifica un test: quando divergono si spegne un pulsante che avrebbe funzionato.
    */
-  const purchasable = computed<boolean>(() => canBuyUpgrade(upgrade.value, balances.value.card))
+  const canBuyUpgradeWith = (pool: Pool): boolean => {
+    const option = upgradePriceFor(pool)
+    return option !== null && canBuyUpgrade(upgrade.value, option, balances.value[pool])
+  }
 
   /** Se l'upgrade è già stato comprato. Alla UI serve il fatto, non lo stato del sistema. */
   const owned = computed<boolean>(() => upgrade.value.upgraded)
@@ -460,8 +476,8 @@ export const useGameStore = defineStore('game', () => {
     void close()
   })
 
-  const buyUpgrade = (): Result<IncomeState, IncomeError> => {
-    const bought = game.income.buyUpgrade()
+  const buyUpgrade = (pool: Pool): Result<IncomeState, IncomeError> => {
+    const bought = game.income.buyUpgrade(pool)
     // I saldi li rispecchia l'evento del Ledger; i modificatori no, perché registrarne uno non
     // è un movimento economico e nessuno lo annuncia.
     if (bought.ok) readIncome()
@@ -478,8 +494,8 @@ export const useGameStore = defineStore('game', () => {
     savedAt,
     upgraded: owned,
     incomePerSecond: rate,
-    upgradeCost: cost,
-    canBuyUpgrade: purchasable,
+    upgradePrices: prices,
+    canBuyUpgradeWith,
     atmFee: fee,
     atmAmounts: amounts,
     atmDefaultAmount: defaultAmount,

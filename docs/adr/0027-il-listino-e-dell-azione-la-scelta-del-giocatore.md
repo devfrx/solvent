@@ -1,6 +1,11 @@
 # ADR 0027 — Il listino è dell'azione, la scelta è del giocatore
 
-- **Stato:** Proposta — il meccanismo nasce con [D019](../delega/D019-il-pagamento.md)
+- **Stato:** **Accettata** — [D019](../delega/D019-il-pagamento.md): `PaymentOption` e
+  `PriceList` vivono in `contracts/payment.ts`, il listino dell'upgrade è una funzione pura di
+  `income/rules.ts`, `UPGRADE_PAYMENT.accepts` **ne è generato**, e il comando riceve il pool e
+  ricalcola il prezzo. Il rosso che l'ha dimostrata: con il prezzo copiato (`.plus(0)`) tre test
+  di identità diventano rossi e quelli di uguaglianza restano verdi — è INV-19 che si rompe
+  senza far rumore, e adesso fa rumore
 - **Data:** 2026-08-20
 
 ## Contesto

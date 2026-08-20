@@ -1,11 +1,12 @@
 import type { CommandHandler } from '@core/contracts/commands'
 import type { LedgerError, TransactionMeta } from '@core/contracts/ledger'
+import type { Pool } from '@core/contracts/pools'
 import { err, ok } from '@core/contracts/result'
 
 import type { Modifiers } from '@core/balance/modifiers'
 import { spend, type Ledger } from '@core/kernel/Ledger'
 
-import { upgradeCost, upgradeModifier } from './rules'
+import { upgradeModifier, upgradePriceFor, upgradePrices } from './rules'
 import type { IncomeState } from './types'
 
 /**
@@ -24,22 +25,54 @@ export type IncomeError =
 const ALREADY_UPGRADED: IncomeError = { code: 'error.income.already_upgraded' }
 
 /**
- * ADR 0017 — l'upgrade si paga **solo** con la carta, e lo dichiara qui invece che in un `if`: il
- * Ledger rifiuta con `error.ledger.pool_not_accepted` ogni movimento su un pool del giocatore
- * fuori dall'elenco, e l'elenco viaggia dentro l'errore, così la UI può dire con cosa si paga.
+ * ADR 0027 — `accepts` **si genera dal listino**, non gli sta accanto.
  *
- * È esportata perché è la dichiarazione del dominio, non un dettaglio del comando: chi vuole
- * sapere con quali strumenti si compra questo upgrade legge questa costante, e un test la mette
- * davanti a un pagamento in contanti per verificare che morda davvero.
+ * Sono due dichiarazioni della stessa cosa — con quali strumenti si compra questo upgrade — e il
+ * giorno in cui una cambiasse senza l'altra il giocatore vedrebbe un'opzione che il Ledger
+ * rifiuta. Affiancarle e verificarle con un test proteggerebbe da metà del problema; derivarne una
+ * dall'altra toglie il problema, ed è la stessa mossa del Registry contro le cinque liste.
+ *
+ * Resta esportata perché è la dichiarazione del dominio, non un dettaglio del comando: un test la
+ * mette davanti a un pagamento in contanti per verificare che il Ledger la faccia valere davvero.
  */
 export const UPGRADE_PAYMENT: TransactionMeta = {
   reason: 'reason.income.upgrade',
-  accepts: ['card']
+  accepts: upgradePrices().map((option) => option.pool)
 }
+
+/**
+ * Uno strumento che il listino non offre, detto con il codice del Ledger invece che con uno nuovo.
+ *
+ * È lo stesso fatto e porta le stesse due informazioni — quale pool, e quali andavano bene — quindi
+ * il giocatore legge la stessa frase da qualunque delle due strade arrivi. Un codice nuovo sarebbe
+ * una seconda frase per una situazione sola.
+ *
+ * Il rifiuto arriva **prima** del Ledger, e non lo scavalca: `transaction` è raggiungibile solo con
+ * un prezzo, e un pool fuori listino un prezzo non ce l'ha. Per i pool che il listino offre,
+ * l'ultima parola resta di `accepts`.
+ */
+const notInPriceList = (pool: Pool): LedgerError => ({
+  code: 'error.ledger.pool_not_accepted',
+  pool,
+  accepted: upgradePrices().map((option) => option.pool)
+})
 
 export interface UpgradeDeps {
   readonly ledger: Ledger
   readonly modifiers: Modifiers
+}
+
+/**
+ * Ciò che serve per comprare: lo stato di partenza, e lo **strumento scelto dal giocatore**.
+ *
+ * Il prezzo non è qui, ed è la decisione centrale dell'ADR 0027. Se arrivasse da fuori, chi lo
+ * consegna potrebbe consegnarne uno diverso da quello mostrato, e la garanzia che il prezzo visto
+ * e quello addebitato coincidano (INV-19) sarebbe una speranza invece di una proprietà. Il comando
+ * riceve il pool e **ricalcola** dal listino.
+ */
+export interface UpgradePurchase {
+  readonly state: IncomeState
+  readonly pool: Pool
 }
 
 /**
@@ -51,11 +84,14 @@ export interface UpgradeDeps {
  * Ledger rifiuterebbe lo stesso, ma sistema e saldi resterebbero disallineati.
  */
 export const createBuyUpgrade =
-  ({ ledger, modifiers }: UpgradeDeps): CommandHandler<IncomeState, IncomeState, IncomeError> =>
-  (state) => {
+  ({ ledger, modifiers }: UpgradeDeps): CommandHandler<UpgradePurchase, IncomeState, IncomeError> =>
+  ({ state, pool }) => {
     if (state.upgraded) return err(ALREADY_UPGRADED)
 
-    const paid = ledger.transaction(spend('card', upgradeCost()), UPGRADE_PAYMENT)
+    const chosen = upgradePriceFor(pool)
+    if (chosen === null) return err(notInPriceList(pool))
+
+    const paid = ledger.transaction(spend(chosen.pool, chosen.price), UPGRADE_PAYMENT)
     if (!paid.ok) return paid
 
     modifiers.register(upgradeModifier())

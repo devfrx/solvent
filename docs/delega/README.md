@@ -102,6 +102,11 @@ nessuno l'aveva costruito, e che il caveau sarebbe stato il **secondo** comando 
 l'ultimo momento per rispondere senza rifare niente. Se D017 fosse partita il giorno prima, avrebbe
 scelto un pool nel sorgente e D019 avrebbe dovuto disfarlo.
 
+**Ed è la prima chiusa della fetta 02.** È costata meno del previsto — 87 righe di sorgente contro
+~140 — e la ragione è quella che la delega dichiarava: metà del sistema esisteva già nel kernel, e
+non si è toccata. Il caveau adesso trova il listino invece di doverselo inventare, e in
+[D017](D017-il-caveau.md) c'è scritto cosa esattamente.
+
 **D020 usa lo stesso argomento di D001, ed è la seconda volta che il progetto lo accetta.** Il
 caveau è il **secondo** dominio con stato, e oggi niente obbliga un dominio a controllare il
 salvataggio che riceve. Se la regola nascesse dentro D017, la scriverebbe la stessa persona che
@@ -148,7 +153,7 @@ configurato dopo che c'erano già 156 file.
 | [D013](D013-verifica-della-fetta.md)                      | Verifica della fetta — STOP 2                                         | 93 test + 17 di README     | **Chiusa** |
 | [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) | Un numero che nessuno conta non si scrive                             | 672 test + 56 generate     | **Chiusa** |
 | [D022](D022-il-confine-disegnato-e-il-confine-vero.md)    | Il confine disegnato è il confine vero                                | 264 test + 5 di sorgente   | **Chiusa** |
-| [D019](D019-il-pagamento.md)                              | Il pagamento: il listino di un'azione, e chi lo sceglie               | ~140 codice + ~220 test    | **Aperta** |
+| [D019](D019-il-pagamento.md)                              | Il pagamento: il listino di un'azione, e chi lo sceglie               | 87 codice + 204 test       | **Chiusa** |
 | [D020](D020-nessun-sistema-si-fida-del-salvataggio.md)    | Nessun sistema si fida del proprio salvataggio                        | ~70 test, zero di sorgente | **Aperta** |
 | [D017](D017-il-caveau.md)                                 | Il caveau: i contanti hanno una capienza — fetta 02                   | ~330 codice + ~410 test    | **Aperta** |
 | [D018](D018-la-scheda-di-dominio.md)                      | La scheda di dominio: la forma, e le prime tre compilate              | ~510 di documentazione     | **Aperta** |

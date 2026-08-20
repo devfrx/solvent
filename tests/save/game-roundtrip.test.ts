@@ -56,7 +56,7 @@ let game: Game
 const play = (target: Game): void => {
   target.registry.tickAll(target.ctx, ticks(TICKS_TO_AFFORD))
   target.atm.deposit(target.ctx.ledger.balance('cash'))
-  target.income.buyUpgrade()
+  target.income.buyUpgrade('card')
 
   // Dopo l'upgrade il reddito è 18,00 €/s: questi tick valgono più dei primi, e il salvataggio
   // deve poterlo dimostrare.

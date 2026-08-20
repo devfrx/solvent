@@ -1,4 +1,5 @@
 import type { CommandHandler } from '@core/contracts/commands'
+import type { Pool } from '@core/contracts/pools'
 
 import type { Modifiers } from '@core/balance/modifiers'
 import { income, type Ledger } from '@core/kernel/Ledger'
@@ -26,7 +27,11 @@ export interface Income {
    * cambia e quella sì.
    */
   readonly state: () => IncomeState
-  readonly buyUpgrade: CommandHandler<void, IncomeState, IncomeError>
+  /**
+   * ADR 0027 — l'argomento è lo **strumento**, non il prezzo. Chi chiama sceglie con cosa paga; a
+   * dire quanto costa con quello resta il listino, che il comando interroga da sé.
+   */
+  readonly buyUpgrade: CommandHandler<Pool, IncomeState, IncomeError>
 }
 
 /**
@@ -96,8 +101,8 @@ export const createIncome = (ledger: Ledger, modifiers: Modifiers): Income => {
 
     state: () => state,
 
-    buyUpgrade: () => {
-      const bought = purchase(state)
+    buyUpgrade: (pool) => {
+      const bought = purchase({ state, pool })
       if (bought.ok) state = bought.value
       return bought
     }

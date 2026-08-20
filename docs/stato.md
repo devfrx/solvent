@@ -13,9 +13,9 @@ affidate a un occhio, e stanno in [qualita.md](qualita.md) con la data accanto.
 
 ## Decisioni
 
-**27** ADR: 21 `Accettata`, 6 `Proposta`, 0 `Superata`.
+**27** ADR: 22 `Accettata`, 5 `Proposta`, 0 `Superata`.
 
-- `Proposta`: 0010, 0022, 0023, 0025, 0026, 0027
+- `Proposta`: 0010, 0022, 0023, 0025, 0026
 - `Superata`: _nessuno_
 
 Il perché di ciascuna sta nel [compendio](adr/README.md); uno stato si legge
@@ -23,9 +23,9 @@ dall'intestazione del suo ADR, ed è da lì che questo elenco arriva.
 
 ## Deleghe
 
-**22** deleghe: 18 `Chiusa`, 0 `In corso`, 4 `Aperta`.
+**22** deleghe: 19 `Chiusa`, 0 `In corso`, 3 `Aperta`.
 
-- `Aperta`: D017, D018, D019, D020
+- `Aperta`: D017, D018, D020
 - `In corso`: _nessuno_
 
 L'ordine in cui si eseguono non è questo elenco: è il grafo in
@@ -37,8 +37,8 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 
 ## Codice
 
-**51** file sotto `src/`, di cui **10** `.vue`.
-**60** file di test. I domini sono 2: `atm`, `income`.
+**52** file sotto `src/`, di cui **10** `.vue`.
+**61** file di test. I domini sono 2: `atm`, `income`.
 
 Le righe sono **righe di codice**: commenti e righe vuote escluse, con lo stesso metodo per
 tutti — ed è `codeLines` in `tests/helpers/projectState.ts` a definirlo, così due misure restano
@@ -46,11 +46,11 @@ confrontabili.
 
 | Cartella                      | File | Righe |
 | ----------------------------- | ---- | ----- |
-| `src/core/contracts/`         | 9    | 137   |
+| `src/core/contracts/`         | 10   | 144   |
 | `src/core/kernel/`            | 5    | 471   |
 | `src/core/balance/`           | 3    | 74    |
-| `src/core/domains/`           | 6    | 168   |
+| `src/core/domains/`           | 6    | 188   |
 | `src/main/` + `src/preload/`  | 8    | 246   |
-| `src/renderer/`               | 20   | 1.729 |
-| — di cui `src/renderer/i18n/` | 3    | 369   |
-| — di cui CSS dentro i `.vue`  | 10   | 438   |
+| `src/renderer/`               | 20   | 1.757 |
+| — di cui `src/renderer/i18n/` | 3    | 372   |
+| — di cui CSS dentro i `.vue`  | 10   | 443   |
