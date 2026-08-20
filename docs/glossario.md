@@ -144,3 +144,17 @@ file) · `service` (senza un dominio davanti) · `stuff` · `temp` · `new` / `o
 
 Se un pezzo di codice non trova un nome che non sia in questa lista, il problema non è il nome:
 è che quel pezzo di codice non ha ancora una responsabilità sola.
+
+**Il meccanismo è `tests/rules/forbidden-words`** (regola C09), e copre i **nomi di file e di
+cartelle** sotto `src/`. Due limiti, dichiarati invece che nascosti:
+
+- **Non guarda gli identificatori.** Dentro un identificatore le stesse parole sono spesso
+  legittime — `handler` è il nome standard di una callback e compare in `Bus.ts` e in `host.ts` a
+  ragione — e una regola che gridasse al lupo lì verrebbe disattivata, dopodiché non proteggerebbe
+  più niente. Lì resta la review.
+- **Non guarda `tests/`.** Il divieto esiste perché quelle parole nascondono una responsabilità
+  mancante nel codice di prodotto. `tests/helpers/` non nasconde niente: la sua responsabilità
+  **è** aiutare i test, e la parola la descrive esattamente.
+
+Fino a [D016](delega/D016-correzioni-audit.md) questa sezione era una regola senza meccanismo,
+cioè — per la regola del progetto stesso — una regola che non esisteva.

@@ -1,7 +1,7 @@
 # D013 — Verifica della fetta (STOP 2)
 
 - **Stato:** Aperta — **preparata per l'esecuzione il 2026-08-20**, con la fetta 01 davanti
-- **Dipende da:** D015 (cioè tutto). Le quattordici deleghe che la precedono sono tutte `Chiusa`
+- **Dipende da:** D016 (cioè tutto). Le quindici deleghe che la precedono sono tutte `Chiusa`
 - **Sblocca:** la decisione sulla fetta 02
 - **ADR vincolanti:** 0014
 - **Regole:** nessuna nuova. Questa delega non ne aggiunge: le **verifica**
@@ -41,7 +41,13 @@ metadati del prodotto, non la presenza del file.
 
 **5. Nessuna riga di `tracciabilita.md` punta più a un meccanismo che non esiste.** L'ultimo era
 `tests/rules/home-tiles`, nato con [D015](D015-home-bancomat.md). Verificarlo è una lettura, non un
-lavoro: le ventiquattro righe che nominano un file di test lo trovano tutte.
+lavoro: le righe che nominano un file di test lo trovano tutte.
+
+Attenzione però a cosa quella lettura **non** vede, ed è la lezione di
+[D016](D016-correzioni-audit.md): la tabella censisce le regole che qualcuno ha messo in tabella.
+Due divieti veri — le parole vietate del glossario e il barrel di `convenzioni.md` — non c'erano, e
+il conteggio delle righe 👤 non li vedeva per costruzione. La domanda da fare non è «ogni riga ha un
+meccanismo?» ma «ogni **regola scritta da qualche parte** ha una riga?».
 
 **6. Il percorso manuale ha due passi che oggi non si fanno come sono scritti**, ed è la parte più
 utile di questa preparazione: vedi _Il percorso manuale_ qui sotto.
@@ -59,10 +65,11 @@ e qualcuno l'ha visto scattare?_ Per 0010 la risposta è già scritta e vale no 
 
 Non è cortesia: è ciò che distingue «verificare» da «riscrivere».
 
-- **477 test su 52 file**, e ogni rete nata da D009 in poi è stata **vista rossa** almeno una volta:
+- **497 test su 54 file**, e ogni rete nata da D009 in poi è stata **vista rossa** almeno una volta:
   le tabelle delle rotture indotte stanno in fondo a [D011](D011-runtime-e-store.md),
-  [D012](D012-ui-e-i18n.md), [D014](D014-dominio-bancomat.md) e
-  [D015](D015-home-bancomat.md) — **cinquantatré** rotture in tutto.
+  [D012](D012-ui-e-i18n.md), [D014](D014-dominio-bancomat.md),
+  [D015](D015-home-bancomat.md) e [D016](D016-correzioni-audit.md) — **cinquantanove** rotture
+  in tutto.
 - **La fetta è già stata giocata a mano**, e i numeri sono nella nota di chiusura di
   [D015](D015-home-bancomat.md): 500 prelevati diventano 497,50 sui contanti e 2,50 di commissione,
   quattro depositi da 100 portano la carta a 890,00 €, l'upgrade riesce e il reddito passa da 12,00
@@ -70,8 +77,8 @@ Non è cortesia: è ciò che distingue «verificare» da «riscrivere».
 - **`tests/save/kernel-roundtrip`** fa il giro completo su stato non banale, fino a un file vero.
 - **`tests/renderer/store`** carica una partita salvata e verifica saldi, upgrade e reddito dopo il
   caricamento: il pezzo che manca è il **salvataggio** della partita vera, non la sua rilettura.
-- **Ogni delega della fetta è `Chiusa` con il commit annotato**, D012 e D015 comprese, e i due rami
-  sono uniti a `main`.
+- **Ogni delega della fetta è `Chiusa` con il commit annotato**, D012, D015 e D016 comprese, e i
+  loro rami sono uniti a `main`.
 
 ## Da produrre
 
@@ -117,6 +124,9 @@ Da fare a mano, oltre ai test, perché è la cosa che i test non vedono:
 5. chiudo la finestra
 6. riapro: saldo, upgrade e reddito sono quelli di prima, più il tempo passato
 7. reset hard: torna tutto a zero, upgrade incluso
+8. **chiudo la finestra dalla schermata d'errore, invece di scegliere**, e riapro: il salvataggio è
+   ancora quello di prima. È il difetto critico che [D016](D016-correzioni-audit.md) ha chiuso
+   (INV-17), e serve lo stesso salvataggio illeggibile del passo 7 per arrivarci
 
 Due avvertenze che [D015](D015-home-bancomat.md) ha pagato, e che cambiano come si esegue l'elenco:
 
@@ -137,7 +147,7 @@ Due avvertenze che [D015](D015-home-bancomat.md) ha pagato, e che cambiano come 
 
 - [ ] `npm run verify` verde, con l'**output incollato** — non riassunto, non parafrasato
 - [ ] `npm run verify:release` verde: da D011 il renderer compila, e deve continuare a farlo
-- [ ] i sette passi manuali sopra, eseguiti davvero, con le due avvertenze rispettate
+- [ ] gli otto passi manuali sopra, eseguiti davvero, con le due avvertenze rispettate
 - [ ] `tests/save/game-roundtrip` esiste e passa su una partita **giocata**, non costruita a mano
 - [ ] ogni test nuovo è stato rotto di proposito almeno una volta, per verificare che possa fallire
 - [ ] `docs/tracciabilita.md`: nessuna riga ha un meccanismo che non esiste — verificato aprendo i

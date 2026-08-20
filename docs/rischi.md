@@ -82,8 +82,15 @@ contrario: non "aggiorna i documenti che nomini", ma "cerca chi nomina ciò che 
 
 Dichiarati, non nascosti:
 
-- **Il CSS morto non è coperto.** TypeScript non vede i fogli di stile. Con due componenti il
-  problema non esiste; alla seconda fetta si valuta un tool (ADR 0012).
+- **Il CSS morto non è coperto.** TypeScript non vede i fogli di stile, e i `.vue` sono adesso
+  **dieci** con **439 righe** di CSS dentro: la riga che stava qui diceva «con due componenti il
+  problema non esiste», ed era il numero di D012 mai rimisurato
+  ([D016](delega/D016-correzioni-audit.md)). Oggi il problema non c'è ancora — nessuna regola è
+  orfana, e l'audit del 2026-08-20 lo ha verificato — ma la difesa non è più la dimensione: è che
+  lo stile sta attaccato al componente che lo usa, così toglierlo lo porta via. L'unica eccezione
+  è il blocco non scoped di `App.vue`, che tiene i token e le poche primitive disegnate da **due**
+  componenti. Il grilletto per un tool resta l'inizio della fetta 02 (ADR 0012), e adesso ha una
+  misura dietro invece di un'impressione.
 - **La logica scritta inline in un `.vue`, senza import, sfugge al lint** (A09). Nessuna regola
   automatica distingue "calcolo di presentazione" da "calcolo economico". Resta alla review.
 - **Un `eslint-disable` motivato sconfigge qualsiasi regola.** Non lo vietiamo: vietarlo produce

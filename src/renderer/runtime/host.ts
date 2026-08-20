@@ -42,6 +42,14 @@ export interface Host {
    */
   readonly wallClock: () => number
   readonly schedule: (run: () => void) => Cancel
+  /**
+   * La lingua **dichiarata dal documento**, che non è la stessa cosa delle parole tradotte:
+   * `lang` è ciò che uno screen reader usa per la pronuncia e il browser per la sillabazione, e
+   * vive sull'elemento radice — cioè fuori da Vue, dove nessun componente arriva. Sta qui perché
+   * `document` sta qui, e senza sarebbe una lingua scritta a mano in `index.html` che
+   * `DEFAULT_LOCALE` non riesce a spostare (R12, difetto A13).
+   */
+  readonly setLanguage: (locale: string) => void
   readonly onVisibilityChange: (handler: (visible: boolean) => void) => Unsubscribe
   /**
    * La finestra sta per chiudersi, e la chiusura è **annullata** finché il gestore non chiama
@@ -66,6 +74,10 @@ export const createBrowserHost = (): Host => {
     schedule: (run) => {
       const handle = requestAnimationFrame(() => run())
       return () => cancelAnimationFrame(handle)
+    },
+
+    setLanguage: (locale) => {
+      document.documentElement.lang = locale
     },
 
     onVisibilityChange: (handler) => {

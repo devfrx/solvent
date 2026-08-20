@@ -43,6 +43,15 @@ stessa cosa.
 `App.vue` — l'unico non scoped del progetto — e il resto del CSS sta attaccato al componente che lo
 usa, così togliere il componente toglie anche il suo stile. Nessun secondo verde, mai.
 
+Accanto ai token, in quel blocco, vivono le poche **primitive** che più di un componente disegna
+allo stesso modo: `.panel`, `.caption`, `.amount`, i due pulsanti, e da
+[D016](../delega/D016-correzioni-audit.md) anche `.refusal`, il rifiuto spiegato. Il confine è
+quello: una primitiva entra lì quando la disegnano **due** componenti, non prima. `.refusal` ci è
+entrata perché l'audit l'ha trovata copiata in due pannelli con il valore di `--danger` ricopiato a
+mano in quattro righe di `rgba()` — cambiare il token avrebbe spostato il testo e lasciato indietro
+sfondo e bordo. Adesso si derivano dal token con `color-mix`, che è ciò che rende il rosso una cosa
+sola anche quando è trasparente.
+
 ---
 
 ## P3 — La home è cruscotto **e** bancomat
@@ -112,11 +121,22 @@ anche l'unico punto in cui il gioco può permettersi un vezzo visivo senza ralle
 - Il livello che cresce (o l'era di prestige) cambia il materiale della carta: standard, oro,
   nero. È il progresso reso visibile su un oggetto invece che su una barra.
 
-**Fatto in [D015](../delega/D015-home-bancomat.md)**, con una correzione: il retro non porta
-plafond, limite e punteggio di credito, perché nella fetta 01 la carta non presta soldi e nessuno
-ha un punteggio — mostrarli sarebbe stato inventarli. Porta le tre dichiarazioni vere dello
-strumento, lette da `POOLS`: tracciabilità, capienza, commissione per operazione. Girare la carta
-serve, che è ciò che questa preferenza chiede; i tre numeri arrivano con l'era che li crea.
+**Fatto in [D015](../delega/D015-home-bancomat.md)**, con due correzioni.
+
+**Il retro** non porta plafond, limite e punteggio di credito, perché nella fetta 01 la carta non
+presta soldi e nessuno ha un punteggio — mostrarli sarebbe stato inventarli. Porta le tre
+dichiarazioni vere dello strumento, lette da `POOLS`: tracciabilità, capienza, commissione per
+operazione. Girare la carta serve, che è ciò che questa preferenza chiede; i tre numeri arrivano
+con l'era che li crea.
+
+**L'inerzia non è stata costruita**, e fino a [D016](../delega/D016-correzioni-audit.md) nessuno
+l'aveva scritto: la riga qui sopra la prometteva e il codice non la conteneva, che è la forma di
+disallineamento più difficile da vedere — un documento che descrive una cosa in più, non una in
+meno. Al rilascio la carta va **dritta** alla posizione di riposo, con una transizione CSS che
+rispetta `prefers-reduced-motion`. Il ritorno morbido c'è; ciò che manca è la velocità che
+continua dopo che il dito si è alzato. Sono venti righe di matematica in `rotation.ts` per un
+vezzo, e il gesto funziona già: il grilletto sta nel [registro YAGNI](../roadmap-fette.md), ed è
+una fetta che tocchi la carta per un'altra ragione.
 
 ---
 

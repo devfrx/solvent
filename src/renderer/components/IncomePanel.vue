@@ -55,7 +55,7 @@ const buy = (): void => {
       {{ text('common.buy', { cost: money(store.upgradeCost) }) }}
     </button>
 
-    <p v-if="refusal !== null" class="refusal">{{ failure(refusal) }}</p>
+    <p v-if="refusal !== null" class="refusal boxed">{{ failure(refusal) }}</p>
   </section>
 </template>
 
@@ -100,14 +100,8 @@ button {
   color: var(--accent);
 }
 
-.refusal {
-  margin: 10px 0 0;
-  font-size: 12px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  line-height: 1.45;
-  background: rgba(248, 113, 113, 0.1);
-  color: var(--danger);
-  border: 1px solid rgba(248, 113, 113, 0.25);
+/* Il rifiuto è una primitiva condivisa (`App.vue`): qui resta solo lo stacco dal pulsante. */
+.refusal.boxed {
+  margin-top: 10px;
 }
 </style>

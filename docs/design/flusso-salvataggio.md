@@ -100,6 +100,25 @@ sequenceDiagram
 Il payload si valida **dopo** la migrazione, non prima: prima della migrazione ha la forma
 vecchia, e validarlo contro lo schema corrente fallirebbe sempre.
 
+### `loadAll` non è atomico, e a fornire l'atomicità è chi lo chiama
+
+Il Ledger valida **tutti** i movimenti prima di toccarne uno (INV-09): una transazione non è mai
+applicata a metà. `Registry.loadAll` non fa lo stesso, e va detto: consegna lo stato a un sistema
+alla volta, quindi se il terzo rifiuta il proprio — un `load` che lancia è un esito, non un crollo
+(ADR 0002) — i primi due sono già caricati.
+
+Ciò che rende la cosa innocua non è il Registry: è il chiamante. `createGame().load()` ritorna
+`error.registry.load_failed`, lo store va in `Errore` e da lì **non si gioca** — si ricarica da
+capo o si comincia una partita nuova, e in entrambi i casi lo stato a metà viene sostituito prima
+che qualcuno lo veda. È anche la ragione per cui INV-17 vieta di scrivere da quello stato: un
+modello a metà non è una partita.
+
+Renderlo atomico costerebbe due fasi — chiedere a tutti di validare, poi chiedere a tutti di
+applicare — cioè un contratto in più per un solo sistema con stato. Il grilletto è già nel
+[registro YAGNI](../roadmap-fette.md): _un meccanismo condiviso per validare lo stato salvato di
+un sistema_, al **secondo** dominio con stato. Fino ad allora questa riga è la garanzia, e vale
+quanto vale.
+
 ## Gli esiti attraversano il confine
 
 I `Result` dei due diagrammi qui sopra hanno una forma precisa, e vive in `core/contracts/save.ts`

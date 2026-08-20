@@ -9,16 +9,21 @@ Questo documento dice quali sono, cosa garantisce ciascuno, e cosa nessuno di es
 
 | #   | Comando                | Cosa garantisce                                                                                 | Tempo reale       |
 | --- | ---------------------- | ----------------------------------------------------------------------------------------------- | ----------------- |
-| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, R12, INV-13 + codice morto (C01) | ~12 s             |
-| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                       | ~8 s              |
+| G1  | `npm run typecheck`    | le regole imposte dai tipi: R04, R06, R07, R08, R09, R10, R11, R12, INV-13 + codice morto (C01) | ~16 s             |
+| G2  | `npm run lint`         | le regole imposte da ESLint: R01, R03, R04, R05, R06, R10, INV-02, INV-03                       | ~10 s             |
 | G3  | `npm run format:check` | il codice è formattato (C02)                                                                    | ~6 s              |
-| G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint        | ~8 s              |
+| G4  | `npm run test`         | comportamento, round-trip, parità i18n, bersagli, regole strutturali, meta-test del lint        | ~7 s              |
 | G5  | `npm run build`        | l'applicazione si compila davvero, main e renderer                                              | decine di secondi |
 
-Rimisurati a D015 chiusa su Windows, con 477 test: `verify` sta a **26 s**, e i quattro gate
-presi da soli fanno 12 + 8 + 6 + 8. Sono tempi **di parete**, quindi comprendono
-l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre `npm run`. La parte di
-lavoro vero è meno della metà del totale.
+Rimisurati a [D016](delega/D016-correzioni-audit.md) chiusa su Windows, con 497 test: i quattro
+gate fanno 16 + 10 + 6 + 7, e `verify` sta fra **42 e 45 s** su due esecuzioni. Sono tempi **di
+parete**, quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena
+tre `npm run`.
+
+La cifra precedente diceva 26 s davanti a quattro gate che ne sommavano 34, cioè **meno della somma
+delle proprie parti**: era già sbagliata quando è stata scritta, e nessuno l'ha rimisurata. È lo
+stesso difetto che questo paragrafo denuncia due capoversi più sotto, capitato al paragrafo
+stesso — la ragione per cui adesso le due misure stanno una accanto all'altra e si controllano.
 
 Da D012 il **typecheck** copre anche R12: `Dictionary` è un `Record` totale sulle chiavi, quindi
 una `Reason` o un codice d'errore senza traduzione non compila, in nessuna delle due lingue.
@@ -30,12 +35,14 @@ Due comandi, non uno, ed è deliberato:
 
 **Perché separati.** Il tempo atteso è parte della specifica: un gate lento viene aggirato. I
 quattro veloci stanno **sotto il minuto** — venticinque secondi a D006, trentuno a D007, fra
-ventisette e trenta a D008, ventotto e ventinove a D009, trentacinque a D012, **ventisei a
-D015** — e si
-eseguono a ogni modifica; la compilazione costa un ordine di grandezza in più e serve prima di
-un rilascio, non prima di un salvataggio. Se `verify` supera il minuto, è un problema da risolvere, non da
-tollerare, e il rimedio è già censito nel [registro YAGNI](roadmap-fette.md): togliere l'avvio di
-`npm` ripetuto, non togliere un gate.
+ventisette e trenta a D008, ventotto e ventinove a D009, trentacinque a D012, fra **quarantadue e
+quarantacinque a D016** — e si eseguono a ogni modifica; la compilazione costa un ordine di
+grandezza in più e serve prima di un rilascio, non prima di un salvataggio. Se `verify` supera il
+minuto, è un problema da risolvere, non da tollerare, e il rimedio è già censito nel
+[registro YAGNI](roadmap-fette.md): togliere l'avvio di `npm` ripetuto, non togliere un gate.
+
+Il margine si è ristretto, e va guardato: sei `npm run` incatenati costano da soli qualche secondo
+di avvio, e sono la prima cosa da togliere quando la soglia si avvicina — non un gate.
 
 La crescita da D009 a D012 è quasi tutta di `typecheck` e `lint`, e ha una causa sola: il renderer
 è entrato in tutti e due. `vue-tsc` compila anche i `.vue`, e ESLint ha adesso quattro componenti
@@ -58,18 +65,26 @@ ma da qui in avanti ogni delega deve tenerlo verde.
 
 ## Cosa copre ciascun livello di test
 
-| Livello                | Dove             | Cosa dimostra                                                                               | Cosa **non** dimostra                                           |
-| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| **Kernel**             | `tests/kernel/`  | Clock, Rng, Bus, Registry, Ledger si comportano come dichiarato, isolatamente               | che i sistemi li usino bene                                     |
-| **Dominio**            | `tests/domains/` | le regole pure producono i numeri attesi, con seed fisso                                    | che la UI mostri quei numeri                                    |
-| **Round-trip**         | `tests/save/`    | stato → salva → ricarica → identico. Attraversa payload, busta, validazione                 | che una migrazione futura funzioni                              |
-| **Bilanciamento**      | `tests/balance/` | i numeri stanno negli intervalli dichiarati in `targets.ts`                                 | che il gioco sia divertente                                     |
-| **i18n**               | `tests/i18n/`    | nessuna chiave manca in nessuna lingua, i segnaposto coincidono, ogni chiave si risolve     | che le traduzioni siano corrette                                |
-| **Regole strutturali** | `tests/rules/`   | Registry completo, nessuna logica nei `.vue`, identità del prodotto coerente, nessun `TODO` | ciò che è dichiarato ⚠️ in [tracciabilita.md](tracciabilita.md) |
+| Livello                | Dove             | Cosa dimostra                                                                                                                               | Cosa **non** dimostra                                           |
+| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Kernel**             | `tests/kernel/`  | Clock, Rng, Bus, Registry, Ledger si comportano come dichiarato, isolatamente                                                               | che i sistemi li usino bene                                     |
+| **Dominio**            | `tests/domains/` | le regole pure producono i numeri attesi, con seed fisso                                                                                    | che la UI mostri quei numeri                                    |
+| **Round-trip**         | `tests/save/`    | stato → salva → ricarica → identico. Attraversa payload, busta, validazione                                                                 | che una migrazione futura funzioni                              |
+| **Bilanciamento**      | `tests/balance/` | i numeri stanno negli intervalli dichiarati in `targets.ts`                                                                                 | che il gioco sia divertente                                     |
+| **i18n**               | `tests/i18n/`    | nessuna chiave manca in nessuna lingua, i segnaposto coincidono, ogni chiave si risolve                                                     | che le traduzioni siano corrette                                |
+| **Regole strutturali** | `tests/rules/`   | Registry completo, nessuna logica nei `.vue`, identità del prodotto coerente, nessun `TODO`, nessun barrel, nessuna parola vietata nei nomi | ciò che è dichiarato ⚠️ in [tracciabilita.md](tracciabilita.md) |
 
-**Non esistono test end-to-end sulla UI in questa fetta.** Con due componenti che leggono selettori
-e inviano comandi, il costo di uno strumento E2E supera il valore. La decisione si rivede quando la
-UI avrà uno stato proprio non banale — e allora sarà un ADR.
+**Non esistono test end-to-end sulla UI in questa fetta.** I `.vue` sono **dieci** — il guscio, due
+viste, sette componenti — e la riga che stava qui ne diceva due: era il numero di D012, mai
+rimisurato ([D016](delega/D016-correzioni-audit.md)).
+
+Il numero è cambiato, la decisione no, e vale la pena dire perché. Non è la quantità di componenti
+a rendere utile uno strumento E2E: è lo **stato proprio** che hanno. Qui i dieci leggono un
+selettore e inviano un comando, e le due sole parti davvero sbagliabili — la matematica della
+rotazione della carta e la scelta di quali movimenti mostrare — sono uscite in
+`components/rotation.ts` e `components/postings.ts`, pure e provate senza montare niente. Il
+grilletto resta quello del [registro YAGNI](roadmap-fette.md): il primo comportamento di un
+componente che **non** si riesce a estrarre in una funzione pura. Allora sarà un ADR.
 
 ## Il test round-trip, e perché è il più importante
 

@@ -87,7 +87,13 @@ del ciclo di vita, il saldo e l'upgrade hanno una schermata, e ogni parola passa
 due lingue — le chiavi del bancomat comprese, perché una lingua che si completa in due tempi è il
 difetto A13. Con D015 il gioco **si gioca**: la home è un bancomat con la carta che si gira, la
 commissione si vede prima della conferma, il cruscotto dice come sta andando e il giro si chiude —
-si guadagna in contanti, si deposita, si compra con la carta. La prossima delega è
+si guadagna in contanti, si deposita, si compra con la carta.
+
+Con [D016](delega/D016-correzioni-audit.md) il gioco **non perde più la partita di nessuno**: un
+audit dell'intera codebase e di questi documenti, il 2026-08-20, ha trovato diciassette difetti, di
+cui uno critico — chiudere la finestra dalla schermata d'errore scriveva una partita vuota sopra il
+salvataggio del giocatore. Con le correzioni sono nati due meccanismi per due regole che stavano
+solo in prosa (C09, C10) e un invariante nuovo (INV-17). La prossima delega è
 [D013 — Verifica della fetta](delega/D013-verifica-della-fetta.md), che è lo **STOP 2**: nessun
 codice nuovo, e la decisione sulla fetta 02.
 

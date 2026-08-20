@@ -25,13 +25,17 @@ stateDiagram-v2
     Sospeso --> Recupero: finestra di nuovo visibile
 
     InGioco --> Chiusura: l'utente chiude
+    Sospeso --> Chiusura: l'utente chiude
+    Recupero --> Chiusura: l'utente chiude
     Chiusura --> [*]: salvataggio completato
     Chiusura --> Errore: salvataggio fallito
 
-    Errore --> Caricamento: l'utente riprova a caricare
-    Errore --> Chiusura: l'utente riprova a salvare
-    Errore --> InGioco: l'utente sceglie partita nuova
-    Errore --> [*]: l'utente chiude lo stesso
+    Avvio --> [*]: l'utente chiude<br/>(niente da salvare)
+    Caricamento --> [*]: l'utente chiude<br/>(niente da salvare)
+
+    Errore --> Caricamento: l'utente riprova a caricare,<br/>oppure sceglie partita nuova
+    Errore --> Chiusura: l'utente riprova a salvare,<br/>o chiude la finestra
+    Errore --> [*]: l'utente chiude lo stesso,<br/>o non c'era niente da salvare
 ```
 
 ## Le regole che il diagramma stabilisce
@@ -61,6 +65,22 @@ codice dell'errore non basta a distinguerle (`error.save.io` esce da entrambe): 
 **`Chiusura` attende il salvataggio.** La finestra si chiude dopo che il main ha completato la
 scrittura atomica, non prima. Se quella scrittura fallisce la finestra **non** si chiude: si passa
 in `Errore`, che è l'unico arco che entra in quello stato senza venire da `Caricamento`.
+
+**Si scrive solo da uno stato che ha una partita da salvare (INV-17).** Chiudere la finestra è un
+gesto disponibile in **ogni** stato, e non da tutti passa per `Chiusura`: da `Avvio`, da
+`Caricamento` e da `Errore` per un **caricamento** fallito il modello in memoria non è mai stato
+caricato — è una partita nuova, azzerata, che non rappresenta nessuno. Lì la finestra si chiude e
+basta, senza toccare il disco.
+
+Non è una precauzione teorica: prima di [D016](../delega/D016-correzioni-audit.md) quel gesto
+scriveva la partita azzerata **sopra** il salvataggio del giocatore, mentre la schermata d'errore
+gli stava promettendo che il file non era stato modificato. La precondizione vive in `close()`,
+che è l'unica funzione che sa cosa sta per scrivere — non in chi la chiama, dove sarebbe la stessa
+omissione spostata di un file.
+
+`Errore` per un **salvataggio** fallito va nella direzione opposta: lì la partita è tutta in
+memoria e non è mai arrivata sul disco, quindi chiudere la finestra è un altro modo di dire
+«riprova». A perdere qualcosa è solo la scelta esplicita, che ha un pulsante suo.
 
 ## Quando si salva
 

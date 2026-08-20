@@ -75,6 +75,7 @@ export type ScreenKey =
   | 'app.duration.hours'
   | 'app.duration.minutes'
   | 'app.duration.and'
+  | 'app.duration.under_a_minute'
   | 'common.buy'
   | 'common.level'
   | 'pool.cash'
@@ -134,7 +135,7 @@ export type Dictionary = Readonly<Record<MessageKey, string>>
  * pool nuovo — `chips` è già nel glossario — questa riga non compila finché qualcuno non decide
  * se quel pool si mostra.
  */
-export const POOL_KEYS: Readonly<Record<Pool, MessageKey | null>> = {
+const POOL_KEYS: Readonly<Record<Pool, MessageKey | null>> = {
   cash: 'pool.cash',
   card: 'pool.card',
   world: null,
@@ -256,15 +257,26 @@ export const createTranslator = (wording: Wording): Translator => {
 
   const instant = (at: number): string => wording.date(new Date(at), 'short')
 
+  /**
+   * Una durata detta come la direbbe una persona: i due zeri hanno una frase loro invece di
+   * comparire dentro quella generale.
+   *
+   * Sotto il minuto non si dice «0 minuti» — è la risposta che si legge a ogni ritorno da una
+   * finestra nascosta per due secondi — e alle ore tonde non si dice «3 ore e 0 minuti». Sono due
+   * casi che l'aritmetica produce e che nessuna lingua pronuncia.
+   */
   const duration = (elapsed: Milliseconds): string => {
     const totalMinutes = Math.floor(elapsed / (MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE))
+    if (totalMinutes === 0) return text('app.duration.under_a_minute')
+
     const hours = Math.floor(totalMinutes / MINUTES_PER_HOUR)
     const minutes = totalMinutes % MINUTES_PER_HOUR
-    const spelledMinutes = count('app.duration.minutes', minutes)
-    if (hours === 0) return spelledMinutes
+    if (hours === 0) return count('app.duration.minutes', minutes)
+    if (minutes === 0) return count('app.duration.hours', hours)
+
     return text('app.duration.and', {
       first: count('app.duration.hours', hours),
-      second: spelledMinutes
+      second: count('app.duration.minutes', minutes)
     })
   }
 

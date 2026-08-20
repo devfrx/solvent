@@ -78,7 +78,8 @@ flowchart TD
   D011 --> D012["D012 · Guscio, parole e reddito"]
   D012 --> D015["D015 · Home: bancomat e cruscotto"]
   D014 --> D015
-  D015 --> D013["D013 · Verifica della fetta — STOP 2"]
+  D015 --> D016["D016 · Le correzioni dell'audit"]
+  D016 --> D013["D013 · Verifica della fetta — STOP 2"]
 ```
 
 **D001 è prima di tutto, e non è un caso.** Le regole devono esistere prima del codice che
@@ -104,12 +105,21 @@ configurato dopo che c'erano già 156 file.
 | [D011](D011-runtime-e-store.md)      | Runtime e store                                                       | 379 codice + 774 test   | **Chiusa**    |
 | [D012](D012-ui-e-i18n.md)            | Il guscio, le parole e il reddito                                     | 1.060 codice + 740 test | **Chiusa**    |
 | [D015](D015-home-bancomat.md)        | La home: bancomat, carta e cruscotto                                  | 725 codice + 321 test   | **Chiusa**    |
+| [D016](D016-correzioni-audit.md)     | Le correzioni dell'audit del 2026-08-20                               | 186 codice + 326 test   | **Chiusa**    |
 | [D013](D013-verifica-della-fetta.md) | Verifica della fetta — STOP 2                                         | ~120 test + README      | **Preparata** |
 
-D014 e D015 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015 il
-2026-08-19 spezzando D012. Nel grafo sopra si vede dove stanno davvero — D014 accanto a D010, D015
-fra D012 e D013. **La numerazione è cronologica, l'ordine è il grafo**: rinumerare romperebbe i
-riferimenti nei commit e nella tracciabilità.
+D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
+il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede
+dove stanno davvero — D014 accanto a D010, D015 fra D012 e D013, D016 **prima** di D013.
+**La numerazione è cronologica, l'ordine è il grafo**: rinumerare romperebbe i riferimenti nei
+commit e nella tracciabilità.
+
+**Perché D016 sta prima dello STOP 2.** D013 riporta che la fetta regge; l'audit ha trovato un
+difetto di perdita dati. Riportare un verdetto con quel difetto aperto sarebbe riportare un
+verdetto falso, e il passo 5 del percorso manuale di D013 — «chiudo la finestra» — ci passa
+esattamente sopra senza vederlo, perché lì il salvataggio è valido. Infilare le correzioni dentro
+D013 era l'alternativa, ed è stata scartata: una delega che verifica e insieme corregge non può
+più dire quale delle due cose ha fatto.
 
 **Perché D012 è stata spezzata.** Valeva ~1.150 righe, più del kernel intero, e il numero era una
 misura fatta sui mockup — non una stima. Una delega di quella dimensione non è verificabile a metà

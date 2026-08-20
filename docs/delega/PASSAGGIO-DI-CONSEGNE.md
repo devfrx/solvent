@@ -40,12 +40,13 @@ leggi che tengono il gioco bilanciato stanno in [prodotto/visione.md](../prodott
 | D011 — runtime e store   | **chiusa**, commit `dbf821c`                                             |
 | D012 — guscio e parole   | **chiusa**, commit `fb45d71`                                             |
 | D015 — home e bancomat   | **chiusa**, commit `3aa3460`                                             |
+| D016 — correzioni audit  | **chiusa**, commit `c648639`                                             |
 | Kernel                   | **finito** — 535 righe, da D003 a D008                                   |
 | Persistenza nel main     | **finita** — 244 righe in `src/main/` e `src/preload/`                   |
 | Codice di dominio        | **`income` 104 righe, `atm` 64** — i due della fetta 01                  |
 | Fetta 01                 | **giocabile**: guadagna in contanti, deposita, compra con la carta       |
-| Renderer                 | **finito** — 1.725 righe, di cui 456 di CSS e 365 sotto `i18n/`          |
-| `npm run verify`         | **verde** — 477 test su 52 file, ~28 s                                   |
+| Renderer                 | **1.729 righe**, di cui 439 di CSS e 369 sotto `i18n/`                   |
+| `npm run verify`         | **verde** — 497 test su 54 file, 42–45 s                                 |
 | `npm run verify:release` | **verde** — il renderer compila: 88 moduli, 562 kB                       |
 | Prossimo passo           | **[D013 — Verifica della fetta](D013-verifica-della-fetta.md)** — STOP 2 |
 
@@ -55,8 +56,8 @@ rimisurati qui: il numero del kernel viene da D008 e usa un altro metodo.
 I contratti sono in `src/core/contracts/`, Clock, Rng, Bus, Registry e Ledger in
 `src/core/kernel/`, i numeri di gioco in `src/core/balance/`, lo schema del salvataggio e i tre
 canali IPC in `src/main/save/`, i due domini in `src/core/domains/`. In `src/renderer/` ci sono il
-bootstrap, il loop, l'unico store, il guscio `App.vue`, le due viste sotto `views/`, sette pezzi
-sotto `components/` — cinque componenti e due moduli puri, la rotazione della carta e la scelta dei
+bootstrap, il loop, l'unico store, il guscio `App.vue`, le due viste sotto `views/`, nove pezzi
+sotto `components/` — sette componenti e due moduli puri, la rotazione della carta e la scelta dei
 movimenti da mostrare — e le parole del gioco sotto `i18n/`. Ogni delega chiusa ha in fondo le
 **correzioni** rispetto a com'era scritta: [D002](D002-contratti.md) ne ha sette,
 [D003](D003-kernel-clock.md) cinque, [D004](D004-kernel-rng.md) sei,
@@ -64,7 +65,8 @@ movimenti da mostrare — e le parole del gioco sotto `i18n/`. Ogni delega chius
 [D007](D007-kernel-ledger.md) nove, [D008](D008-balance.md) otto,
 [D009](D009-persistenza-main.md) dieci, [D010](D010-dominio-income.md) dieci,
 [D014](D014-dominio-bancomat.md) undici, [D011](D011-runtime-e-store.md) quattordici,
-[D012](D012-ui-e-i18n.md) e [D015](D015-home-bancomat.md) diciassette. Leggile prima di fidarti del
+[D012](D012-ui-e-i18n.md) e [D015](D015-home-bancomat.md) diciassette,
+[D016](D016-correzioni-audit.md) sette. Leggile prima di fidarti del
 testo di una delega ancora aperta — alcune di quelle correzioni riguardano proprio deleghe che non
 sono ancora state eseguite.
 
@@ -85,11 +87,23 @@ una delega chiusa è un documento storico: nessuno la rilegge.
   ma `Money` si costruisce da una **stringa**: a fermarlo è `tests/rules/domains-no-money-literals`
   (D014, correzione 2).
 - **Un `eslint-disable` senza motivazione è un test rosso**, non un appunto di review (C06).
+- **Il salvataggio si scrive solo da uno stato che ha una partita vera** (INV-17). `close()` ha una
+  precondizione: da `Avvio`, da `Caricamento` e da `Errore` per un caricamento fallito la finestra
+  si chiude **senza scrivere**, perché quello che c'è in memoria non è la partita di nessuno.
+- **Nessun barrel** (C10) e **nessuna parola vietata nei nomi** (C09): due regole che stavano solo
+  in prosa e adesso hanno un test — `tests/rules/no-barrel` e `tests/rules/forbidden-words`.
 
 **Resta aperta solo D013**, che è lo STOP 2, ed è stata **preparata per l'esecuzione**: le sette
 righe che stavano qui ora vivono dentro [D013](D013-verifica-della-fetta.md), insieme a tutto ciò
 che il suo testo originale dava per non ancora esistente e che invece esiste. Chi la prende legge
 quella, non questa.
+
+Prima di lei c'è stata [D016](D016-correzioni-audit.md), nata da un **audit della codebase** fatto
+il 2026-08-20: diciassette difetti, di cui uno critico — chiudere la finestra dalla schermata
+d'errore scriveva una partita vuota sopra il salvataggio del giocatore. Le due radici sono nella
+delega, e la seconda vale la pena saperla anche senza aprirla: `tests/rules/doc-links` verifica che
+i collegamenti fra documenti risolvano, **non che i numeri scritti in prosa siano veri**. Sei
+affermazioni numeriche di documenti vivi erano invecchiate senza far rumore.
 
 ### Quanto ci si può fidare di questi documenti
 
@@ -114,7 +128,10 @@ Da lì in avanti valgono due cose:
   codice che non esiste ancora, e lo dichiarano in testa. Se ne trovi uno che non lo dichiara, è
   quello il difetto.
 
-Quello che l'audit **non** copre è tutto ciò che è cambiato dopo D008, cioè da ora in poi.
+Quel primo audit **non** copriva ciò che è cambiato dopo D008. Il secondo — 2026-08-20, tutta la
+codebase e tutti i documenti — è quello che ha prodotto [D016](D016-correzioni-audit.md), e la sua
+copertura è dichiarata lì. Da lì in poi vale la stessa avvertenza di sempre: quello che è cambiato
+dopo, nessuno l'ha ancora guardato.
 
 ## Le sei cose da non fare
 
@@ -168,8 +185,10 @@ Le due cose da sapere prima ancora di aprire la delega:
    frame: `npm run build`, la pagina servita da `out/renderer/`, le tre funzioni di `SaveApi` finte
    al posto del preload, e un salvataggio con dei soldi dentro al posto del tempo che non passa.
    Senza frame `requestAnimationFrame` non scatta e il reddito non entra mai.
-2. **`verify` sta a ~26 s** e `verify:release` aggiunge la compilazione. La soglia dichiarata in
-   [qualita.md](../qualita.md) è il minuto.
+2. **`verify` sta fra 42 e 45 s** e `verify:release` aggiunge la compilazione. La soglia
+   dichiarata in [qualita.md](../qualita.md) è il minuto, e il margine si è ristretto: la cifra
+   precedente diceva 26 s davanti a quattro gate che ne sommavano 34, cioè meno della somma
+   delle proprie parti. Rimisurata a D016.
 
 ## Come si lavora
 
@@ -292,16 +311,19 @@ Leggi in quest'ordine, e non altro prima di aver finito:
 2. `docs/delega/D013-verifica-della-fetta.md` — la delega, **preparata per l'esecuzione**: la
    sezione "Cosa è cambiato da quando è stata scritta" per prima, perché sette punti del testo
    originale sono invecchiati e lì sono già corretti
-3. `docs/delega/D015-home-bancomat.md`, la nota di chiusura — il giro di gioco già percorso a
+3. `docs/delega/D016-correzioni-audit.md` — l'audit del 2026-08-20 e le sue correzioni: due
+   radici, INV-17, e i due meccanismi nati per regole che stavano solo in prosa
+4. `docs/delega/D015-home-bancomat.md`, la nota di chiusura — il giro di gioco già percorso a
    mano, con i numeri che devi rivedere
-4. `docs/qualita.md` — cosa si prova e cosa no, e perché non ci sono test end-to-end
-5. `docs/convenzioni.md` — nomi, commit, e la lingua del codice (C08)
+5. `docs/qualita.md` — cosa si prova e cosa no, e perché non ci sono test end-to-end
+6. `docs/convenzioni.md` — nomi, commit, e la lingua del codice (C08)
 
-Stato: STOP 1 approvato. Chiuse da D001 a D012, D014 e D015, tutte unite a `main`: resta aperta
-solo D013. La fetta 01 è **completa e giocabile** — si guadagna in contanti, si deposita al
-bancomat pagando la commissione, si compra l'upgrade con la carta e il reddito passa da 12,00 a
-18,00 €/s. `npm run verify` verde con 477 test su 52 file in ~26 s, e `npm run verify:release` è
-verde: un renderer che non compila è una regressione.
+Stato: STOP 1 approvato. Chiuse da D001 a D012, D014, D015 e D016, tutte unite a `main`: resta
+aperta solo D013. La fetta 01 è **completa e giocabile** — si guadagna in contanti, si deposita
+al bancomat pagando la commissione, si compra l'upgrade con la carta e il reddito passa da 12,00
+a 18,00 €/s. Con D016 non perde più la partita di nessuno: chiudere la finestra dalla schermata
+d'errore non sovrascrive il salvataggio (INV-17). `npm run verify` verde con 497 test su 54 file
+in 42–45 s, e `npm run verify:release` è verde: un renderer che non compila è una regressione.
 
 D013 vale ~120 righe di test e un README di venti righe. Nessun codice di gioco nuovo. È l'ultima
 delega della fetta 01, e alla fine si decide se la fetta 02 parte e con quale forma.
@@ -328,8 +350,8 @@ Quattro cose che il progetto ti dà già e che non vanno rifatte:
 - **Il gioco gira senza Electron**: bundle di produzione, le tre funzioni di `SaveApi` finte al
   posto del preload, un salvataggio con dei soldi dentro. Senza frame comporti, il reddito non
   entra mai — e non è un difetto del gioco.
-- **Le reti esistono già**: 477 test, e cinquantatré rotture indotte una alla volta nelle deleghe
-  chiuse. Il punto 3 del rapporto allo STOP 2 — quali regole si sono rivelate scomode — ha già
+- **Le reti esistono già**: 497 test, e cinquantanove rotture indotte una alla volta nelle
+  deleghe chiuse. Il punto 3 del rapporto allo STOP 2 — quali regole si sono rivelate scomode — ha già
   cinque candidati elencati nella delega, da verificare invece che da ricopiare.
 
 Due trappole che le deleghe precedenti hanno già pagato:

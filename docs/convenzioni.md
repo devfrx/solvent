@@ -15,8 +15,17 @@ quale.
 | ADR                                                         | `NNNN-slug-in-italiano.md` | `0009-passo-fisso-...md`  | review              |
 | Delega                                                      | `DNNN-slug-in-italiano.md` | `D006-kernel-registry.md` | review              |
 
-Un solo `index.ts` che riesporta è ammesso in tutto il progetto: `core/kernel/index.ts`. Ogni
-altro barrel è vietato — nascondono le dipendenze reali e rendono inutile ogni regola di import.
+**Nessun barrel, mai** (C10). Un file che si limita a ri-esportare nasconde le dipendenze reali:
+da `import { x } from '@core/kernel'` non si vede quale modulo si sta tirando dentro, e con esso
+sparisce metà del valore di `import-x/order` e delle `no-restricted-imports` che governano i
+confini. A imporlo è `tests/rules/no-barrel`, che guarda **cosa c'è dentro** e non come si chiama
+il file: `index.ts` resta un nome legittimo per un punto d'ingresso con del contenuto vero —
+`main/index.ts`, `preload/index.ts` e `i18n/index.ts` lo sono.
+
+Fino a [D016](delega/D016-correzioni-audit.md) questa riga concedeva un'eccezione,
+`core/kernel/index.ts`, che **non è mai esistita**: un permesso che puntava al vuoto, e che
+chiunque avrebbe potuto riempire per allinearsi al documento. La regola senza eccezioni è più
+forte, ed è anche l'unica meccanizzabile.
 
 ## La lingua del codice
 
