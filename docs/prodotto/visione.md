@@ -7,7 +7,7 @@ Le meccaniche qui sotto nascono dal progetto precedente, preso come **catalogo d
 codice e non di strutture. Ciò che era stato capito bene lì è la profondità dei domini; ciò che
 era stato capito male è come collegarli.
 
-Solvent non ha un'attività principale con dei contorni. È una **sandbox economica**: tredici domini
+Solvent non ha un'attività principale con dei contorni. È una **sandbox economica**: diciassette domini
 che si contendono le stesse risorse, tutti disponibili a chi soddisfa i loro requisiti, in
 qualunque ordine il giocatore riesca a soddisfarli.
 
@@ -83,17 +83,17 @@ il denaro fermo non rende. La carta scala all'infinito ma lascia tracce e ti leg
 volta che il giocatore guadagna, deve decidere dove mettere quei soldi, e quella decisione ha
 conseguenze a tre domini di distanza.
 
-Senza questa tensione, tredici domini sono tredici pulsanti che fanno salire lo stesso numero.
+Senza questa tensione, diciassette domini sono diciassette pulsanti che fanno salire lo stesso numero.
 
 ---
 
-## La casa: come tredici domini stanno sullo stesso scaffale
+## La casa: come diciassette domini stanno sullo stesso scaffale
 
 Questa è la parte che va progettata **prima** dei domini, e che non riguarda nessuno di loro in
 particolare.
 
 Il problema è semplice da enunciare. Ogni dominio è un posto dove il giocatore versa denaro. Se
-ognuno viene disegnato per conto suo, il giorno in cui sono tredici la domanda «quale conviene?» ha
+ognuno viene disegnato per conto suo, il giorno in cui sono diciassette la domanda «quale conviene?» ha
 una risposta sola e definitiva — quello con il numero più grande — e gli altri dodici diventano
 arredamento.
 
@@ -114,7 +114,7 @@ Ogni strumento dichiara le stesse **otto voci**, come dati, sempre nello stesso 
 | 7   | **Pagamento**  | contanti, carta, o entrambi (ADR 0017)                       |
 | 8   | **Requisito**  | cosa serve per poterlo usare                                 |
 
-Le otto voci sono state provate riempiendole per tutti e tredici i domini di questa pagina. Ci
+Le otto voci sono state provate riempiendole per tutti e diciassette i domini di questa pagina. Ci
 stanno tutti, e nessuna voce resta vuota per più di uno.
 
 **Un rendimento negativo non è un errore.** È così che si descrivono gli strumenti che non servono
@@ -124,7 +124,7 @@ dei tre è un investimento, e tutti e tre stanno nell'etichetta senza forzature.
 
 **L'etichetta descrive l'interfaccia, non l'interno.** Il casinò dentro è dadi e roulette;
 l'impresa dentro è turni, fornitori e scorte. Quella profondità va progettata quando il dominio
-arriva, e l'etichetta non la tocca. Serve solo a far stare tredici cose diverse sullo stesso
+arriva, e l'etichetta non la tocca. Serve solo a far stare diciassette cose diverse sullo stesso
 scaffale — come i valori nutrizionali, che permettono di confrontare una mela e una bistecca senza
 dire niente su come si cucinano.
 
@@ -139,7 +139,7 @@ dentro del codice.
 tutte le coppie di strumenti, e per ogni coppia deve esistere almeno una voce in cui il secondo
 batte il primo.
 
-È la risposta al problema di bilanciare tredici domini fra loro. Non si tarano a mano uno contro
+È la risposta al problema di bilanciare diciassette domini fra loro. Non si tarano a mano uno contro
 l'altro: si **dichiara** che nessuno domina, e un test dice il giorno in cui la dichiarazione è
 diventata falsa.
 

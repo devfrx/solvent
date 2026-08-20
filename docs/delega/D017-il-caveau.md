@@ -135,7 +135,7 @@ perché lì servivano, e col caveau non è più il loro posto.
 Nessuna regola lo impedirebbe: sotto `src/core/domains/**` il lint vieta `vue`, `pinia`, `electron`
 (INV-02) e le conversioni di `Money` (R11), e **non** vieta a un dominio di importarne un altro. Un
 `atm` che importa `vault/rules` passerebbe tutti i gate. Sarebbe anche il **primo** accoppiamento
-fra domini del progetto, cioè un precedente — e la visione ne ha diciotto che si contendono le
+fra domini del progetto, cioè un precedente — e la visione ne ha diciassette che si contendono le
 stesse risorse.
 
 La proposta è non aprirlo: la capienza arriva a `previewOf` **per argomento**, come già fa con

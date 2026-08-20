@@ -12,8 +12,8 @@ audit con **17 difetti misurati**. Quel repo si usa **solo come catalogo di idee
 copiarne codice, struttura di cartelle o pattern — sono esattamente ciò che ha fallito.
 
 Il gioco ruota attorno a una tensione sola: **contanti contro carta**. Anonimi ma limitati contro
-tracciabili ma illimitati. Ogni dominio — mercato nero, prestiti, casinò, immobiliare — è un modo
-diverso di viverla. Senza quella tensione, tredici domini sono tredici pulsanti che alzano lo
+tracciabili ma illimitati. Ogni dominio — black market, prestiti, casinò, immobiliare — è un modo
+diverso di viverla. Senza quella tensione, diciassette domini sono diciassette pulsanti che alzano lo
 stesso numero.
 
 Non c'è un'attività principale e non c'è una progressione: è una **sandbox**. Nessun dominio si

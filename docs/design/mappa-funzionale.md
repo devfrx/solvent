@@ -20,7 +20,7 @@ Un **idle/tycoon finanziario per desktop**. Il giocatore parte da uno stipendio 
 governare un patrimonio fatto di immobili, imprese, posizioni di mercato e traffici illegali. Il
 tempo passa anche mentre non guarda: riaprire il gioco significa scoprire cosa è successo.
 
-Non ha un'attività principale con dei contorni. È una **sandbox di diciotto domini** che si
+Non ha un'attività principale con dei contorni. È una **sandbox di diciassette domini** che si
 contendono le stesse risorse. Nessuno si sblocca: ognuno dichiara un requisito, e il giocatore lo
 soddisfa quando ci riesce, nell'ordine che si costruisce da sé.
 
@@ -33,7 +33,7 @@ Tutto il gioco ruota attorno a una scelta sola, ripetuta all'infinito con conseg
 | Tracciabilità           | nessuna                          | totale                          |
 | Capacità                | limitata: occupano spazio fisico | illimitata                      |
 | Interessi e credito     | nessuno                          | sì, e costruiscono il punteggio |
-| Mercato nero            | conveniente, poco visibile       | accettata, ma molto visibile    |
+| Black market            | conveniente, poco visibile       | accettata, ma molto visibile    |
 | Investimenti e prestiti | possibile ma penalizzato         | la via naturale                 |
 | Rischio                 | furto, perquisizione, perdita    | blocco del conto, commissioni   |
 
@@ -52,7 +52,7 @@ Il denaro non è la risorsa scarsa: in un idle cresce sempre. Le risorse vere so
 | Risorsa        | Cos'è                                | Cosa la consuma                                           | Cosa la restituisce                    | Il tetto che impone                   |
 | -------------- | ------------------------------------ | --------------------------------------------------------- | -------------------------------------- | ------------------------------------- |
 | **Denaro**     | il punteggio                         | tutto                                                     | tutto                                  | nessuno                               |
-| **Calore**     | quanto sei visibile alle autorità    | mercato nero, riciclaggio, insider, movimenti grossi      | il tempo, i consulenti, la reputazione | l'indagine: conti bloccati, sequestri |
+| **Calore**     | quanto sei visibile alle autorità    | black market, riciclaggio, insider, movimenti grossi      | il tempo, i consulenti, la reputazione | l'indagine: conti bloccati, sequestri |
 | **Attenzione** | quante cose riesci davvero a seguire | ogni entità gestita a mano: attività, immobili, posizioni | delegare — che costa margine ed errori | quante cose puoi tenere in aria       |
 
 Calore e attenzione non si comprano. Sono i due limiti che rendono una scelta una scelta.
@@ -73,19 +73,19 @@ I requisiti sono di **tipi diversi**, e questo è ciò che rende vero il sandbox
 | Tipo                             | Esempio                                     |
 | -------------------------------- | ------------------------------------------- |
 | Uno strumento                    | il mercato azionario vuole un conto titoli  |
-| Una relazione                    | il mercato nero vuole un contatto           |
+| Una relazione                    | il black market vuole un contatto           |
 | Un punteggio costruito nel tempo | i prestiti vogliono uno storico sulla carta |
 | Una cosa che possiedi            | l'impresa vuole una sede                    |
 
 **Per l'interfaccia significa due cose.** Un requisito va **mostrato** prima di essere soddisfatto,
 in modo che si possa lavorarci — «serve un conto titoli: 500 €» — e non deve mai essere un
 contatore invisibile. E la superficie iniziale non è vuota: **il pulito si vede, il grigio si
-scopre.** Banche, broker, depositi, immobiliare sono elencati dal primo secondo; il mercato nero e
+scopre.** Banche, broker, depositi, immobiliare sono elencati dal primo secondo; il black market e
 certi contatti compaiono solo incontrandoli.
 
 ### La casa: cosa ogni strumento deve dichiarare
 
-Perché tredici domini stiano sullo stesso scaffale, ognuno dichiara le stesse **otto voci**:
+Perché diciassette domini stiano sullo stesso scaffale, ognuno dichiara le stesse **otto voci**:
 rendimento, varianza, liquidità, calore, attenzione, **pozza**, pagamento, requisito.
 
 Per l'interfaccia sono esattamente le colonne di qualunque confronto fra strumenti, e la ragione
@@ -122,14 +122,14 @@ rendimenti attesi, e cosa si paga per ognuno:
 | Mercato azionario  | 7 – 10 %, volatilità 15 – 25 %                | varianza                        |
 | Impresa            | 10 – 20 % sul capitale investito              | molta attenzione                |
 | Crypto             | 0 – 15 %, oppure −80 %, volatilità 60 – 100 % | varianza estrema                |
-| Mercato nero       | +30 – 80 % per operazione                     | calore                          |
+| Black market       | +30 – 80 % per operazione                     | calore                          |
 | Aste               | +0 – 30 % atteso, varianza altissima          | informazione imperfetta         |
 | Casinò             | **−2 – −8 % per giro**                        | è il prezzo della varianza      |
 | _Prestito (costo)_ | _5 – 20 % secondo il punteggio_               | _è l'altra parte del confronto_ |
 
 ---
 
-## 2. I diciotto domini
+## 2. I diciassette domini
 
 Per ognuno: il ciclo di gioco, cosa il giocatore **deve poter vedere**, cosa **deve poter
 decidere**, come **può andare male**, e quanto **pesa** in termini di quantità di roba a schermo.
@@ -184,7 +184,7 @@ che ha adesso.
 **Pesa:** poco in superficie, ma è presente **sempre**, in ogni schermata di ogni dominio grigio,
 e ogni azione grigia deve poter dichiarare in anticipo quanto calore costa.
 
-#### 5. Mercato nero
+#### 5. Black market
 
 **Ciclo:** sblocca contatti, tratta con loro, incassa. Prezzi ottimi, calore alto.
 **Deve vedere:** i contatti disponibili, ciascuno con reputazione, specialità e affidabilità; cosa
@@ -215,7 +215,7 @@ che risponde.
 **Ciclo:** compra oggetti, restaurali, rivendili o mettili all'asta.
 **Deve vedere:** l'inventario con condizione, rarità e provenienza di ogni oggetto; il valore
 corrente, che è condizione × rarità × domanda, e la domanda oscilla; costo e durata di un
-restauro; dove conviene vendere (negozio pulito, mercato nero se l'oggetto non è pulito).
+restauro; dove conviene vendere (negozio pulito, black market se l'oggetto non è pulito).
 **Deve decidere:** restaurare o vendere com'è; vendere adesso o aspettare che la domanda risalga.
 **Può andare male:** restauro che costa più del guadagno; oggetto invendibile che occupa spazio;
 smaltimento che **costa**.
@@ -357,7 +357,11 @@ resta ancora accessibile; quali difese esistono e quanto costano; quanto manca a
 **Pesa:** medio, ma è lo stato più invasivo del gioco: mentre è attivo, molte azioni altrove sono
 negate — e ognuna deve dire perché.
 
-#### 18. Traguardi
+### 2.5 — Fuori dai domini: i traguardi
+
+I traguardi **non sono un dominio**: non ci si versa denaro, non hanno una pozza e non dichiarano
+un'etichetta. Stanno qui perché a schermo occupano lo stesso spazio di un dominio, e l'interfaccia
+deve reggerli come tale.
 
 Non c'è prestige e non c'è una fine: la partita è una, lunga, e ricominciare è una partita nuova
 con un mondo diverso. I traguardi sono ciò che le dà forma.
@@ -376,9 +380,9 @@ fare senza dirgli cosa deve fare.
 
 ## 3. Inventario trasversale
 
-Questa è la sezione che dice davvero **cosa deve saper fare l'interfaccia**. I diciotto domini qui
-sopra si riducono a un numero finito di tipi di informazione, azione, esito e stato. Un sistema di
-design che li copre tutti copre il gioco intero.
+Questa è la sezione che dice davvero **cosa deve saper fare l'interfaccia**. I diciassette domini
+qui sopra, e i traguardi, si riducono a un numero finito di tipi di informazione, azione, esito e
+stato. Un sistema di design che li copre tutti copre il gioco intero.
 
 ### 3.1 — Tipi di informazione da mostrare
 
@@ -465,7 +469,7 @@ quali cambia cosa si può fare:
 indagine in corso · conto congelato · beni sequestrati · insolvenza · attività chiusa · margin
 call subita · immobile sfitto · inquilino moroso · sfratto in corso · guasto non riparato ·
 deposito vincolato non disponibile · caveau pieno · contratto in scadenza · evento attivo che
-cambia le regole · mercato nero chiuso da una retata · dominio non ancora sbloccato
+cambia le regole · black market chiuso da una retata · dominio non ancora sbloccato
 
 **Stati vuoti** — ognuno con un significato diverso da «non c'è niente»:
 
@@ -539,7 +543,7 @@ saperlo per capire da dove si parte — **non è un vincolo di design**.
 - italiano e inglese completi
 
 **Deciso ma non ancora costruito**, nell'ordine: caveau con capienza (fetta 02), progresso offline
-(03), calore e mercato nero (04), prestiti e punteggio di credito (05), indagine (06). Poi
+(03), calore e black market (04), prestiti e punteggio di credito (05), indagine (06). Poi
 i blocchi: negozio e aste; calendario, depositi e affitti; immobiliare e mercato; impresa, crypto
 e casinò; indagini, eventi e albero delle abilità.
 

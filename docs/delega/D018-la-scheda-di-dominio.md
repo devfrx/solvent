@@ -4,7 +4,7 @@
   [visione](../prodotto/visione.md) e l'audit del kernel che ne è seguito
 - **Dipende da:** D013 (la fetta 01 chiusa). **Non** dipende da D017: sono documenti, non codice, e
   non si toccano
-- **Sblocca:** lo studio di ognuno dei tredici domini, uno alla volta. E il grilletto dell'etichetta
+- **Sblocca:** lo studio di ognuno dei diciassette domini, uno alla volta. E il grilletto dell'etichetta
   come tipo, che chiede «il secondo strumento con un'etichetta vera» e con questa delega ne avrà tre
 - **ADR vincolanti:** nessuno nuovo. Ne **cita** dodici, ed è metà del suo lavoro: 0002, 0003, 0005,
   0009, 0010, 0014, 0016, 0017, 0019, 0020, 0022, 0023, 0024, 0025
@@ -44,8 +44,9 @@ domande ovvie che nessuno aveva scritto in un posto dove tornassero a galla.
 - **La visione** è riscritta e coerente: l'etichetta a otto voci, la legge della non dominanza, le
   quattro forme di saturazione, i requisiti, il tempo, l'attenzione, il fuori-finestra.
 - **La mappa funzionale** ([design/mappa-funzionale.md](../design/mappa-funzionale.md)) descrive già
-  ciclo, cosa vedere, cosa decidere e cosa può andare male per tutti e diciotto i blocchi. **Non si
-  riscrive**: la scheda la cita e aggiunge ciò che le manca, cioè la metà kernel.
+  ciclo, cosa vedere, cosa decidere e cosa può andare male per tutti e diciassette i domini, e per
+  i traguardi. **Non si riscrive**: la scheda la cita e aggiunge ciò che le manca, cioè la metà
+  kernel.
 - **Tre domini esistono davvero**: `income` (D010), `atm` (D014), e `vault` disegnato in
   [D017](D017-il-caveau.md) ma non ancora scritto. Sono i tre casi di prova, e sono diversi apposta
   — uno ticchetta e ha stato, uno non ha né l'uno né l'altro, uno ha stato e non ticchetta.
@@ -122,14 +123,14 @@ D017. Una scheda che descrive ciò che credevamo di aver scritto è peggio di ne
   di fretta.
 - **Le tre schede compilate contengono almeno una risposta che ha sorpreso chi la scriveva.** Non è
   poesia: se compilarle non scopre niente, la scheda sta chiedendo cose che si sapevano già, e va
-  cambiata prima di darla ai dieci domini che verranno.
+  cambiata prima di darla ai quattordici domini che verranno.
 - **Nessun file sotto `src/` viene toccato.** Se compilare una scheda fa venire voglia di
   correggere il codice, la correzione si annota nella scheda e si lascia lì.
 
 ## Fuori scope
 
-- **I dieci domini non ancora costruiti.** Ognuno avrà la sua scheda, con la sua delega, quando ci
-  si arriva. Compilarne tredici adesso è il difetto A17 travestito da diligenza — e la visione lo
+- **I quattordici domini non ancora costruiti.** Ognuno avrà la sua scheda, con la sua delega, quando ci
+  si arriva. Compilarne diciassette adesso è il difetto A17 travestito da diligenza — e la visione lo
   vieta esplicitamente nella sezione «cosa NON si costruisce adesso».
 - **L'etichetta come tipo TypeScript, e il test di non dominanza.** Questa delega porta il conteggio
   degli strumenti dichiarati da uno a tre, cioè **fa scattare** il grilletto del registro YAGNI.
@@ -163,7 +164,7 @@ D017. Una scheda che descrive ciò che credevamo di aver scritto è peggio di ne
 ## Trappole note
 
 - **A17, e stavolta con un'aggravante.** Avere una scheda in mano fa venire voglia di compilarla
-  tredici volte in un pomeriggio. Sarebbero tredici domini progettati per un kernel che non li ha
+  tredici volte in un pomeriggio. Sarebbero diciassette domini progettati per un kernel che non li ha
   mai visti, cioè esattamente i 24 sistemi nati prima di un modo per collegarli. Tre, e sono tre
   che **esistono**.
 - **La scheda che diventa un modulo burocratico.** Una scheda si compila una volta e si legge dieci:

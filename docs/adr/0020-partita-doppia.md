@@ -13,7 +13,7 @@ In un gioco il denaro nasce dal nulla (il reddito) e sparisce nel nulla (gli acq
 risposta ingenua è no. La risposta contabile è sì: il denaro non nasce dal nulla, nasce da un
 **conto sorgente** che va in negativo, e sparisce in un **conto pozzo** che va in positivo.
 
-La differenza sembra formale. Non lo è, per un gioco con tredici domini che muovono denaro e un
+La differenza sembra formale. Non lo è, per un gioco con diciassette domini che muovono denaro e un
 problema di bilanciamento serio.
 
 ## Decisione
