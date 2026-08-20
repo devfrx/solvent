@@ -178,7 +178,7 @@ solvent/
 │     │  ├─ HomeView.vue          # bancomat, upgrade, cruscotto, ultime operazioni
 │     │  └─ StatsView.vue
 │     ├─ components/
-│     │  ├─ IncomePanel.vue       # l'upgrade: tre selettori, un comando, un rifiuto tradotto
+│     │  ├─ IncomePanel.vue       # l'upgrade: il listino letto prima di premere, un comando, un rifiuto
 │     │  ├─ BankCard3d.vue        # la carta: CSS 3D puro, zero logica
 │     │  ├─ rotation.ts           # la matematica della rotazione, pura e provata a parte
 │     │  ├─ CashPanel.vue         # contanti, capienza, tracciabilita

@@ -144,8 +144,10 @@ più.
 sono attive e a che livello; quanto costa il prossimo potenziamento e se se lo può permettere.
 **Deve decidere:** se spendere adesso per guadagnare di più dopo, sapendo che il reddito attivo ha
 un plateau.
-**Può andare male:** il potenziamento si paga **solo con la carta** — se il giocatore ha solo
-contanti, l'azione viene rifiutata con una spiegazione, non disabilitata in silenzio.
+**Può andare male:** il potenziamento si paga **solo con la carta** — e da
+[D019](../delega/D019-il-pagamento.md) lo si legge **prima** di premere, accanto al prezzo, invece
+di scoprirlo sbagliando. Se il giocatore ha solo contanti l'azione viene rifiutata con una
+spiegazione, non disabilitata in silenzio.
 **Pesa:** poco. Una manciata di fonti, ciascuna con nome, livello, effetto e costo.
 
 #### 2. Bancomat

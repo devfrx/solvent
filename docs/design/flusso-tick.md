@@ -94,10 +94,11 @@ sequenceDiagram
     participant B as Bus
     participant I as i18n
 
-    C->>ST: buyUpgrade()
+    C->>ST: buyUpgrade(pool scelto)
     ST->>CMD: esegue
+    CMD->>CMD: ricalcola il prezzo dal listino (INV-19)
     CMD->>LG: transaction — reason.income.upgrade, categoria purchase
-    Note over LG: due movimenti: card -costo e sink +costo<br/>l'upgrade si paga solo con la carta (D010)
+    Note over LG: due movimenti: card -costo e sink +costo<br/>accepts è generato dal listino, non scritto a mano (ADR 0027)
     alt saldo sufficiente
         LG->>B: emit('money.posted', { transaction, balances })
         LG-->>CMD: Result ok con i saldi nuovi

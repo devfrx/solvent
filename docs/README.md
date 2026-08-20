@@ -112,10 +112,13 @@ davvero, e un gruppo di ADR che passano ad _Accettata_ dopo aver visto scattare 
 meccanismo. Ha trovato tre cose che nessun gate poteva vedere, e il rapporto è in fondo a quella
 delega.
 
-**La fetta 02 è aperta**, e non è più una domanda: ha le sue deleghe scritte e misurate —
-[D019](delega/D019-il-pagamento.md) porta il listino di pagamento,
-[D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md) la regola sotto cui nasce il secondo
-dominio con stato, e [D017](delega/D017-il-caveau.md) il caveau vero.
+**La fetta 02 è aperta**, e non è più una domanda: ha le sue deleghe scritte e misurate.
+[D019](delega/D019-il-pagamento.md) è **chiusa** — ogni azione che si paga espone un listino, il
+comando riceve lo strumento e ricalcola il prezzo da lì, e l'[ADR 0027](adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)
+è la prima decisione della fetta a passare ad _Accettata_.
+[D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md) porta la regola sotto cui nasce il
+secondo dominio con stato, ed è **preparata**; [D017](delega/D017-il-caveau.md) porta il caveau
+vero e aspetta lei.
 [D018](delega/D018-la-scheda-di-dominio.md) corre accanto e non tocca nessuna delle altre. Prima
 di tutte vengono [D021](delega/D021-un-numero-che-nessuno-conta-non-si-scrive.md) e
 [D022](delega/D022-il-confine-disegnato-e-il-confine-vero.md), nate dall'audit dello STOP 2: sono
