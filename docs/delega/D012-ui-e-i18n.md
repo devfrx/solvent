@@ -16,7 +16,7 @@ di spegnere un pulsante.
 Riferimento visivo: **[fetta-01-primo-stipendio.html](../design/mockups/fetta-01-primo-stipendio.html)**.
 Quel mockup è la specifica di questa delega, e non per caso: la sua intestazione dice di sé che
 _mostra gli stati, che sono la parte che conta_. Lo stile è approvato
-([P2](../prodotto/preferenze.md#p2--lo-stile-visivo-del-mockup-è-approvato)).
+([P2](../prodotto/preferenze.md#p2--lo-stile-visivo-viene-dal-design-system)).
 
 ## Perché è stata spezzata
 
@@ -198,7 +198,7 @@ gerarchia la seconda prenderebbe il posto della prima.
 **10. `useGrouping: 'always'`, altrimenti la stessa colonna ha due regole.** In italiano CLDR
 dichiara `minimumGroupingDigits = 2`: `1284,60 €` esce **senza** separatore e `18.402,15 €` con.
 Entrambi i mockup raggruppano sempre, e un gioco finanziario si legge per numeri
-([P2](../prodotto/preferenze.md#p2--lo-stile-visivo-del-mockup-è-approvato)).
+([P2](../prodotto/preferenze.md#p2--lo-stile-visivo-viene-dal-design-system)).
 
 **11. Una delle frasi del mockup è una riga di progetto, non di gioco.** _«Nessun tick parte prima
 che il caricamento sia finito»_ è una regola di

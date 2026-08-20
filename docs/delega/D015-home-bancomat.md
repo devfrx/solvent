@@ -16,7 +16,7 @@ bancomat mostra la commissione **prima** della conferma, e il cruscotto dice com
 Riferimento visivo: **[home-atm.html](../design/mockups/home-atm.html)**. È la specifica, e il
 budget di questa delega è misurato su di lui: 407 righe di CSS non vuote in tre blocchi, 216 di
 markup. Lo stile è approvato
-([P2](../prodotto/preferenze.md#p2--lo-stile-visivo-del-mockup-è-approvato)).
+([P2](../prodotto/preferenze.md#p2--lo-stile-visivo-viene-dal-design-system)).
 
 ## Perché esiste
 

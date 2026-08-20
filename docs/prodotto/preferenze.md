@@ -17,40 +17,57 @@ Ogni voce ha un **perché** — senza, fra sei mesi sembrerà arbitraria e qualc
 
 ---
 
-## P2 — Lo stile visivo del mockup è approvato
+## P2 — Lo stile visivo viene dal design system
 
-**Approvato il 2026-08-19** sulla base di
-[fetta-01-primo-stipendio.html](../design/mockups/fetta-01-primo-stipendio.html).
+**Approvato il 2026-08-20** sulla base del canvas di Claude Design consegnato dall'utente, e
+**sostituisce** la versione approvata il 2026-08-19 sul
+[mockup della fetta 01](../design/mockups/fetta-01-primo-stipendio.html). Il mockup resta al suo
+posto: è il documento che ha fatto approvare la **forma** della home, e quella non cambia.
 
-Le costanti dello stile, da estrarre in token quando nascerà il primo CSS:
+| Elemento    | Scelta                                                                         |
+| ----------- | ------------------------------------------------------------------------------ |
+| Temi        | due, completi: chiaro caldo predefinito, scuro. Sceglie il sistema operativo   |
+| Fondo       | carta calda nel chiaro, quasi nero caldo nello scuro — mai grigio neutro       |
+| Superfici   | quattro livelli — incassata, fondo, superficie, rialzata — con bordo sottile   |
+| Accento     | **inchiostro**: il colore del testo, non un colore acceso                      |
+| Significato | verde guadagno, rosso perdita, ambra rischio. Un colore per ogni strumento     |
+| Allarme     | rosso per il fallimento, ambra per il rischio                                  |
+| Numeri      | cifre tabulari sempre, ovunque compaia un importo                              |
+| Tipografia  | **due caratteri caricati**: mono per ogni cifra e etichetta, sans per la prosa |
+| Densità     | compatta ma respirata; il numero che comanda è l'elemento più grande           |
 
-| Elemento   | Scelta                                                                |
-| ---------- | --------------------------------------------------------------------- |
-| Fondo      | scuro profondo, quasi nero, non grigio                                |
-| Superfici  | pannelli su due livelli, bordo sottile a basso contrasto              |
-| Accento    | verde, usato **solo** per il denaro che entra e per l'azione primaria |
-| Allarme    | rosso per il fallimento, ambra per il rischio                         |
-| Numeri     | cifre tabulari sempre, ovunque compaia un importo                     |
-| Tipografia | di sistema, nessun font caricato                                      |
-| Densità    | compatta ma respirata; il saldo è l'elemento più grande dello schermo |
+### Cosa è cambiato rispetto al 2026-08-19, e perché
+
+Tre punti, e vale la pena vederli in chiaro invece di scoprirli leggendo il CSS.
+
+- **Il fondo non è più solo scuro.** Il design nasce chiaro e caldo, e porta lo scuro completo
+  accanto. Non si sceglie fra i due a mano: decide `prefers-color-scheme`, quindi nessuno dei due è
+  codice morto. Invertire il predefinito è una riga, il giorno in cui si volesse.
+- **L'accento non è più verde.** Era verde e riservato al denaro in entrata, che è una buona regola;
+  il design la rende più forte togliendo del tutto il colore all'azione. Il verde adesso vuol dire
+  **solo** guadagno, in ogni punto dello schermo, e l'azione primaria è inchiostro su carta. Un
+  colore che significa una cosa sola è ciò che P2 voleva già.
+- **I caratteri adesso si caricano, e sono due.** Era «nessun font caricato», e il costo era la
+  ragione. Il design ne chiede due con due mestieri distinti, e il tabulare — che P2 chiedeva già —
+  un carattere di sistema non lo garantisce. Stanno nel bundle, non in rete: la pagina resta tutta
+  locale. Il ragionamento intero, con le alternative scartate, è
+  nell'[ADR 0029](../adr/0029-due-caratteri-e-stanno-nel-bundle.md).
 
 **Perché:** un gioco finanziario si legge per numeri. Cifre tabulari significa che un importo che
-sale non fa ballare il resto della riga — è la differenza fra un contatore leggibile e uno
-fastidioso. L'accento riservato al denaro in entrata fa sì che il verde voglia dire sempre la
-stessa cosa.
+sale non fa ballare il resto della riga. E i colori portano significato invece che umore: se il
+verde è insieme «guadagno» e «premi qui», il giocatore impara due cose da un segnale solo.
 
-**Come si applica:** fatto in D012. I token vivono in un blocco `<style>` non scoped dentro
-`App.vue` — l'unico non scoped del progetto — e il resto del CSS sta attaccato al componente che lo
-usa, così togliere il componente toglie anche il suo stile. Nessun secondo verde, mai.
+**Come si applica:** [D023](../delega/D023-il-design-system.md). I token e le primitive escono dal
+blocco non scoped di `App.vue` — che sparisce — ed entrano in `src/renderer/ui/`, un livello che non
+conosce il gioco ([ADR 0028](../adr/0028-il-kit-ui-non-sa-che-gioco-e.md)). Il confine non è più una
+riga di questo documento: lo tengono due regole con un test, **R14** e **R15**.
 
-Accanto ai token, in quel blocco, vivono le poche **primitive** che più di un componente disegna
-allo stesso modo: `.panel`, `.caption`, `.amount`, i due pulsanti, e da
-[D016](../delega/D016-correzioni-audit.md) anche `.refusal`, il rifiuto spiegato. Il confine è
-quello: una primitiva entra lì quando la disegnano **due** componenti, non prima. `.refusal` ci è
-entrata perché l'audit l'ha trovata copiata in due pannelli con il valore di `--danger` ricopiato a
-mano in quattro righe di `rgba()` — cambiare il token avrebbe spostato il testo e lasciato indietro
-sfondo e bordo. Adesso si derivano dal token con `color-mix`, che è ciò che rende il rosso una cosa
-sola anche quando è trasparente.
+La regola che stava qui — «una primitiva entra nel blocco quando la disegnano **due** componenti» —
+esce insieme al blocco. Era buona e ha funzionato finché è stata guardata: l'audit di
+[D016](../delega/D016-correzioni-audit.md) ha trovato `.refusal` copiata in due pannelli con il
+valore di `--danger` ricopiato a mano in quattro righe di `rgba()`. Il criterio resta lo stesso — un
+pezzo entra nel kit quando lo disegnano due componenti — ma adesso ciò che impedisce di aggirarlo è
+R15, non l'attenzione di chi rilegge.
 
 ---
 

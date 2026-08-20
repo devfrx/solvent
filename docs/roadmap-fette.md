@@ -180,6 +180,26 @@ mostra — **è chiusa**: il pannello è la home di [D015](delega/D015-home-banc
 che compone gli importi vive nello store, e quali righe si vedano lo decide
 `components/postings.ts`. Le mostrano tutte e due le schermate, con la stessa funzione.
 
+### Nel design, e non ancora nel codice
+
+Il canvas di Claude Design consegnato il 2026-08-20 è un **prototipo dell'intera applicazione**:
+disegna diciotto domini, mentre il codice ne ha due. [D023](delega/D023-il-design-system.md) ne
+prende le fondamenta — i ruoli di colore, le scale, i due caratteri e sei pezzi — e lascia qui tutto
+il resto, con il grilletto scritto. Senza queste righe la tentazione sarebbe costruirlo tutto in un
+pomeriggio, che è il difetto **A17** con un vestito bello.
+
+| Cosa manca                                        | Grilletto                                                                                                                                          |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| La plancia con i riquadri riordinabili            | la prima schermata che ha più riquadri di quanti ne stiano fermi. Oggi il cruscotto ne ha cinque e il tetto è sei (INV-12)                         |
+| Le schermate dei domini che non esistono          | la fetta di ciascuno. Il canvas disegna black market, immobiliare, impresa, casinò e crypto: nessuno di quei domini ha una riga di codice          |
+| Le schermate segnaposto per i domini chiusi       | il primo dominio che dichiara un requisito e lo mostra al giocatore prima di essere aperto                                                         |
+| Una schermata per ognuno dei sette stati          | oggi il guscio li distingue già dentro `App.vue`. Il grilletto è il primo stato che ha bisogno di più di un messaggio                              |
+| Gli stati vuoti, e i loro sette significati       | il primo elenco che può essere vuoto in un modo che significa qualcosa. Le ultime operazioni non lo sono: dopo due secondi sono piene di stipendio |
+| Il sistema di sovrapposizioni                     | la prima cosa che deve stare **sopra** il resto invece che dentro il flusso                                                                        |
+| L'interruttore del tema                           | le impostazioni, che hanno già il loro grilletto qui sopra. Fino ad allora sceglie `prefers-color-scheme`, quindi nessuno dei due temi è morto     |
+| `UiRow`, `UiStack` e i contenitori generici       | **mai**, salvo un ADR che scarti la ragione dell'[ADR 0028](adr/0028-il-kit-ui-non-sa-che-gioco-e.md). Sta qui perché qualcuno lo chiederà         |
+| La tabella «cosa l'interfaccia deve al giocatore» | è un documento, non codice: il suo posto è la scheda di dominio di [D018](delega/D018-la-scheda-di-dominio.md)                                     |
+
 ### Negli strumenti
 
 La voce **«un meccanismo per la purezza di `rules.ts`»** è **uscita** da qui: il grilletto era
