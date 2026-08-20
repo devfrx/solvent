@@ -39,7 +39,7 @@ leggi che tengono il gioco bilanciato stanno in [prodotto/visione.md](../prodott
 | D014 — dominio bancomat  | **chiusa**, commit `a0b3b9f`                                             |
 | D011 — runtime e store   | **chiusa**, commit `dbf821c`                                             |
 | D012 — guscio e parole   | **chiusa**, commit `fb45d71`                                             |
-| D015 — home e bancomat   | **chiusa**, commit `__COMMIT__`                                          |
+| D015 — home e bancomat   | **chiusa**, commit `3aa3460`                                             |
 | Kernel                   | **finito** — 535 righe, da D003 a D008                                   |
 | Persistenza nel main     | **finita** — 244 righe in `src/main/` e `src/preload/`                   |
 | Codice di dominio        | **`income` 104 righe, `atm` 64** — i due della fetta 01                  |
