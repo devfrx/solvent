@@ -18,7 +18,7 @@ Regola: una fetta non inizia finché la precedente non ha i gate verdi (ADR 0014
 | 03     | **Progresso offline**                                                                                                                           | il tetto di recupero, e che il recupero usi **lo stesso** codice del tempo reale (ADR 0009)                                                                                                       | non iniziata                                                                                         |
 | 04     | **Calore e black market**                                                                                                                       | il primo sistema che **ascolta** eventi da altri domini invece di importarli; il primo consumatore reale dell'Rng con stream separati                                                             | non iniziata                                                                                         |
 | 05     | **Prestiti e punteggio di credito**                                                                                                             | il primo sistema che legge lo storico dei movimenti; il primo debito, quindi il primo saldo che può essere negativo per volontà del giocatore                                                     | non iniziata                                                                                         |
-| 06     | **Prestige e ere**                                                                                                                              | `ResetScope` su molti sistemi contemporaneamente: ognuno decide cosa conserva, nel proprio file. Il difetto A09 nasceva qui                                                                       | non iniziata                                                                                         |
+| 06     | **L'indagine**                                                                                                                                  | uno stato imposto dall'esterno a **molti sistemi insieme**: ognuno decide cosa si congela e cosa si perde, nel proprio file. Il difetto A09 nasceva qui                                           | non iniziata — **da confermare**, vedi sotto                                                         |
 
 **La fetta 02 prometteva anche «il primo `boundedList` con dati veri dentro», e non lo mantiene.**
 Scrivendo [D017](delega/D017-il-caveau.md) è emerso il perché: il caveau «conserva contanti **e
@@ -26,6 +26,42 @@ oggetti**», ma gli oggetti nascono col black market e con le aste di box, e sen
 inventario è un contenitore vuoto — cioè l'astrazione speculativa che l'ADR 0014 vieta. La riga è
 stata corretta invece che obbedita, e ne discende che l'[ADR 0010](adr/0010-liste-storiche-limitate-alla-definizione.md)
 resta `Proposta` ancora una fetta.
+
+**La fetta 06 era «Prestige e ere», e quelle due cose non esistono più.** La
+[visione](prodotto/visione.md) riscritta il 2026-08-20 toglie sia le ere sia il prestige: i domini
+si aprono per requisiti, e il reset non è un pulsante che si preme per un bonus — è quello che
+succede se strafai. La fetta serviva a mettere alla prova una cosa sola, che resta vera: **uno stato
+imposto a molti sistemi contemporaneamente, ognuno dei quali decide nel proprio file cosa conserva.**
+Il candidato naturale è l'**indagine**, che congela conti e sequestra beni attraverso tutti i domini
+grigi, e che arriva dopo il calore (04) e dopo i prestiti (05) che può rovinare.
+
+È una **proposta**, non una decisione presa: chi apre la fetta 06 la confermi o la cambi, e lo
+scriva. Quello che è certo è che non può più chiamarsi prestige.
+
+**Ne discende una domanda aperta sul codice**, ed è nel registro YAGNI più sotto: senza prestige,
+`ResetScope` ha due valori — `soft` e `hard` — e uno dei due non ha più nessuno che lo chiama.
+
+**La fetta 03 ha tre problemi che la sua riga non dice**, e sono usciti dall'audit del kernel del
+2026-08-20, cioè rileggendo il codice **dopo** aver riscritto la visione.
+
+1. **Il progresso offline non è limitato dal tetto: è limitato dal caveau.** Finché i contanti sono
+   l'unico posto dove il reddito arriva, otto ore di assenza con un caveau da 8.000 € valgono
+   8.000 €, cioè il 2,3% di quello che `RECOVERY_CAP` permetterebbe. Non è un difetto — è la
+   [visione](prodotto/visione.md) che funziona — ma sposta la domanda della fetta.
+2. **Il tetto di otto ore, con un giorno da due secondi, vale trentanove anni di gioco.** A un
+   rendimento annuo dell'8% sono venti volte il portafoglio, mentre un'ora di gioco attivo ne vale
+   cinque anni e lo moltiplica per uno e mezzo: **dormire renderebbe tredici volte più che
+   giocare**. Il numero non era sbagliato quando è stato scelto — è stato scelto per un gioco senza
+   mercati. La visione dichiara ora la legge («il progresso offline non batte mai il gioco attivo»)
+   e il tetto va ri-derivato **in tempo di gioco**, non in ore reali.
+3. **Il recupero fa un solo `tickAll`**, e con un mondo che può andare contro il giocatore quel
+   passo solo rende invisibile ogni soglia attraversata e rientrata: la margin call che scatta e si
+   risana, il calore che sfonda e ridiscende, l'attività che va sotto il fido e risale. Il recupero
+   deve avanzare a **blocchi**. Non è una formula offline separata — è lo stesso codice eseguito più
+   volte, che è il contrario di ciò che l'ADR 0009 vieta.
+
+Ne discende che la fetta 03 non risponde a «di quanto alziamo il tetto». Risponde a **«cosa vuol
+dire offline quando il mondo va avanti anche contro di te»**. Chi la apre parta da lì.
 
 ### Perché quest'ordine
 
@@ -39,9 +75,15 @@ Ogni fetta è scelta per essere la **prima** che rompe qualcosa, se qualcosa è 
 - **04 prima dei domini più ricchi** perché il calore è il primo sistema che vive di eventi altrui:
   se il contratto del Bus è sbagliato, si scopre qui — quando cambiarlo costa poco.
 
-**L'ordine di costruzione non è l'ordine di gioco.** Il prestige è era 4 per il giocatore e fetta
-06 per noi, perché è la prima cosa che stressa `ResetScope` su molti sistemi insieme. Le due
-sequenze rispondono a domande diverse e non vanno allineate.
+**L'ordine di costruzione non è l'ordine di gioco, perché l'ordine di gioco non esiste.** Nella
+[visione](prodotto/visione.md) i domini non si sbloccano: dichiarano un requisito, e il giocatore
+lo soddisfa quando ci riesce. Due partite diverse aprono i domini in ordini diversi, e nessuna delle
+due è quella giusta.
+
+Questa lista è quindi **solo nostra**: dice in che ordine mettiamo alla prova il kernel, e non
+promette niente al giocatore. L'indagine è fetta 06 per noi perché è la prima cosa che impone uno
+stato a molti sistemi insieme, non perché sia «tardi» nella partita: al giocatore può capitare la
+prima sera, se si comporta di conseguenza.
 
 ## Oltre la fetta 06
 
@@ -51,8 +93,15 @@ documento diceva che oltre la 06 non ci fosse pianificazione di alcun tipo, e la
 Resta vera per il **disegno**. Non è mai stata vera per l'**ordine**: sapere quale dominio viene
 dopo non costa niente e serve a decidere cosa non costruire adesso.
 
-Le ere sono descritte in [prodotto/visione.md](prodotto/visione.md). Qui c'è solo la sequenza di
-lavoro che ne discende, e cosa ciascun blocco è la prima cosa a mettere alla prova.
+I domini sono descritti in [prodotto/visione.md](prodotto/visione.md). Qui c'è solo la sequenza di
+lavoro, e cosa ciascun blocco è la prima cosa a mettere alla prova.
+
+**Qui vivono le quattro ere, e solo qui.** Erano una progressione del gioco — contanti, capitale,
+impresa, rete — e la visione le ha tolte: aprivano i domini al posto del giocatore. Quello che
+resta è una **lettura interna**, utile a una cosa sola: indovinare cosa la maggior parte dei
+giocatori farà per primo, e costruire quello prima. Il giocatore non le vede, non le nomina e non
+ne raggiunge mai una. Se una riga di questo documento le usa per decidere **cosa costruire**, è al
+suo posto; se le usa per dire **cosa il giocatore può fare**, è un residuo da correggere.
 
 | Blocco                                               | Prima cosa che mette alla prova                                             |
 | ---------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -90,17 +139,20 @@ condizione, non entra — nemmeno se sembra ovvia.
 | **`now: Ticks` nel `SystemContext`**            | è la forma più diretta            | un dominio che ha bisogno dell'ora **esatta** e non del cambio di giorno. Nessuno dei domini della visione ce l'ha (ADR 0023)                                                                                                                                                                                                                                                                                      |
 | Uno `Scheduler` nel kernel                      | le scadenze sembrano chiederlo    | due o tre domini con scadenze già scritti, e una forma comune **osservata** fra loro                                                                                                                                                                                                                                                                                                                               |
 | Un `Logger` nel kernel                          | ovvio                             | quando servirà diagnosticare qualcosa che gli errori tipizzati non spiegano                                                                                                                                                                                                                                                                                                                                        |
+| Un chiamante per `ResetScope: 'soft'`           | è nel tipo dalla fetta 01         | la fetta 06. La [visione](prodotto/visione.md) del 2026-08-20 toglie il prestige, che era l'unico significato dichiarato di `soft`. Delle due l'una: o prende un significato nuovo — ricominciare **con lo stesso mondo**, contro `hard` che ne semina uno diverso (ADR 0005) — o esce dal tipo. Non inventargliene uno prima che serva                                                                            |
 
 ### Nei contratti e nei domini
 
-| Cosa manca                                                              | Grilletto                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Un contratto condiviso per le **collezioni di entità**                  | il **terzo** dominio che tiene un array di entità con id e ciclo di vita. Con due si copia, con tre si estrae                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| Un generatore di **id deterministici** per le entità del giocatore      | la prima entità creata dal giocatore (blocco A). Deve venire dall'Rng o da un contatore salvato, mai da `Date.now()`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Un meccanismo condiviso per **validare lo stato salvato di un sistema** | il **secondo** dominio con stato. `SystemsSave` è opaco per lo schema del main (D009), quindi ogni sistema è l'unico posto che può guardare ciò che riceve nel `load`: `income` lo fa a mano in tre righe. Con due domini che copiano quelle tre righe, la domanda va risposta invece che rimandata. **Non è D014**: preparandola si è visto che il bancomat della fetta 01 non ha stato. Il candidato è il caveau della fetta 02, o il bancomat stesso quando arrivano le soglie giornaliere                                                                                                                                                |
-| Un tipo per le **scadenze** (tick assoluto + cosa succede)              | il secondo dominio che ne ha una. Il primo se la scrive in casa, ed è giusto così                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `Reason` spezzata per dominio invece che un'unione unica                | quando il file dei contratti diventa un punto di conflitto misurato, non prima. Oggi è il prezzo giusto per avere le chiavi i18n tipizzate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Uno schema che verifica il `max` di una lista storica (R09)             | il primo `boundedList` che entra **davvero** nel salvataggio: il primo sistema con stato che ne tiene una. **Non è il caveau**: [D017](delega/D017-il-caveau.md) gli dà una capienza, non un inventario, e senza oggetti da conservare non c'è nessun array. Il candidato è il primo dominio che possiede **cose** — black market o aste di box, sempre nell'era 1. Nel payload della versione 1 non c'è nessun array — `balances` e `cursors` sono mappe, `SystemsSave` è opaco — quindi il controllo non avrebbe niente da attraversare. Era nella definizione di fatto di [D009](delega/D009-persistenza-main.md), ed è stato tolto da lì |
+| Cosa manca                                                              | Grilletto                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Un contratto condiviso per le **collezioni di entità**                  | il **terzo** dominio che tiene un array di entità con id e ciclo di vita. Con due si copia, con tre si estrae                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Un generatore di **id deterministici** per le entità del giocatore      | la prima entità creata dal giocatore (blocco A). Deve venire dall'Rng o da un contatore salvato, mai da `Date.now()`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Un meccanismo condiviso per **validare lo stato salvato di un sistema** | il **secondo** dominio con stato. `SystemsSave` è opaco per lo schema del main (D009), quindi ogni sistema è l'unico posto che può guardare ciò che riceve nel `load`: `income` lo fa a mano in tre righe. Con due domini che copiano quelle tre righe, la domanda va risposta invece che rimandata. **Non è D014**: preparandola si è visto che il bancomat della fetta 01 non ha stato. Il candidato è il caveau della fetta 02, o il bancomat stesso quando arrivano le soglie giornaliere                                                                                                                                       |
+| Un tipo per le **scadenze** (tick assoluto + cosa succede)              | il secondo dominio che ne ha una. Il primo se la scrive in casa, ed è giusto così                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `Reason` spezzata per dominio invece che un'unione unica                | quando il file dei contratti diventa un punto di conflitto misurato, non prima. Oggi è il prezzo giusto per avere le chiavi i18n tipizzate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Uno schema che verifica il `max` di una lista storica (R09)             | il primo `boundedList` che entra **davvero** nel salvataggio: il primo sistema con stato che ne tiene una. **Non è il caveau**: [D017](delega/D017-il-caveau.md) gli dà una capienza, non un inventario, e senza oggetti da conservare non c'è nessun array. Il candidato è il primo dominio che possiede **cose** — black market o aste di box, blocco A. Nel payload della versione 1 non c'è nessun array — `balances` e `cursors` sono mappe, `SystemsSave` è opaco — quindi il controllo non avrebbe niente da attraversare. Era nella definizione di fatto di [D009](delega/D009-persistenza-main.md), ed è stato tolto da lì |
+| La precisione di `Decimal` scelta invece che ereditata                  | la prossima delega che tocca `contracts/money.ts`, e comunque prima che esista un salvataggio in mano a qualcuno. La [visione](prodotto/visione.md) dichiara un bersaglio a 1e30; le venti cifre predefinite di decimal.js tengono i centesimi fino a 1e18, e oltre quella soglia la somma dei conti smette di fare zero **in silenzio**. È una riga di configurazione e una misurazione di cosa diventa rosso, non una feature                                                                                                                                                                                                     |
+| L'etichetta a otto voci degli strumenti, e il test di non dominanza     | il **secondo** strumento con un'etichetta vera. Oggi ce n'è uno solo — il caveau — e una struttura generalizzata da un caso solo è generalizzata male. La forma è descritta nella [visione](prodotto/visione.md); qui resta il grilletto L'audit del kernel del 2026-08-20 ha aggiunto un vincolo: **non è un campo del `System`**, perché il bancomat ha un'etichetta e non ha un sistema (D014). Sono due liste diverse, e la seconda vuole il suo `registry-completeness` o le etichette mancheranno in silenzio                                                                                                                 |
 
 ### Nell'applicazione
 
@@ -122,6 +174,7 @@ La riga che stava qui — **gli importi nelle ultime operazioni**, in attesa del
 mostra — **è chiusa**: il pannello è la home di [D015](delega/D015-home-bancomat.md), il selettore
 che compone gli importi vive nello store, e quali righe si vedano lo decide
 `components/postings.ts`. Le mostrano tutte e due le schermate, con la stessa funzione.
+| Il denaro formattato dal `Decimal` invece che da un `number` | il primo importo sopra 9.007.199.254.740.991 €, e comunque prima della prima release. `toDisplayNumber` passa da un `number` JS, che è esatto solo fin lì: oltre quella soglia **lo schermo mente**, e mente prima che si rompa il libro mastro. Porta con sé i suffissi (K, M, B…), perché un importo con venti cifre non sta su un riquadro |
 
 ### Negli strumenti
 

@@ -11,9 +11,13 @@ vale `null` per tutti e sei, quindi il ramo esiste, è provato
 (`tests/kernel/ledger-capacity`), ed è spento.
 
 La fetta 02 lo accende, e nel farlo scopre che quella costante non basta più. Il caveau della
-[visione](../prodotto/visione.md) non è un tetto fisso: è il **muro dell'era 1**, e la regola delle
-quattro ere dice che un muro «non si compra: si supera cambiando modo di giocare». Il caveau «si
-amplia, ma non all'infinito». Una capienza che cresce non può vivere in una costante compilata.
+[visione](../prodotto/visione.md) non è un tetto fisso: è la **pozza** dei contanti, cioè il modo in
+cui quello strumento smette di assorbire denaro, e «si amplia, ma non all'infinito». Una capienza
+che cresce non può vivere in una costante compilata.
+
+Ed è il primo caso di una forma generale: la pozza di uno strumento si sposta quasi sempre — un
+distretto si sviluppa, un fido cresce col punteggio, un tavolo alto si apre giocando. Il caveau è
+solo il primo a chiederlo.
 
 Il resto del meccanismo invece **non ha bisogno di niente**, ed è ciò che rende questa la sola
 domanda della fetta: il Ledger rifiuta già con `error.ledger.capacity_exceeded`, che porta con sé

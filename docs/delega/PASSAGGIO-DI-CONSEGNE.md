@@ -16,10 +16,17 @@ tracciabili ma illimitati. Ogni dominio — mercato nero, prestiti, casinò, imm
 diverso di viverla. Senza quella tensione, tredici domini sono tredici pulsanti che alzano lo
 stesso numero.
 
-Non c'è un'attività principale: è un **ecosistema** in quattro ere, e ogni era rende insufficiente
-la strategia della precedente con un muro che il denaro non compra — il caveau, il punteggio di
-credito, l'attenzione, il calore accumulato. Le ere, la profondità di ogni dominio e le cinque
-leggi che tengono il gioco bilanciato stanno in [prodotto/visione.md](../prodotto/visione.md).
+Non c'è un'attività principale e non c'è una progressione: è una **sandbox**. Nessun dominio si
+sblocca — ognuno dichiara un requisito, e il giocatore lo soddisfa quando ci riesce, nell'ordine
+che si costruisce da sé. A impedire che uno strumento diventi la risposta a ogni domanda non è una
+fase del gioco: è che ognuno **satura**, e che ognuno paga in almeno una fra liquidità,
+tracciabilità, varianza e attenzione.
+
+La struttura che regge tutto questo — l'etichetta a otto voci, la legge della non dominanza, le
+quattro forme di saturazione — e la profondità di ogni dominio stanno in
+[prodotto/visione.md](../prodotto/visione.md), riscritta il 2026-08-20. **Se hai in mente le quattro
+ere, quel documento è cambiato sotto di te:** le ere non esistono più come struttura di gioco, e
+sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md).
 
 ## Dove siamo, esattamente
 
@@ -355,8 +362,9 @@ Leggi in quest'ordine, e non altro prima di aver finito:
    STOP 2 nei suoi cinque punti, il percorso manuale eseguito, e undici correzioni
 3. `docs/roadmap-fette.md` — il registro delle fette e il registro YAGNI, che è il più importante
    dei due: dice cosa è stato deliberatamente lasciato fuori e cosa lo farà entrare
-4. `docs/prodotto/visione.md` — le quattro ere e le cinque leggi, perché la fetta 02 è la prima
-   che serve al gioco e non solo al kernel
+4. `docs/prodotto/visione.md` — la casa (l'etichetta, la non dominanza, la saturazione) e le sei
+   leggi, perché la fetta 02 è la prima che serve al gioco e non solo al kernel. **Riscritta il
+   2026-08-20**: se l'hai letta prima di quella data, rileggila
 5. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
 
 Stato: STOP 1 approvato, STOP 2 pronto da decidere. Da D001 a D016 tutte `Chiusa` e unite a

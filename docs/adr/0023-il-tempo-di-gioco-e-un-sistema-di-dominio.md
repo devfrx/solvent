@@ -57,8 +57,9 @@ stesso frame paga: nessuna latenza, nessuna coda.
 
 ## Quando
 
-**Non adesso.** Il grilletto è il primo dominio con una scadenza — gli affitti o le rate, era 2
-della visione. Le fette da 01 a 06 non hanno date: il progresso offline della fetta 03 è tempo
+**Non adesso.** Il grilletto è il primo dominio con una scadenza — gli affitti o le rate, blocco B
+del [registro delle fette](../roadmap-fette.md). Le fette da 01 a 06 non hanno date: il progresso
+offline della fetta 03 è tempo
 _trascorso_, non tempo _assoluto_, e il tetto di recupero lo gestisce senza sapere che giorno sia.
 
 ## Alternative scartate
