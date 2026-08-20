@@ -296,11 +296,11 @@ Le quattro cose che chi arriva adesso deve sapere:
    `vue-eslint-parser` sono adesso dichiarati a mano. La causa vera è aperta, ed è la correzione 8
    di [D023](D023-il-design-system.md).
 
-**Adesso [D017 — Il caveau](D017-il-caveau.md).** È **Aperta** e **preparata per l'esecuzione**: il
+**Adesso [D017 — Il caveau](D017-il-caveau.md).** È **Aperta**, **preparata per l'esecuzione** e **ri-preparata il 2026-08-21**, perché fra la sua scrittura e oggi si sono chiuse tre deleghe: il
 costo del cambiamento è stato misurato mettendo davvero una capienza a `POOLS.cash` e guardando
 cosa diventa rosso, e la misura ha trovato un difetto nella delega stessa — il recupero dopo
 un'assenza incassava **zero** invece di quanto ci sta. La decisione di gioco è stata riscritta
-prima che esistesse una riga di codice. Gli otto punti stanno in [D017](D017-il-caveau.md), sotto
+prima che esistesse una riga di codice. I punti misurati stanno in [D017](D017-il-caveau.md), sotto
 _Cosa la preparazione ha verificato_.
 
 Il caveau è anche l'unico dominio con una **[scheda](../design/domini/vault.md)** già compilata, ed
