@@ -2,7 +2,7 @@
 
 - **Stato:** **Chiusa** — scritta il 2026-08-21 su una domanda dell'utente (_dove vive
   l'interfaccia di un dominio?_) ed eseguita lo stesso giorno, sul ramo
-  `d026-dove-si-attacca-un-dominio`. Le tre decisioni sono state prese con l'utente prima di
+  `d026-dove-si-attacca-un-dominio`, commit `22c050a`. Le tre decisioni sono state prese con l'utente prima di
   toccare un file, e stanno più sotto in _Le tre decisioni, e come sono state prese_
 - **Dipende da:** [D024](D024-il-telaio.md) — la colonna, `components/screens.ts` e INV-22 sono il
   meccanismo su cui una pagina di dominio si attacca; senza il telaio questa delega dovrebbe
