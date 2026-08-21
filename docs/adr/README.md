@@ -150,6 +150,7 @@ Il grilletto resta quello che il registro YAGNI ha scritto: il primo dominio che
 | [0036](0036-i-cheat-passano-dalle-porte-del-gioco.md)                          | I cheat di sviluppo passano dalle porte del gioco              | **Accettata** | come si costruisce uno stato di gioco senza poter mentire su di esso        | A05             |
 | [0037](0037-il-telaio-non-scorre-il-contenuto-si.md)                           | Il telaio non scorre, il contenuto sì                          | **Accettata** | chi scorre in un'applicazione da scrivania, e perché non serve un `z-index` | A14             |
 | [0038](0038-la-commissione-scala-il-pavimento-no.md)                           | La commissione scala, il pavimento no                          | **Accettata** | perché una commissione fissa smette di esistere, e cosa la tiene viva       | —               |
+| [0039](0039-una-sovrapposizione-passa-dal-kit.md)                              | Una sovrapposizione passa dal kit                              | **Accettata** | chi possiede il livello superiore, e perché una riga di CSS lo disfaceva    | —               |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è

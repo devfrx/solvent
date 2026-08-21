@@ -64,6 +64,7 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 | R19 | Nessun dominio importa un altro dominio                                                         | ✅      | `tests/rules/domains-are-independent` — alias e percorsi relativi, `import type` compreso (D018)                                             |
 | R20 | I cheat esistono solo in sviluppo, e nessuno li nomina fuori dal ramo che il compilatore spegne | ✅      | `tests/rules/cheats-are-dev-only` — import di **valore**, l'unico `import.meta.env`, e l'elenco chiuso dei `CheatId`                         |
 | R21 | Nessun `z-index` in `src/`                                                                      | ✅      | `tests/rules/no-z-index` — `.ts`, `.vue` e `.css`; ⚠️ non vede il CSS delle librerie                                                         |
+| R22 | L'attributo `popover` vive solo in `UiPopover`: una sovrapposizione passa dal kit               | ✅      | `tests/rules/overlays-pass-through-the-kit` — l'attributo nel sorgente, `popovertarget` escluso; ⚠️ non vede un `popover` messo a runtime    |
 
 Regole di configurazione e di processo, con la stessa dignità:
 

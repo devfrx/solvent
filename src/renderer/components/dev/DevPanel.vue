@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { ref, shallowRef } from 'vue'
+import { shallowRef } from 'vue'
 
 import type { Cheat, CheatId } from '@core/contracts/cheats'
 import type { Money } from '@core/contracts/money'
@@ -10,6 +10,7 @@ import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
 import UiButton from '@renderer/ui/UiButton.vue'
 import UiLabel from '@renderer/ui/UiLabel.vue'
+import UiPopover from '@renderer/ui/UiPopover.vue'
 import UiText from '@renderer/ui/UiText.vue'
 
 /**
@@ -26,10 +27,16 @@ import UiText from '@renderer/ui/UiText.vue'
  * allo store e li dà da formattare al traduttore. È la stessa disciplina di `BankCard3d`, che
  * riceve quattro stringhe già fatte.
  *
- * **Sta nel livello superiore** (ADR 0032): `popover`, niente `z-index`, `Esc` che chiude gratis.
- * Non è un lusso — un pannello dentro il flusso verrebbe tagliato dal primo antenato con `overflow`
- * e sposterebbe la pagina che si sta guardando, cioè disturberebbe proprio la cosa che serve a
- * verificare.
+ * **Sta nel livello superiore** (ADR 0032), e da [D031](../../../../docs/delega/D031-la-sovrapposizione-e-un-pezzo-del-kit.md)
+ * ci sta passando da `UiPopover` invece che per conto proprio. Non è un lusso — un pannello dentro
+ * il flusso verrebbe tagliato dal primo antenato con `overflow` e sposterebbe la pagina che si sta
+ * guardando, cioè disturberebbe proprio la cosa che serve a verificare.
+ *
+ * **Questo file è stato il difetto**, e vale la pena che lo dica: la sua `.panel` scriveva
+ * `display: flex` senza condizione, e una regola d'autore vince su quella del motore — quindi il
+ * riquadro restava visibile anche chiuso, e per due stesure la colpa era stata data alla meccanica
+ * di apertura. Adesso quella riga non è più sua: `UiPopover` possiede il `display`, e R22 impedisce
+ * a questo file di avere di nuovo in mano un elemento con `popover`.
  *
  * **Non è una schermata.** Nessuna voce nella colonna, nessuna riga in `SCREENS`: le destinazioni
  * sono i posti dove il gioco si amministra (ADR 0033), e questo non è gioco. Vive sopra qualunque
@@ -40,25 +47,9 @@ const store = useGameStore()
 const { devCheats } = storeToRefs(store)
 const { text, money, failure } = useTranslator()
 
-const open = ref(false)
-
 /** `shallowRef` come altrove: un rifiuto porta dei `Decimal`, e un `ref` li avvolgerebbe. */
 const refusal = shallowRef<GameError | null>(null)
 const refused = shallowRef<CheatId | null>(null)
-
-/**
- * Lo stato aperto/chiuso arriva **dal motore**, non da noi: con `popovertarget` è il browser a
- * aprire, chiudere, ascoltare `Esc` e chiudere al clic fuori. A noi resta di rispecchiarlo per
- * `aria-expanded`.
- *
- * La prima stesura apriva e chiudeva a mano da un `@click`, e il pannello **non si chiudeva più**:
- * un `popover` si congeda da solo quando si clicca fuori, e il pulsante è fuori — quindi il motore
- * chiudeva e il gestore riapriva nello stesso clic. Con l'aggancio dichiarativo il motore sa che
- * quel pulsante è il suo, e non fa il giro.
- */
-const onToggle = (event: Event): void => {
-  open.value = (event as ToggleEvent).newState === 'open'
-}
 
 const run = (cheat: Cheat, amount?: Money): void => {
   const done = store.runCheat(cheat.id, amount)
@@ -72,53 +63,71 @@ const reasonFor = (cheat: Cheat): string | undefined =>
 </script>
 
 <template>
-  <button class="tab" type="button" popovertarget="dev-panel" :aria-expanded="open">
-    {{ text('dev.title') }}
-  </button>
+  <UiPopover class="corner" side="top">
+    <template #trigger="{ popovertarget, expanded }">
+      <button class="tab" type="button" :popovertarget="popovertarget" :aria-expanded="expanded">
+        {{ text('dev.title') }}
+      </button>
+    </template>
 
-  <div id="dev-panel" popover class="panel" @toggle="onToggle">
-    <header class="head">
-      <UiLabel>{{ text('dev.title') }}</UiLabel>
-      <UiText tone="ink-3" size="xs">{{ text('dev.subtitle') }}</UiText>
-    </header>
+    <div class="panel">
+      <header class="head">
+        <UiLabel>{{ text('dev.title') }}</UiLabel>
+        <UiText tone="ink-3" size="xs">{{ text('dev.subtitle') }}</UiText>
+      </header>
 
-    <ul class="cheats">
-      <li v-for="cheat of devCheats" :key="cheat.id" class="cheat">
-        <template v-if="cheat.kind === 'amount'">
-          <UiLabel>{{ text(cheat.id) }}</UiLabel>
-          <div class="amounts">
-            <UiButton
-              v-for="amount of cheat.amounts"
-              :key="amount.toString()"
-              variant="quiet"
-              :label="money(amount)"
-              :reason="reasonFor(cheat)"
-              @press="run(cheat, amount)"
-            />
-          </div>
-        </template>
-        <UiButton
-          v-else
-          variant="quiet"
-          :label="text(cheat.id)"
-          :reason="reasonFor(cheat)"
-          @press="run(cheat)"
-        />
-      </li>
-    </ul>
-  </div>
+      <ul class="cheats">
+        <li v-for="cheat of devCheats" :key="cheat.id" class="cheat">
+          <template v-if="cheat.kind === 'amount'">
+            <UiLabel>{{ text(cheat.id) }}</UiLabel>
+            <div class="amounts">
+              <UiButton
+                v-for="amount of cheat.amounts"
+                :key="amount.toString()"
+                variant="quiet"
+                :label="money(amount)"
+                :reason="reasonFor(cheat)"
+                @press="run(cheat, amount)"
+              />
+            </div>
+          </template>
+          <UiButton
+            v-else
+            variant="quiet"
+            :label="text(cheat.id)"
+            :reason="reasonFor(cheat)"
+            @press="run(cheat)"
+          />
+        </li>
+      </ul>
+    </div>
+  </UiPopover>
 </template>
 
 <style scoped>
 /*
- * L'aggancio: piccolo, in basso a destra, `fixed` perché deve restare raggiungibile mentre la
- * pagina scorre. Il tratteggio è deliberato — dice «questo non fa parte del gioco» senza bisogno
- * di una parola in più, ed è l'unico posto del progetto che lo usa.
+ * L'angolo: `fixed` perché l'aggancio deve restare raggiungibile mentre la pagina scorre.
+ *
+ * Sta sull'**ancora** e non sul pulsante, e non è un dettaglio: da D031 l'ancora è l'elemento a cui
+ * il riquadro si aggancia, quindi deve essere lei a trovarsi dove il pulsante si vede. Con `fixed`
+ * sul pulsante l'ancora resterebbe un rettangolo vuoto in mezzo alla pagina, e il pannello si
+ * aprirebbe lì.
+ *
+ * Che una classe passata da fuori arrivi fino all'ancora non è fortuna: `UiPopover` ha un elemento
+ * di radice solo, quindi gli attributi ricadono lì da soli. Non è una proprietà di geometria (R16):
+ * è il chiamante che veste ciò che possiede.
  */
-.tab {
+.corner {
   position: fixed;
   right: var(--space-4);
   bottom: var(--space-4);
+}
+
+/*
+ * L'aggancio: piccolo, tratteggiato. Il tratteggio è deliberato — dice «questo non fa parte del
+ * gioco» senza bisogno di una parola in più, ed è l'unico posto del progetto che lo usa.
+ */
+.tab {
   padding: var(--space-2) var(--space-3);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
@@ -135,14 +144,15 @@ const reasonFor = (cheat: Cheat): string | undefined =>
 }
 
 /*
- * `inset: auto` disfa il «al centro dello schermo» che il motore mette su ogni riquadro del livello
- * superiore, come in `UiTooltip`. Poi si colloca sopra il proprio aggancio.
+ * La pittura del pannello, e **solo** quella: dove si colloca, come sta nel livello superiore e
+ * quando si vede sono di `UiPopover`.
+ *
+ * Il `display: flex` qui è legittimo, ed è la differenza che conta: questo è un `div` dentro il
+ * riquadro, non l'elemento che porta l'attributo `popover`. La riga che disfaceva il meccanismo
+ * stava sull'elemento sbagliato, e adesso quell'elemento non è più raggiungibile da questo file —
+ * lo impedisce R22, non l'attenzione di chi scrive.
  */
 .panel {
-  position: fixed;
-  inset: auto;
-  right: var(--space-4);
-  bottom: calc(var(--space-7) + var(--space-4));
   width: 300px;
   max-height: 72vh;
   overflow-y: auto;

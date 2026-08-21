@@ -1,9 +1,8 @@
 # D031 — La sovrapposizione è un pezzo del kit
 
-- **Stato:** **Aperta** — scritta il 2026-08-21, non eseguita. Il ramo si chiami
-  `d031-la-sovrapposizione-e-un-pezzo-del-kit` e parta da `d030-il-contenuto-scorre-nel-telaio`
-  (oppure da `main`, se nel frattempo i rami sono stati fusi — vedi
-  [PASSAGGIO-DI-CONSEGNE](PASSAGGIO-DI-CONSEGNE.md))
+- **Stato:** Chiusa — ramo `d031-la-sovrapposizione-e-un-pezzo-del-kit`, che parte da
+  [D032](D032-la-commissione-scala-il-pavimento-no.md) e non da `d030` come diceva: D032 ha chiuso
+  prima, e le due non si toccano. Scritta il 2026-08-21, eseguita lo stesso giorno
 - **Dipende da:** [D025](D025-il-tooltip.md), che ha portato la prima sovrapposizione, e
   [D029](D029-i-devcheat.md), che ha portato la seconda e ne ha rotta una
 - **Sblocca:** niente, ed è una correzione. Diceva «D032, la rifinitura del bancomat»: quella è
@@ -15,12 +14,14 @@
   vivono le sovrapposizioni), [0028](../adr/0028-il-kit-ui-non-sa-che-gioco-e.md) (il kit non sa
   che gioco è), [0030](../adr/0030-il-telaio-e-una-forma-non-un-contenitore.md) (una forma non è un
   contenitore), [0037](../adr/0037-il-telaio-non-scorre-il-contenuto-si.md) (R21, nessun
-  `z-index`). Probabilmente ne produce uno nuovo — vedi _Le due decisioni aperte_
+  `z-index`)
+- **Produce:** ADR [0039](../adr/0039-una-sovrapposizione-passa-dal-kit.md) e la regola **R22**
 - **Regole:** R14, R16, R17 e R21 valgono tutte. Se il pezzo nuovo prende il posto di
   `UiTooltip`, R17 va riletta: dice «se c'è una spiegazione, è `UiTooltip`», e quel nome potrebbe
   cambiare
-- **Budget:** non stimato. Chi la esegue lo scriva prima di cominciare, dopo aver preso le due
-  decisioni aperte: la forbice fra le due opzioni è larga
+- **Budget:** non stimato in partenza, come la delega chiedeva. Misurato a fine lavoro: **96 righe**
+  nel pezzo nuovo e **34** nella regola. `UiTooltip` ne ha **perse 37** (da 73 a 36) e `DevPanel`
+  una sola (da 122 a 121) — che è il numero più interessante dei quattro: vedi _Correzioni_, punto 3
 
 ## Obiettivo
 
@@ -212,16 +213,16 @@ contestuale, quindi la domanda va posta a lui invece che decisa da chi esegue.
 
 ## Definizione di fatto
 
-- [ ] Il pannello dei cheat **si chiude**, e la causa vera del difetto è scritta invece che
+- [x] Il pannello dei cheat **si chiude**, e la causa vera del difetto è scritta invece che
       aggirata. Se la seconda stesura era giusta e il problema era altro, va detto quale.
-- [ ] La meccanica della sovrapposizione vive in **un** file di `src/renderer/ui/`.
-- [ ] Il pezzo nuovo ha almeno due utenti veri nel repo.
-- [ ] Apertura e chiusura col puntatore, col tabulatore e con `Esc` — verificate **nella finestra
+- [x] La meccanica della sovrapposizione vive in **un** file di `src/renderer/ui/`.
+- [x] Il pezzo nuovo ha almeno due utenti veri nel repo.
+- [x] Apertura e chiusura col puntatore, col tabulatore e con `Esc` — verificate **nella finestra
       vera**, via CDP, e con una misura letta nel DOM: il pannello dei cheat non esiste nel
       pacchetto compilato, quindi l'ambiente statico di `out/renderer/` **non basta**.
-- [ ] Zero `z-index` (R21 verde), nessuna chiave i18n nel kit (R14 verde).
-- [ ] La regola nuova, se ne nasce una, è rotta di proposito una volta.
-- [ ] `npm run verify` verde e `docs/stato.md` rigenerato.
+- [x] Zero `z-index` (R21 verde), nessuna chiave i18n nel kit (R14 verde).
+- [x] La regola nuova, se ne nasce una, è rotta di proposito una volta.
+- [x] `npm run verify` verde e `docs/stato.md` rigenerato.
 
 ## Trappole note
 
@@ -245,3 +246,90 @@ contestuale, quindi la domanda va posta a lui invece che decisa da chi esegue.
    che non si riesce a estrarre in una funzione pura_. Questa delega è il candidato più serio che
    sia comparso finora — se ci si arriva, sono **due dipendenze**, quindi un ADR
    ([0015](../adr/0015-criterio-di-ammissione-delle-dipendenze.md)). Non farlo di straforo.
+
+## Correzioni rispetto a com'era scritta la delega
+
+1. **Le due decisioni aperte sono state prese dall'utente, e la seconda con un «no».** Decisione 1
+   è **A**: una base sola, `UiPopover`, e `UiTooltip` la usa. La ragione decisiva non era quella
+   scritta nella delega — «se restano due, fra sei mesi sono quattro» — ma la causa del difetto,
+   che nel frattempo era stata trovata: `UiTooltip` non era rotto **per fortuna**, perché non gli
+   era servito scrivere `display`. Una regola rispettata per caso non è una regola.
+   Decisione 2 è **un pezzo solo**: niente `UiMenu`. Il pannello dei cheat è un elenco di pulsanti e
+   il menu contestuale del canvas non ha una riga di codice, quindi `UiMenu` avrebbe **zero**
+   chiamanti — contro i due che il kit richiede (D023).
+2. **La riproduzione minima in HTML puro non è servita.** La delega la dava come primo passo, e la
+   risposta è arrivata prima e da un altro posto: leggendo il documento della finestra vera durante
+   [D032](D032-la-commissione-scala-il-pavimento-no.md), dove il pannello copriva i pulsanti che
+   quella delega doveva premere. Tre delle cinque piste erano escludibili con **una** lettura.
+3. **`DevPanel` ha perso una riga sola, e non è un fallimento: è la misura giusta.** La delega
+   diceva «perde la meccanica e tiene i cheat», e ci si aspetterebbe un file più corto. Le righe di
+   meccanica erano cinque — `position`, `inset`, `right`, `bottom`, `display` — e sono state
+   sostituite da altrettante fra lo slot, l'ancora e il commento che spiega perché `position: fixed`
+   si è spostato. **Ciò che è cambiato non è quanto codice c'è, ma quale**: nessuna delle righe
+   rimaste può più rompere una sovrapposizione, perché nessuna tocca un elemento con `popover`.
+4. **`position: fixed` è passato dal pulsante all'ancora**, e la delega non lo prevedeva. Con
+   `fixed` sul pulsante l'ancora resterebbe un rettangolo vuoto in mezzo alla pagina, e il riquadro
+   si aprirebbe **lì**: l'ancoraggio CSS guarda dove l'ancora si trova, non dove sta il suo
+   contenuto. Ne discende un guadagno che non era in programma — il pannello adesso è ancorato
+   davvero, a 6 px sopra il proprio pulsante, invece di ripetere a mano le coordinate del pulsante
+   con `right` e `bottom`.
+5. **R17 non è stata rivista, e l'intestazione diceva che forse andava.** «Se c'è una spiegazione, è
+   `UiTooltip`» resta vero alla lettera: il componente esiste ancora, ha perso la meccanica e non il
+   ruolo. La domanda era giusta da porre e la risposta è stata «no».
+6. **`useId` entra nel progetto, ed è la prima volta.** L'aggancio dichiarativo vuole un `id` e due
+   istanze in pagina non possono averlo uguale. Non è una dipendenza nuova — è Vue, già in uso — ma
+   è una scelta: l'alternativa era un contatore di modulo, cioè stato globale dentro un pezzo del
+   kit.
+7. **La regola nuova ha avuto bisogno di un confine che la delega non immaginava.** R22 vieta
+   l'attributo `popover` e deve lasciar passare `popovertarget`, che è il modo **corretto** di
+   aprire un riquadro dal proprio pulsante. Senza il `(?![\w-])` finale la regola avrebbe vietato
+   proprio la forma che vuole incoraggiare — ed è il caso di prova che lo dichiara, non un commento.
+8. **Niente jsdom, e la trappola 5 non è scattata.** La delega lo dava come candidato più serio per
+   la prima dipendenza di prova. Non è servita: ciò che andava verificato — che il riquadro si apra
+   e si **chiuda** — è comportamento del motore, e montarlo in un DOM finto avrebbe provato il finto
+   invece del vero. La verifica è la finestra vera più una regola strutturale, che insieme coprono
+   più di quanto un test montato avrebbe potuto.
+
+## La misura, presa nella finestra vera
+
+Via CDP, con la finestra ferma dov'era, il 2026-08-21. Ogni riga è letta **nel documento** dopo il
+gesto, non guardata in un'immagine.
+
+### Il pannello dei cheat
+
+| Gesto                 | `:popover-open` | `display` | riquadro | `aria-expanded` | stacco dal pulsante |
+| --------------------- | --------------- | --------- | -------- | --------------- | ------------------- |
+| all'avvio             | `false`         | `none`    | 0×0      | `false`         | —                   |
+| primo clic            | **`true`**      | `flex`    | 300×502  | `true`          | **6 px**            |
+| secondo clic          | **`false`**     | `none`    | 0×0      | `false`         | —                   |
+| `Esc`                 | `false`         | `none`    | 0×0      | `false`         | —                   |
+| tabulatore + `Invio`  | `true`          | `flex`    | 300×502  | `true`          | 6 px                |
+| tabulatore + `Spazio` | `true`          | `flex`    | 300×502  | `true`          | 6 px                |
+
+**Il fuoco dopo `Esc` resta sul pulsante `DEV`**, che è la metà di quella spunta che si dimentica.
+
+### Il tooltip, che ha cambiato meccanica sotto
+
+Dodici ancore in pagina, undici a puntatore. Il ruolo della bolla è `tooltip` e `aria-describedby`
+punta al riquadro giusto.
+
+| Ancora            | Aperto | Dove va               | Stacco | Scarto orizzontale |
+| ----------------- | ------ | --------------------- | ------ | ------------------ |
+| a 56 px dall'alto | sì     | **sotto (ribaltata)** | 6 px   | **0 px**           |
+| a 470 px          | sì     | sopra, come chiesto   | 6 px   | **0 px**           |
+
+Il ribaltamento è la dichiarazione che funziona: alla prima ancora non c'è posto sopra, e il CSS
+sceglie l'altra parte da solo. Lo scarto orizzontale è **zero** in tutti e due i casi, che è la
+prova che `anchor-scope` sta facendo il proprio lavoro — senza, tutte le bolle si aggancerebbero
+alla prima.
+
+### Una trappola dello strumento, non del codice
+
+`Spazio` non attivava il pulsante, e per qualche minuto è sembrato un difetto di accessibilità. Non
+lo era: l'evento sintetico mandava `key: 'Space'` invece di `key: ' '`, quindi il motore non
+sintetizzava il clic. A dirlo è stato un controllo preso **nello stesso ambiente** — lo stesso
+`Spazio` non attivava nemmeno l'interruttore del tema, che nessuno aveva toccato.
+
+È la stessa lezione di [D030](D030-il-contenuto-scorre-nel-telaio.md), correzione 2, con un'altra
+faccia: **una misura strana va confrontata con un controllo preso allo stesso modo**, o il primo
+numero storto diventa un difetto inventato.

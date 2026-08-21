@@ -16,9 +16,10 @@
   [0033](../adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md),
   [0030](../adr/0030-il-telaio-e-una-forma-non-un-contenitore.md),
   [0037](../adr/0037-il-telaio-non-scorre-il-contenuto-si.md)
-- **Produce:** ADR **0039** — _Il bancomat e il cruscotto sono due pagine_, che manda l'ADR 0018 in
+- **Produce:** ADR **0040** — _Il bancomat e il cruscotto sono due pagine_, che manda l'ADR 0018 in
   `Superata`. Sarebbe il primo `Superata` del progetto: oggi ne conta zero
-  ([stato.md](../stato.md))
+  ([stato.md](../stato.md)). Era 0039 quando questa delega è stata scritta: D031 ha chiuso prima e
+  quel numero se l'è preso
 - **Fonte del disegno:** [design/mockups/solvent-canvas.dc.html](../design/mockups/solvent-canvas.dc.html),
   artboard `ATM`, righe 1702–2453. **Si legge nel sorgente**, con il metodo del
   [suo README](../design/mockups/README.md)
@@ -228,8 +229,8 @@ ragione va riscritta nel test.
 | `tests/domains/atm/rules.test.ts`                | `largestThatFits`: il netto ci sta, e un centesimo in più no               |
 | `tests/rules/board-tiles.test.ts`                | era `home-tiles`: stesso tetto, ragione riscritta                          |
 | `tests/rules/domain-ui.test.ts`                  | verde con `atm` sulla propria destinazione                                 |
-| `docs/adr/0039-…`                                | la decisione                                                               |
-| `docs/adr/0018-…`                                | da `Accettata` a `Superata`, con il rimando al 0039                        |
+| `docs/adr/0040-…`                                | la decisione                                                               |
+| `docs/adr/0018-…`                                | da `Accettata` a `Superata`, con il rimando al 0040                        |
 | `docs/design/domini/atm.md`                      | la scheda: la domanda 9 cambia risposta                                    |
 
 ## Invarianti
@@ -271,7 +272,7 @@ ragione va riscritta nel test.
 
 - [ ] `atm` e `board` sono due destinazioni, e `home` non esiste più — né come schermata, né come
       prefisso di chiave i18n.
-- [ ] L'ADR 0018 è `Superata` e l'ADR 0039 dice perché. `docs/stato.md` conta **un** `Superata`.
+- [ ] L'ADR 0018 è `Superata` e l'ADR 0040 dice perché. `docs/stato.md` conta **un** `Superata`.
 - [ ] La pagina del bancomat ha le due colonne del canvas, e sotto la soglia diventa una con
       l'operazione **prima**.
 - [ ] L'importo si digita, e il campo rifiuta ciò che non è un importo senza far cadere la pagina.
