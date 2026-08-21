@@ -125,6 +125,33 @@ era `Proposta` quando D018 è stata scritta ed è ora `Accettata`: la domanda 8 
 perché la capienza di un pool **si chiede** e la funzione che risponde appartiene a un dominio.
 Quali siano `Proposta` adesso lo dice [stato.md](../stato.md), che li conta.
 
+**9. La scheda guadagna una sezione, e la domanda è dell'utente.** Posta il 2026-08-21, chiudendo
+[D024](D024-il-telaio.md) e [D025](D025-il-tooltip.md): _quali cose non sono di nessun dominio, e
+attraversano tutto il programma?_ Le sette sezioni della metà di gioco descrivono un dominio **da
+dentro** — cosa fa, cosa costa, a cosa si collega — e nessuna chiede cosa **usa senza possederlo**.
+Il caveau lo mostra: conserva i contanti, e i contanti non sono suoi.
+
+Le cose trasversali che oggi si sanno nominare, con dove vive ciascuna:
+
+| Trasversale                                         | Dove vive oggi                                                                                       |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Gli strumenti — contanti, carta, e poi le altre     | `contracts/pools.ts` ([ADR 0017](../adr/0017-il-denaro-e-plurale.md))                                |
+| Il listino di un'azione                             | `contracts/payment.ts` ([ADR 0027](../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)) |
+| Gli **oggetti**, e chi li conserva                  | da nessuna parte: il grilletto è il blocco A del [registro](../roadmap-fette.md)                     |
+| Il calore e l'attenzione                            | nella [visione](../prodotto/visione.md), non nel codice                                              |
+| Il tempo di gioco e le scadenze                     | [ADR 0023](../adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md), non costruito                  |
+| Le entità del giocatore, e i conti che hanno        | [ADR 0022](../adr/0022-il-ledger-ha-conti-non-solo-pool.md), `Proposta`                              |
+| Gli eventi che un dominio emette e un altro ascolta | `contracts/events.ts` ([ADR 0016](../adr/0016-il-bus-e-sincrono-e-fire-and-forget.md))               |
+| L'etichetta a nove voci, e il requisito             | nella [visione](../prodotto/visione.md); il grilletto è nel registro                                 |
+
+**La sezione non le costruisce e non le progetta.** Chiede a ogni dominio di dichiarare quali usa e
+quali produce, e la ragione è la stessa dell'intera delega: la giunzione fra una decisione di gioco e
+il meccanismo che la regge smette di essere un atto di attenzione. Il primo dominio che **presta**
+qualcosa — gli oggetti del blocco A — troverà la riga già scritta invece di doverla inventare.
+
+Vale l'invariante di sempre: dove il registro YAGNI ha già il grilletto, la scheda **rimanda**. Una
+tabella ricopiata qui invecchierebbe da sola.
+
 ### Cosa ne discende per il budget
 
 **La scheda del caveau è già scritta a metà, e quella metà è più della metà.** Il budget dice ~110
@@ -173,6 +200,9 @@ La scheda ha **due metà**, e la seconda è la ragione per cui questa delega esi
    sezione che può bocciare un dominio invece di descriverlo.
 7. **Cosa succede a finestra chiusa** — cosa avanza, cosa si ferma, cosa può andare **contro** il
    giocatore.
+8. **Cosa prende in prestito, e cosa presta** — quali cose **trasversali** il dominio usa senza
+   possederle, e quali ne escono e diventano di tutti. Aggiunta il 2026-08-21; il perché sta nel
+   punto 9 qui sotto.
 
 **Metà kernel.** Dodici domande. Sono quelle che l'audit ha fatto a mano, e ognuna ha un ADR o un
 meccanismo dietro:
@@ -261,6 +291,9 @@ facendo.
       un consiglio
 - [ ] le tre schede sono compilate, e **nessuna** ha una voce dell'etichetta vuota — se una voce non
       si applica, lo dice a parole invece di restare bianca
+- [ ] la sezione 8 — _cosa prende in prestito, e cosa presta_ — è compilata per tutte e tre, e
+      **almeno una** dichiara di prestare qualcosa oppure è scritto che nessuna lo fa. Se le tre
+      risposte sono identiche, la sezione non discrimina e va detto (punto 9 della preparazione)
 - [ ] le tre schede sono state compilate leggendo `src/` — **tutte e tre**, caveau compreso: la riga
       diceva «e la scheda del caveau leggendo D017», ed era vera finché il caveau non esisteva
 - [ ] almeno una sorpresa per scheda è annotata, o è dichiarato per iscritto che non ce n'è stata

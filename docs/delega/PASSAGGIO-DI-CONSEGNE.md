@@ -43,7 +43,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
 | `main`                   | **allineato**: il telaio e il tooltip sono stati fusi da `d024-d025-telaio-e-tooltip` in un `--ff-only`                                |
 | Albero di lavoro         | **pulito**                                                                                                                             |
-| Prossimo passo           | [D018](D018-la-scheda-di-dominio.md), l'unica delega aperta. Il suo ramo parte da `main`                                               |
+| Prossimo passo           | [D026](D026-dove-si-attacca-un-dominio.md) — **non preparata**: porta tre decisioni da prendere con l'utente. Il ramo parte da `main`  |
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -282,6 +282,32 @@ WebSocket passano `Runtime.evaluate` — per **chiedere al documento** invece ch
 spunta a occhio da adesso in poi, e le spunte a occhio sono l'unica classe di verifica che nessun
 gate può dare. Serve anche l'altra metà, ed è la lezione della prima trappola: l'immagine dice se
 qualcosa è bello, il documento dice se c'è. Le due domande sono diverse e vogliono due strumenti.
+
+### E da lì è nata [D026](D026-dove-si-attacca-un-dominio.md)
+
+Guardare l'applicazione ha prodotto una domanda dell'utente che nessun documento del progetto
+rispondeva: **dove vive l'interfaccia di un dominio?** Il caveau è la prova che la regola manca —
+`components/CashPanel.vue` è due domini in un file, il pool e il caveau, e non per decisione: il
+pannello dei contanti c'era già e il caveau ci è cresciuto dentro.
+
+Due cose vanno sapute da chi prende D026, e sono le due che hanno rischiato di far partire quella
+delega sbagliata.
+
+1. **Il caveau con solo denaro non è un difetto, è una scelta scritta.** La visione dice «conserva
+   contanti **e oggetti**», e il [registro](../roadmap-fette.md) dice perché gli oggetti non ci sono:
+   nascono col black market e con le aste di box, e un inventario senza oggetti dentro è
+   l'astrazione speculativa che l'[ADR 0014](../adr/0014-una-fetta-verticale-alla-volta.md) vieta. Il
+   grilletto è il blocco A.
+2. **«Quando UI e quando componente» era già deciso**, e chi credesse di doverlo decidere rifarebbe
+   [D023](D023-il-design-system.md): il kit non sa che gioco è (ADR 0028, R14), una forma non è un
+   contenitore (ADR 0030, R16), e un pezzo entra nel kit quando lo disegnano **due** componenti.
+   Quello che manca è l'ordine **dentro** `components/`, che oggi è piatta.
+
+**La domanda gemella — cosa è trasversale e cosa è di dominio — non sta in D026 ed è deliberato.**
+Le valute, gli oggetti, il calore, l'attenzione, l'etichetta: generalizzarli adesso vorrebbe dire
+generalizzare da un dominio solo, che è ciò che la [visione](../prodotto/visione.md) vieta con parole
+sue. Il suo posto è la sezione 8 della scheda di [D018](D018-la-scheda-di-dominio.md), aggiunta lo
+stesso giorno, più i grilletti che il registro ha già.
 
 **Lo STOP 2 è stato riportato, e le regole che governano la fetta 02 sono già in vigore.**
 La fetta 01 è conclusa e verificata. [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) e
@@ -563,89 +589,93 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-Questo prompt **consegna una delega**, e una sola per volta. [D024](D024-il-telaio.md) e
-[D025](D025-il-tooltip.md) sono chiuse, e con loro il telaio e il tooltip; l'ID adesso è **D018**,
-la scheda di dominio — l'unica delega aperta, e la prima che non appartiene a nessuna fetta.
+Questo prompt **consegna una delega**, e una sola per volta. Adesso ce ne sono due aperte:
+[D026](D026-dove-si-attacca-un-dominio.md), scritta il 2026-08-21 e **non preparata**, e
+[D018](D018-la-scheda-di-dominio.md), preparata e ferma. Il prompt qui sotto consegna **D026**,
+perché è quella che sblocca il resto: finché non si sa dove si attacca un dominio, ogni pannello
+nuovo si attacca dove capita — che è come il caveau è finito dentro i contanti.
+
+**D026 comincia con tre decisioni, non con del codice.** Chi la esegue le porta all'utente prima di
+toccare un file, e il prompt lo dice apertamente: una sessione che decide da sola cosa diventa la
+home consegna un lavoro da rifare.
 
 ```markdown
-Esegui la delega D018 nel progetto Solvent, in questa repo.
+Esegui la delega D026 nel progetto Solvent, in questa repo.
 
 Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 
 1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, e le cose che sa solo lui. In
-   particolare _Cosa vale per qualunque delega_ e _Le decisioni contestabili_
+   particolare _Il prossimo passo, in concreto_, _Come si guarda l'applicazione senza toccarla_,
+   _Cosa vale per qualunque delega_ e _Le decisioni contestabili_
 2. `docs/stato.md` — quanti sono gli ADR, le deleghe e i documenti, e in che stato. È **generato**:
-   non si scrive a mano, e quando ne cambi uno si rigenera con
-   `npx vitest run tests/rules/project-state -u`
-3. `docs/delega/D018-la-scheda-di-dominio.md` — la delega che esegui. Interamente, e in
-   particolare _Cosa la preparazione ha verificato_: è stata **preparata il 2026-08-21** compilando
-   davvero le dodici domande sui tre domini, e quello che ha trovato cambia due voci della
-   definizione di fatto
-4. `docs/design/domini/vault.md` — l'**unica scheda che esiste**, ed è anche l'unica che si è già
-   riletta contro il codice: in fondo c'è _Cosa l'esecuzione ha smentito_, che è il pezzo di cui
-   D018 deve capire se è una sezione della forma o un caso isolato
-5. `docs/delega/D017-il-caveau.md`, le **sedici correzioni** in fondo: sono il codice che le dodici
-   domande sul kernel dovranno descrivere, e le tre righe della scheda che il codice ha smentito
-6. `docs/prodotto/visione.md` — l'etichetta a nove voci e la legge della non dominanza
-7. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
+   non si scrive a mano, si rigenera con `npx vitest run tests/rules/project-state -u`
+3. `docs/delega/D026-dove-si-attacca-un-dominio.md` — la delega che esegui. Interamente, e in
+   particolare _Le decisioni aperte_: sono tre, non spettano a te, e vanno portate a me prima di
+   scrivere una riga
+4. `docs/adr/0018-la-home-e-un-atm.md` — è l'ADR che la decisione 1 può **superare**, ed è
+   `Accettata` con un test dietro. Leggi anche le sue alternative scartate: dicono perché il
+   bancomat non deve stare dietro un clic, ed è l'argomento contro cui la decisione 1 va pesata
+5. `docs/adr/0028-il-kit-ui-non-sa-che-gioco-e.md` e `0030-il-telaio-e-una-forma-non-un-contenitore.md`
+   — il confine del kit e il criterio forma/contenitore. **Sono già decisi:** questa delega li usa,
+   non li rimette in discussione
+6. `src/renderer/components/CashPanel.vue` — il file che è due domini insieme, e la ragione per cui
+   questa delega esiste. Poi `views/HomeView.vue`, `components/screens.ts` e `App.vue`
+7. `docs/roadmap-fette.md`, la sezione _Nel design, e non ancora nel codice_ — i grilletti che
+   questa delega sfiora e che non deve anticipare
 
-Stato: `npm run verify` e `npm run verify:release` **verdi**. La fetta 02 è **conclusa**, il telaio
-e il tooltip sono chiusi, e D018 è l'unica delega aperta rimasta.
+Stato: `npm run verify` e `npm run verify:release` **verdi**. `main` è aggiornato e il telaio, i due
+temi e il tooltip ci sono: D024 e D025 sono chiuse.
+
+Come si comincia, ed è l'unica cosa che non puoi saltare:
+
+1. **Portami le tre decisioni**, una alla volta, con due opzioni e i compromessi. Non decidere al
+   posto mio: la 1 cambia un ADR accettato, la 2 cambia cosa il giocatore apre, la 3 cambia la
+   cartella che cresce più in fretta del progetto
+2. **Poi** scrivi l'ADR 0033 con il criterio, non con l'elenco delle pagine di oggi
+3. **Poi** il codice, il gate della regola nuova, e la regola rotta di proposito
 
 Attenzione a tre cose del punto di partenza:
 
-- **`main` è il punto di partenza**, ed è aggiornato: il telaio e il tooltip sono stati fusi alla
-  chiusura di D024 e D025. Il ramo nuovo parte da `main`. Se una delega **chiusa** ti dice di
-  partire da un altro ramo, quella è la cronaca del giorno in cui è stata scritta
-- **Il progetto è cambiato dopo lo STOP 2**, ed è la cosa che D018 deve sapere di sé: il telaio, i
-  due temi, il tooltip, R16, R17 e INV-22 non c'erano quando questa delega è stata scritta. La
-  scheda descrive il progetto del giorno in cui viene compilata, non quello dello STOP 2
+- **Il caveau con solo denaro non è un difetto.** La visione dice «conserva contanti e oggetti», e
+  gli oggetti nascono col black market e con le aste di box: la riga è in `docs/roadmap-fette.md` con
+  il grilletto scritto. Costruire un inventario adesso è l'astrazione che l'ADR 0014 vieta
+- **Cosa è trasversale e cosa è di dominio è fuori scope**, e non per dimenticanza: sta nella
+  sezione 8 della scheda di D018 e nel registro YAGNI. Portarlo qui vuol dire generalizzare da un
+  dominio solo
 - **`npm install` non funziona in questa repo**, e non è colpa tua: `electron-vite@5` regge `vite`
   fino alla 7 e il progetto è sulla 8. L'unico comando che installa è `npm ci --legacy-peer-deps`,
   che però ignora i peer. È la correzione 8 di `docs/delega/D023-il-design-system.md`
 
-D018 vale ~510 righe di **documentazione** e **zero di codice**, ed è la prima delega in cui zero
-righe di sorgente sono una condizione di correttezza invece di una stima.
-
-Quattro cose che sono già state fatte, e che non vanno rifatte:
-
-- **il caveau esiste davvero**, quindi le dodici domande sul kernel si rispondono leggendo
-  `src/core/domains/vault/` invece di immaginarlo — e vale per tutte e tre le schede, non due
-- **la scheda del caveau si è già corretta da sola**: tre righe smentite, zero decisioni di gioco
-  cambiate. È la misura che D018 si era prenotata, ed è arrivata prima che D018 cominciasse
-- **le dodici domande sono già state compilate una volta e buttate via**, ed è la preparazione: si
-  sa quali cinque rispondono «no» tre volte su tre, quale trova il primo «sì» del progetto, e quale
-  afferma una regola che nessun meccanismo impone
-- **`domains/* --> domains/*` non è ancora mai stata disegnata**, e D017 ha scelto due volte di non
-  aprirla. La domanda 6 la dà per acquisita e non lo è: **è la sola decisione aperta di questa
-  delega**, e le due strade stanno nel punto 6 della preparazione
-
 Come lavoro:
 
-- **Un ramo `d018-la-scheda-di-dominio`.** Non si commetta su `main`
+- **Un ramo `d026-dove-si-attacca-un-dominio`.** Non si commetta su `main`
 - **La delega si esegue, non si riscrive.** Se il testo è invecchiato o sbagliato, fermati e
   dimmelo: è successo cinque volte e ogni volta ha tolto lavoro invece di aggiungerlo
-- **Il budget di righe è un allarme, non un limite.** Se lo stai raddoppiando, stai risolvendo
-  un problema diverso da quello descritto: dillo invece di continuare
-- **Fuori scope vuol dire fuori scope.** Le schede dei domini che non hanno codice si compilano a
-  metà o non si compilano: una scheda che descrive ciò che credevamo di scrivere è peggio di
-  nessuna scheda, e il caveau lo ha appena dimostrato
 - **Ogni test nuovo va rotto di proposito almeno una volta.** Un test che non si è mai visto
   fallire non è una rete, è una decorazione
 - `npm run verify` verde alla fine, con l'**output incollato**. Non «dovrebbe passare»
+- **Le schermate che tocchi vanno guardate**, nei due temi, con l'interruttore in fondo alla
+  colonna. Il modo sta in _Come si guarda l'applicazione senza toccarla_: `npm run dev` con
+  `--remoteDebuggingPort`, e si chiede al documento oltre che all'immagine
 - Niente `TODO`, niente `any`, niente scorciatoie presentate come soluzioni. Identificatori in
   inglese, prosa in italiano
-- **Chiudere la delega significa rigenerare `docs/stato.md`**: `npx vitest run tests/rules/project-state -u`.
-  Se non lo fai, il gate è rosso — ed è voluto (C11). Quel file non si scrive a mano
+- **Chiudere la delega significa rigenerare `docs/stato.md`**:
+  `npx vitest run tests/rules/project-state -u`. Se non lo fai, il gate è rosso — ed è voluto (C11)
 - **Se sposti un confine fra livelli, il diagramma di `docs/architettura.md` cambia nello stesso
-  commit**, e `tests/rules/import-graph` lo verifica nei due versi (C13)
-- Alla fine, in fondo alla delega: le **correzioni** rispetto a com'era scritta, e il consuntivo
-  di righe contro il budget. Ogni delega chiusa ne ha da quattro a diciassette
+  commit**, e `tests/rules/import-graph` lo verifica nei due versi (C13). Una sottocartella nuova
+  sotto `src/` è un confine
+- Alla fine, in fondo alla delega: le **correzioni** rispetto a com'era scritta, e il consuntivo di
+  righe contro il budget. Ogni delega chiusa ne ha da quattro a diciassette
 ```
 
-### E dopo, la fetta 03
+### E dopo, D018 e la fetta 03
 
-Chiusa D018, la fetta 03 comincia da una **scheda compilata** invece che da una schermata
-immaginata — che è esattamente ciò per cui D018 esiste. Quali deleghe restino aperte lo dice
-[stato.md](../stato.md); le tre cose da avere in mente prima di scrivere una riga stanno qui sopra,
-in fondo a _Il prossimo passo_.
+[D018](D018-la-scheda-di-dominio.md) resta aperta e preparata, e non aspetta D026: sono documenti
+contro codice, come D017 e D018 al giro prima. Ha guadagnato una sezione il 2026-08-21 — _cosa
+prende in prestito, e cosa presta_ — che è dove la domanda sulle cose trasversali è andata a vivere.
+Il prompt che la consegnava sta nel git log di questo file: si recupera da lì invece di tenerne due
+in vita, che è la stessa ragione per cui i numeri stanno in un posto solo.
+
+Poi la fetta 03, che comincia da una **scheda compilata** invece che da una schermata immaginata. Le
+tre cose da avere in mente prima di scrivere una riga stanno qui sopra, in fondo a _Il prossimo
+passo_.
