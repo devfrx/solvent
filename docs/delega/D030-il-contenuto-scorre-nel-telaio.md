@@ -1,6 +1,6 @@
 # D030 — Il contenuto scorre nel telaio
 
-- **Stato:** Chiusa — commit `PENDING`, ramo `d030-il-contenuto-scorre-nel-telaio`. Scritta ed
+- **Stato:** Chiusa — commit `1f3a0e1`, ramo `d030-il-contenuto-scorre-nel-telaio`. Scritta ed
   eseguita il 2026-08-21
 - **Dipende da:** [D024](D024-il-telaio.md), che ha costruito il telaio, e
   [D029](D029-i-devcheat.md) solo nell'ordine di esecuzione: i cheat servono a **mettere** la
