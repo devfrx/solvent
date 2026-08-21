@@ -508,7 +508,10 @@ Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 2. `docs/stato.md` — quanti sono gli ADR, le deleghe e i documenti, e in che stato. È **generato**:
    non si scrive a mano, e quando ne cambi uno si rigenera con
    `npx vitest run tests/rules/project-state -u`
-3. `docs/delega/D018-la-scheda-di-dominio.md` — la delega che esegui. Interamente
+3. `docs/delega/D018-la-scheda-di-dominio.md` — la delega che esegui. Interamente, e in
+   particolare _Cosa la preparazione ha verificato_: è stata **preparata il 2026-08-21** compilando
+   davvero le dodici domande sui tre domini, e quello che ha trovato cambia due voci della
+   definizione di fatto
 4. `docs/design/domini/vault.md` — l'**unica scheda che esiste**, ed è anche l'unica che si è già
    riletta contro il codice: in fondo c'è _Cosa l'esecuzione ha smentito_, che è il pezzo di cui
    D018 deve capire se è una sezione della forma o un caso isolato
@@ -531,15 +534,18 @@ Attenzione a due cose del punto di partenza:
 D018 vale ~510 righe di **documentazione** e **zero di codice**, ed è la prima delega in cui zero
 righe di sorgente sono una condizione di correttezza invece di una stima.
 
-Tre cose che D017 ti ha già preparato, e che non vanno rifatte:
+Quattro cose che sono già state fatte, e che non vanno rifatte:
 
 - **il caveau esiste davvero**, quindi le dodici domande sul kernel si rispondono leggendo
-  `src/core/domains/vault/` invece di immaginarlo
-- **la scheda del caveau si è già corretta da sola**, e le tre righe che ha smentito dicono quali
-  domande la forma deve fare per non sbagliare di nuovo
+  `src/core/domains/vault/` invece di immaginarlo — e vale per tutte e tre le schede, non due
+- **la scheda del caveau si è già corretta da sola**: tre righe smentite, zero decisioni di gioco
+  cambiate. È la misura che D018 si era prenotata, ed è arrivata prima che D018 cominciasse
+- **le dodici domande sono già state compilate una volta e buttate via**, ed è la preparazione: si
+  sa quali cinque rispondono «no» tre volte su tre, quale trova il primo «sì» del progetto, e quale
+  afferma una regola che nessun meccanismo impone
 - **`domains/* --> domains/*` non è ancora mai stata disegnata**, e D017 ha scelto due volte di non
-  aprirla: se la scheda deve chiedere «da quali domini dipende», la risposta giusta oggi è
-  «nessuno, e a collegarli è il bootstrap»
+  aprirla. La domanda 6 la dà per acquisita e non lo è: **è la sola decisione aperta di questa
+  delega**, e le due strade stanno nel punto 6 della preparazione
 
 Come lavoro:
 

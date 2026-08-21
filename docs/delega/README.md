@@ -109,7 +109,22 @@ flowchart TD
 ```
 
 **D017 e D018 non si toccano**, ed è il primo caso del progetto: una scrive codice, l'altra solo
-documenti, e nessuna aspetta l'altra. Il grafo lo mostra facendole partire entrambe da D013.
+documenti, e nessuna aspetta l'altra. Il grafo lo mostra facendole partire entrambe da D013, e la
+freccia resta assente anche adesso che D017 è chiusa: una delega che viene **prima** non è una
+delega da cui si **dipende**, e disegnarla sarebbe scrivere nel grafo una cronologia invece di un
+vincolo.
+
+**L'ordine in cui sono state eseguite però non era indifferente, ed è andata bene.** D017 per prima
+significa che il caveau **esiste**, quindi tutte e tre le schede di prova di D018 si compilano
+leggendo `src/` invece che una dal codice, una dal codice e una da un disegno. E significa che la
+trappola più costosa di D018 è già scattata da sola: la [scheda del caveau](../design/domini/vault.md)
+era stata scritta prima del suo codice, si è riletta contro quel codice il giorno dopo, e ha
+smentito **tre** delle proprie righe senza cambiare nessuna delle proprie decisioni di gioco. È la
+misura che D018 si era prenotata, arrivata prima che D018 cominciasse.
+
+Se l'ordine fosse stato l'opposto, D018 avrebbe consegnato ai quattordici domini futuri una forma
+provata su due domini scritti e uno immaginato — e non avrebbe avuto modo di sapere quale delle sue
+domande prende la classe di errore che il caveau ha davvero commesso.
 
 **D019 si è infilata fra D013 e D017**, ed è nata da una domanda posta al momento giusto: prima di
 eseguire D017 si è ragionato su come si sceglie con cosa si paga. È venuto fuori che
