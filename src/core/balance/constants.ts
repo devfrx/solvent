@@ -60,24 +60,55 @@ export const BALANCE = {
   UPGRADE_MULTIPLIER: fromString('1.5'),
 
   /**
-   * La commissione che il bancomat trattiene su ogni operazione, deposito o prelievo che sia
-   * (D014). È un **importo fisso** e non una percentuale, ed è una scelta di gioco prima che di
-   * forma: con una percentuale il caso "la commissione supera l'importo" non si presenterebbe mai,
-   * e con esso sparirebbe la dinamica che il caveau della fetta 02 userà — prelevare poco costa
-   * proporzionalmente molto, quindi conviene prelevare grosso, ma i contanti hanno una capienza.
+   * Il **pavimento** della commissione del bancomat: quanto trattiene un'operazione piccola,
+   * qualunque cosa dica la percentuale.
+   *
+   * Fino a D032 era tutta la commissione, un importo fisso, con questa ragione di gioco:
+   * «prelevare poco costa proporzionalmente molto, quindi conviene prelevare grosso, ma i contanti
+   * hanno una capienza». **Quella ragione regge ancora**, ed è esattamente ciò che il pavimento
+   * tiene in piedi. Ne mancava un'altra: 2,50 € su un milione non sono una commissione, sono un
+   * arrotondamento — il gesto centrale del gioco diventava gratuito proprio quando la scelta
+   * cominciava a contare qualcosa.
+   *
+   * `max(pavimento, importo × tasso)` tiene tutte e due. Sotto la soglia di attraversamento — il
+   * pavimento diviso il tasso — la commissione è piatta e vale la lezione vecchia; sopra, scala.
+   *
+   * **Resta 2,50 € e non 1,00 € come il canvas**, e non è pigrizia: `vault_card_discount`
+   * confronta lo sconto della carta con la commissione più bassa che possa esistere, cioè con
+   * questo numero. A 2,50 € i quattro prezzi del caveau non si ritarano; più in basso sì, e sarebbe
+   * un cantiere in un altro dominio aperto per una cifra che nessuno ha chiesto.
    *
    * Sta qui e non in `domains/atm/` perché `no-magic-numbers` sotto `domains/**` lo impedisce, ed
    * è proprio il punto: un numero di gioco scritto dentro un dominio è un bilanciamento che si
    * sposta da solo.
    */
-  ATM_FEE: fromString('2.50'),
+  ATM_FEE_FLOOR: fromString('2.50'),
+
+  /**
+   * I due tassi della commissione, uno per verso, e l'asimmetria è una frase di gioco invece di
+   * una taratura: **uscire dal tracciabile costa più che entrarci**. Vengono dal canvas e si
+   * prendono così come sono.
+   *
+   * Sono due costanti e non una con un ricarico calcolato, per la ragione di `VAULT_PRICES_CARD`:
+   * un prezzo derivato da un altro non è un prezzo, ed è un numero che non si può cambiare da solo.
+   *
+   * `Decimal` come tutto il resto di questo file: `0.015` scritto come letterale JavaScript è
+   * proprio la perdita di centesimi lungo la catena che l'intestazione dichiara di voler evitare.
+   */
+  ATM_FEE_RATE_IN: fromString('0.015'),
+  ATM_FEE_RATE_OUT: fromString('0.02'),
 
   /**
    * Gli importi che il bancomat offre. Non è una comodità dell'interfaccia: **sono l'unico modo di
-   * scegliere un importo** nella fetta 01, e la scala che hanno decide quanto la commissione fissa
-   * si fa sentire. Letti in fila raccontano da soli la regola del bancomat — 1,00 € è rifiutato
-   * perché la commissione se lo mangia, 10,00 € ne perde un quarto, 500,00 € lo 0,5% — che è ciò
-   * che rende "prelevare grosso conviene" una cosa che si vede invece di una nota nel manuale.
+   * scegliere un importo** nella fetta 01, e la scala che hanno decide quanto la commissione si fa
+   * sentire. Letti in fila raccontano da soli la regola del bancomat, prelevando: 1,00 € è
+   * rifiutato perché la commissione se lo mangia, 10,00 € ne perde un quarto, 100,00 € il 2,5% —
+   * e 500,00 € il 2%, che è il tasso nudo. È il punto in cui la curva **smette di scendere**,
+   * cioè dove il pavimento finisce e la percentuale prende il suo posto.
+   *
+   * Da D032 quei quattro numeri dicono una cosa in più di prima: non solo "prelevare grosso
+   * conviene", ma **fino a dove** conviene. Oltre la soglia il vantaggio finisce, e il gioco lo fa
+   * vedere con quattro pulsanti invece che con una nota nel manuale.
    *
    * Il primo esiste **perché fallisce**: senza, il rifiuto dell'anteprima (ADR 0018 — con un
    * motivo, non con un pulsante spento) sarebbe raggiungibile solo da un test, e un ramo che
@@ -131,8 +162,10 @@ export const BALANCE = {
    * Gli stessi ampliamenti pagati con la **carta**, e sono due euro in meno ciascuno.
    *
    * Due euro sembrano nulla, e sono l'unico numero possibile finché il calore non esiste. Chi ha
-   * solo contanti, per pagare con la carta, deve prima versarli e lasciare `ATM_FEE` al bancomat:
-   * lo sconto conviene **solo se supera la commissione**. Con uno sconto di 50,00 € i contanti
+   * solo contanti, per pagare con la carta, deve prima versarli e lasciare la commissione al
+   * bancomat: lo sconto conviene **solo se supera la commissione**, e da D032 la commissione più
+   * bassa che possa esistere è `ATM_FEE_FLOOR` — è contro **quel** numero che questi sono tarati,
+   * perché è il caso peggiore per i contanti. Con uno sconto di 50,00 € i contanti
    * diventerebbero una voce di listino che nessuno sceglie mai — arredamento con dentro del codice
    * — perché la carta non paga ancora niente in cambio della traccia che lascia.
    *

@@ -38,10 +38,15 @@ const SAVED_AT = 1_755_600_000_000
 
 /**
  * Quanti tick servono a guadagnare il prezzo dell'upgrade **giocando**: a 12,00 €/s il reddito è
- * 1,20 € per tick, e 669 tick fanno 802,80 € — l'upgrade più la commissione, con del resto. Il
- * numero è scritto qui una volta sola perché è una scelta di questo test, non del gioco.
+ * 1,20 € per tick, e 677 tick fanno 812,40 €. Il numero è scritto qui una volta sola perché è una
+ * scelta di questo test, non del gioco.
+ *
+ * Erano 669 fino a D032, quando la commissione era 2,50 € qualunque fosse l'importo. Adesso
+ * versare 812,40 € ne costa l'1,5%, cioè 12,19 €, e sul conto ne arrivano 800,21 — l'upgrade, con
+ * pochissimo resto. **Che questo numero abbia dovuto salire è il punto della delega**: la
+ * commissione ha ricominciato a farsi sentire su un importo grande.
  */
-const TICKS_TO_AFFORD = 669
+const TICKS_TO_AFFORD = 677
 
 /**
  * Quanti tick servono ad ampliare il caveau **in contanti**: a 1,20 € per tick, 750 tick fanno
@@ -75,8 +80,9 @@ const play = (target: Game): void => {
   // deve poterlo dimostrare.
   target.registry.tickAll(target.ctx, ticks(7))
 
-  // Un rifiuto fa parte del giocare, e non deve muovere un centesimo: la commissione fissa si
-  // mangia 1,00 € intero (D014, BALANCE.ATM_AMOUNTS — il primo importo esiste perché fallisce).
+  // Un rifiuto fa parte del giocare, e non deve muovere un centesimo: il pavimento della
+  // commissione si mangia 1,00 € intero (BALANCE.ATM_AMOUNTS — il primo importo esiste perché
+  // fallisce, e da D032 è il pavimento a tenerlo raggiungibile).
   target.atm.withdraw(fromString('1'))
 
   target.atm.deposit(fromString('10'))
@@ -122,10 +128,10 @@ describe('la partita giocata, dal disco e ritorno', () => {
     // Cinque conti su sei mossi, decimali compresi: il giro del bancomat li produce da solo.
     expect(payload.ledger.balances).toEqual({
       cash: '2.6',
-      card: '7.8',
-      world: '-1715.4',
+      card: '7.71',
+      world: '-1725',
       sink: '1700',
-      fees: '5',
+      fees: '14.69',
       house: '0'
     })
 

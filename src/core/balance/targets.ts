@@ -55,10 +55,15 @@ export const TARGETS: Readonly<Record<BalanceTargetId, BalanceTarget>> = {
   /**
    * Quanto si risparmia ampliando il caveau con la **carta** invece che con i contanti.
    *
-   * L'intervallo sta tutto **sotto `ATM_FEE`**, e non è pignoleria: chi ha solo contanti, per
-   * pagare con la carta, deve prima versarli e lasciare la commissione al bancomat. Se lo sconto
-   * la superasse, convertire converrebbe sempre e i contanti sarebbero una voce di listino che
-   * nessuno sceglie mai. Sopra lo zero perché a prezzi uguali la scelta non esiste.
+   * L'intervallo sta tutto **sotto `ATM_FEE_FLOOR`**, e non è pignoleria: chi ha solo contanti,
+   * per pagare con la carta, deve prima versarli e lasciare la commissione al bancomat. Se lo
+   * sconto la superasse, convertire converrebbe sempre e i contanti sarebbero una voce di listino
+   * che nessuno sceglie mai. Sopra lo zero perché a prezzi uguali la scelta non esiste.
+   *
+   * Il confronto è con il **pavimento** e non con la commissione, perché da D032 la commissione
+   * non è un numero: è `max(pavimento, importo × tasso)`. Il pavimento è la più bassa che possa
+   * mai esistere, quindi uno sconto che sta sotto di lui sta sotto qualunque commissione — ed è il
+   * confronto più severo dei due, non una scorciatoia.
    *
    * È il solo argine alla legge della non dominanza finché il calore non esiste: la carta lascia
    * tracce e oggi le tracce non costano niente. Quando costeranno (fetta 04), questo intervallo si

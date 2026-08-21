@@ -17,7 +17,7 @@
 | #   | Voce              | Bancomat                                                                                                 |
 | --- | ----------------- | -------------------------------------------------------------------------------------------------------- |
 | 1   | **Rendimento**    | **negativo**, sempre. Ogni operazione lascia 2,50 € al conto delle commissioni                           |
-| 2   | **Varianza**      | **zero**. Non usa l'Rng: la commissione è un importo fisso, non una percentuale                          |
+| 2   | **Varianza**      | **zero**. Non usa l'Rng: dato un importo e un verso, la commissione è sempre la stessa                   |
 | 3   | **Liquidità**     | **è la liquidità**. Non la possiede: la converte, ed è l'unico che sa farlo                              |
 | 4   | **Tracciabilità** | **è il punto in cui si sceglie**. Depositare rende il denaro tracciabile, e non si torna indietro gratis |
 | 5   | **Calore**        | **zero**, oggi. Sarà il primo a guadagnarne quando arriverà la fetta 04                                  |
@@ -28,7 +28,9 @@
 
 ### 2 · Il ciclo
 
-Deposita contanti sul conto, preleva contanti dal conto. Ogni operazione trattiene una commissione.
+Deposita contanti sul conto, preleva contanti dal conto. Ogni operazione trattiene una commissione:
+il maggiore fra un pavimento e una percentuale dell'importo, e la percentuale non è la stessa nei
+due versi ([D032](../../delega/D032-la-commissione-scala-il-pavimento-no.md)).
 
 ### 3 · Deve vedere, deve decidere, può andare male
 
@@ -93,10 +95,12 @@ rispetto ai saldi mentre la finestra è chiusa.
 però non nomina mai, perché la riga la scrive `transfer` (INV-10) — e il **tetto del pool in
 arrivo**, che gli arriva per argomento dallo store.
 
-**Presta:** la propria commissione come **unità di misura**. `ATM_FEE` è il metro contro cui è
-tarato lo sconto della carta del caveau: uno sconto che superasse la commissione renderebbe i
-contanti una voce di listino che nessuno sceglie mai. Il bancomat non sa di essere quel metro, e il
-bersaglio che lo usa è di un altro dominio.
+**Presta:** la propria commissione come **unità di misura**. `ATM_FEE_FLOOR` è il metro contro cui
+è tarato lo sconto della carta del caveau: uno sconto che superasse la commissione renderebbe i
+contanti una voce di listino che nessuno sceglie mai. Il metro è il **pavimento** e non la
+commissione intera, perché è il caso peggiore per i contanti — la commissione più bassa che il
+bancomat possa chiedere. Il bancomat non sa di essere quel metro, e il bersaglio che lo usa è di un
+altro dominio.
 
 ### 9 · Questo dominio si amministra?
 
@@ -129,9 +133,15 @@ dimostra.
 | 11  | Sapere che giorno è?                  | **no — e sarà il primo a chiederlo.** Le soglie giornaliere sono il grilletto del calendario                                                                               |
 | 12  | Usa l'Rng?                            | **no**                                                                                                                                                                     |
 
-**Numeri di gioco introdotti:** `ATM_FEE` (2,50 €), `ATM_AMOUNTS` (1 · 10 · 100 · 500 €) e
-`ATM_DEFAULT_AMOUNT`. Il primo importo esiste **perché fallisce**: senza, il rifiuto dell'anteprima
-sarebbe raggiungibile solo da un test.
+**Numeri di gioco introdotti:** `ATM_FEE_FLOOR` (2,50 €), `ATM_FEE_RATE_IN` (1,5%),
+`ATM_FEE_RATE_OUT` (2,0%), `ATM_AMOUNTS` (1 · 10 · 100 · 500 €) e `ATM_DEFAULT_AMOUNT`. Il primo
+importo esiste **perché fallisce**: senza, il rifiuto dell'anteprima sarebbe raggiungibile solo da
+un test — ed è il pavimento a tenerlo raggiungibile, perché una percentuale nuda non arriverebbe
+mai a mangiarsi 1,00 €.
+
+I quattro importi rapidi, prelevando, disegnano la curva da soli: 1,00 € rifiutato, 10,00 € al 25%,
+100,00 € al 2,5%, 500,00 € al 2% — che è il tasso nudo, cioè il punto in cui il vantaggio di
+prelevare grosso **finisce**.
 
 **Bersaglio lasciato:** **nessuno**, e vedi qui sotto.
 
@@ -140,8 +150,8 @@ sarebbe raggiungibile solo da un test.
 ## Cosa questa compilazione ha trovato
 
 **1. Il bancomat non lascia un bersaglio di bilanciamento.** La scheda dice che un dominio senza
-bersaglio è un dominio il cui bilanciamento è un'opinione, e il bancomat è il primo caso: `ATM_FEE`
-non è verificata da nessun intervallo suo. È tarata **di rimbalzo**, da `vault_card_discount`, che
+bersaglio è un dominio il cui bilanciamento è un'opinione, e il bancomat è il primo caso: la
+commissione non è verificata da nessun intervallo suo. È tarata **di rimbalzo**, da `vault_card_discount`, che
 è del caveau — quindi cambiare la commissione rende rosso un test che parla d'altro, e chi lo
 leggesse non capirebbe subito perché.
 

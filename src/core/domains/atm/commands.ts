@@ -7,6 +7,7 @@ import { roomIn } from '@core/contracts/pools'
 import type { Result } from '@core/contracts/result'
 import { err, ok } from '@core/contracts/result'
 
+import { BALANCE } from '@core/balance/constants'
 import { transfer, type Ledger } from '@core/kernel/Ledger'
 
 import { atmFee, fitsIn, isFeeWithinAmount, isValidAmount } from './rules'
@@ -40,6 +41,13 @@ export interface AtmOperation {
   readonly meta: TransactionMeta
   readonly from: Pool
   readonly to: Pool
+  /**
+   * Il tasso della commissione in questo verso (D032). Sta **nell'operazione** e non dentro
+   * `atmFee` per la ragione che tiene in piedi tutta questa tabella: un tasso letto altrove
+   * vorrebbe dire un `if` sulla direzione, e le due direzioni esistono come dati proprio per non
+   * averne nessuno.
+   */
+  readonly feeRate: Money
 }
 
 /**
@@ -58,13 +66,15 @@ export interface AtmOperation {
 export const WITHDRAW: AtmOperation = {
   meta: { reason: 'reason.atm.withdraw' },
   from: 'card',
-  to: 'cash'
+  to: 'cash',
+  feeRate: BALANCE.ATM_FEE_RATE_OUT
 }
 
 export const DEPOSIT: AtmOperation = {
   meta: { reason: 'reason.atm.deposit' },
   from: 'cash',
-  to: 'card'
+  to: 'card',
+  feeRate: BALANCE.ATM_FEE_RATE_IN
 }
 
 /**
@@ -101,7 +111,7 @@ export const previewOf = (
 ): Result<readonly Posting[], AtmError> => {
   if (!isValidAmount(amount)) return err({ code: 'error.atm.amount_not_positive', amount })
 
-  const fee = atmFee()
+  const fee = atmFee(amount, operation.feeRate)
   if (!isFeeWithinAmount(amount, fee)) {
     return err({ code: 'error.atm.fee_exceeds_amount', amount, fee })
   }

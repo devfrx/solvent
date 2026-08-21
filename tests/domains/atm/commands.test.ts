@@ -5,6 +5,7 @@ import { fromString, toString, ZERO } from '@core/contracts/money'
 import type { Pool } from '@core/contracts/pools'
 import { POOL_IDS } from '@core/contracts/pools'
 
+import { BALANCE } from '@core/balance/constants'
 import { createBus } from '@core/kernel/Bus'
 import { createLedger, income, transfer, type Ledger } from '@core/kernel/Ledger'
 
@@ -25,6 +26,9 @@ import { atmFee } from '../../../src/core/domains/atm/rules'
  */
 
 const money = fromString
+
+/** La commissione di un prelievo, chiesta alla stessa funzione che il comando usa (D032). */
+const feeOut = (amount: string): ReturnType<typeof money> => atmFee(money(amount), WITHDRAW.feeRate)
 
 let ledger: Ledger
 let atm: Atm
@@ -93,9 +97,10 @@ describe('un prelievo riuscito', () => {
 
     atm.withdraw(money('500'))
 
+    // 500,00 € sta sopra la soglia, quindi paga il tasso pieno: il 2% dell'uscita, cioè 10,00 €.
     expect(balanceOf('card')).toBe('500')
-    expect(balanceOf('cash')).toBe('497.5')
-    expect(balanceOf('fees')).toBe('2.5')
+    expect(balanceOf('cash')).toBe('490')
+    expect(balanceOf('fees')).toBe('10')
     expect(totalOfAccounts()).toBe('0')
   })
 })
@@ -158,7 +163,7 @@ describe('la commissione supera l’importo', () => {
 
     expect(done).toEqual({
       ok: false,
-      error: { code: 'error.atm.fee_exceeds_amount', amount: money('1'), fee: atmFee() }
+      error: { code: 'error.atm.fee_exceeds_amount', amount: money('1'), fee: feeOut('1') }
     })
     expect(posted).toHaveLength(0)
     expect(balanceOf('card')).toBe('1000')
@@ -167,13 +172,17 @@ describe('la commissione supera l’importo', () => {
   it('e il controllo deve stare prima, perché transfer lancerebbe', () => {
     // Chiamare il Ledger e poi `try`/`catch` non sarebbe la stessa cosa: un `RangeError` dice che
     // il programma è scritto male, e qui invece è il giocatore che ha chiesto un prelievo da 1,00.
-    expect(() => transfer('card', 'cash', money('1'), atmFee())).toThrow(RangeError)
+    expect(() => transfer('card', 'cash', money('1'), feeOut('1'))).toThrow(RangeError)
   })
 
   it('uguale è già troppo: il Ledger lo accetterebbe e arriverebbe zero', () => {
     fund('card', '1000')
 
-    const done = atm.withdraw(atmFee())
+    // Prelevare **esattamente** il pavimento: sotto la soglia la commissione è il pavimento, quindi
+    // qui importo e commissione coincidono. Da D032 è l'unico modo di costruire questo caso — con
+    // la percentuale sopra la soglia la commissione non raggiunge mai l'importo.
+    const atTheFloor = BALANCE.ATM_FEE_FLOOR
+    const done = atm.withdraw(atTheFloor)
 
     expect(done.ok).toBe(false)
     if (done.ok) return
@@ -181,11 +190,9 @@ describe('la commissione supera l’importo', () => {
 
     // La prova che il "maggiore o uguale" serve: qui `transfer` non lancia affatto, costruisce una
     // transazione valida in cui il giocatore paga e riceve 0,00.
-    expect(transfer('card', 'cash', atmFee(), atmFee()).map((p) => toString(p.amount))).toEqual([
-      '-2.5',
-      '0',
-      '2.5'
-    ])
+    expect(transfer('card', 'cash', atTheFloor, atTheFloor).map((p) => toString(p.amount))).toEqual(
+      ['-2.5', '0', '2.5']
+    )
   })
 })
 
@@ -236,8 +243,12 @@ describe('un deposito riuscito', () => {
     expect(done.ok).toBe(true)
     expect(onlyTransaction().reason).toBe('reason.atm.deposit')
     expect(balanceOf('cash')).toBe('500')
-    expect(balanceOf('card')).toBe('497.5')
-    expect(balanceOf('fees')).toBe('2.5')
+
+    // Lo stesso importo del prelievo qui sopra, e la commissione **non** è la stessa: 7,50 invece
+    // di 10,00. È l'asimmetria di D032 vista dai saldi — uscire dal tracciabile costa di più che
+    // entrarci — e sono i due soli test in cui la si può leggere accostando due numeri.
+    expect(balanceOf('card')).toBe('492.5')
+    expect(balanceOf('fees')).toBe('7.5')
   })
 
   it('fallisce per una causa sua: i contanti che non bastano', () => {
@@ -285,14 +296,13 @@ describe('il pool in arrivo, quando ha un tetto', () => {
   })
 
   it('e guarda quello che **arriva**, non quello che si è digitato', () => {
-    // La commissione è trattenuta: chi preleva 500,00 € ne riceve 497,50. Con 497,50 € di spazio
-    // l'operazione ci sta, e chiedere sull'importo lordo la rifiuterebbe per due euro e mezzo che
-    // non arrivano mai a destinazione.
-    const fee = toString(atmFee())
+    // La commissione è trattenuta: chi preleva 500,00 € ne riceve 490,00, perché a quella taglia
+    // comanda il 2% e non più il pavimento. Con 490,00 € di spazio l'operazione ci sta, e chiedere
+    // sull'importo lordo la rifiuterebbe per dieci euro che non arrivano mai a destinazione.
+    expect(toString(feeOut('500'))).toBe('10')
 
-    expect(previewOf(WITHDRAW, money('500'), withCeiling('497.5', '0')).ok).toBe(true)
-    expect(previewOf(WITHDRAW, money('500'), withCeiling('497.49', '0')).ok).toBe(false)
-    expect(fee).toBe('2.5')
+    expect(previewOf(WITHDRAW, money('500'), withCeiling('490', '0')).ok).toBe(true)
+    expect(previewOf(WITHDRAW, money('500'), withCeiling('489.99', '0')).ok).toBe(false)
   })
 
   it('senza tetto non chiede niente a nessuno', () => {

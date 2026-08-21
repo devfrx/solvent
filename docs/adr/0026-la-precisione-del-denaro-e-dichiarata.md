@@ -1,7 +1,11 @@
 # ADR 0026 — La precisione del denaro è dichiarata, non ereditata
 
-- **Stato:** Proposta — il meccanismo nasce con la prima delega che tocca `contracts/money.ts`.
-  _Contesto_ e _Conseguenze_ sono stati **rimisurati** il 2026-08-20 da
+- **Stato:** **Accettata** — [D032](../delega/D032-la-commissione-scala-il-pavimento-no.md) è la
+  delega che tocca `contracts/money.ts`, cioè il grilletto che questo ADR aspettava: la commissione
+  in percentuale ha chiesto un arrotondamento, e un arrotondamento vive accanto alla primitiva.
+  `precision: 40` è dichiarata, e i **due** test che questa decisione richiedeva ci sono
+  entrambi — vedi _Conseguenze_, dove le due soglie sono adesso misure e non previsioni.
+  _Contesto_ e _Conseguenze_ erano già stati **rimisurati** il 2026-08-20 da
   [D021](../delega/D021-un-numero-che-nessuno-conta-non-si-scrive.md) (AUD-009): la decisione non
   cambia, l'evidenza che la motivava sì
 - **Data:** 2026-08-20
@@ -93,3 +97,22 @@ valori e non per altri — che è peggio di non applicarla.
 - **Non risolve il tetto dello schermo**, che è più basso: `toDisplayNumber` passa da un `number`
   JS, esatto solo fino a 9.007.199.254.740.991. È un problema distinto, con il suo grilletto nel
   [registro YAGNI](../roadmap-fette.md).
+
+### Cosa la misura ha detto, eseguendola (2026-08-21, D032)
+
+**Le due soglie previste erano esatte**, e adesso sono in `tests/contracts/money`:
+
+|                                      | Previsto | Misurato                                           |
+| ------------------------------------ | -------- | -------------------------------------------------- |
+| Il centesimo esiste fino a           | 1e37 €   | **1e37 €** — a 1e38 sommarlo non cambia più niente |
+| `transfer()` smette di bilanciare da | 1e40 €   | **1e40 €** — a 1e39 la somma è ancora zero esatto  |
+
+**Alzare la precisione non ha reso rosso nessun test esistente.** Era la conseguenza più temuta —
+_«`precision` governa anche l'arrotondamento delle divisioni, quindi qualche test sul denaro può
+cambiare risultato»_ — e il modo di saperlo era scrivere la riga ed eseguire la suite, come ha
+fatto la preparazione di [D017](../delega/D017-il-caveau.md). Ottocento test, nessuno spostato:
+le divisioni che il progetto fa oggi non arrivano a una ventesima cifra significativa.
+
+Il costo di aritmetica più larga non è stato misurato, e non è stato misurato di proposito: la
+catena dei gate non è rallentata in modo percepibile, e un profilo per un numero che non si vede
+sarebbe ottimizzazione senza un problema.

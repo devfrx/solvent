@@ -147,6 +147,7 @@ export const it: Dictionary = {
     'operazione, grande o piccola.',
   'atm.fee': 'Commissione',
   'atm.fee.per_operation': 'Commissione per operazione',
+  'atm.fee.rates': '{deposit} versando · {withdraw} prelevando',
   'atm.deposit.confirm': 'Conferma deposito',
   'atm.withdraw.confirm': 'Conferma prelievo',
   'atm.recent.title': 'Ultime operazioni',

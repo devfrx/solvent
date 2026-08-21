@@ -17,7 +17,6 @@ import type { SaveError } from '@core/contracts/save'
 import { BALANCE } from '@core/balance/constants'
 import type { AtmError, AtmOperation } from '@core/domains/atm/commands'
 import { DEPOSIT, previewOf, WITHDRAW } from '@core/domains/atm/commands'
-import { atmFee } from '@core/domains/atm/rules'
 import type { IncomeError } from '@core/domains/income/commands'
 import {
   canBuyUpgrade,
@@ -107,7 +106,7 @@ export type AtmOperationKind = (typeof ATM_KINDS)[number]
  * L'operazione e il comando che le corrisponde, **appaiati una volta sola**. Se anteprima e
  * comando leggessero due tabelle diverse, un giorno il pulsante «Deposita» mostrerebbe l'anteprima
  * di un prelievo: due letture che devono coincidere prima o poi divergono, ed è la stessa ragione
- * per cui `atmFee()` è una funzione invece di un numero (D014).
+ * per cui `atmFee` è una funzione invece di un numero (D014).
  */
 interface AtmDirection {
   readonly operation: AtmOperation
@@ -276,10 +275,14 @@ export const useGameStore = defineStore('game', () => {
    * la ragione di `cost`: un `Money` esposto **nudo** da uno store Pinia viene proxato alla
    * lettura, e da lì in poi non è più il `Decimal` che il dominio ha prodotto.
    *
-   * `fee` non è il 2,50 copiato dal mockup: è `atmFee()`, la stessa funzione che l'anteprima e il
-   * comando leggono. Due letture della commissione sarebbero due commissioni.
+   * **`fee` non c'è più, e la sua assenza è la delega D032.** Era un `Money` letto una volta alla
+   * costruzione, e funzionava finché la commissione era un importo fisso. Adesso dipende
+   * dall'importo e dal verso, quindi non è più un numero che uno store possa tenere: chiederla
+   * vuol dire chiedere un'anteprima, ed è ciò che `preview` fa già.
+   *
+   * Al suo posto ci sono i due **tassi**, che sono l'unica cosa costante rimasta — e si leggono
+   * dalle operazioni, non da `BALANCE`. Vedi `feeRates`, più sotto accanto a `directions`.
    */
-  const fee = shallowRef<Money>(atmFee())
   const amounts = shallowRef(BALANCE.ATM_AMOUNTS)
   const defaultAmount = shallowRef<Money>(BALANCE.ATM_DEFAULT_AMOUNT)
 
@@ -383,6 +386,20 @@ export const useGameStore = defineStore('game', () => {
     deposit: { operation: DEPOSIT, command: game.atm.deposit },
     withdraw: { operation: WITHDRAW, command: game.atm.withdraw }
   }
+
+  /**
+   * I due tassi della commissione, per direzione (D032). Si leggono **dalle operazioni**, che sono
+   * le stesse che `preview` e `confirm` usano: `BALANCE.ATM_FEE_RATE_IN` scritto qui sarebbe una
+   * seconda lettura dello stesso numero di gioco, cioè il difetto A04 con un altro nome.
+   *
+   * Sono l'unica cosa del bancomat che resti un numero fisso, e servono a una cosa sola: la carta
+   * dichiara sul retro cosa costa usarla. Quanto costa **questa** operazione lo dice l'anteprima,
+   * e non si ricava da qui.
+   */
+  const feeRates = shallowRef<Readonly<Record<AtmOperationKind, Money>>>({
+    deposit: directions.deposit.operation.feeRate,
+    withdraw: directions.withdraw.operation.feeRate
+  })
 
   /**
    * INV-11 nella sua forma più forte: l'anteprima **è** l'operazione. Questa funzione non calcola
@@ -709,7 +726,7 @@ export const useGameStore = defineStore('game', () => {
     incomePerSecond: rate,
     upgradePrices: prices,
     canBuyUpgradeWith,
-    atmFee: fee,
+    atmFeeRates: feeRates,
     atmAmounts: amounts,
     atmDefaultAmount: defaultAmount,
     cashCapacity,

@@ -19,21 +19,70 @@ import { capacityFor } from '../../../src/core/domains/vault/rules'
 
 const money = fromString
 
+/** Le due direzioni, per non ricopiare i tassi in ogni asserzione. */
+const IN = BALANCE.ATM_FEE_RATE_IN
+const OUT = BALANCE.ATM_FEE_RATE_OUT
+
+/**
+ * La soglia in cui il pavimento cede il posto alla percentuale: **si misura** dai due numeri che
+ * la producono, non si scrive. Scriverla sarebbe il difetto A04 — cambiare un tasso in
+ * `constants.ts` lascerebbe qui una cifra che non vale più, e il test resterebbe verde.
+ */
+const crossover = (rate: typeof IN): typeof IN => BALANCE.ATM_FEE_FLOOR.div(rate)
+
 describe('la commissione', () => {
-  it('è quella dichiarata in constants.ts, non un numero del dominio', () => {
-    // Da sola questa riga è quasi una tautologia, e va detto: a impedire che un numero di gioco
-    // nasca dentro `domains/` è un meccanismo, non un'asserzione. Per i numeri è
-    // `no-magic-numbers` (D010, `.div(10)`); per il denaro — che si costruisce da una **stringa**,
-    // e quindi passava indisturbato — è `tests/rules/domains-no-money-literals`, nato qui.
+  it('sotto la soglia è il pavimento dichiarato in constants.ts', () => {
+    // A impedire che un numero di gioco nasca dentro `domains/` è un meccanismo, non
+    // un'asserzione: `no-magic-numbers` per i numeri (D010, `.div(10)`), e per il denaro — che si
+    // costruisce da una **stringa**, quindi passava indisturbato — `domains-no-money-literals`.
     // Questa riga dichiara *quale* costante è quella giusta, così cambiarla in `constants.ts` basta.
-    expect(atmFee().toString()).toBe(BALANCE.ATM_FEE.toString())
+    expect(atmFee(money('10'), OUT).toString()).toBe(BALANCE.ATM_FEE_FLOOR.toString())
+    expect(atmFee(money('100'), OUT).toString()).toBe(BALANCE.ATM_FEE_FLOOR.toString())
   })
 
-  it('è la stessa per il deposito e per il prelievo', () => {
-    // Una costante sola finché non c'è una ragione di gioco per due: la funzione non ha un
-    // parametro che possa distinguerli, quindi la simmetria non è una promessa ma una firma.
-    expect(atmFee().toString()).toBe(atmFee().toString())
-    expect(atmFee().toString()).toBe('2.5')
+  it('sopra la soglia è la percentuale, e allora i due versi non pagano lo stesso', () => {
+    // 500,00 € sta sopra la soglia in tutte e due le direzioni, quindi qui l'asimmetria si vede:
+    // versare costa l'1,5%, prelevare il 2%. Sotto la soglia sarebbero identici, ed è il motivo
+    // per cui questo caso non si può provare con un importo piccolo.
+    expect(atmFee(money('500'), IN).toString()).toBe('7.5')
+    expect(atmFee(money('500'), OUT).toString()).toBe('10')
+  })
+
+  it('attraversa esattamente dove il pavimento diviso il tasso lo dice', () => {
+    for (const rate of [IN, OUT]) {
+      const at = crossover(rate)
+
+      // Un centesimo sotto la soglia comanda ancora il pavimento; alla soglia i due coincidono,
+      // e da lì in su comanda la percentuale. È il bordo, e sta qui perché è l'unico punto in cui
+      // una delle due metà della formula può sparire senza che nulla diventi rosso.
+      expect(atmFee(at.minus(money('0.01')), rate).toString()).toBe(
+        BALANCE.ATM_FEE_FLOOR.toString()
+      )
+      expect(atmFee(at.plus(money('1')), rate).greaterThan(BALANCE.ATM_FEE_FLOOR)).toBe(true)
+    }
+  })
+
+  it('non scende mai sotto il pavimento, per quanto piccolo sia l importo', () => {
+    // È la meta' della formula che tiene in piedi la lezione vecchia: prelevare poco costa
+    // proporzionalmente molto. Senza pavimento, l'1,5% di 1,00 € sarebbe un centesimo e mezzo.
+    expect(atmFee(money('0.01'), IN).toString()).toBe(BALANCE.ATM_FEE_FLOOR.toString())
+    expect(atmFee(money('1'), OUT).toString()).toBe(BALANCE.ATM_FEE_FLOOR.toString())
+  })
+
+  it('arrotonda ai centesimi per eccesso, mai a mezzo centesimo', () => {
+    // 333,00 × 1,5% fa 4,995: il caso che ha fatto nascere `roundUpToCents`, e che con una
+    // commissione fissa non poteva presentarsi. Per eccesso, quindi 5,00 e non 4,99.
+    expect(atmFee(money('333'), IN).toString()).toBe('5')
+
+    // Un caso che arrotonda **davvero**, cioè in cui la terza cifra non è un cinque tondo:
+    // 1.234,56 × 2% fa 24,6912.
+    expect(atmFee(money('1234.56'), OUT).toString()).toBe('24.7')
+  })
+
+  it('cresce con l importo, che è la ragione per cui questa delega esiste', () => {
+    // 2,50 € su un milione non erano una commissione: erano un arrotondamento. Adesso il gesto
+    // centrale del gioco costa qualcosa anche quando il giocatore è ricco.
+    expect(atmFee(money('1000000'), OUT).toString()).toBe('20000')
   })
 })
 

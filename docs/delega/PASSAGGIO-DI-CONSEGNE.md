@@ -557,7 +557,7 @@ Le quattro cose che chi arriva adesso deve sapere:
    livello. Adesso è **R19**, `tests/rules/domains-are-independent`, e non fa sconti all'
    `import type`. D018 dichiarava «nessuna regola nuova»: è la sua correzione 1, e la ragione è che
    senza quel test D018 violava un proprio invariante nella riga stessa che lo enuncia.
-2. **La scheda del bancomat ha trovato che `ATM_FEE` non ha un bersaglio suo.** È tarata di
+2. **La scheda del bancomat ha trovato che la commissione non ha un bersaglio suo.** È tarata di
    rimbalzo da `vault_card_discount`, che è del caveau: cambiare la commissione rende rosso un test
    che parla d'altro. Non è stato corretto — D018 non tocca `src/` — ed è annotato in
    [atm.md](../design/domini/atm.md).
@@ -829,7 +829,7 @@ La seconda è più piccola e ha un prezzo misurato: il canvas nella repo costa c
 progetto in cui il costo di un documento si paga in un gate.
 
 Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
-recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE` scelti
+recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE_FLOOR` scelti
 da D014, e i quattro importi rapidi del bancomat — 1 · 10 · 100 · 500 — scelti da D015. Sono di
 un'altra categoria: cambiarli costa una riga in `balance/constants.ts` e un test che diventa rosso
 apposta. Reddito base e costo dell'upgrade vengono invece dai

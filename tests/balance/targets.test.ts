@@ -125,8 +125,12 @@ describe('i bersagli di bilanciamento', () => {
   it('lo sconto della carta resta sotto la commissione del bancomat: vault_card_discount', () => {
     // La legge della non dominanza, misurata. Senza il calore la carta non paga niente in cambio
     // della traccia che lascia, e l'unico argine è che convertire i contanti costi più di quanto
-    // lo sconto faccia risparmiare. Il confronto è con `ATM_FEE` e non con una cifra ricopiata:
-    // ritoccare la commissione deve rendere rosso **questo** test.
+    // lo sconto faccia risparmiare. Il confronto è con `ATM_FEE_FLOOR` e non con una cifra
+    // ricopiata: ritoccare il pavimento deve rendere rosso **questo** test.
+    //
+    // Da D032 la commissione non è un numero ma `max(pavimento, importo × tasso)`, e il pavimento
+    // è la più bassa che possa esistere: se lo sconto sta sotto di lui, sta sotto ogni commissione
+    // che il bancomat possa mai chiedere. È il confronto più severo, non quello più comodo.
     const target = TARGETS.vault_card_discount
     const levels = BALANCE.VAULT_PRICES_CASH.length
 
@@ -138,7 +142,7 @@ describe('i bersagli di bilanciamento', () => {
       const discount = cash.price.minus(card.price)
       expect(discount.greaterThanOrEqualTo(target.min)).toBe(true)
       expect(discount.lessThanOrEqualTo(target.max)).toBe(true)
-      expect(discount.lessThan(BALANCE.ATM_FEE)).toBe(true)
+      expect(discount.lessThan(BALANCE.ATM_FEE_FLOOR)).toBe(true)
     }
   })
 

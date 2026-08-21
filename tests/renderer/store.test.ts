@@ -475,7 +475,7 @@ describe('i comandi', () => {
     const moved = store.confirm('deposit', fromString('500'))
 
     expect(moved.ok).toBe(true)
-    expect(toString(store.balances.card)).toBe('497.5')
+    expect(toString(store.balances.card)).toBe('492.5')
   })
 
   it('un comando rifiutato torna indietro con il suo codice, e niente si muove', async () => {
@@ -773,10 +773,20 @@ const fund = (pool: Pool, amount: string): void => {
 }
 
 describe('i selettori del bancomat', () => {
-  it('la commissione è quella del dominio, non il numero copiato dal mockup', async () => {
+  it('i tassi sono quelli del dominio, non i numeri copiati dal canvas', async () => {
     const store = await start()
 
-    expect(toString(store.atmFee)).toBe(toString(BALANCE.ATM_FEE))
+    expect(toString(store.atmFeeRates.deposit)).toBe(toString(BALANCE.ATM_FEE_RATE_IN))
+    expect(toString(store.atmFeeRates.withdraw)).toBe(toString(BALANCE.ATM_FEE_RATE_OUT))
+  })
+
+  it('non espone piu una commissione, perche da D032 non e piu un numero', async () => {
+    const store = await start()
+
+    // La riga che questa delega ha tolto. Un `Money` catturato alla costruzione funzionava finche'
+    // la commissione era fissa; adesso dipende dall'importo e dal verso, quindi chiederla vuol dire
+    // chiedere un'anteprima. Se qualcuno la rimettesse, questo test lo direbbe.
+    expect('atmFee' in store).toBe(false)
   })
 
   it('gli importi rapidi ci sono, e la schermata si apre sul più grande', async () => {
@@ -946,15 +956,15 @@ describe('l’anteprima del bancomat e il comando', () => {
     }
   })
 
-  it('un prelievo di 500 sposta 497,50 sui contanti e 2,50 alle commissioni', async () => {
+  it('un prelievo di 500 sposta 490,00 sui contanti e 10,00 alle commissioni', async () => {
     const store = await start()
     fund('card', '1000')
 
     store.confirm('withdraw', fromString('500'))
 
-    expect(toString(store.balances.cash)).toBe('497.5')
+    expect(toString(store.balances.cash)).toBe('490')
     expect(toString(store.balances.card)).toBe('500')
-    expect(toString(store.feesPaid)).toBe('2.5')
+    expect(toString(store.feesPaid)).toBe('10')
   })
 
   it('un importo che la commissione si mangia è un no spiegato, non un pulsante spento', async () => {

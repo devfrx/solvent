@@ -143,6 +143,7 @@ export const en: Dictionary = {
     'operation, large or small.',
   'atm.fee': 'Fee',
   'atm.fee.per_operation': 'Fee per operation',
+  'atm.fee.rates': '{deposit} in · {withdraw} out',
   'atm.deposit.confirm': 'Confirm deposit',
   'atm.withdraw.confirm': 'Confirm withdrawal',
   'atm.recent.title': 'Recent operations',

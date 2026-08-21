@@ -26,7 +26,11 @@ defineProps<{
   readonly account: string
   /** Il tetto dello strumento, già in parole: oggi «Illimitata». */
   readonly capacity: string
-  /** Cosa costa un'operazione al bancomat, già formattato. */
+  /**
+   * Cosa costa usare questo strumento, già in parole: da D032 sono i **due tassi**, uno per verso,
+   * e non più un importo. Quanto costi la singola operazione non lo sa più nessuno in anticipo —
+   * lo dice l'anteprima, che è l'operazione stessa (INV-11).
+   */
   readonly fee: string
   /** Se i movimenti lasciano traccia, già in parole. È metà della dualità di P4. */
   readonly traceability: string

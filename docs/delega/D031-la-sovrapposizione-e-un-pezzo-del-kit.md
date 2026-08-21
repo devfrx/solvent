@@ -6,9 +6,11 @@
   [PASSAGGIO-DI-CONSEGNE](PASSAGGIO-DI-CONSEGNE.md))
 - **Dipende da:** [D025](D025-il-tooltip.md), che ha portato la prima sovrapposizione, e
   [D029](D029-i-devcheat.md), che ha portato la seconda e ne ha rotta una
-- **Sblocca:** D032, la rifinitura del bancomat: il canvas disegna menu e riquadri sovrapposti in
-  quasi ogni schermata, e costruirli uno per volta dentro le pagine è il modo in cui il kit smette
-  di esistere
+- **Sblocca:** niente, ed è una correzione. Diceva «D032, la rifinitura del bancomat»: quella è
+  diventata [D033](D033-il-bancomat-e-una-pagina.md), e la sua pagina `ATM` del canvas — letta nel
+  sorgente — **non ha una sola sovrapposizione**. Le due deleghe sono indipendenti. Resta vero il
+  perché generale: il canvas disegna menu e riquadri sovrapposti in quasi ogni **altra** schermata,
+  e costruirli uno per volta dentro le pagine è il modo in cui il kit smette di esistere
 - **ADR vincolanti:** [0032](../adr/0032-le-sovrapposizioni-stanno-nel-livello-superiore.md) (dove
   vivono le sovrapposizioni), [0028](../adr/0028-il-kit-ui-non-sa-che-gioco-e.md) (il kit non sa
   che gioco è), [0030](../adr/0030-il-telaio-e-una-forma-non-un-contenitore.md) (una forma non è un
@@ -51,8 +53,12 @@ slot e la collocazione una proprietà.
 
 ## Il difetto, e cosa si sa davvero
 
-**Non è diagnosticato.** Quello che segue è ciò che è stato provato e cosa ne è uscito: chi esegue
-riparta dalla riproduzione, non dalle ipotesi.
+> **Diagnosticato il 2026-08-21**, di rimbalzo, misurando altro: vedi _La causa, misurata_ in fondo
+> a questa sezione. Il resto resta scritto com'era, perché la cronologia dei tentativi è ciò che
+> impedisce di rifarli.
+
+**Non era diagnosticato quando questa delega è stata scritta.** Quello che segue è ciò che era
+stato provato e cosa ne era uscito.
 
 Cronologia:
 
@@ -84,8 +90,61 @@ Piste da guardare, in ordine di costo:
 | Il congedo al clic fuori riapre comunque                                  | riproduzione minima in HTML puro, senza Vue, con la stessa struttura e lo stesso CSS |
 | Un secondo elemento con lo stesso `id` in pagina                          | `document.querySelectorAll('#dev-panel').length`                                     |
 
-**La riproduzione minima in HTML puro è il primo passo**, e costa dieci minuti: se lì funziona, il
-colpevole è Vue o il nostro CSS; se lì non funziona, è la forma del popover e va cambiata la forma.
+**La riproduzione minima in HTML puro era il primo passo**, e non serve più: la risposta è arrivata
+prima, dalla finestra vera.
+
+### La causa, misurata
+
+Trovata il 2026-08-21 durante [D032](D032-la-commissione-scala-il-pavimento-no.md), interrogando la
+finestra di sviluppo via CDP per un'altra ragione — il pannello copriva i pulsanti che quella delega
+doveva premere. **Non è stata corretta**: questa resta la delega che la corregge, e correggerla lì
+sarebbe stato costruire due cose insieme.
+
+Le prime tre piste della tabella qui sopra sono **escluse**, e da una lettura sola:
+
+| Pista                                    | Letto nel DOM della finestra vera                        |
+| ---------------------------------------- | -------------------------------------------------------- |
+| il codice nuovo non è arrivato a schermo | il pulsante ha `popovertarget="dev-panel"`, c'è          |
+| Vue non rende `popovertarget`            | lo rende: è l'attributo giusto sull'elemento giusto      |
+| un secondo elemento con lo stesso `id`   | `document.querySelectorAll('#dev-panel').length` è **1** |
+
+E la misura che le rende tutte irrilevanti: **`#dev-panel:popover-open` è `false` mentre il
+pannello è visibile e i suoi pulsanti sono cliccabili.** Non è un popover che non si chiude — è un
+riquadro che non è mai stato aperto come popover, e che si vede lo stesso.
+
+La riga è in `DevPanel.vue`:
+
+```css
+.panel {
+  /* … */
+  display: flex;
+}
+```
+
+Il foglio di stile del motore dà `display: none` a ogni elemento con l'attributo `popover` quando è
+chiuso. **Una regola d'autore vince su quella del motore**, quindi `display: flex` scritto senza
+condizione tiene il pannello visibile qualunque cosa dica il popover: aperto o chiuso, si vede. Il
+motore chiude, e lo schermo non cambia.
+
+Ne discende che il difetto **non è nella meccanica di apertura** e non lo era in nessuna delle due
+stesure: è una riga di CSS che disfa il meccanismo che entrambe usavano. La forma dichiarativa
+della seconda stesura era giusta.
+
+**`UiTooltip` non ha il problema per un motivo che vale la pena guardare: non scrive `display`
+affatto.** La sua bolla si dispone con `justify-self: anchor-center` e non ha figli da impilare,
+quindi la regola del motore resta l'unica e il congedo funziona. Non è disciplina — è che a quel
+componente non è mai servito.
+
+Il pannello dei cheat invece è una colonna, quindi `display: flex` gli serve davvero. Ne discende
+la forma della correzione: la dichiarazione va **condizionata allo stato aperto**
+(`.panel:popover-open { display: flex }`) oppure spostata su un figlio, così che l'elemento con
+l'attributo `popover` non abbia mai un `display` d'autore addosso.
+
+E ne discende la cosa che riguarda il **kit**, che è poi la ragione per cui questa delega esiste:
+il difetto non è stato una svista ma una riga che chiunque riscriverebbe in buona fede — il primo
+componente che dovrà impilare qualcosa dentro una sovrapposizione la riscriverà uguale. Un pezzo
+del kit che possiede il `display` la rende impossibile, invece di sconsigliarla. È il candidato più
+forte per la **regola** che la sezione _Da produrre_ lascia opzionale.
 
 ## Le due decisioni aperte
 

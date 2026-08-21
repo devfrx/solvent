@@ -13,7 +13,7 @@ import { read, sourceFiles, withoutComments } from '../helpers/sources'
  * cioè proprio la categoria di valori che R04 esiste per proteggere, passava attraverso.
  *
  * Verificato scrivendo `fromString('2.50')` dentro `atm/rules.ts` invece di leggere
- * `BALANCE.ATM_FEE`: lint verde, ventisette test verdi. Da qui questo file.
+ * `BALANCE.ATM_FEE_FLOOR`: lint verde, ventisette test verdi. Da qui questo file.
  *
  * Il controllo guarda la **stringa**, non la funzione che la riceve. La prima versione cercava
  * `fromString(` e `new Decimal(`, e un `import { fromString as fromLiteral }` le passava davanti
@@ -56,7 +56,7 @@ describe('il rilevatore', () => {
 
   it('lascia passare un importo costruito da un dato che arriva da fuori', () => {
     expect(NUMBER_AS_STRING.test('const balance = fromString(saved.balance)')).toBe(false)
-    expect(NUMBER_AS_STRING.test('const fee = BALANCE.ATM_FEE')).toBe(false)
+    expect(NUMBER_AS_STRING.test('const fee = BALANCE.ATM_FEE_FLOOR')).toBe(false)
   })
 
   it('non grida al lupo sulle stringhe che i domini scrivono davvero', () => {

@@ -1,9 +1,8 @@
 # D032 — La commissione scala, il pavimento no
 
-- **Stato:** **Aperta** — scritta il 2026-08-21, non eseguita. Il ramo si chiami
-  `d032-la-commissione-scala-il-pavimento-no` e parta da `main` (se i sei commit del 2026-08-21
-  sono stati fusi) oppure da `d030-il-contenuto-scorre-nel-telaio` — vedi
-  [PASSAGGIO-DI-CONSEGNE](PASSAGGIO-DI-CONSEGNE.md)
+- **Stato:** Chiusa — ramo `d032-la-commissione-scala-il-pavimento-no`, che parte da
+  `d030-il-contenuto-scorre-nel-telaio` perché i sei commit del 2026-08-21 non sono ancora fusi in
+  `main`. Scritta ed eseguita il 2026-08-21
 - **Dipende da:** [D014](D014-dominio-bancomat.md), che ha costruito la commissione fissa, e
   [D017](D017-il-caveau.md), che ha tarato i prezzi del caveau **contro** quella commissione
 - **Sblocca:** [D033](D033-il-bancomat-e-una-pagina.md). La pagina nuova disegna «ATM fee (1,5%)»
@@ -13,9 +12,9 @@
   [0021](../adr/0021-una-sola-primitiva-per-il-denaro.md) (una primitiva sola),
   [0026](../adr/0026-la-precisione-del-denaro-e-dichiarata.md) — **`Proposta`, e questa delega è
   il suo grilletto**, [0027](../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)
-- **Produce:** ADR **0038** — _La commissione scala, il pavimento no_. Se
-  [D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md) chiude prima e produce il suo, questo
-  diventa 0039. Il numero si fissa aprendo il ramo, non scrivendo la delega
+- **Produce:** ADR [0038](../adr/0038-la-commissione-scala-il-pavimento-no.md) — _La commissione
+  scala, il pavimento no_ — e manda l'[ADR 0026](../adr/0026-la-precisione-del-denaro-e-dichiarata.md)
+  da `Proposta` ad `Accettata`, perché ne è il grilletto
 - **Regole:** R04 e R11 (i numeri di gioco stanno in `balance/`), INV-08 (la somma fa zero),
   INV-10 (nessun dominio nomina il conto delle commissioni), INV-11 (l'anteprima **è**
   l'operazione)
@@ -178,20 +177,20 @@ commissione. L'arrotondamento cade prima della transazione, mai dentro.
 
 ## Definizione di fatto
 
-- [ ] La commissione è `max(pavimento, importo × tasso)`, arrotondata ai centesimi per eccesso, e
+- [x] La commissione è `max(pavimento, importo × tasso)`, arrotondata ai centesimi per eccesso, e
       la formula sta in **un** posto.
-- [ ] I due tassi sono asimmetrici e ciascuna direzione porta il proprio: nessun `if` sulla
+- [x] I due tassi sono asimmetrici e ciascuna direzione porta il proprio: nessun `if` sulla
       direzione in tutto il repo.
-- [ ] `ATM_FEE` non esiste più. `grep -rn "ATM_FEE\b" src/ tests/` non trova niente.
-- [ ] L'ADR 0026 è `Accettata` e la precisione è dichiarata in `contracts/money.ts`.
-- [ ] `tests/balance/targets` è verde **senza** che `VAULT_PRICES_CASH` o `VAULT_PRICES_CARD`
+- [x] `ATM_FEE` non esiste più. `grep -rn "ATM_FEE\b" src/ tests/` non trova niente.
+- [x] L'ADR 0026 è `Accettata` e la precisione è dichiarata in `contracts/money.ts`.
+- [x] `tests/balance/targets` è verde **senza** che `VAULT_PRICES_CASH` o `VAULT_PRICES_CARD`
       siano stati toccati.
-- [ ] 1,00 € è ancora rifiutato con `error.atm.fee_exceeds_amount`, e la spunta è presa **premendo
+- [x] 1,00 € è ancora rifiutato con `error.atm.fee_exceeds_amount`, e la spunta è presa **premendo
       il pulsante nella finestra vera**, non solo in un test.
-- [ ] La soglia di attraversamento è provata nelle due direzioni: appena sotto la commissione è il
+- [x] La soglia di attraversamento è provata nelle due direzioni: appena sotto la commissione è il
       pavimento, appena sopra è la percentuale.
-- [ ] Una regola nuova, se ne nasce una, è rotta di proposito una volta.
-- [ ] `npm run verify` verde e `docs/stato.md` rigenerato.
+- [x] Una regola nuova, se ne nasce una, è rotta di proposito una volta.
+- [x] `npm run verify` verde e `docs/stato.md` rigenerato.
 
 ## Trappole note
 
@@ -218,3 +217,78 @@ commissione. L'arrotondamento cade prima della transazione, mai dentro.
 6. **La soglia non è un numero da scrivere.** 166,67 € e 125,00 € sono `pavimento / tasso`: si
    **misurano** dai due numeri che li producono, come `seconds_to_first_wall` fa già in
    `targets.test.ts`. Scriverli sarebbe il difetto A04 con un altro nome.
+
+## Correzioni rispetto a com'era scritta la delega
+
+1. **La delega diceva di dichiarare venti cifre significative. L'ADR 0026 ne chiedeva quaranta, ed
+   è stato eseguito come era scritto.** Il testo qui sopra — _«si dichiara al valore che ha già,
+   quindi non cambia un comportamento»_, e il fuori scope _«alzare la precisione oltre i venti
+   significativi»_ — era stato scritto senza leggere fino in fondo la sezione _Decisione_ di
+   quell'ADR. Dichiarare il predefinito sarebbe stato un ADR eseguito a metà, e il numero non era
+   arbitrario: la [visione](../prodotto/visione.md) dichiara un bersaglio di scala di ~1e30 €, e a
+   venti cifre `transfer()` smette di bilanciare a 1e20 — dieci ordini di grandezza **prima** del
+   bersaglio che il progetto si è dato.
+2. **L'ADR 0026 chiedeva due test, non uno, e aveva ragione.** Il primo impone la precisione, il
+   secondo copre il guasto vero: `transfer()` che smette di sommare a zero. Le due soglie che
+   quell'ADR prevedeva sono state **misurate** e sono esatte — il centesimo esiste fino a 1e37,
+   `transfer` sbilancia da 1e40. Sono adesso in `tests/contracts/money`, derivate invece che
+   ricopiate: un aggiornamento di decimal.js che le spostasse le renderebbe rosse.
+3. **Alzare la precisione non ha reso rosso un solo test degli ottocento esistenti**, ed era la
+   conseguenza che l'ADR 0026 temeva di più. La misura è stata presa come vuole
+   [D017](D017-il-caveau.md): si scrive la riga, si esegue la suite, si legge. Le divisioni che il
+   progetto fa oggi non arrivano a una ventesima cifra significativa.
+4. **`store.atmFee` non è stato sostituito: è stato tolto, e al suo posto è nata un'altra cosa.**
+   La delega diceva «entrano i due tassi», che è vero, e non diceva la parte che conta: `atmFeeRates`
+   non è il successore di `atmFee`, perché non risponde alla stessa domanda. «Quanto costa
+   un'operazione» non ha più una risposta costante, e chi la vuole chiede un'anteprima. Un test
+   nuovo verifica l'**assenza** (`'atmFee' in store` è falso), perché una riga tolta che qualcuno
+   rimette in buona fede è il modo in cui questa delega si disfa.
+5. **Il formato `rate` è entrato nell'i18n, e la delega non lo prevedeva.** Il retro della carta
+   deve dire «1,5% versando · 2,0% prelevando», e un tasso non è un importo: scriverlo nel
+   dizionario sarebbe stato un numero di gioco dentro una traduzione (R04). Il formato usa
+   `style: 'percent'`, che moltiplica per cento da sé — così il fattore cento non compare in nessun
+   punto del nostro codice. La costante `CURRENCY` dei formati è stata rinominata `NUMBERS`, perché
+   con una percentuale dentro il vecchio nome mentiva.
+6. **Una partita giocata è cambiata sotto il test che la registra.** `game-roundtrip` versa tutto
+   il contante per comprare l'upgrade da 800 €: servivano 669 tick, adesso 677, perché versare
+   812,40 € ne costa 12,19 invece di 2,50. **Che quel numero abbia dovuto salire è la misura di
+   questa delega**, non un effetto collaterale da assorbire.
+7. **Il `grep` della definizione di fatto ha trovato più di quanto cercasse.** `ATM_FEE` viveva
+   anche in tre documenti **vivi** — la scheda del bancomat, quella del caveau e il passaggio di
+   consegne — oltre che in `constants.ts`, dentro il commento di `VAULT_PRICES_CARD`. Le deleghe
+   chiuse che lo nominano non sono state toccate: sono documenti storici, e riscriverle
+   falsificherebbe cosa era vero quando sono state eseguite.
+8. **La spunta a occhio ha richiesto un cheat, ed è la prima volta.** Il caveau della partita di
+   sviluppo era pieno, quindi ogni prelievo sbatteva sulla capienza prima di poter mostrare la
+   percentuale: le quattro anteprime del prelievo dicevano tutte «ci stanno ancora 0,00 €». «Svuota
+   i contanti» ([D029](D029-i-devcheat.md)) ha costruito lo stato in cui la misura era possibile —
+   che è esattamente ciò per cui quella delega esiste.
+9. **La verifica a occhio ha diagnosticato il difetto di un'altra delega.** Il pannello dei cheat
+   copre 300×502 px della colonna destra e rendeva irraggiungibile metà dei pulsanti da premere.
+   Interrogando il DOM per toglierlo di mezzo è venuta fuori la causa che
+   [D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md) cercava: `.panel { display: flex }`
+   sovrascrive il `display: none` che il motore dà a un `popover` chiuso. **Non è stata corretta
+   qui** — è scritta nella sua delega, che resta quella che la corregge.
+
+## La misura, presa nella finestra vera
+
+Via CDP, con la finestra ferma dov'era, il 2026-08-21. Ogni riga è il testo letto **nel documento**
+dopo aver premuto il pulsante, non un numero calcolato a parte.
+
+**Il retro della carta:** «Commissione per operazione = 1,5% versando · 2,0% prelevando».
+
+| Importo  | Deposito (1,5%)                    | Prelievo (2,0%)                    |
+| -------- | ---------------------------------- | ---------------------------------- |
+| 1,00 €   | _rifiutato_                        | _rifiutato_                        |
+| 10,00 €  | commissione **2,50 €** (pavimento) | commissione **2,50 €** (pavimento) |
+| 100,00 € | commissione **2,50 €** (pavimento) | commissione **2,50 €** (pavimento) |
+| 500,00 € | commissione **7,50 €** (1,5%)      | commissione **10,00 €** (2,0%)     |
+
+**Le due cose che questa tabella dimostra e nessun test poteva dare:**
+
+1. **L'asimmetria si vede a schermo**, e si vede solo a 500,00 €: sotto la soglia i due versi
+   pagano identico, perché comanda il pavimento. Chi guardasse solo gli importi piccoli non
+   saprebbe che i due tassi esistono.
+2. **Il rifiuto è raggiungibile premendo**, e non solo nell'anteprima: premuto «Conferma» su
+   1,00 €, sotto il pulsante compare «La commissione di 2,50 € si mangia tutti i 1,00 €» — con il
+   motivo, non con un pulsante spento (ADR 0018, che su questo resta in vigore).

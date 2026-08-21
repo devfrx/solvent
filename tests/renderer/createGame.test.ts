@@ -56,7 +56,7 @@ describe('una partita è un’istanza sola di ciascuna cosa', () => {
 
     expect(moved.ok).toBe(true)
     expect(toString(game.ctx.ledger.balance('cash'))).toBe('500')
-    expect(toString(game.ctx.ledger.balance('card'))).toBe('497.5')
+    expect(toString(game.ctx.ledger.balance('card'))).toBe('492.5')
   })
 
   it('anche il comando dell’upgrade paga da quel Ledger, non da uno suo', () => {

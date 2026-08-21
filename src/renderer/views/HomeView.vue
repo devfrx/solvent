@@ -41,7 +41,7 @@ const store = useGameStore()
 const {
   balances,
   cardCapacity,
-  atmFee,
+  atmFeeRates,
   incomePerSecond,
   netWorth,
   earned,
@@ -49,7 +49,7 @@ const {
   feesPaid,
   recentOperations
 } = storeToRefs(store)
-const { text, money } = useTranslator()
+const { text, money, rate } = useTranslator()
 </script>
 
 <template>
@@ -60,7 +60,12 @@ const { text, money } = useTranslator()
   <BankCard3d
     :account="money(balances.card)"
     :capacity="cardCapacity === null ? text('pool.unlimited') : money(cardCapacity)"
-    :fee="money(atmFee)"
+    :fee="
+      text('atm.fee.rates', {
+        deposit: rate(atmFeeRates.deposit),
+        withdraw: rate(atmFeeRates.withdraw)
+      })
+    "
     :traceability="text(traceabilityKey('card'))"
   />
 

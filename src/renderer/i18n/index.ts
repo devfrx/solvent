@@ -176,6 +176,7 @@ export type ScreenKey =
   | 'atm.breakdown.explained'
   | 'atm.fee'
   | 'atm.fee.per_operation'
+  | 'atm.fee.rates'
   | 'atm.deposit.confirm'
   | 'atm.withdraw.confirm'
   | 'atm.recent.title'
@@ -232,7 +233,7 @@ const MINUTES_PER_HOUR = 60
  * regole diverse a seconda della cifra. I mockup raggruppano sempre, e un gioco finanziario si
  * legge per numeri (P2).
  */
-const CURRENCY = {
+const NUMBERS = {
   currency: { style: 'currency', currency: 'EUR', useGrouping: 'always' },
   /**
    * Lo stesso formato con il segno **sempre** davanti, zero escluso. Serve alle righe di una
@@ -245,7 +246,17 @@ const CURRENCY = {
     currency: 'EUR',
     useGrouping: 'always',
     signDisplay: 'exceptZero'
-  }
+  },
+  /**
+   * Un tasso, che da D032 è il modo in cui si dice la commissione del bancomat. `style: 'percent'`
+   * moltiplica per cento da sé: riceve `0,015` e scrive `1,5%`, quindi il fattore cento non compare
+   * da nessuna parte nel nostro codice — che è l'unico posto dove potrebbe sbagliarsi.
+   *
+   * Una cifra decimale fissa, minima **e** massima: senza la minima `0,02` uscirebbe come «2%» e
+   * `0,015` come «1,5%», cioè due tassi accostati nella stessa riga con due forme diverse. È la
+   * stessa ragione per cui `useGrouping` è `always` qui sopra.
+   */
+  rate: { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }
 } as const
 
 const TIMESTAMP = {
@@ -275,7 +286,7 @@ export const createTranslations = () =>
     legacy: false,
     locale: DEFAULT_LOCALE,
     messages: { it, en },
-    numberFormats: { it: CURRENCY, en: CURRENCY },
+    numberFormats: { it: NUMBERS, en: NUMBERS },
     datetimeFormats: { it: TIMESTAMP, en: TIMESTAMP }
   })
 
@@ -291,6 +302,8 @@ export interface Translator {
   readonly money: (amount: Money) => string
   /** Lo stesso importo con il proprio verso davanti: è la riga di una transazione, non un saldo. */
   readonly signedMoney: (amount: Money) => string
+  /** Un tasso in percentuale. Attraversa lo stesso confine di `money`, e per la stessa ragione. */
+  readonly rate: (value: Money) => string
   readonly instant: (at: number) => string
   readonly duration: (elapsed: Milliseconds) => string
   readonly poolName: (pool: Pool) => string
@@ -323,6 +336,8 @@ export const createTranslator = (wording: Wording): Translator => {
   const money = (amount: Money): string => wording.number(toDisplayNumber(amount), 'currency')
 
   const signedMoney = (amount: Money): string => wording.number(toDisplayNumber(amount), 'signed')
+
+  const rate = (value: Money): string => wording.number(toDisplayNumber(value), 'rate')
 
   const instant = (at: number): string => wording.date(new Date(at), 'short')
 
@@ -405,7 +420,7 @@ export const createTranslator = (wording: Wording): Translator => {
     }
   }
 
-  return { text, count, money, signedMoney, instant, duration, poolName, failure }
+  return { text, count, money, signedMoney, rate, instant, duration, poolName, failure }
 }
 
 /** Dentro un componente, le quattro funzioni le porta `useI18n()`. Fuori, le porta un test. */

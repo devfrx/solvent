@@ -1,5 +1,5 @@
 import type { Money } from '@core/contracts/money'
-import { ZERO } from '@core/contracts/money'
+import { roundUpToCents, ZERO } from '@core/contracts/money'
 
 import { BALANCE } from '@core/balance/constants'
 
@@ -12,16 +12,31 @@ import { BALANCE } from '@core/balance/constants'
  */
 
 /**
- * La commissione trattenuta da ogni operazione. Una sola costante finché non c'è una ragione di
- * gioco per due: deposito e prelievo pagano lo stesso.
+ * La commissione trattenuta da un'operazione: **il maggiore fra un pavimento e una percentuale**.
  *
- * Non prende l'importo, e non è una svista. Con una commissione fissa il parametro non verrebbe
- * usato, e un parametro inutilizzato è un errore di compilazione (`noUnusedParameters`, C01). È
- * una funzione invece della costante nuda per la ragione di `upgradeCost()` (D010): l'anteprima e
- * l'esecuzione devono leggere lo **stesso** posto, e due letture che devono coincidere prima o poi
- * divergono.
+ * Fino a D032 non prendeva argomenti, ed era motivato — con una commissione fissa un parametro
+ * sarebbe rimasto inutilizzato, cioè un errore di compilazione (`noUnusedParameters`, C01). Adesso
+ * ne prende due, e la ragione è che la commissione ha smesso di essere un numero: dipende da
+ * quanto si sposta e da che verso.
+ *
+ * Il **tasso arriva per argomento** e non si legge qui dentro, ed è la stessa scelta di `fitsIn`
+ * poche righe più sotto: chi conosce il verso è l'operazione (`DEPOSIT`, `WITHDRAW`), che lo porta
+ * come dato. Leggerlo qui vorrebbe dire un `if` sulla direzione, e un `if` sulla direzione è
+ * esattamente ciò che l'ADR 0017 ha tolto dal progetto una volta.
+ *
+ * Resta una funzione invece di un'espressione sparsa per la ragione di `upgradeCost()` (D010):
+ * l'anteprima e l'esecuzione devono leggere lo **stesso** posto, e due letture che devono
+ * coincidere prima o poi divergono.
+ *
+ * L'arrotondamento è qui e in nessun altro punto della catena: applicarlo di nuovo più avanti
+ * farebbe salire la commissione di un centesimo per passaggio.
  */
-export const atmFee = (): Money => BALANCE.ATM_FEE
+export const atmFee = (amount: Money, rate: Money): Money => {
+  const proportional = amount.mul(rate)
+  return roundUpToCents(
+    proportional.greaterThan(BALANCE.ATM_FEE_FLOOR) ? proportional : BALANCE.ATM_FEE_FLOOR
+  )
+}
 
 /**
  * Zero non è un non-evento. `magnitude` lo lascia passare, quindi un trasferimento da 0,00 sarebbe

@@ -128,7 +128,7 @@ cose diverse.
   conviene solo se lo sconto supera quanto costa portarci i contanti.
 
   **Come è stata risolta**, perché la riga qui sopra dice il criterio e non la risposta: lo sconto
-  della carta è di **due euro** a ogni livello, cioè **sotto** i 2,50 € di `ATM_FEE`. Ne discende
+  della carta è di **due euro** a ogni livello, cioè **sotto** i 2,50 € di `ATM_FEE_FLOOR`. Ne discende
   che chi ha i contanti li spende, perché convertirli costerebbe più di quanto lo sconto faccia
   risparmiare, e chi ha già del denaro sulla carta paga con quella. Con cosa paghi è **dove hai i
   soldi**, e nessuna delle due voci è arredamento. Uno sconto più grande — cinquanta euro, per dire
@@ -248,11 +248,11 @@ _Lo spazio_. Costa zero oggi e costa una riscrittura fra tre fette.
 
 ## Domande aperte
 
-| Domanda                                                       | Chi la chiude                                                                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ~~Quanto costa con ognuno dei due strumenti~~                 | **chiusa** da [D017](../../delega/D017-il-caveau.md): la carta costa **due euro in meno** a ogni livello, e quel numero è tarato contro `ATM_FEE` invece che scelto — sopra la commissione i contanti diventerebbero una voce che nessuno sceglie. Lo verifica `vault_card_discount` in `targets.ts` |
-| ~~I numeri: quanti livelli, quale curva di capienza e costo~~ | **chiusa** da [D017](../../delega/D017-il-caveau.md): **cinque** livelli, da 1.000,00 € a 250.000,00 €, con ogni prezzo appena sotto la capienza del livello da cui si paga. Il bersaglio è `seconds_to_first_wall`: il muro morde fra i 60 e i 120 secondi di gioco                                 |
-| **L'ingombro degli oggetti**: come si dichiara                | il primo dominio che produce oggetti — black market o aste di box                                                                                                                                                                                                                                    |
+| Domanda                                                       | Chi la chiude                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~Quanto costa con ognuno dei due strumenti~~                 | **chiusa** da [D017](../../delega/D017-il-caveau.md): la carta costa **due euro in meno** a ogni livello, e quel numero è tarato contro `ATM_FEE_FLOOR` invece che scelto — sopra la commissione i contanti diventerebbero una voce che nessuno sceglie. Lo verifica `vault_card_discount` in `targets.ts` |
+| ~~I numeri: quanti livelli, quale curva di capienza e costo~~ | **chiusa** da [D017](../../delega/D017-il-caveau.md): **cinque** livelli, da 1.000,00 € a 250.000,00 €, con ogni prezzo appena sotto la capienza del livello da cui si paga. Il bersaglio è `seconds_to_first_wall`: il muro morde fra i 60 e i 120 secondi di gioco                                       |
+| **L'ingombro degli oggetti**: come si dichiara                | il primo dominio che produce oggetti — black market o aste di box                                                                                                                                                                                                                                          |
 
 ---
 
@@ -324,7 +324,7 @@ arriva.
 lunghezza dell'elenco, e `MAX_LEVEL` la legge.
 
 **Bersagli lasciati:** `seconds_to_first_wall` (60–120 secondi) e `vault_card_discount`
-(0,50 €–2,49 €, tutto sotto `ATM_FEE`). È il solo dei tre domini a lasciarne **due**.
+(0,50 €–2,49 €, tutto sotto `ATM_FEE_FLOOR`). È il solo dei tre domini a lasciarne **due**.
 
 ---
 
