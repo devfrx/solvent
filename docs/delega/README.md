@@ -112,6 +112,7 @@ flowchart TD
   D026 --> D027["D027 · Un grafico è una serie"]
   D017 --> D028["D028 · Una capienza ferma chi sale"]
   D028 --> D029["D029 · I devcheat"]
+  D024 --> D030["D030 · Il contenuto scorre nel telaio"]
 ```
 
 **D017 e D018 non si toccano**, ed è il primo caso del progetto: una scrive codice, l'altra solo
@@ -234,6 +235,7 @@ configurato dopo che c'erano già 156 file.
 | [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md)  | Un grafico è una serie, e nessuno la tiene                            | 170 codice + 158 test         | **Chiusa** |
 | [D028](D028-una-capienza-ferma-chi-sale.md)               | Una capienza ferma chi sale, non chi si trova già in alto             | 15 codice + 55 test           | **Chiusa** |
 | [D029](D029-i-devcheat.md)                                | I devcheat: costruire uno stato invece di aspettarlo                  | 318 codice + 249 test         | **Chiusa** |
+| [D030](D030-il-contenuto-scorre-nel-telaio.md)            | Il contenuto scorre nel telaio, e la testata sta ferma                | 12 codice + 22 test           | **Chiusa** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede

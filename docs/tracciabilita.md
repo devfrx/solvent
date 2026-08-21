@@ -63,6 +63,7 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 | R18 | Un dominio ha la sua cartella in `components/`                                                  | ✅      | `tests/rules/domain-ui` — legge le cartelle vere dai due lati; l'unica dichiarazione è la lista delle due cartelle non di dominio (ADR 0033) |
 | R19 | Nessun dominio importa un altro dominio                                                         | ✅      | `tests/rules/domains-are-independent` — alias e percorsi relativi, `import type` compreso (D018)                                             |
 | R20 | I cheat esistono solo in sviluppo, e nessuno li nomina fuori dal ramo che il compilatore spegne | ✅      | `tests/rules/cheats-are-dev-only` — import di **valore**, l'unico `import.meta.env`, e l'elenco chiuso dei `CheatId`                         |
+| R21 | Nessun `z-index` in `src/`                                                                      | ✅      | `tests/rules/no-z-index` — `.ts`, `.vue` e `.css`; ⚠️ non vede il CSS delle librerie                                                         |
 
 Regole di configurazione e di processo, con la stessa dignità:
 
