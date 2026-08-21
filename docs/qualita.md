@@ -21,8 +21,15 @@ bene: `verify` non paga l'avvio di `npm` due volte per lo stesso gate. Sono temp
 quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre
 `npm run`.
 
-**Rimisurata alla chiusura di [D018](delega/D018-la-scheda-di-dominio.md)**, il 2026-08-21 e sulla
-stessa macchina: la catena intera **33,3 s**, con **745 test**. Era 38,4 s con 726 test a
+**Rimisurata alla chiusura di [D030](delega/D030-il-contenuto-scorre-nel-telaio.md)**, il
+2026-08-21 e sulla stessa macchina: la catena intera **51,6 s**, con **794 test**. Il salto è
+grosso e va letto con prudenza: la misura è stata presa **mentre la finestra di sviluppo
+dell'utente girava**, quindi una parte è contesa di macchina e non lavoro nuovo. Va rifatta a
+macchina scarica prima di trattare 51,6 s come il numero vero — ma anche così è il primo valore che
+si avvicina alla soglia del minuto, e il rimedio è già censito nel
+[registro YAGNI](roadmap-fette.md): togliere l'avvio ripetuto di `npm`, non togliere un gate.
+
+Prima, alla chiusura di [D018](delega/D018-la-scheda-di-dominio.md): **33,3 s** con **745 test**. Era 38,4 s con 726 test a
 [D024](delega/D024-il-telaio.md) e [D025](delega/D025-il-tooltip.md), 36,4 s con 678 test a
 [D017](delega/D017-il-caveau.md), 34,7 s con 564 test a
 [D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md), 34,9 s con 558 a

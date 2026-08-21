@@ -30,22 +30,22 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                        |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                          |
-| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                 |
-| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md) |
-| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                      |
-| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                |
-| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina         |
-| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato               |
-| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
-| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
-| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
-| `main`                   | **allineato**: `d027-un-grafico-e-una-serie` è stato fuso in un `--ff-only`. Il ramo nuovo parte da `main`                             |
-| `origin/main`            | **indietro**, e non di poco — vedi l'avvertimento qui sotto. Il numero non si scrive: lo dice `git rev-list --count origin/main..main` |
-| Albero di lavoro         | **pulito**                                                                                                                             |
-| Prossimo passo           | la **fetta 03**. Quali deleghe restino aperte lo dice [stato.md](../stato.md), e D027 non è fra quelle: è chiusa e fusa                |
+|                          |                                                                                                                                                                                                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                         |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                     |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                               |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina                                                                                                                        |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                              |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                        |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                 |
+| `main`                   | **indietro di sei commit.** Le tre deleghe del 2026-08-21 vivono su rami impilati: `d030-il-contenuto-scorre-nel-telaio` li contiene tutti e tre e si fonde con un `--ff-only`. Non è stato fatto: fondere è una di quelle cose che si chiedono       |
+| `origin/main`            | **indietro**, e non di poco — vedi l'avvertimento qui sotto. Il numero non si scrive: lo dice `git rev-list --count origin/main..main`                                                                                                                |
+| Albero di lavoro         | **pulito**                                                                                                                                                                                                                                            |
+| Prossimo passo           | **[D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md)**, che è aperta e ha un difetto vivo dentro. Poi D032, il bancomat, che **non è ancora scritta**: aspetta tre risposte dell'utente. La fetta 03 viene dopo. Vedi _La sessione del 2026-08-21_ |
 
 > **⚠️ Il lavoro esiste solo su questa macchina.** `origin/main` è fermo al 2026-08-20, al commit
 > `84dbe47`, e da allora nessun `push`. Tutto quello che c'è dopo — la fetta 02 col caveau, il
@@ -62,6 +62,88 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 > Se invece è deliberato — il repo pubblico si aggiorna a fine fetta, o il progetto resta locale
 > finché non è presentabile — allora questa riga va cancellata e la ragione scritta al suo posto,
 > perché così com'è sembra una dimenticanza.
+
+## La sessione del 2026-08-21: tre deleghe chiuse, due cose aperte
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione.
+
+**Cosa è stato chiuso, e perché ognuna esisteva.**
+
+| Delega                                         | Cos'era                                                                                                 |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| [D028](D028-una-capienza-ferma-chi-sale.md)    | un pool oltre la capienza rifiutava **ogni** transazione, comprese quelle che lo facevano scendere      |
+| [D029](D029-i-devcheat.md)                     | i devcheat: costruire uno stato di gioco invece di aspettarlo, senza poter mentire su di esso           |
+| [D030](D030-il-contenuto-scorre-nel-telaio.md) | la carta 3D passava sopra la testata scorrendo; adesso scorre solo il contenuto, dentro la propria area |
+
+Ognuna ha portato il proprio ADR — [0035](../adr/0035-una-capienza-ferma-chi-sale.md),
+[0036](../adr/0036-i-cheat-passano-dalle-porte-del-gioco.md),
+[0037](../adr/0037-il-telaio-non-scorre-il-contenuto-si.md) — più l'invariante **INV-23** e le
+regole **R20** e **R21**, ciascuna con il proprio test e ciascuna rotta di proposito almeno una
+volta. `npm run verify` è **verde**; il conto dei test e il tempo della catena stanno in
+[qualita.md](../qualita.md), con la data accanto, ed è l'unico posto in cui si scrivono.
+
+**Le tre cose che chi arriva adesso deve sapere, e che nessun'altra pagina dice:**
+
+1. **La partita di sviluppo non è più murata viva.** L'avvertenza in fondo a
+   [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md) — 903.359,30 € di contanti contro una
+   capienza di 1.000,00 €, quindi ogni transazione rifiutata e ogni grafico piatto — **non vale
+   più**: con INV-23 quel saldo può scendere, quindi deposito, prelievo e ampliamento funzionano di
+   nuovo, e il cheat «svuota i contanti» lo riporta dentro le regole senza toccare il file.
+2. **Il pannello dei cheat esiste e ha un difetto aperto.** Si apre col pulsante `DEV` in basso a
+   destra e **non si chiude**. È la ragione per cui D031 è aperta, e la causa **non è
+   diagnosticata**: quello che è stato provato, e cosa resta da provare, sta scritto lì dentro. Chi
+   riprende non riparta dalle ipotesi.
+3. **Il bancomat è rimasto a metà, ed è deliberato.** L'utente ha chiesto di rifinire la home
+   «secondo il canvas», poi ha chiesto di **non toccarla** finché non avrà puntualizzato lui. Le tre
+   domande poste e rimaste senza risposta sono qui sotto: sono la prima cosa da chiedergli.
+
+### Le tre domande aperte sul bancomat
+
+Nessuna è stata decisa, e nessuna va decisa in autonomia: cambiano la forma di una schermata e di
+un ADR in vigore.
+
+1. **La home fa due lavori** — è la pagina del bancomat (carta, contanti, deposita/preleva) **e** il
+   cruscotto (cinque riquadri, grafico, operazioni recenti). Il canvas invece tiene le due cose
+   separate: la sua pagina `ATM` è a due colonne — a sinistra l'operazione, a destra la carta e le
+   operazioni — e il cruscotto è una pagina a sé, `Board`. Restano insieme, e allora l'
+   [ADR 0018](../adr/0018-la-home-e-un-atm.md) resta in vigore, oppure si separano e quell'ADR va
+   superato?
+2. **La carta del canvas è un'altra carta.** Nera con l'accento, numero, intestatario, scadenza, e
+   sul retro «cosa fa questo strumento». Quella nel codice è oro e porta il solo saldo. Si adotta
+   quella del canvas?
+3. **Il canvas disegna un gioco più grande di quello che esiste** — una striscia di risorse in
+   testa con sei voci (contanti, carta, fiche, crypto, calore, attenzione) e una colonna a cinque
+   gruppi. Il codice ha due pool e quattro destinazioni. Ci si ferma a ciò che esiste, oppure si
+   prepara la forma?
+
+**Il canvas è già nel repo**, ed è lo stesso file che l'utente ha riconsegnato in quella sessione:
+[design/mockups/solvent-canvas.dc.html](../design/mockups/solvent-canvas.dc.html) — verificato byte
+per byte dopo la formattazione. Si legge **nel sorgente**, non solo guardandolo, ed è il metodo che
+[il suo README](../design/mockups/README.md) descrive.
+
+**Una cosa sul canvas che vale la pena sapere prima di aprirlo:** la sua testata usa `z-index: 20`.
+Da R21 quel numero **non si può scrivere** in `src/`, e non è una contraddizione: il canvas è
+l'autorità su come una schermata si **vede**, non su come è fatto il telaio. La ragione per esteso
+sta nelle alternative scartate dell'[ADR 0037](../adr/0037-il-telaio-non-scorre-il-contenuto-si.md).
+
+### Cosa c'è nell'albero di lavoro, e cosa non c'è
+
+- **Niente di non commesso**: `git status` è pulito, `git stash list` è vuoto.
+- **Sei commit su rami impilati**, e `main` non li ha. `d030-il-contenuto-scorre-nel-telaio` li
+  contiene tutti: `git merge --ff-only d030-il-contenuto-scorre-nel-telaio` da `main` li porta a
+  casa in un colpo. **Non è stato fatto**, perché fondere e spingere sono decisioni dell'utente.
+- **`out/` contiene un `index.html` manomesso**: durante D030 ci è stato iniettato un `window.solvent`
+  finto per guardare la schermata senza Electron. `out/` è ignorato da git e si rifà con
+  `npm run build`, quindi non è un residuo — ma chi apre quel file e lo trova strano adesso sa
+  perché.
+
+### Un dubbio che questa sessione non ha sciolto
+
+`npm run build` produce un renderer **non minificato** — i commenti del sorgente sono ancora dentro
+il bundle, ed è così che si è scoperto. Ne discende che i 2.437,92 kB dichiarati in
+[qualita.md](../qualita.md) sono il peso di un pacchetto non minificato, non il peso di ApexCharts.
+Non è stato toccato: è nel [registro YAGNI](../roadmap-fette.md) con il suo grilletto, e prima di
+stringere qualcosa va saputo quanto pesa davvero la libreria, o si ottimizza il file sbagliato.
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
