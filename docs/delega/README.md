@@ -109,6 +109,7 @@ flowchart TD
   D023 --> D024["D024 · Il telaio"]
   D023 --> D025["D025 · Il tooltip"]
   D024 --> D026["D026 · Dove si attacca un dominio"]
+  D026 --> D027["D027 · Un grafico è una serie"]
 ```
 
 **D017 e D018 non si toccano**, ed è il primo caso del progetto: una scrive codice, l'altra solo
@@ -228,6 +229,7 @@ configurato dopo che c'erano già 156 file.
 | [D024](D024-il-telaio.md)                                 | Il telaio: dove ogni schermata si attacca                             | 359 codice + 96 test      | **Chiusa** |
 | [D025](D025-il-tooltip.md)                                | Il tooltip: la spiegazione che non occupa posto                       | 164 codice + 48 test      | **Chiusa** |
 | [D026](D026-dove-si-attacca-un-dominio.md)                | Dove si attacca un dominio: la pagina, e le cartelle che la reggono   | 124 codice + 81 test      | **Chiusa** |
+| [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md)  | Un grafico è una serie, e nessuno la tiene                            | ~120 codice + ~60 test    | **Aperta** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede
@@ -273,6 +275,15 @@ del lavoro sono `git mv` e un file spostato non produce righe. Le decisioni 2 e 
 in autonomia su direttiva generale dell'utente, quindi sono contestabili: stanno nell'
 [ADR 0033](../adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md), che è il posto dove una
 decisione si contesta.
+
+**[D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md) è nata da una richiesta arrivata mentre
+D026 si decideva**, ed è stata **tenuta fuori** invece che assorbita: i grafici sul cruscotto. È il
+caso in cui la sezione _Fuori scope_ fa il lavoro per cui esiste — D026 chiedeva dove si attacca
+un'interfaccia, e i grafici sono cosa ci si mette dentro. Porta due decisioni, come D026 ne portava
+tre, e la prima non è di disegno: nel progetto **non esiste nessuna serie storica**, quindi il
+lavoro vero è decidere chi la tiene. Il canvas che l'utente ha allegato ha già risposto alla
+seconda senza saperlo — il suo grafico non usa nessuna libreria — ma la risposta va pesata contro
+ciò che verrà dopo, non contro un mock.
 
 **D024 e D025 sono state eseguite insieme e chiuse in un commit solo**, ed è la prima volta: le due
 spunte che restavano — l'interruttore premuto, il tooltip toccato col tabulatore — si pagano nella

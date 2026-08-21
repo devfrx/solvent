@@ -41,9 +41,9 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
 | `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
-| `main`                   | **indietro di una delega**: D026 vive su `d026-dove-si-attacca-un-dominio` e non è stata fusa                                          |
+| `main`                   | **allineato**: `d026-dove-si-attacca-un-dominio` è stato fuso in un `--ff-only`. Il ramo nuovo parte da `main`                         |
 | Albero di lavoro         | **pulito**                                                                                                                             |
-| Prossimo passo           | [D018](D018-la-scheda-di-dominio.md) — preparata. Il ramo parte da `d026-dove-si-attacca-un-dominio`, non da `main`                    |
+| Prossimo passo           | [D018](D018-la-scheda-di-dominio.md), preparata, oppure [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md), non preparata        |
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -659,13 +659,14 @@ Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 7. `docs/prodotto/visione.md` — l'etichetta a nove voci e la legge della non dominanza
 8. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
 
-Stato: `npm run verify` e `npm run verify:release` **verdi**. D018 è l'unica delega aperta rimasta.
+Stato: `npm run verify` e `npm run verify:release` **verdi**. Quali deleghe siano aperte lo dice
+[stato.md](../stato.md), che le conta.
 
 Attenzione a tre cose del punto di partenza:
 
-- **`main` è indietro di una delega.** D026 vive su `d026-dove-si-attacca-un-dominio` e non è stata
-  fusa: il ramo nuovo parte **da lì**, non da `main`. Se una delega chiusa ti dice di partire da un
-  altro ramo, quella è la cronaca del giorno in cui è stata scritta
+- **`main` è allineato**, e il ramo nuovo parte da lì. `d026-dove-si-attacca-un-dominio` è stato
+  fuso in un `--ff-only`. Se una delega chiusa ti dice di partire da un altro ramo, quella è la
+  cronaca del giorno in cui è stata scritta
 - **Le schede dei domini che non hanno codice non si compilano**, o si compilano a metà: una scheda
   che descrive ciò che credevamo di scrivere è peggio di nessuna scheda, e il caveau lo ha appena
   dimostrato smentendo tre delle proprie righe
