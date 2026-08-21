@@ -24,17 +24,34 @@ Ogni voce ha un **perché** — senza, fra sei mesi sembrerà arbitraria e qualc
 [mockup della fetta 01](../design/mockups/fetta-01-primo-stipendio.html). Il mockup resta al suo
 posto: è il documento che ha fatto approvare la **forma** della home, e quella non cambia.
 
-| Elemento    | Scelta                                                                         |
-| ----------- | ------------------------------------------------------------------------------ |
-| Temi        | due, completi: chiaro caldo predefinito, scuro. Sceglie il sistema operativo   |
-| Fondo       | carta calda nel chiaro, quasi nero caldo nello scuro — mai grigio neutro       |
-| Superfici   | quattro livelli — incassata, fondo, superficie, rialzata — con bordo sottile   |
-| Accento     | **inchiostro**: il colore del testo, non un colore acceso                      |
-| Significato | verde guadagno, rosso perdita, ambra rischio. Un colore per ogni strumento     |
-| Allarme     | rosso per il fallimento, ambra per il rischio                                  |
-| Numeri      | cifre tabulari sempre, ovunque compaia un importo                              |
-| Tipografia  | **due caratteri caricati**: mono per ogni cifra e etichetta, sans per la prosa |
-| Densità     | compatta ma respirata; il numero che comanda è l'elemento più grande           |
+| Elemento      | Scelta                                                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Temi          | due, completi: chiaro caldo predefinito, scuro. Sceglie il sistema operativo, e il giocatore lo scavalca per la sessione |
+| Impaginazione | colonna a sinistra, testata appiccicata con la striscia degli strumenti, contenuto che scorre                            |
+| Fondo         | carta calda nel chiaro, quasi nero caldo nello scuro — mai grigio neutro                                                 |
+| Superfici     | quattro livelli — incassata, fondo, superficie, rialzata — con bordo sottile                                             |
+| Accento       | **inchiostro**: il colore del testo, non un colore acceso                                                                |
+| Significato   | verde guadagno, rosso perdita, ambra rischio. Un colore per ogni strumento                                               |
+| Allarme       | rosso per il fallimento, ambra per il rischio                                                                            |
+| Numeri        | cifre tabulari sempre, ovunque compaia un importo                                                                        |
+| Tipografia    | **due caratteri caricati**: mono per ogni cifra e etichetta, sans per la prosa                                           |
+| Densità       | compatta ma respirata; il numero che comanda è l'elemento più grande                                                     |
+
+### Cosa è cambiato il 2026-08-21, e perché
+
+Due righe, tutte e due da [D024](../delega/D024-il-telaio.md), che prende dal canvas l'impaginazione
+che [D023](../delega/D023-il-design-system.md) aveva lasciato indietro.
+
+- **L'impaginazione è una preferenza, adesso che ce n'è una.** Prima le schermate si sceglievano con
+  una fila di linguette dentro il guscio: andava bene per due, e non regge la terza. La colonna a
+  sinistra è dove ogni destinazione futura si attacca, e la striscia della testata è l'unico posto
+  da cui un saldo si vede **anche mentre si guarda un'altra schermata** — che in un idle è la
+  differenza fra un numero e un numero utile.
+- **Il tema si può scegliere.** Continua a decidere il sistema operativo, e finché il giocatore non
+  tocca l'interruttore continua a decidere anche mentre la finestra è aperta. Quando lo tocca, vince
+  lui — per quella sessione. La scelta non si ricorda, e il perché sta
+  nell'[ADR 0031](../adr/0031-il-tema-si-sceglie-e-non-si-ricorda.md): ricordarla vorrebbe dire
+  archiviarla, e il colore del fondo non è stato del gioco.
 
 ### Cosa è cambiato rispetto al 2026-08-19, e perché
 

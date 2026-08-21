@@ -13,6 +13,7 @@ import UiLabel from '@renderer/ui/UiLabel.vue'
 import UiNumber from '@renderer/ui/UiNumber.vue'
 import UiPanel from '@renderer/ui/UiPanel.vue'
 import UiText from '@renderer/ui/UiText.vue'
+import UiTooltip from '@renderer/ui/UiTooltip.vue'
 
 import PostingRows from './PostingRows.vue'
 
@@ -119,7 +120,9 @@ const submit = (): void => {
     </div>
 
     <p class="breakdown">
-      <UiLabel>{{ text('atm.breakdown') }}</UiLabel>
+      <UiTooltip :text="text('atm.breakdown.explained')">
+        <UiLabel>{{ text('atm.breakdown') }}</UiLabel>
+      </UiTooltip>
     </p>
     <div class="ledger">
       <PostingRows v-if="preview.ok" :postings="preview.value" />

@@ -21,13 +21,14 @@ bene: `verify` non paga l'avvio di `npm` due volte per lo stesso gate. Sono temp
 quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre
 `npm run`.
 
-**Rimisurata a [D017](delega/D017-il-caveau.md)**, il 2026-08-21 e sulla stessa macchina: la catena
-intera **36,4 s**, con **678 test**. Era 34,7 s con 564 test a
+**Rimisurata alla chiusura di [D024](delega/D024-il-telaio.md) e
+[D025](delega/D025-il-tooltip.md)**, il 2026-08-21 e sulla stessa macchina: la catena intera
+**38,4 s**, con **726 test**. Era 36,4 s con 678 test a [D017](delega/D017-il-caveau.md), 34,7 s con 564 test a
 [D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md), 34,9 s con 558 a
-[D019](delega/D019-il-pagamento.md), e prima ancora 35,3 s. Centoquattordici test in più costano un
-secondo e mezzo, che è dentro la variazione fra due esecuzioni: il tempo non sta crescendo con i
-test, sta fermo — e la ragione è che quasi tutto il minuto lo pagano `typecheck` e `lint`, non
-`test`. Il numero di test sta qui e non in [stato.md](stato.md) per la stessa ragione del tempo: non
+[D019](delega/D019-il-pagamento.md), e prima ancora 35,3 s. Da D019 a qui i test sono cresciuti di
+un terzo e la catena di tre secondi e mezzo, che è poco più della variazione fra due esecuzioni: il
+tempo non sta crescendo con i test — e la ragione è che quasi tutto il minuto lo pagano `typecheck`
+e `lint`, non `test`, che da solo ne fa cinque e mezzo. Il numero di test sta qui e non in [stato.md](stato.md) per la stessa ragione del tempo: non
 è derivabile dal repo senza eseguirli. Fino a D019 lo portava il
 [passaggio di consegne](delega/PASSAGGIO-DI-CONSEGNE.md), che lo aveva scaduto di due deleghe;
 adesso quella pagina punta qui invece di ricopiarlo.
@@ -97,6 +98,25 @@ motore è uno solo. La misura sta qui e non in [stato.md](stato.md) per la stess
 non è derivabile dal repo senza compilarlo. Da D009 a D010 era rosso e non era una regressione — il renderer non esisteva —
 ma da qui in avanti ogni delega deve tenerlo verde.
 `tests/rules/gates.test.ts` impedisce che un gate sparisca da una delle due catene (INV-14).
+
+**Il peso, rimisurato a [D024](delega/D024-il-telaio.md) e [D025](delega/D025-il-tooltip.md), il
+2026-08-21.** Il modulo compilato è **619,60 kB** e il foglio di stile **26,64 kB** — erano 601,78 e
+20,46 a [D017](delega/D017-il-caveau.md). La differenza sono il telaio, tre pezzi di kit, il tooltip
+e venti chiavi in due lingue. I cinque file di carattere non si muovono.
+
+**Il motore, misurato invece che supposto.** L'[ADR 0032](adr/0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)
+poggia su due funzionalità del motore — il livello superiore e l'ancoraggio CSS — e la sua premessa è
+che il motore sia uno solo e recente. Chiesto a lui invece che al changelog:
+
+| Cosa                        | Valore, il 2026-08-21 |
+| --------------------------- | --------------------- |
+| `process.versions.electron` | 43.4.1                |
+| `process.versions.chrome`   | 150.0.7871.224        |
+
+Il livello superiore è disponibile da Chromium 114, l'ancoraggio da 125, `position-area` da 129 e
+`justify-self: anchor-center` da 130: il margine è largo, e il giorno in cui non lo fosse
+`verify:release` non se ne accorgerebbe — a dirlo sarebbe la spunta a occhio della definizione di
+fatto, che è il motivo per cui esiste.
 
 ## Cosa copre ciascun livello di test
 

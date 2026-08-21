@@ -23,8 +23,8 @@ flowchart TD
     BOOT["main.ts<br/>il bootstrap"]
     APP["App.vue<br/>il guscio: i sette stati"]
     VIEWS["views/*.vue<br/>HomeView · StatsView"]
-    CMP["components/*<br/>sette componenti · rotation · postings"]
-    UI["ui/*<br/>tokens · roles · sei pezzi<br/>non sa che gioco è"]
+    CMP["components/*<br/>i componenti di gioco · il guscio della colonna<br/>rotation · postings · screens"]
+    UI["ui/*<br/>tokens · roles · theme · i pezzi<br/>non sa che gioco è"]
     I18N["i18n/*"]
     ST["stores/*"]
     RT["runtime/*<br/>createGame · loop · host"]
@@ -42,6 +42,7 @@ flowchart TD
   BOOT --> RT
   BOOT --> I18N
   APP --> VIEWS
+  APP --> CMP
   APP --> ST
   APP --> I18N
   VIEWS --> CMP
@@ -77,6 +78,10 @@ flowchart TD
   PRE --> CON
   PRE -->|solo channels.ts| SAVE
 ```
+
+`APP --> CMP` nasce con [D024](delega/D024-il-telaio.md): il guscio monta la colonna e la testata,
+che sono due componenti di gioco. Prima montava solo le viste, e le linguette se le disegnava da sé —
+è esattamente ciò che quella delega ha tolto.
 
 `CMP --> CON` è di soli **dati**, e non contraddice R05: un componente che mostra i pool li deriva
 da `POOLS` invece di elencarli a mano, e uno che mostra i movimenti di una transazione ne nomina il
@@ -255,6 +260,8 @@ Legenda: **🔒 impossibile** = il tipo o la struttura non permettono di scriver
 | 13  | Un file `rules.ts` è puro                  | `tests/rules/pure-rules`: nessun `ctx`, nessun effetto, nessuna lettura dell'ora                                                                                                                                                      | ⚠️      |
 | 14  | Il kit UI non sa che gioco è               | ESLint `no-restricted-imports` su `src/renderer/ui/**` + `tests/rules/ui-kit-is-standalone`, che risolve anche i percorsi relativi                                                                                                    | ✅      |
 | 15  | Nessun colore fuori dai token              | `tests/rules/no-color-literals`: un'eccezione sola, `ui/tokens.css`, e non è configurabile                                                                                                                                            | ✅      |
+| 16  | Il kit non prende la geometria             | `tests/rules/ui-kit-has-no-geometry`: nessun `defineProps` di `ui/**` dichiara `gap`, `direction`, `width`… È il criterio dell'ADR 0030, reso verificabile                                                                            | ⚠️      |
+| 17  | Nessun tooltip nativo                      | `tests/rules/no-native-tooltips`: nessun attributo `title` in un `.vue` di `src/`. Distingue l'attributo di un elemento dalla proprietà di un componente, che si chiama `title` a ragione                                             | ⚠️      |
 
 **Quando entra ciascun meccanismo.** Alcune di queste regole sono già in vigore, altre nascono con
 la delega che le usa: la colonna _Delega_ di [tracciabilita.md](tracciabilita.md) dice quale, per

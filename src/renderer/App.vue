@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import type { Component } from 'vue'
 import { ref } from 'vue'
 
-import type { MessageKey } from './i18n'
+import AppHeader from './components/AppHeader.vue'
+import AppNav from './components/AppNav.vue'
+import type { Screen } from './components/screens'
+import { SCREEN_WORDING } from './components/screens'
 import { useTranslator } from './i18n'
 import type { GameStatus } from './stores/game'
 import { useGameStore } from './stores/game'
 import UiButton from './ui/UiButton.vue'
+import UiHeading from './ui/UiHeading.vue'
+import UiShell from './ui/UiShell.vue'
 import UiText from './ui/UiText.vue'
 import HomeView from './views/HomeView.vue'
 import StatsView from './views/StatsView.vue'
@@ -35,24 +41,31 @@ import StatsView from './views/StatsView.vue'
  */
 const PLAYABLE: readonly GameStatus[] = ['playing', 'suspended', 'recovering']
 
+/**
+ * INV-22 · D024 — ogni destinazione della colonna ha la sua schermata, e a pretenderlo è il tipo:
+ * `Record<Screen, Component>` è **totale**, quindi un nome aggiunto a `SCREENS` non compila finché
+ * non ha qualcosa da montare.
+ *
+ * Fino a D024 la scelta era un `v-if` con un `v-else`, e con due destinazioni funzionava. Con tre
+ * avrebbe smesso di funzionare **in silenzio**: il terzo nome sarebbe comparso nella colonna e al
+ * clic si sarebbe vista la seconda vista. È la difesa contro A17 messa dove il difetto entrerebbe —
+ * non si può elencare un dominio che non esiste, perché non c'è niente da montare quando lo si preme.
+ */
+const SCREEN_VIEWS: Readonly<Record<Screen, Component>> = {
+  home: HomeView,
+  stats: StatsView
+}
+
 const store = useGameStore()
 const { status, failure, failedDuring, awayFor } = storeToRefs(store)
 const { text, duration, failure: failureText } = useTranslator()
 
 /**
- * Le due schermate della fetta. Sono un `ref` e non un router: due destinazioni senza indirizzo
- * da condividere non giustificano una dipendenza (ADR 0015), e il giorno in cui ne servirà uno
- * lo dirà una schermata che vuole essere raggiungibile da fuori.
+ * Dove siamo. È un `ref` e non un router: due destinazioni senza indirizzo da condividere non
+ * giustificano una dipendenza (ADR 0015), e il giorno in cui ne servirà uno lo dirà una schermata
+ * che vuole essere raggiungibile da fuori. I nomi e le parole stanno in `components/screens.ts`,
+ * perché li legge anche la colonna.
  */
-const SCREENS = ['home', 'stats'] as const
-
-type Screen = (typeof SCREENS)[number]
-
-const SCREEN_KEYS: Readonly<Record<Screen, MessageKey>> = {
-  home: 'app.nav.home',
-  stats: 'app.nav.stats'
-}
-
 const screen = ref<Screen>('home')
 
 const retry = (): void => void store.retry()
@@ -60,7 +73,7 @@ const startOver = (): void => void store.newGame()
 </script>
 
 <template>
-  <main class="shell" :data-status="status">
+  <div class="app" :data-status="status">
     <template v-if="status === 'failed' && failure !== null">
       <div class="center">
         <p class="headline danger">{{ failureText(failure) }}</p>
@@ -80,22 +93,20 @@ const startOver = (): void => void store.newGame()
     </template>
 
     <template v-else-if="PLAYABLE.includes(status)">
-      <nav class="tabs">
-        <button
-          v-for="name of SCREENS"
-          :key="name"
-          type="button"
-          class="tab"
-          :class="{ current: screen === name }"
-          @click="screen = name"
-        >
-          {{ text(SCREEN_KEYS[name]) }}
-        </button>
-      </nav>
-      <div class="board">
-        <HomeView v-if="screen === 'home'" />
-        <StatsView v-else />
-      </div>
+      <UiShell>
+        <template #nav>
+          <AppNav :current="screen" @go="screen = $event" />
+        </template>
+        <template #head>
+          <AppHeader :current="screen" />
+        </template>
+
+        <UiHeading
+          :title="text(SCREEN_WORDING[screen].title)"
+          :description="text(SCREEN_WORDING[screen].description)"
+        />
+        <component :is="SCREEN_VIEWS[screen]" />
+      </UiShell>
 
       <div v-if="status === 'recovering'" class="center veil">
         <span class="ring" aria-hidden="true"></span>
@@ -115,48 +126,14 @@ const startOver = (): void => void store.newGame()
       <span class="ring" aria-hidden="true"></span>
       <p class="headline">{{ text('app.loading.title') }}</p>
     </div>
-  </main>
+  </div>
 </template>
 
 <style scoped>
-.shell {
+.app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-}
-
-.tabs {
-  display: flex;
-  gap: var(--space-1);
-  padding: var(--space-3) var(--space-5);
-  background: var(--color-raised);
-  border-bottom: 1px solid var(--color-line);
-}
-
-.tab {
-  background: transparent;
-  color: var(--color-ink-3);
-  padding: var(--space-2) var(--space-5);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--track-wide);
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
-.tab.current {
-  color: var(--color-ink);
-  background: var(--color-surface);
-  border-color: var(--color-line);
-}
-
-.board {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  padding: var(--space-6);
 }
 
 /*

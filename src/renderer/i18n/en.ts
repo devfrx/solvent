@@ -8,8 +8,12 @@ import type { Dictionary } from './index'
  * anche sui codici che nasceranno dopo.
  */
 export const en: Dictionary = {
+  'app.name': 'Solvent',
   'app.nav.home': 'Home',
-  'app.nav.stats': 'Statistics',
+  'app.nav.stats': 'Stats',
+
+  'app.theme.light': 'Light',
+  'app.theme.dark': 'Dark',
 
   'app.loading.title': 'Loading…',
   'app.loading.catchup': 'Catching up on the time that passed…',
@@ -40,6 +44,13 @@ export const en: Dictionary = {
   'pool.traced': 'Every movement is recorded',
   'pool.untraced': 'No trace',
   'pool.traceability': 'Traceability',
+  'pool.cash.explained':
+    'Leaves no trace, but the vault has a floor: past capacity, wages stop coming in.',
+  'pool.card.explained':
+    'No ceiling, but every move stays on the record. That is the other half of the choice.',
+  'pool.traceability.explained':
+    'Whether moves on this instrument stay on the record. It is the one question this game is ' +
+    'built on.',
   'pool.capacity': 'Capacity',
 
   'income.per_second': '+ {amount} / s',
@@ -61,7 +72,11 @@ export const en: Dictionary = {
   'stats.saved_at.never': 'Never: this game has not been written to disk yet.',
   'stats.operations.title': 'Operations log',
   'stats.operations.empty': 'Nothing to show yet.',
+  'stats.description': 'The full ledger and the last save: what happened, line by line.',
 
+  'home.description':
+    'The ATM and the dashboard. Money arrives as cash, is deposited for a fee, and here you ' +
+    'see what moving it costs.',
   'home.zone.atm': 'ATM',
   'home.zone.dashboard': 'Dashboard',
   'home.tile.income': 'Income',
@@ -69,15 +84,29 @@ export const en: Dictionary = {
   'home.tile.earned': 'Earned in total',
   'home.tile.spent': 'Spent in total',
   'home.tile.fees': 'Fees paid',
+  'home.tile.income.explained': 'What comes in each second, upgrades already counted.',
+  'home.tile.net_worth.explained':
+    'Cash plus card. It is earned minus spent minus fees: always, by construction.',
+  'home.tile.earned.explained':
+    'Everything that came in since the game began, before any spending.',
+  'home.tile.spent.explained':
+    'Everything that went out to buy something. Fees are counted separately.',
+  'home.tile.fees.explained':
+    'What moving money has cost. It is the price of making traceable what was not.',
 
   'atm.account.title': 'On the account',
   'atm.cash.title': 'Cash',
   'atm.cash.capacity': 'Vault capacity',
+  'atm.cash.capacity.explained':
+    'How much cash the vault holds right now. Once full, wages stop: deposit, or expand.',
   'atm.deposit': 'Deposit',
   'atm.withdraw': 'Withdraw',
   'atm.deposit.title': 'Deposit into the account',
   'atm.withdraw.title': 'Withdraw from the account',
   'atm.breakdown': 'What happens',
+  'atm.breakdown.explained':
+    'The exact postings the confirmation will apply. The fee is flat and charged on every ' +
+    'operation, large or small.',
   'atm.fee': 'Fee',
   'atm.fee.per_operation': 'Fee per operation',
   'atm.deposit.confirm': 'Confirm deposit',

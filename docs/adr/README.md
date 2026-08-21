@@ -66,6 +66,25 @@ sono due dipendenze nuove (ADR 0015). Tutti e due li **impone** [D023](../delega
 _Accettata_ nello stesso giorno in cui sono nati: è la prima volta che succede, e la ragione è che
 un ADR sull'aspetto senza il CSS che lo applica non decide niente.
 
+Il **0030** e il **0031** nascono il 2026-08-21 dallo stesso canvas, e sono i due che
+[D024](../delega/D024-il-telaio.md) ha preso prima di scrivere il telaio — e portato ad _Accettata_
+nel commit che lo ha scritto, come D023 con i suoi due. Il 0030 risponde a
+una domanda che l'ADR 0028 aveva lasciato aperta: se i contenitori generici sono scartati, dove vive
+l'impaginazione? La risposta separa la **forma** — regioni fisse, nessuna geometria in ingresso — dal
+contenitore, e la separazione ha una regola con un test invece di un paragrafo. Il 0031 dà al
+giocatore l'interruttore del tema e gli nega la memoria, perché ricordare vorrebbe dire archiviare, e
+questo progetto archivia in un posto solo.
+
+Il **0032** nasce il giorno dopo, dal primo pezzo che deve stare **sopra** il resto: il
+tooltip di [D025](../delega/D025-il-tooltip.md). Decide che le sovrapposizioni usano il livello
+superiore del motore e l'ancoraggio CSS invece di una libreria di posizionamento — il motore qui è
+uno solo, e fa già tutte e tre le metà del problema. La metà che conta però non è tecnica: è **R17**,
+che vieta l'attributo `title` del browser. Senza, il pezzo vestito sarebbe un modo di spiegare
+accanto a quello gratis, e il gratis vince sempre. Anche questo è passato ad _Accettata_ con la
+delega che lo ha scritto — e con una cosa in più delle altre: il presupposto «il motore è uno solo e
+recente» è stato **chiesto al motore** invece che al changelog, e la risposta sta in
+[qualita.md](../qualita.md) con la data.
+
 Quali decisioni siano ancora _Proposta_ lo dice [stato.md](../stato.md), che le conta invece di
 ricordarsele. Qui c'è il **perché**, che è la sola cosa che un conteggio non può dire.
 
@@ -114,6 +133,9 @@ fetta 02 a chiuderla.
 | [0027](0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)               | Il listino è dell'azione, la scelta è del giocatore            | Accettata     | chi decide con cosa si paga, e dove vive il prezzo di ogni strumento    | A05             |
 | [0028](0028-il-kit-ui-non-sa-che-gioco-e.md)                                   | Il kit UI non sa che gioco è                                   | **Accettata** | dove vive lo stile, e cosa gli è vietato sapere                         | A14             |
 | [0029](0029-due-caratteri-e-stanno-nel-bundle.md)                              | Due caratteri, e stanno nel bundle                             | **Accettata** | con quali caratteri si legge il gioco, e da dove arrivano               | —               |
+| [0030](0030-il-telaio-e-una-forma-non-un-contenitore.md)                       | Il telaio è una forma, non un contenitore                      | **Accettata** | quale impaginazione il kit accetta, e quale rifiuta                     | A14             |
+| [0031](0031-il-tema-si-sceglie-e-non-si-ricorda.md)                            | Il tema si sceglie, e non si ricorda                           | **Accettata** | chi decide il tema, e perché la scelta non sopravvive alla finestra     | A14             |
+| [0032](0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)                | Le sovrapposizioni stanno nel livello superiore                | **Accettata** | dove sta ciò che copre il resto, e perché non ha una libreria           | A14             |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è

@@ -2,13 +2,20 @@ import { readFileSync } from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
+import { en as english } from '../../src/renderer/i18n/en'
+import { it as italian } from '../../src/renderer/i18n/it'
 import { read, withoutComments } from '../helpers/sources'
 
 /**
  * C03 — un solo nome per il prodotto, ovunque (ADR 0008).
  *
  * Il difetto A15 era quattro nomi diversi per lo stesso prodotto e metadati del template mai
- * sostituiti. Se aggiungi un sesto posto in cui il nome compare, aggiornalo qui nello stesso commit.
+ * sostituiti. Se aggiungi un posto in cui il nome compare, aggiungi qui la sua verifica, nello
+ * stesso commit — un conteggio scritto in questa riga sarebbe scaduto al primo posto nuovo (C11).
+ *
+ * D024 ne ha portato uno: il nome adesso si **legge**, nel marchio della colonna e nelle briciole
+ * della testata. Ci arriva da una chiave i18n, perché è una parola davanti al giocatore (R12), e le
+ * due lingue devono dire la stessa cosa — che è la sola parte che una parità di chiavi non vede.
  *
  * L'`appId` compare in **due** posti: `electron-builder.yml`, che lo scrive nel pacchetto, e
  * `src/main/index.ts`, che lo dichiara a runtime con `setAppUserModelId` — senza, su Windows la
@@ -66,5 +73,10 @@ describe('identità del prodotto', () => {
 
   it('nessun blocco publish finto (ADR 0008)', () => {
     expect(builder).not.toMatch(/^publish:/m)
+  })
+
+  it('e il dizionario lo scrive uguale in tutte e due le lingue (D024)', () => {
+    expect(italian['app.name']).toBe(DISPLAY_NAME)
+    expect(english['app.name']).toBe(DISPLAY_NAME)
   })
 })

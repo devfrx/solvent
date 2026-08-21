@@ -41,8 +41,9 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
 | `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
-| `main`                   | **allineato** alla fine della fetta 02: un ramo nuovo parte da qui                                                                     |
-| Prossimo passo           | **[D018](D018-la-scheda-di-dominio.md)**. La fetta 02 è **conclusa**: D017, D019, D020 e D023 sono chiuse                              |
+| `main`                   | fermo alla fine della fetta 02: [D024](D024-il-telaio.md) e [D025](D025-il-tooltip.md) sono su un ramo che **non è stato fuso**        |
+| Albero di lavoro         | **pulito**. Il telaio e il tooltip stanno sul ramo `d024-d025-telaio-e-tooltip`, chiusi entrambi                                       |
+| Prossimo passo           | [D018](D018-la-scheda-di-dominio.md), l'unica delega aperta — e il suo ramo parte da `d024-d025-telaio-e-tooltip`, non da `main`       |
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -53,10 +54,11 @@ che ce ne sia una sola.
 I contratti sono in `src/core/contracts/`, Clock, Rng, Bus, Registry e Ledger in
 `src/core/kernel/`, i numeri di gioco in `src/core/balance/`, lo schema del salvataggio e i tre
 canali IPC in `src/main/save/`, i tre domini in `src/core/domains/`. In `src/renderer/` ci sono il
-bootstrap, il loop, l'unico store, il guscio `App.vue`, le due viste sotto `views/`, nove pezzi
-sotto `components/` — sette componenti e due moduli puri, la rotazione della carta e la scelta dei
-movimenti da mostrare — il kit che non sa che gioco è sotto `ui/`, e le parole del gioco sotto
-`i18n/`. Ogni delega chiusa ha in fondo le
+bootstrap, il loop, l'unico store, il guscio `App.vue`, le due viste sotto `views/`, i componenti
+di gioco sotto `components/` — insieme a tre moduli puri: la rotazione della carta, la scelta dei
+movimenti da mostrare e l'elenco delle destinazioni — il kit che non sa che gioco è sotto `ui/`, e
+le parole del gioco sotto `i18n/`. Da [D024](D024-il-telaio.md) il guscio non disegna più le
+linguette: monta il **telaio** del kit e gli passa dentro la colonna e la testata. Ogni delega chiusa ha in fondo le
 **correzioni** rispetto a com'era scritta: [D002](D002-contratti.md) ne ha sette,
 [D003](D003-kernel-clock.md) cinque, [D004](D004-kernel-rng.md) sei,
 [D005](D005-kernel-bus.md) cinque, [D006](D006-kernel-registry.md) sei,
@@ -66,7 +68,8 @@ movimenti da mostrare — il kit che non sa che gioco è sotto `ui/`, e le parol
 [D012](D012-ui-e-i18n.md) e [D015](D015-home-bancomat.md) diciassette,
 [D016](D016-correzioni-audit.md) sette,
 [D019](D019-il-pagamento.md) tredici, [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) nove,
-[D023](D023-il-design-system.md) undici, [D017](D017-il-caveau.md) sedici. Leggile prima di fidarti del
+[D023](D023-il-design-system.md) undici, [D017](D017-il-caveau.md) sedici,
+[D024](D024-il-telaio.md) e [D025](D025-il-tooltip.md) quattro ciascuna. Leggile prima di fidarti del
 testo di una delega ancora aperta — alcune di quelle correzioni riguardano proprio deleghe che non
 sono ancora state eseguite.
 
@@ -237,6 +240,48 @@ Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: all
 **quello**, e riparti dalle alternative già scartate invece che da zero.
 
 ## Il prossimo passo, in concreto
+
+**[D024](D024-il-telaio.md) e [D025](D025-il-tooltip.md) sono chiuse**, ed è la prima volta che due
+deleghe si chiudono in un commit solo: le due spunte che restavano — l'interruttore premuto, il
+tooltip toccato col tabulatore — si pagavano nella **stessa** sessione a occhio, e separarle avrebbe
+voluto dire aprire due volte la stessa finestra.
+
+Cosa c'è adesso: il **telaio** del design — colonna a sinistra, testata appiccicata, striscia degli
+strumenti — l'**interruttore del tema**, e il **tooltip**, che da R17 è l'unico modo di spiegare
+qualcosa. Tre regole nuove, R16, R17 e INV-22, rotte di proposito una per una.
+
+**Le due verifiche a occhio non hanno trovato niente da correggere**, e vale la pena dire cosa hanno
+guardato, perché «guardato» da solo non è una misura: quattro combinazioni di schermata e tema, con
+`data-theme` e i colori calcolati letti a ogni clic; la bolla aperta col puntatore e col tabulatore,
+centrata sull'ancora al mezzo pixel; `Esc` che la chiude lasciando il fuoco dov'è. Le tabelle stanno
+in fondo alle due deleghe.
+
+### Come si guarda l'applicazione senza toccarla
+
+**Tre trappole del guardare, e la terza è anche la via d'uscita.** Le prime due sono state pagate
+scrivendo D024 e D025; la terza le risolve tutte.
+
+1. Una cattura della finestra può **non dipingere l'ultima banda** in fondo, e per venti minuti il
+   piede della colonna è sembrato assente mentre c'era. A dirlo è stata una misura presa **dentro**
+   la pagina, non un'altra occhiata.
+2. L'applicazione di sviluppo **si chiude** se le si porta la finestra in primo piano da fuori — per
+   esempio con uno script che la va a cercare.
+3. Non serve portarla in primo piano. `npm run dev` accetta `--remoteDebuggingPort`, e da lì la
+   finestra vera si interroga e si comanda dal di dentro:
+
+```bash
+npx electron-vite dev --remoteDebuggingPort 9222
+```
+
+Con la porta aperta, `http://127.0.0.1:9222/json/list` dice quale pagina è il renderer, e sul suo
+WebSocket passano `Runtime.evaluate` — per **chiedere al documento** invece che all'immagine —
+`Input.dispatchMouseEvent` e `Input.dispatchKeyEvent` per premere e tabulare, e
+`Page.captureScreenshot` per l'immagine. La finestra resta dov'è e non si chiude.
+
+**Perché è scritto qui e non in una delega:** è il modo in cui questo progetto pagherà **ogni**
+spunta a occhio da adesso in poi, e le spunte a occhio sono l'unica classe di verifica che nessun
+gate può dare. Serve anche l'altra metà, ed è la lezione della prima trappola: l'immagine dice se
+qualcosa è bello, il documento dice se c'è. Le due domande sono diverse e vogliono due strumenti.
 
 **Lo STOP 2 è stato riportato, e le regole che governano la fetta 02 sono già in vigore.**
 La fetta 01 è conclusa e verificata. [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) e
@@ -416,9 +461,18 @@ già dei soldi. Il modo esatto è nella nota di chiusura di
 
 ## Le decisioni contestabili
 
-Trenta, prese in autonomia. **Le righe nuove si aggiungono in fondo**: la prosa qui sotto indicizza
-la tabella per posizione — «le prime quattro», «la ventiduesima» — e una riga infilata in mezzo
-sposta tutto ciò che viene dopo senza che nessun gate se ne accorga.
+Prese in autonomia; quante siano non si scrive, perché nessuno le conta. **Le righe nuove si
+aggiungono in fondo**: la prosa qui sotto indicizza la tabella per posizione — «le prime quattro»,
+«la ventiduesima» — e una riga infilata in mezzo sposta tutto ciò che viene dopo senza che nessun
+gate se ne accorga.
+
+**È già successo, e in due modi.** Il primo: questo paragrafo diceva «Trenta» davanti a trentasei
+righe. Il secondo è più insidioso e riguarda le righe **aggiunte in fondo**, che erano la mossa
+sicura: le sei di D017 hanno spinto in avanti la fine della tabella, e le due frasi che ci si
+appoggiavano da dietro — «le cinque che precedono l'ultima», «le ultime cinque» — hanno smesso di
+puntare a ciò che nominavano. Adesso quelle due dicono di **quale delega** parlano invece di dove
+stanno, che è l'unica ancora che non si sposta.
+
 Le prime quattro sono **in vigore** da D007 e sono state usate da due
 domini: cambiarle costa il Ledger, i suoi test e i due domini. D014 era il momento buono per
 contestarle ed è passato — nessuna delle quattro si è rivelata scomoda usandole.
@@ -443,7 +497,7 @@ La tredicesima, la quattordicesima, la quindicesima e la sedicesima sono di **D0
 dizionario, il guscio e le schermate — e D015 le ha ereditate senza contestarne nessuna: le chiavi
 piatte hanno retto una decina di chiavi nuove, i mirror hanno retto i selettori del bancomat.
 
-Le cinque che precedono l'ultima sono di **D015**, e costano la home. Due riguardano cosa il gioco **non** mostra —
+Le cinque righe che portano **D015** costano la home. Due riguardano cosa il gioco **non** mostra —
 i tre numeri del retro della carta e il sesto riquadro — e sono le meno costose da cambiare: i dati
 arriveranno, e i posti sono lì ad aspettarli. La terza è un numero di gioco travestito da
 interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto così.
@@ -490,7 +544,15 @@ interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto co
 La ventiduesima è di **D013** e costa una riga di un test: è anche l'unica riga non di test che
 quella delega abbia toccato.
 
-**Le ultime cinque sono del 2026-08-20, e tre di loro sono entrate in vigore con [D019](D019-il-pagamento.md).** Il listino dentro l'azione, il selettore rimandato a D017, il calore e `convertibleTo` lasciati fuori: adesso costano `contracts/payment.ts`, il dominio `income`, lo store e un componente — poco, ma non più zero. Le altre due, quelle di D020, sono entrate in vigore con [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) e non costano quasi niente lo stesso: la validazione come **test** costa un file di `tests/rules/` e zero righe di `src/` — contestarla vuol dire cancellare quel file, non disfare il kernel — e l'ordine «prima di D017, non dentro» è ormai speso, perché D017 le trova entrambe già fatte. Nascono tutte dalle due domande poste prima di eseguire D017 — come si sceglie con cosa si paga, e chi controlla lo stato che arriva dal disco. Le scelte **di gioco** di quelle sessioni non sono qui perché non sono state prese in autonomia: lo spazio unico del caveau, il tetto a livelli finiti, la varianza zero e la nona voce dell'etichetta sono state decise dall'utente, e stanno nella [scheda del caveau](../design/domini/vault.md) con le alternative scartate.
+**Le cinque righe del 2026-08-20 — quelle di [D019](D019-il-pagamento.md) e
+[D020](D020-nessun-sistema-si-fida-del-salvataggio.md) — e tre di loro sono entrate in vigore con D019.** Il listino dentro l'azione, il selettore rimandato a D017, il calore e `convertibleTo` lasciati fuori: adesso costano `contracts/payment.ts`, il dominio `income`, lo store e un componente — poco, ma non più zero. Le altre due, quelle di D020, sono entrate in vigore con [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) e non costano quasi niente lo stesso: la validazione come **test** costa un file di `tests/rules/` e zero righe di `src/` — contestarla vuol dire cancellare quel file, non disfare il kernel — e l'ordine «prima di D017, non dentro» è ormai speso, perché D017 le trova entrambe già fatte. Nascono tutte dalle due domande poste prima di eseguire D017 — come si sceglie con cosa si paga, e chi controlla lo stato che arriva dal disco. Le scelte **di gioco** di quelle sessioni non sono qui perché non sono state prese in autonomia: lo spazio unico del caveau, il tetto a livelli finiti, la varianza zero e la nona voce dell'etichetta sono state decise dall'utente, e stanno nella [scheda del caveau](../design/domini/vault.md) con le alternative scartate.
+
+**Le sei righe in fondo sono di [D017](D017-il-caveau.md)**, e sono quelle che chiudono la fetta 02:
+i cinque livelli del caveau, lo sconto della carta sotto la commissione, la funzione delle capienze
+esposta invece che solo ricevuta, lo spazio passato al reddito per costruzione, il caveau in
+`ORDER.ECONOMY`, e l'importo — non il `sì/no` — che resta fuori dal tick. Costano il dominio, il
+Ledger e i loro test. **D024 e D025 non ne hanno aggiunte**: le loro scelte in autonomia sono
+diventate ADR — 0030, 0031 e 0032 — e un ADR è già il posto dove una decisione si contesta.
 
 Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
 recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE` scelti
@@ -501,18 +563,17 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-Questo prompt **consegna una delega**, e una sola per volta. D019, D020, D023 e adesso
-[D017](D017-il-caveau.md) sono chiuse, e con D017 si chiude la **fetta 02**; l'ID adesso è
-**D018**, la scheda di dominio — l'unica delega aperta, e la prima che non appartiene a nessuna
-fetta.
+Questo prompt **consegna una delega**, e una sola per volta. [D024](D024-il-telaio.md) e
+[D025](D025-il-tooltip.md) sono chiuse, e con loro il telaio e il tooltip; l'ID adesso è **D018**,
+la scheda di dominio — l'unica delega aperta, e la prima che non appartiene a nessuna fetta.
 
 ```markdown
 Esegui la delega D018 nel progetto Solvent, in questa repo.
 
 Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 
-1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, e le quattro cose che sa solo lui.
-   In particolare _Cosa vale per qualunque delega_ e _Le decisioni contestabili_
+1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, e le cose che sa solo lui. In
+   particolare _Cosa vale per qualunque delega_ e _Le decisioni contestabili_
 2. `docs/stato.md` — quanti sono gli ADR, le deleghe e i documenti, e in che stato. È **generato**:
    non si scrive a mano, e quando ne cambi uno si rigenera con
    `npx vitest run tests/rules/project-state -u`
@@ -528,14 +589,18 @@ Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 6. `docs/prodotto/visione.md` — l'etichetta a nove voci e la legge della non dominanza
 7. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
 
-Stato: `npm run verify` e `npm run verify:release` **verdi**. La fetta 02 è **conclusa** —
-D017 l'ha chiusa il 2026-08-21 — e D018 è l'unica delega aperta rimasta.
+Stato: `npm run verify` e `npm run verify:release` **verdi**. La fetta 02 è **conclusa**, il telaio
+e il tooltip sono chiusi, e D018 è l'unica delega aperta rimasta.
 
-Attenzione a due cose del punto di partenza:
+Attenzione a tre cose del punto di partenza:
 
-- **`main` è aggiornato**, e per la prima volta da quattro deleghe: D019, D020, D023 e D017 sono
-  state fuse alla chiusura della fetta 02. Il ramo nuovo parte da `main`, e se una delega **chiusa**
-  ti dice di partire da un ramo, quella è la cronaca del giorno in cui è stata scritta
+- **`main` non è il punto di partenza.** D024 e D025 sono chiuse sul ramo
+  `d024-d025-telaio-e-tooltip` e **non sono state fuse**: il ramo nuovo parte da lì, o nasce senza
+  il telaio. Se una delega **chiusa** ti dice di partire da un altro ramo, quella è la cronaca del
+  giorno in cui è stata scritta
+- **Il progetto è cambiato dopo lo STOP 2**, ed è la cosa che D018 deve sapere di sé: il telaio, i
+  due temi, il tooltip, R16, R17 e INV-22 non c'erano quando questa delega è stata scritta. La
+  scheda descrive il progetto del giorno in cui viene compilata, non quello dello STOP 2
 - **`npm install` non funziona in questa repo**, e non è colpa tua: `electron-vite@5` regge `vite`
   fino alla 7 e il progetto è sulla 8. L'unico comando che installa è `npm ci --legacy-peer-deps`,
   che però ignora i peer. È la correzione 8 di `docs/delega/D023-il-design-system.md`
@@ -560,7 +625,7 @@ Come lavoro:
 
 - **Un ramo `d018-la-scheda-di-dominio`.** Non si commetta su `main`
 - **La delega si esegue, non si riscrive.** Se il testo è invecchiato o sbagliato, fermati e
-  dimmelo: è successo quattro volte e ogni volta ha tolto lavoro invece di aggiungerlo
+  dimmelo: è successo cinque volte e ogni volta ha tolto lavoro invece di aggiungerlo
 - **Il budget di righe è un allarme, non un limite.** Se lo stai raddoppiando, stai risolvendo
   un problema diverso da quello descritto: dillo invece di continuare
 - **Fuori scope vuol dire fuori scope.** Le schede dei domini che non hanno codice si compilano a
@@ -576,5 +641,12 @@ Come lavoro:
 - **Se sposti un confine fra livelli, il diagramma di `docs/architettura.md` cambia nello stesso
   commit**, e `tests/rules/import-graph` lo verifica nei due versi (C13)
 - Alla fine, in fondo alla delega: le **correzioni** rispetto a com'era scritta, e il consuntivo
-  di righe contro il budget. Ogni delega chiusa ne ha da cinque a diciassette
+  di righe contro il budget. Ogni delega chiusa ne ha da quattro a diciassette
 ```
+
+### E dopo, la fetta 03
+
+Chiusa D018, la fetta 03 comincia da una **scheda compilata** invece che da una schermata
+immaginata — che è esattamente ciò per cui D018 esiste. Quali deleghe restino aperte lo dice
+[stato.md](../stato.md); le tre cose da avere in mente prima di scrivere una riga stanno qui sopra,
+in fondo a _Il prossimo passo_.

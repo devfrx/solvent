@@ -5,9 +5,13 @@
  *
  * Ogni valore viene dal canvas di Claude Design, contato invece che scelto a occhio: le misure che
  * quel disegno ripete di più sono quelle che sopravvivono. Il canvas ne usa quattordici per il
- * testo, otto per i raggi e nove per gli spazi; qui sono sei, cinque e sei. Un design system è la
+ * testo, otto per i raggi e nove per gli spazi; qui sono sei, cinque e sette. Un design system è la
  * riduzione, non la trascrizione — chi le copiasse tutte avrebbe un foglio di stile, non un
  * sistema.
+ *
+ * Il settimo passo di spazio è arrivato con D024, e la ragione è dichiarata lì: la scala dei sei era
+ * stata ricavata dagli **interni** dei pannelli, e il telaio è la prima cosa più grande di un
+ * pannello.
  *
  * **I due temi vivono in una dichiarazione sola.** `light-dark()` sceglie in base a
  * `color-scheme`, quindi non esiste un secondo blocco da tenere allineato: cambiare un colore lo
@@ -103,6 +107,14 @@
   --space-4: 10px;
   --space-5: 14px;
   --space-6: 18px;
+  --space-7: 24px;
+
+  /*
+   * D024 — la larghezza della colonna del telaio. Non è un passo della scala: è **una** misura di
+   * impaginazione, decisa una volta dal design. Allungare la scala fino a duecento darebbe cinque
+   * passi che nessuno userebbe mai, che è il modo in cui una scala smette di essere una scala.
+   */
+  --nav-width: 238px;
 
   --radius-xs: 2px;
   --radius-sm: 6px;

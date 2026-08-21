@@ -106,6 +106,8 @@ flowchart TD
   D020 --> D017
   D023 --> D017
   D013 --> D018["D018 · La scheda di dominio"]
+  D023 --> D024["D024 · Il telaio"]
+  D023 --> D025["D025 · Il tooltip"]
 ```
 
 **D017 e D018 non si toccano**, ed è il primo caso del progetto: una scrive codice, l'altra solo
@@ -222,6 +224,8 @@ configurato dopo che c'erano già 156 file.
 | [D023](D023-il-design-system.md)                          | Il design system: un livello che non sa che gioco è                   | 346 codice + 129 test     | **Chiusa** |
 | [D017](D017-il-caveau.md)                                 | Il caveau: i contanti hanno una capienza — fetta 02                   | 347 codice + 508 test     | **Chiusa** |
 | [D018](D018-la-scheda-di-dominio.md)                      | La scheda di dominio: la forma, e le prime tre compilate              | ~510 di documentazione    | **Aperta** |
+| [D024](D024-il-telaio.md)                                 | Il telaio: dove ogni schermata si attacca                             | 359 codice + 96 test      | **Chiusa** |
+| [D025](D025-il-tooltip.md)                                | Il tooltip: la spiegazione che non occupa posto                       | 164 codice + 48 test      | **Chiusa** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede
@@ -236,6 +240,28 @@ costruisce gioco: costruisce la **scheda** che ogni dominio futuro dovrà compil
 scritto, con dentro le dodici domande sul kernel che l'audit ha dovuto fare a mano. È anche la prima
 con un budget di sole righe di documentazione, e la prima in cui **zero righe di codice** è una
 condizione di correttezza invece di una stima.
+
+**D024 finisce ciò che D023 aveva cominciato**, e la divisione fra le due è quella che l'ADR 0014
+chiede: D023 ha preso dal canvas le fondamenta — i ruoli di colore, le scale, i caratteri, sei pezzi
+— e ha lasciato l'impaginazione dov'era. D024 prende il telaio, e prende **solo** le caselle che un
+selettore dello store può riempire oggi: il canvas ne disegna una dozzina e le altre non hanno un
+numero dietro. È la stessa disciplina di D023 applicata al giro dopo, ed è la ragione per cui questa
+delega si misura in ciò che **non** costruisce.
+
+**D025 è la prima delega che nasce da un grilletto invece che da una fetta.** Il registro YAGNI
+teneva «il sistema di sovrapposizioni» con una condizione scritta — _la prima cosa che deve stare
+sopra il resto_ — e il tooltip è quella cosa. Non è stata anticipata e non è stata aggirata: la
+condizione si è avverata, e la voce esce dal registro entrando in una delega. È il primo giro
+completo di quel meccanismo, ed è la prova che il registro non era un posto dove le idee vanno a
+morire.
+
+**D024 e D025 sono state eseguite insieme e chiuse in un commit solo**, ed è la prima volta: le due
+spunte che restavano — l'interruttore premuto, il tooltip toccato col tabulatore — si pagano nella
+**stessa** sessione a occhio, e separarle avrebbe voluto dire aprire due volte la stessa finestra.
+Le righe della tabella qui sopra sono quindi una divisione, non due misure indipendenti: ogni file
+sta con la delega di cui porta la funzione, e i sette file che si toccano tutte e due — le tre
+schermate, il riquadro e i tre dell'i18n — sono divisi riga per riga. Il totale è 523 di sorgente e
+144 di test, e le quattro cifre della tabella lo sommano.
 
 **Perché D016 sta prima dello STOP 2.** D013 riporta che la fetta regge; l'audit ha trovato un
 difetto di perdita dati. Riportare un verdetto con quel difetto aperto sarebbe riportare un

@@ -9,8 +9,12 @@ import type { Dictionary } from './index'
  * rosso (R12, `tests/rules/no-literal-in-template`).
  */
 export const it: Dictionary = {
+  'app.name': 'Solvent',
   'app.nav.home': 'Home',
   'app.nav.stats': 'Statistiche',
+
+  'app.theme.light': 'Chiaro',
+  'app.theme.dark': 'Scuro',
 
   'app.loading.title': 'Caricamento…',
   'app.loading.catchup': 'Recupero il tempo passato…',
@@ -41,6 +45,14 @@ export const it: Dictionary = {
   'pool.traced': 'Ogni movimento è registrato',
   'pool.untraced': 'Nessuna traccia',
   'pool.traceability': 'Tracciabilità',
+  'pool.cash.explained':
+    'Non lasciano traccia, ma il caveau ha un fondo: oltre la capienza lo stipendio non entra ' +
+    'più.',
+  'pool.card.explained':
+    'Non ha un tetto, ma ogni movimento resta registrato. È l’altra metà della scelta.',
+  'pool.traceability.explained':
+    'Se i movimenti di questo strumento restano registrati. È la sola domanda su cui questo ' +
+    'gioco è costruito.',
   'pool.capacity': 'Capienza',
 
   'income.per_second': '+ {amount} / s',
@@ -62,7 +74,12 @@ export const it: Dictionary = {
   'stats.saved_at.never': 'Mai: questa partita non è ancora stata scritta su disco.',
   'stats.operations.title': 'Registro delle operazioni',
   'stats.operations.empty': 'Ancora niente da mostrare.',
+  'stats.description':
+    'Il registro completo e l’ultimo salvataggio: cosa è successo, riga per riga.',
 
+  'home.description':
+    'Il bancomat e il cruscotto. Qui il denaro entra in contanti, si deposita pagando la ' +
+    'commissione, e si vede quanto costa spostarlo.',
   'home.zone.atm': 'Bancomat',
   'home.zone.dashboard': 'Cruscotto',
   'home.tile.income': 'Reddito',
@@ -70,15 +87,30 @@ export const it: Dictionary = {
   'home.tile.earned': 'Guadagnato in totale',
   'home.tile.spent': 'Speso in totale',
   'home.tile.fees': 'Commissioni pagate',
+  'home.tile.income.explained': 'Quanto entra ogni secondo, con gli upgrade già contati.',
+  'home.tile.net_worth.explained':
+    'Contanti più carta. È guadagnato meno speso meno commissioni: sempre, per costruzione.',
+  'home.tile.earned.explained':
+    'Tutto ciò che è entrato da inizio partita, prima di qualunque spesa.',
+  'home.tile.spent.explained':
+    'Tutto ciò che è uscito per comprare qualcosa. Le commissioni si contano a parte.',
+  'home.tile.fees.explained':
+    'Quanto è costato spostare il denaro. È il prezzo di rendere tracciabile ciò che non lo era.',
 
   'atm.account.title': 'Sul conto',
   'atm.cash.title': 'Contanti',
   'atm.cash.capacity': 'Capienza del caveau',
+  'atm.cash.capacity.explained':
+    'Quanti contanti il caveau tiene adesso. Quando è pieno lo stipendio si ferma: si deposita, ' +
+    'oppure si amplia.',
   'atm.deposit': 'Deposita',
   'atm.withdraw': 'Preleva',
   'atm.deposit.title': 'Deposita sul conto',
   'atm.withdraw.title': 'Preleva dal conto',
   'atm.breakdown': 'Cosa succede',
+  'atm.breakdown.explained':
+    'I movimenti esatti che la conferma applicherà. La commissione è fissa e si paga a ogni ' +
+    'operazione, grande o piccola.',
   'atm.fee': 'Commissione',
   'atm.fee.per_operation': 'Commissione per operazione',
   'atm.deposit.confirm': 'Conferma deposito',

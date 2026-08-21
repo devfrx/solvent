@@ -67,11 +67,32 @@ const { text, money } = useTranslator()
       label="home.tile.income"
       :value="text('income.per_second', { amount: money(incomePerSecond) })"
       tone="gain"
+      hint="home.tile.income.explained"
     />
-    <StatTile label="home.tile.net_worth" :value="money(netWorth)" tone="plain" />
-    <StatTile label="home.tile.earned" :value="money(earned)" tone="gain" />
-    <StatTile label="home.tile.spent" :value="money(spent)" tone="plain" />
-    <StatTile label="home.tile.fees" :value="money(feesPaid)" tone="plain" />
+    <StatTile
+      label="home.tile.net_worth"
+      :value="money(netWorth)"
+      tone="plain"
+      hint="home.tile.net_worth.explained"
+    />
+    <StatTile
+      label="home.tile.earned"
+      :value="money(earned)"
+      tone="gain"
+      hint="home.tile.earned.explained"
+    />
+    <StatTile
+      label="home.tile.spent"
+      :value="money(spent)"
+      tone="plain"
+      hint="home.tile.spent.explained"
+    />
+    <StatTile
+      label="home.tile.fees"
+      :value="money(feesPaid)"
+      tone="plain"
+      hint="home.tile.fees.explained"
+    />
   </div>
 
   <UiPanel :title="text('atm.recent.title')">

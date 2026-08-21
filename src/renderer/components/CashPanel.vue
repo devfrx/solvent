@@ -12,6 +12,7 @@ import UiButton from '@renderer/ui/UiButton.vue'
 import UiNumber from '@renderer/ui/UiNumber.vue'
 import UiPanel from '@renderer/ui/UiPanel.vue'
 import UiText from '@renderer/ui/UiText.vue'
+import UiTooltip from '@renderer/ui/UiTooltip.vue'
 
 /**
  * L'altra metà della dualità (P4): i contanti, e le due cose che li distinguono dalla carta — non
@@ -76,7 +77,11 @@ const expand = (pool: Pool): void => {
 
     <dl class="facts">
       <div class="fact">
-        <dt>{{ text('atm.cash.capacity') }}</dt>
+        <dt>
+          <UiTooltip :text="text('atm.cash.capacity.explained')">
+            {{ text('atm.cash.capacity') }}
+          </UiTooltip>
+        </dt>
         <dd>{{ cashCapacity === null ? text('pool.unlimited') : money(cashCapacity) }}</dd>
       </div>
       <div class="fact">
@@ -84,7 +89,11 @@ const expand = (pool: Pool): void => {
         <dd>{{ vaultRoom === null ? text('pool.unlimited') : money(vaultRoom) }}</dd>
       </div>
       <div class="fact">
-        <dt>{{ text('pool.traceability') }}</dt>
+        <dt>
+          <UiTooltip :text="text('pool.traceability.explained')">
+            {{ text('pool.traceability') }}
+          </UiTooltip>
+        </dt>
         <dd>{{ text(traceabilityKey('cash')) }}</dd>
       </div>
     </dl>

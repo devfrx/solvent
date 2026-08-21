@@ -62,8 +62,16 @@ export type ErrorCode = GameError['code']
  * dizionario si completa in un tempo solo, perché una lingua completata in due tempi è A13.
  */
 export type ScreenKey =
+  // Il nome del prodotto. È **una parola davanti al giocatore**, quindi passa da qui come tutte le
+  // altre — e non si traduce: le due lingue dicono la stessa cosa, e `tests/rules/product-identity`
+  // lo verifica insieme agli altri posti in cui il nome vive (C03, ADR 0008).
+  | 'app.name'
   | 'app.nav.home'
   | 'app.nav.stats'
+  // Il telaio (D024). L'interruttore del tema dice **quale tema è acceso**, non cosa succede
+  // premendolo: è un interruttore a due posizioni, e la posizione è l'informazione (ADR 0031).
+  | 'app.theme.light'
+  | 'app.theme.dark'
   | 'app.loading.title'
   | 'app.loading.catchup'
   | 'app.loading.away_for'
@@ -86,6 +94,11 @@ export type ScreenKey =
   | 'pool.untraced'
   | 'pool.traceability'
   | 'pool.capacity'
+  // Le spiegazioni (D025). Sono la prosa dietro una parola corta, e vivono in un tooltip: la
+  // striscia della testata e il cruscotto non hanno posto per una frase, e la frase serve.
+  | 'pool.cash.explained'
+  | 'pool.card.explained'
+  | 'pool.traceability.explained'
   | 'income.per_second'
   | 'income.upgrade.overtime.name'
   | 'income.upgrade.overtime.desc'
@@ -108,6 +121,10 @@ export type ScreenKey =
   | 'stats.saved_at.never'
   | 'stats.operations.title'
   | 'stats.operations.empty'
+  // La frase che apre una schermata (D024). Una per destinazione, e `SCREEN_WORDING` le pretende
+  // tutte: una schermata nuova non compila finché non sa dire a cosa serve.
+  | 'stats.description'
+  | 'home.description'
   // La home (docs/design/mockups/home-atm.html). Le chiavi di questo blocco sono nate con D012,
   // che ha scritto il dizionario intero in un tempo solo perché una lingua completata in due
   // tempi è il difetto A13; D015 le ha usate, e dove il mockup si contraddiceva le ha corrette.
@@ -118,14 +135,21 @@ export type ScreenKey =
   | 'home.tile.earned'
   | 'home.tile.spent'
   | 'home.tile.fees'
+  | 'home.tile.income.explained'
+  | 'home.tile.net_worth.explained'
+  | 'home.tile.earned.explained'
+  | 'home.tile.spent.explained'
+  | 'home.tile.fees.explained'
   | 'atm.account.title'
   | 'atm.cash.title'
   | 'atm.cash.capacity'
+  | 'atm.cash.capacity.explained'
   | 'atm.deposit'
   | 'atm.withdraw'
   | 'atm.deposit.title'
   | 'atm.withdraw.title'
   | 'atm.breakdown'
+  | 'atm.breakdown.explained'
   | 'atm.fee'
   | 'atm.fee.per_operation'
   | 'atm.deposit.confirm'
