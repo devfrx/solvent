@@ -4,7 +4,7 @@
   [visione](../prodotto/visione.md) e l'audit del kernel che ne è seguito; **preparata per
   l'esecuzione** il 2026-08-21, dopo che [D017](D017-il-caveau.md) si è chiusa (vedi _Cosa la
   preparazione ha verificato_); **eseguita** lo stesso giorno sul ramo
-  `d018-la-scheda-di-dominio`. Le nove correzioni e il consuntivo sono in fondo
+  `d018-la-scheda-di-dominio`, commit `731c1db`. Le nove correzioni e il consuntivo sono in fondo
 - **Dipende da:** D013 (la fetta 01 chiusa). **Non** dipende da D017: sono documenti, non codice, e
   non si toccano. È però stata eseguita **dopo**, e la differenza è tutta a favore — il caveau
   adesso esiste, quindi nessuna delle tre schede si compila da un disegno
