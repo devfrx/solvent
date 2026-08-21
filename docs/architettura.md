@@ -91,25 +91,29 @@ disegnarla è [D015](delega/D015-home-bancomat.md), che l'ha usata due volte.
 
 ### Frecce vietate — e chi le impedisce
 
-| Freccia vietata                                   | Perché                                             | Chi la blocca                  |
-| ------------------------------------------------- | -------------------------------------------------- | ------------------------------ |
-| `stores/* --> stores/*`                           | 74 archi diretti e 3 cicli nel progetto precedente | ESLint `no-restricted-imports` |
-| `*.vue --> domains/*/rules`, `*.vue --> kernel/*` | la logica di dominio scappa nei componenti         | ESLint + test di backstop      |
-| `core/* --> vue` / `pinia` / `electron`           | `core/` deve girare in Node                        | ESLint `no-restricted-imports` |
-| `core/* --> renderer/*`, `core/* --> main/*`      | inversione di dipendenza                           | ESLint                         |
-| `main/* --> kernel/*`, `main/* --> domains/*`     | il main conosce il contratto, non il motore        | ESLint                         |
+| Freccia vietata                                   | Perché                                             | Chi la blocca                         |
+| ------------------------------------------------- | -------------------------------------------------- | ------------------------------------- |
+| `stores/* --> stores/*`                           | 74 archi diretti e 3 cicli nel progetto precedente | ESLint `no-restricted-imports`        |
+| `*.vue --> domains/*/rules`, `*.vue --> kernel/*` | la logica di dominio scappa nei componenti         | ESLint + test di backstop             |
+| `core/* --> vue` / `pinia` / `electron`           | `core/` deve girare in Node                        | ESLint `no-restricted-imports`        |
+| `core/* --> renderer/*`, `core/* --> main/*`      | inversione di dipendenza                           | ESLint                                |
+| `main/* --> kernel/*`, `main/* --> domains/*`     | il main conosce il contratto, non il motore        | ESLint                                |
+| `domains/* --> domains/*`                         | il precedente che aprirebbe gli altri sedici archi | `tests/rules/domains-are-independent` |
 
 Il main tocca **solo** `core/contracts/save.ts`. È un arco stretto e voluto.
 
-**Una freccia che nessuno vieta, e che nessuno ha ancora disegnato: `domains/* --> domains/*`.** Il
-diagramma non la distingue — due domini stanno nello stesso nodo — e nemmeno il lint, che sotto
-`src/core/domains/**` vieta `vue`, `pinia`, `electron` e le conversioni di `Money`, non un dominio
-che ne importa un altro. [D017](delega/D017-il-caveau.md) è la prima delega che avrebbe potuto
-aprirla, per due volte: il reddito ha bisogno di sapere quanto spazio c'è nel caveau, e il bancomat
-di sapere se un prelievo ci sta. In tutti e due i casi la risposta arriva **per argomento**, e a
-consegnarla è chi ha entrambi sotto mano — il bootstrap per il reddito, lo store per il bancomat
-(ADR 0024). Il precedente non è stato aperto, e la visione ha diciassette domini che si contendono
-le stesse risorse.
+**L'ultima riga è nuova, e fino a [D018](delega/D018-la-scheda-di-dominio.md) non c'era.** La
+freccia `domains/* --> domains/*` era vietata **in prosa e da nessun altro**: il diagramma non la
+distingue — due domini stanno nello stesso nodo, quindi `import-graph` la salta insieme a tutti gli
+archi interni a un livello — e il lint sotto `src/core/domains/**` vieta `vue`, `pinia`, `electron`
+e le conversioni di `Money`, non un dominio che ne importa un altro.
+
+[D017](delega/D017-il-caveau.md) è la prima delega che avrebbe potuto aprirla, per due volte: il
+reddito ha bisogno di sapere quanto spazio c'è nel caveau, e il bancomat di sapere se un prelievo ci
+sta. In tutti e due i casi la risposta arriva **per argomento**, e a consegnarla è chi ha entrambi
+sotto mano — il bootstrap per il reddito, lo store per il bancomat (ADR 0024). Due scelte identiche
+nello stesso giorno sono una regola che nessuno sapeva di avere: D018 l'ha trovata compilando la
+domanda 6 della [scheda di dominio](design/domini/README.md), e adesso è **R19**.
 
 L'unica freccia dentro il riquadro `main + preload` è `preload --> main/save/channels.ts`, e porta
 tre stringhe: i nomi dei canali IPC. Non passa da `ipc.ts` perché quel file importa `zod`, e un
@@ -253,7 +257,7 @@ solvent/
                        no-barrel · forbidden-words · pure-rules · import-graph
                        stateful-systems-reject-garbage · ui-kit-is-standalone
                        no-color-literals · ui-kit-has-no-geometry · no-native-tooltips
-                       domain-ui
+                       domain-ui · domains-are-independent
 ```
 
 ## Le regole e chi le fa rispettare
@@ -281,6 +285,7 @@ Legenda: **🔒 impossibile** = il tipo o la struttura non permettono di scriver
 | 16  | Il kit non prende la geometria                 | `tests/rules/ui-kit-has-no-geometry`: nessun `defineProps` di `ui/**` dichiara `gap`, `direction`, `width`… È il criterio dell'ADR 0030, reso verificabile                                                                            | ⚠️      |
 | 17  | Nessun tooltip nativo                          | `tests/rules/no-native-tooltips`: nessun attributo `title` in un `.vue` di `src/`. Distingue l'attributo di un elemento dalla proprietà di un componente, che si chiama `title` a ragione                                             | ⚠️      |
 | 18  | Un dominio ha la sua cartella in `components/` | `tests/rules/domain-ui`: nessun file sciolto nella radice, ogni sottocartella è un dominio o una delle due dichiarate, e ogni dominio dice dove si guarda — anche quando la risposta è `null` (ADR 0033)                              | ✅      |
+| 19  | Nessun dominio importa un altro dominio        | `tests/rules/domains-are-independent`: risolve l'alias **e** i percorsi relativi, e non fa sconti all'`import type` — un tipo non aggiunge codice, aggiunge un nome che lega due domini                                               | ✅      |
 
 **Quando entra ciascun meccanismo.** Alcune di queste regole sono già in vigore, altre nascono con
 la delega che le usa: la colonna _Delega_ di [tracciabilita.md](tracciabilita.md) dice quale, per

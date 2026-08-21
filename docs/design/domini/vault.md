@@ -1,9 +1,10 @@
 # Caveau — scheda di dominio
 
-- **Stato:** **metà di gioco completa, e riletta contro il codice** il 2026-08-21, quando
-  [D017](../../delega/D017-il-caveau.md) è stata eseguita. Cosa è cambiato sta in fondo, sotto
-  _Cosa l'esecuzione ha smentito_. La metà kernel non è qui: la compila
-  [D018](../../delega/D018-la-scheda-di-dominio.md), leggendo il codice che adesso esiste
+- **Stato:** **completa.** La metà di gioco è del 2026-08-20, riletta contro il codice il
+  2026-08-21 quando [D017](../../delega/D017-il-caveau.md) è stata eseguita — cosa è cambiato sta
+  in fondo, sotto _Cosa l'esecuzione ha smentito_. La **metà kernel** e la sezione _Cosa prende in
+  prestito, e cosa presta_ le ha compilate [D018](../../delega/D018-la-scheda-di-dominio.md) lo
+  stesso giorno, leggendo `src/core/domains/vault/`
 - **Data:** 2026-08-20, riletta il 2026-08-21
 - **Costruito da:** [D017](../../delega/D017-il-caveau.md), fetta 02 — ma solo per i **contanti**.
   Oggetti, ingombro e perquisizione arrivano con le fette successive
@@ -255,24 +256,75 @@ _Lo spazio_. Costa zero oggi e costa una riscrittura fra tre fette.
 
 ---
 
+## Cosa prende in prestito, e cosa presta
+
+Sezione 8 della [scheda](README.md), aggiunta e compilata da
+[D018](../../delega/D018-la-scheda-di-dominio.md).
+
+**Prende in prestito:** il pool `cash` — e non è suo, è la cosa che conserva
+([ADR 0017](../../adr/0017-il-denaro-e-plurale.md)); il pool `card`, che è la seconda voce del suo
+listino; e il listino stesso (`contracts/payment.ts`). Gli **oggetti**, che un giorno conserverà
+insieme al denaro, non li prende in prestito da nessuno: non esistono ancora, e il grilletto è nel
+[registro](../../roadmap-fette.md).
+
+**Presta la cosa più usata del progetto: la propria capienza.** `capacityFor(level)` è una funzione
+del caveau, e la consegna il bootstrap a due destinatari che non si conoscono — il **Ledger**, che
+la fa rispettare su ogni transazione, e il **reddito**, che ne ricava quanto dello stipendio
+maturato può entrare. Il bancomat la interroga a sua volta, per argomento, prima di mostrare
+l'anteprima di un prelievo.
+
+Nessuno dei tre importa il caveau. È il caso che ha insegnato al progetto come si presta qualcosa
+senza aprire una freccia fra domini: **si dichiara una funzione, e la consegna chi ha entrambi i
+capi sotto mano** ([ADR 0024](../../adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md)).
+
+---
+
+## Questo dominio si amministra?
+
+**Sì**, e la sua destinazione è `vault` (`DOMAIN_SCREENS`). Il caveau è un muro che si incontra, non
+un posto dove si va spesso — e la pagina gli tocca lo stesso, perché c'è qualcosa da amministrare:
+il livello si amplia, e con due strumenti a prezzi diversi.
+
+Quello che il giocatore incontra **senza andarci** è l'allarme — il reddito si è fermato — e infatti
+non vive sulla pagina: sta in `components/vault/VaultAlarm.vue`, e compare sulla home. È l'altra
+metà della regola dell'[ADR 0033](../../adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md): un
+pezzo di un dominio può comparire altrove, **ma esce dalla sua cartella** — ed è precisamente ciò che
+il caveau aveva violato finendo dentro il pannello dei contanti.
+
+---
+
 ## La metà kernel
 
-Non è in questa scheda, e non è una dimenticanza.
+Compilata da [D018](../../delega/D018-la-scheda-di-dominio.md) leggendo
+`src/core/domains/vault/`, non il disegno.
 
-Le dodici domande sul kernel — ha stato, ticchetta, in quale `ORDER`, cosa fa con un `elapsed`
-grande, quali `Reason` introduce, quali pool tocca — sono il lavoro di
-[D018](../../delega/D018-la-scheda-di-dominio.md), e si rispondono **leggendo il codice**. Il
-codice del caveau non esiste ancora.
+| #   | Domanda                               | Caveau                                                                                                                                                                   |
+| --- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Ha stato?                             | **sì**: `{ level: number }`, un numero solo. Capienza, prezzo e livelli restanti si **calcolano** da lì — salvarli sarebbe salvare due volte lo stesso fatto             |
+| 2   | Ticchetta? In quale `ORDER`?          | **no**, e si registra lo stesso. `ORDER.ECONOMY`, che senza `tick` decide solo l'ordine di salvataggio e caricamento — e conta: `ECONOMY` carica prima di `INCOME`       |
+| 3   | Cosa fa con un `elapsed` grande?      | **niente di suo — ma è interrogato dentro il tick di un altro.** È la sua capienza a decidere quanta parte di quell'`elapsed` diventa denaro                             |
+| 4   | Soglie che si attraversano?           | **sì, ed è il primo «sì» del progetto.** Pieno e non pieno è una soglia che il giocatore riattraversa depositando. Riguarda il recupero a blocchi                        |
+| 5   | Cosa serve fuori dal `SystemContext`? | `ledger` per costruzione (ADR 0024): un ampliamento parte dalla UI, fuori da ogni `tick`                                                                                 |
+| 6   | Eventi, e domini importati?           | **nessun evento**. **Non importa nessun dominio**, e nessun dominio importa lui: è il bootstrap a consegnare `capacityFor` a chi la usa                                  |
+| 7   | Quali `Reason` introduce?             | `reason.vault.expand`. Più un codice suo, `error.vault.max_level` — che è un esito, non un guasto: il caveau finisce, e il giocatore lo sa dal primo secondo             |
+| 8   | Tocca il denaro? Quali pool?          | **sì**: `spend` sul pool scelto, con `accepts` **generato dal listino** e per livello. Ed è il solo che **dichiara una capienza**: `Ledger.capacities` è la sua (INV-18) |
+| 9   | Conti propri per entità?              | **no**. Il giorno degli oggetti sarà la prima domanda da rifare: un oggetto ha un'identità, e un'identità tende a volere un conto                                        |
+| 10  | Liste storiche?                       | **no**. Lo stato è un intero                                                                                                                                             |
+| 11  | Sapere che giorno è?                  | **no**                                                                                                                                                                   |
+| 12  | Usa l'Rng?                            | **no**, e discende dalla varianza zero: senza furto casuale non c'è niente che debba accadere da solo                                                                    |
 
-Due risposte però sono già decise qui, perché sono scelte di gioco e non di implementazione, e
-D018 le troverà scritte:
+Il `load` merita una riga in più, perché è il punto in cui questo dominio è più fragile di quanto
+sembri: controlla il livello **campo per campo** — intero, non negativo, non oltre il massimo — e
+non «è un oggetto» (INV-20). Un livello frazionario o fuori scala non fa rumore: produce una
+capienza sbagliata, che il Ledger fa rispettare, e che il giocatore scopre come stipendio che non
+arriva.
 
-- **Il caveau ha stato** — il livello — quindi ha `save`, `load` e `reset`.
-- **Il caveau non ticchetta e non usa l'Rng.** Discende dalla varianza zero: senza furto casuale
-  non c'è niente che debba accadere da solo.
+**Numeri di gioco introdotti:** `VAULT_CAPACITIES` (cinque livelli, da 1.000,00 € a 250.000,00 €),
+`VAULT_PRICES_CASH` e `VAULT_PRICES_CARD`. Quanti livelli esistano non è un numero a parte: è la
+lunghezza dell'elenco, e `MAX_LEVEL` la legge.
 
-Tutte e due sono state confermate dal codice: `vault/system.ts` non ha un `tick`, il tipo lo
-permette, e lo stato salvato è un numero solo.
+**Bersagli lasciati:** `seconds_to_first_wall` (60–120 secondi) e `vault_card_discount`
+(0,50 €–2,49 €, tutto sotto `ATM_FEE`). È il solo dei tre domini a lasciarne **due**.
 
 ---
 

@@ -61,6 +61,7 @@ aggiungi la riga; se una riga non ha un meccanismo, la regola non esiste ancora.
 | R16 | Un pezzo del kit non prende la geometria       | ⚠️      | `tests/rules/ui-kit-has-no-geometry` — legge i nomi delle proprietà, non ne indovina di nuovi (ADR 0030)                                     |
 | R17 | Nessun tooltip nativo: se c'è, è `UiTooltip`   | ⚠️      | `tests/rules/no-native-tooltips` — l'attributo `title` su un elemento, distinto dalla proprietà di un componente (ADR 0032)                  |
 | R18 | Un dominio ha la sua cartella in `components/` | ✅      | `tests/rules/domain-ui` — legge le cartelle vere dai due lati; l'unica dichiarazione è la lista delle due cartelle non di dominio (ADR 0033) |
+| R19 | Nessun dominio importa un altro dominio        | ✅      | `tests/rules/domains-are-independent` — alias e percorsi relativi, `import type` compreso (D018)                                             |
 
 Regole di configurazione e di processo, con la stessa dignità:
 

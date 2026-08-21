@@ -1,9 +1,10 @@
 # D018 — La scheda di dominio: la forma, e le prime tre compilate
 
-- **Stato:** Aperta — scritta il 2026-08-20, dopo la riscrittura della
-  [visione](../prodotto/visione.md) e l'audit del kernel che ne è seguito, e **preparata per
-  l'esecuzione** il 2026-08-21, dopo che [D017](D017-il-caveau.md) si è chiusa. Vedi _Cosa la
-  preparazione ha verificato_
+- **Stato:** **Chiusa** — scritta il 2026-08-20, dopo la riscrittura della
+  [visione](../prodotto/visione.md) e l'audit del kernel che ne è seguito; **preparata per
+  l'esecuzione** il 2026-08-21, dopo che [D017](D017-il-caveau.md) si è chiusa (vedi _Cosa la
+  preparazione ha verificato_); **eseguita** lo stesso giorno sul ramo
+  `d018-la-scheda-di-dominio`. Le nove correzioni e il consuntivo sono in fondo
 - **Dipende da:** D013 (la fetta 01 chiusa). **Non** dipende da D017: sono documenti, non codice, e
   non si toccano. È però stata eseguita **dopo**, e la differenza è tutta a favore — il caveau
   adesso esiste, quindi nessuna delle tre schede si compila da un disegno
@@ -13,7 +14,9 @@
   0010, 0014, 0016, 0017, 0019, 0020, 0022, 0023, 0024, 0025. Quanti siano non si scrive: la riga
   diceva «dodici» davanti a un elenco di quattordici, ed è il difetto di
   [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) sopravvissuto dentro una delega aperta
-- **Regole:** nessuna nuova. Nessun invariante nuovo
+- **Regole:** ne dichiarava **zero**, e ne ha prodotta **una**: **R19** — nessun dominio importa un
+  altro dominio, con `tests/rules/domains-are-independent`. Il perché è la correzione 1. Nessun
+  invariante nuovo
 - **Budget:** ~180 righe per la scheda, ~110 per ognuna delle tre compilate. Totale ~510 righe di
   documentazione. **Zero righe di codice**, ed è una condizione di correttezza, non una stima
 
@@ -330,3 +333,79 @@ facendo.
   la misura di quanto vale l'intera scheda». D017 è stata eseguita, la rilettura è stata fatta, e la
   misura è **tre righe smentite e zero decisioni di gioco cambiate**. Non c'è più niente da temere
   qui: c'è da leggere quelle tre righe e chiedersi quale domanda le avrebbe prese prima.
+
+---
+
+## Le correzioni rispetto a com'era scritta
+
+**1. La domanda 6 è diventata una regola, non una dichiarazione di review.** La preparazione
+lasciava la scelta a chi esegue: scrivere un test, oppure dichiarare 👤 e scriverlo nella scheda. È
+stato scritto il test — **R19**, `tests/rules/domains-are-independent`. La ragione non è il gusto:
+un invariante di questa delega pretende che «ogni riga della metà kernel abbia dietro un ADR, un
+invariante o un test», e la domanda 6 non ne aveva nessuno dei tre. Dichiararla 👤 avrebbe fatto
+violare a D018 la propria regola nella riga stessa che la enuncia.
+
+Costa quello che la preparazione diceva: un ID nuovo in [tracciabilita.md](../tracciabilita.md), e
+una riga d'intestazione — «nessuna regola nuova» — che non è più vera. Zero righe di `src/`.
+
+**2. Il test copre anche gli `import type`, e la preparazione non lo chiedeva.** «Nessun dominio
+importa un altro dominio» non distingue; un tipo non aggiunge codice ma aggiunge un **nome**, e il
+giorno in cui quel nome cambia forma sono due domini a doversi muovere insieme. È la stessa scelta
+che R05 fa da sempre. La regola è stata rotta di proposito **due volte** — con il percorso relativo
+e con l'alias su un import di soli tipi — e in tutti e due i casi ha stampato il file e il dominio
+raggiunto.
+
+**3. `income.md` e `atm.md` sfondano le ~110 righe a testa: sono 141 e 152.** La stima non teneva
+conto di _Cosa questa compilazione ha trovato_, che non è facoltativa — un invariante pretende
+almeno una sorpresa per scheda. Il totale resta **sotto** il budget lo stesso, perché il caveau ha
+chiesto molto meno del previsto: vedi il consuntivo.
+
+**4. La sezione _La metà kernel_ del caveau non era vuota: era un segnaposto con due risposte già
+dentro.** La delega dice «le aggiunge la metà kernel», e in realtà quella sezione andava
+**sostituita**. Le due risposte che conteneva — ha stato, non ticchetta e non usa l'Rng — erano
+giuste e già confermate contro il codice, quindi non è costato niente; ma «aggiungere» e
+«sostituire» sono due lavori diversi, e chi legge la delega si aspetta il primo.
+
+**5. Il caveau aveva bisogno anche della sezione 8, e la tabella _Da produrre_ non lo diceva.** La
+sezione _cosa prende in prestito, e cosa presta_ è stata aggiunta alla forma il 2026-08-21, cioè
+**dopo** che la scheda del caveau era stata scritta. La tabella prometteva «gli manca solo quella
+kernel»: gliene mancavano due.
+
+**6. La domanda 3 discrimina solo se si riformula.** La preparazione avvertiva che due schede su
+tre avrebbero risposto «non ticchetto». È successo, e la differenza vera non è cosa il dominio
+**fa** ma cosa gli **succede mentre il tempo passa**: il caveau viene interrogato dentro il tick di
+un altro, il bancomat è inerte per davvero. La riformulazione è ora scritta in fondo ad
+[atm.md](../design/domini/atm.md), ed è ciò che rende le tre risposte diverse invece che due uguali
+e una no.
+
+**7. La scheda del bancomat ha trovato un difetto che nessuno cercava: `ATM_FEE` non ha un
+bersaglio suo.** La forma dice che «un dominio senza bersaglio è un dominio il cui bilanciamento è
+un'opinione», e il bancomat è il primo caso. La commissione è tarata **di rimbalzo**, da
+`vault_card_discount`, che appartiene al caveau: cambiarla rende rosso un test che parla d'altro.
+Non è stato corretto qui, perché questa delega non tocca `src/` — è annotato nella scheda, com'è
+scritto nell'invariante.
+
+**8. Le tre risposte alla sezione 8 sono diverse, e la definizione di fatto chiedeva di dirlo.** Il
+reddito presta il bersaglio `income.all`; il caveau presta `capacityFor`, che il bootstrap consegna
+a due destinatari che non si conoscono; il bancomat presta la propria commissione come **unità di
+misura** senza sapere di farlo. La sezione discrimina, quindi non va tolta alla quarta compilata.
+
+**9. La riga del registro YAGNI era spezzata a metà, e nessun gate poteva vederlo.** Diceva «qui
+resta il grilletto L'audit del kernel del 2026-08-20 ha aggiunto un vincolo» — due frasi fuse senza
+punto. Corretta mentre si dichiarava che il grilletto è scattato.
+
+## Consuntivo — righe contro budget
+
+| Cosa                                  | Budget           | Prodotto  | Nota                                                            |
+| ------------------------------------- | ---------------- | --------- | --------------------------------------------------------------- |
+| `docs/design/domini/README.md`        | ~180             | 172       | la voce grossa, come previsto                                   |
+| `docs/design/domini/income.md`        | ~110             | 141       | correzione 3                                                    |
+| `docs/design/domini/atm.md`           | ~110             | 152       | correzione 3                                                    |
+| `docs/design/domini/vault.md`         | «molte meno»     | +38 nette | 55 aggiunte, 17 tolte: il segnaposto sostituito                 |
+| **Totale documentazione**             | **~510**         | **503**   | **sotto**, ed è la prima volta nel progetto                     |
+| `tests/rules/domains-are-independent` | non preventivato | 128       | correzione 1: la delega dichiarava «nessuna regola nuova»       |
+| `src/`                                | **zero**         | **zero**  | invariante rispettato: nessun file sotto `src/` è stato toccato |
+
+Le righe di `docs/architettura.md`, `docs/tracciabilita.md`, `docs/roadmap-fette.md`,
+`docs/delega/README.md` e `docs/delega/PASSAGGIO-DI-CONSEGNE.md` non sono contate: sono
+aggiornamenti a documenti esistenti, e il budget parlava di documenti nuovi.

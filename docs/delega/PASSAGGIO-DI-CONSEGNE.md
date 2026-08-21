@@ -43,7 +43,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
 | `main`                   | **allineato**: `d026-dove-si-attacca-un-dominio` è stato fuso in un `--ff-only`. Il ramo nuovo parte da `main`                         |
 | Albero di lavoro         | **pulito**                                                                                                                             |
-| Prossimo passo           | [D018](D018-la-scheda-di-dominio.md), preparata, oppure [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md), non preparata        |
+| Prossimo passo           | [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md) — **non preparata**: porta due decisioni da prendere con l'utente             |
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -433,12 +433,34 @@ adesso deve sapere sono queste:
    `components/postings.ts` — e con un argomento in più: a caveau pieno il reddito **si ferma**,
    quindi lo storico smette di riempirsi di stipendio proprio quando c'è qualcos'altro da leggerci.
 
-**Resta [D018 — La scheda di dominio](D018-la-scheda-di-dominio.md)**, ed è l'unica delega aperta.
-Non appartiene a nessuna fetta e non costruisce gioco: costruisce la **forma** che ogni dominio
-futuro dovrà compilare prima di essere scritto. Adesso ha un vantaggio che non aveva ieri — il
-caveau esiste, quindi le dodici domande sul kernel si rispondono **leggendo il codice** invece di
-immaginarlo, e la sua [scheda](../design/domini/vault.md) si è già corretta da sola contro quel
-codice, smentendo tre delle proprie righe. Quelle tre dicono quali domande la forma deve fare.
+**[D018 — La scheda di dominio](D018-la-scheda-di-dominio.md) è chiusa**, e con lei il progetto ha
+una cosa che prima non aveva: un **modulo che nessun dominio futuro può lasciare vuoto**. Sta in
+[design/domini/README.md](../design/domini/README.md) — nove sezioni di gioco e dodici domande sul
+kernel, ognuna con dietro un ADR, un invariante o un test — e le tre schede compilate
+([reddito](../design/domini/income.md), [bancomat](../design/domini/atm.md),
+[caveau](../design/domini/vault.md)) sono la prova che regge tre domini fatti apposta diversi.
+
+Le quattro cose che chi arriva adesso deve sapere:
+
+1. **`domains/* --> domains/*` adesso è vietata da un test.** Era vera e non imposta da niente: il
+   lint sotto `domains/**` vieta `vue`, `pinia`, `electron` e le conversioni di `Money`, non un
+   dominio che ne importa un altro, e `import-graph` la salta perché è un arco **interno** a un
+   livello. Adesso è **R19**, `tests/rules/domains-are-independent`, e non fa sconti all'
+   `import type`. D018 dichiarava «nessuna regola nuova»: è la sua correzione 1, e la ragione è che
+   senza quel test D018 violava un proprio invariante nella riga stessa che lo enuncia.
+2. **La scheda del bancomat ha trovato che `ATM_FEE` non ha un bersaglio suo.** È tarata di
+   rimbalzo da `vault_card_discount`, che è del caveau: cambiare la commissione rende rosso un test
+   che parla d'altro. Non è stato corretto — D018 non tocca `src/` — ed è annotato in
+   [atm.md](../design/domini/atm.md).
+3. **Una domanda manca alla forma, e si sa già quale.** `withheld` del reddito non è stato, non è
+   una lista e non è un evento: è un numero che spiega **perché il tick ha fatto meno di quanto
+   poteva**. La metà kernel non ha una casella dove metterlo, e ce ne sarà uno per ogni dominio che
+   può fallire parzialmente. Va posta alla quarta scheda, non prima.
+4. **Due sezioni non discriminano ancora, e la scheda lo dichiara invece di lasciarlo intendere.**
+   La 9 — _questo dominio si amministra?_ — riceve tre «sì»: il primo `null` sarà il calendario.
+   Cinque delle dodici domande kernel rispondono «no» per tutti e tre. Non è un difetto: è il
+   numero di partenza del controllo che la scheda si è data — se una sezione non ha mai cambiato
+   una decisione va tolta, e la prova si fa alla **quarta** compilata.
 
 Tre cose che chi apre la fetta 03 deve avere in mente prima di scrivere una riga:
 
@@ -626,18 +648,18 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 ## Prompt pronto per una sessione nuova
 
 Questo prompt **consegna una delega**, e una sola per volta. Con
-[D026](D026-dove-si-attacca-un-dominio.md) chiusa ne resta **una** aperta:
-[D018](D018-la-scheda-di-dominio.md), la scheda di dominio — preparata il 2026-08-21 e ferma da
-allora. Il prompt che consegnava D026 sta nel `git log` di questo file: si recupera da lì invece di
-tenerne due in vita, che è la stessa ragione per cui i numeri stanno in un posto solo.
+[D018](D018-la-scheda-di-dominio.md) chiusa ne resta **una** aperta:
+[D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md), i grafici del cruscotto — scritta il
+2026-08-21 e **non preparata**. I prompt che consegnavano D026 e D018 stanno nel `git log` di questo
+file: si recuperano da lì invece di tenerne tre in vita, che è la stessa ragione per cui i numeri
+stanno in un posto solo.
 
-**D018 adesso ha un vantaggio che non aveva ieri.** L'[ADR 0033](../adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md)
-ha aggiunto alla scheda una domanda che prima nessuno faceva — **questo dominio si amministra?** —
-ed è la domanda che riempie `DOMAIN_SCREENS`. Va risposta prima di scrivere il dominio, non dopo, e
-adesso c'è un test che se ne accorge se non la si risponde.
+**D027 comincia con due decisioni, non con del codice.** Chi la esegue le porta all'utente prima di
+toccare un file, e il prompt lo dice apertamente: la prima decide chi tiene la serie storica — che
+oggi **non esiste** — e la seconda se entra una dipendenza nuova.
 
 ```markdown
-Esegui la delega D018 nel progetto Solvent, in questa repo.
+Esegui la delega D027 nel progetto Solvent, in questa repo.
 
 Leggi in quest'ordine, e non scrivere niente prima di aver finito:
 
@@ -645,57 +667,46 @@ Leggi in quest'ordine, e non scrivere niente prima di aver finito:
    particolare _Cosa vale per qualunque delega_ e _Le decisioni contestabili_
 2. `docs/stato.md` — quanti sono gli ADR, le deleghe e i documenti, e in che stato. È **generato**:
    non si scrive a mano, si rigenera con `npx vitest run tests/rules/project-state -u`
-3. `docs/delega/D018-la-scheda-di-dominio.md` — la delega che esegui. Interamente, e in particolare
-   _Cosa la preparazione ha verificato_: è stata **preparata il 2026-08-21** compilando davvero le
-   dodici domande sui tre domini, e quello che ha trovato cambia due voci della definizione di fatto
-4. `docs/design/domini/vault.md` — l'**unica scheda che esiste**, ed è anche l'unica che si è già
-   riletta contro il codice: in fondo c'è _Cosa l'esecuzione ha smentito_, che è il pezzo di cui
-   D018 deve capire se è una sezione della forma o un caso isolato
-5. `docs/delega/D017-il-caveau.md`, le **sedici correzioni** in fondo: sono il codice che le dodici
-   domande sul kernel dovranno descrivere, e le tre righe della scheda che il codice ha smentito
-6. `docs/adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md` — è nuovo, ed è dove la scheda
-   guadagna la domanda «questo dominio si amministra?». **È già deciso:** D018 lo usa, non lo
-   rimette in discussione
-7. `docs/prodotto/visione.md` — l'etichetta a nove voci e la legge della non dominanza
-8. `docs/qualita.md` e `docs/convenzioni.md` — i gate, e la lingua del codice (C08)
+3. `docs/delega/D027-un-grafico-e-una-serie-che-nessuno-tiene.md` — la delega che esegui.
+   Interamente, e in particolare _Il fatto che decide tutto: la serie non esiste_ e _Le decisioni
+   aperte_: sono due, non spettano a te, e vanno portate a me prima di scrivere una riga
+4. `docs/adr/0010-liste-storiche-limitate-alla-definizione.md` — è `Proposta`, e la decisione 1 può
+   farlo diventare `Accettata`. Una serie storica è esattamente ciò di cui parla
+5. `docs/adr/0015-criterio-di-ammissione-delle-dipendenze.md` — il criterio con cui una libreria
+   entra. La decisione 2 si pesa contro questo, non contro il gusto
+6. `docs/adr/0018-la-home-e-un-atm.md` — il tetto di sei riquadri e l'ordine delle due zone. Un
+   grafico che occupa il posto di un riquadro lo tocca
+7. `docs/adr/0028-il-kit-ui-non-sa-che-gioco-e.md` — **R15**: nessun colore vive fuori dai token, e
+   le librerie di grafici dipingono i propri
+8. `src/renderer/views/HomeView.vue`, `src/renderer/components/shell/StatTile.vue` e
+   `src/renderer/stores/game.ts` — dove il grafico andrebbe, e cosa lo store sa davvero
 
 Stato: `npm run verify` e `npm run verify:release` **verdi**. Quali deleghe siano aperte lo dice
-[stato.md](../stato.md), che le conta.
+`docs/stato.md`, che le conta.
+
+Come si comincia, ed è l'unica cosa che non puoi saltare:
+
+1. **Portami le due decisioni**, una alla volta, con due opzioni e i compromessi. Non decidere al
+   posto mio: la 1 crea il primo storico del progetto e tocca il salvataggio, la 2 può far entrare
+   una dipendenza — e una dipendenza è un ADR
+2. **Poi** il codice, con i gate che servono e ogni test nuovo rotto di proposito
 
 Attenzione a tre cose del punto di partenza:
 
-- **`main` è allineato**, e il ramo nuovo parte da lì. `d026-dove-si-attacca-un-dominio` è stato
-  fuso in un `--ff-only`. Se una delega chiusa ti dice di partire da un altro ramo, quella è la
-  cronaca del giorno in cui è stata scritta
-- **Le schede dei domini che non hanno codice non si compilano**, o si compilano a metà: una scheda
-  che descrive ciò che credevamo di scrivere è peggio di nessuna scheda, e il caveau lo ha appena
-  dimostrato smentendo tre delle proprie righe
+- **La serie non esiste, ed è il fatto che decide tutto.** `history` è una lista di venti
+  transazioni tenuta **solo in memoria**, e `SavePayload` contiene `ledger`, `rng` e `systems` —
+  nessuno storico. Un grafico disegnato oggi disegnerebbe numeri inventati, che è la correzione 1
+  di `docs/delega/D015-home-bancomat.md` con un altro vestito
+- **`main` è allineato**, e il ramo nuovo parte da lì. Se una delega chiusa ti dice di partire da un
+  altro ramo, quella è la cronaca del giorno in cui è stata scritta
 - **`npm install` non funziona in questa repo**, e non è colpa tua: `electron-vite@5` regge `vite`
   fino alla 7 e il progetto è sulla 8. L'unico comando che installa è `npm ci --legacy-peer-deps`,
-  che però ignora i peer. È la correzione 8 di `docs/delega/D023-il-design-system.md`
-
-D018 vale ~510 righe di **documentazione** e **zero di codice**, ed è la prima delega in cui zero
-righe di sorgente sono una condizione di correttezza invece di una stima.
-
-Quattro cose che sono già state fatte, e che non vanno rifatte:
-
-- **il caveau esiste davvero**, quindi le dodici domande sul kernel si rispondono leggendo
-  `src/core/domains/vault/` invece di immaginarlo — e vale per tutte e tre le schede, non due
-- **la scheda del caveau si è già corretta da sola**: tre righe smentite, zero decisioni di gioco
-  cambiate
-- **le dodici domande sono già state compilate una volta e buttate via**, ed è la preparazione: si
-  sa quali cinque rispondono «no» tre volte su tre, quale trova il primo «sì» del progetto, e quale
-  afferma una regola che nessun meccanismo impone
-- **dove vive l'interfaccia di un dominio è deciso** (ADR 0033): la scheda lo **usa** e non lo
-  ridecide. Quello che deve aggiungere è la domanda che riempie `DOMAIN_SCREENS`
-
-E una decisione aperta, che è l'unica: **`domains/* --> domains/*` non è ancora mai stata
-disegnata**, e D017 ha scelto due volte di non aprirla. La domanda 6 la dà per acquisita e non lo è.
-Le due strade stanno nel punto 6 della preparazione: portale a me.
+  che però ignora i peer. È la correzione 8 di `docs/delega/D023-il-design-system.md`. Vale doppio
+  qui: se la decisione 2 sceglie una libreria, l'installazione è parte del lavoro, non un dettaglio
 
 Come lavoro:
 
-- **Un ramo `d018-la-scheda-di-dominio`.** Non si commetta su `main`
+- **Un ramo `d027-un-grafico-e-una-serie`.** Non si commetta su `main`
 - **La delega si esegue, non si riscrive.** Se il testo è invecchiato o sbagliato, fermati e
   dimmelo: è successo sei volte e ogni volta ha tolto lavoro invece di aggiungerlo
 - **Il budget di righe è un allarme, non un limite.** Se lo stai raddoppiando, stai risolvendo un
@@ -704,6 +715,8 @@ Come lavoro:
 - **Ogni test nuovo va rotto di proposito almeno una volta.** Un test che non si è mai visto
   fallire non è una rete, è una decorazione
 - `npm run verify` verde alla fine, con l'**output incollato**. Non «dovrebbe passare»
+- **Le schermate che tocchi vanno guardate**, nei due temi, con l'interruttore in fondo alla
+  colonna. Il modo sta in _Come si guarda l'applicazione senza toccarla_
 - Niente `TODO`, niente `any`, niente scorciatoie presentate come soluzioni. Identificatori in
   inglese, prosa in italiano
 - **Chiudere la delega significa rigenerare `docs/stato.md`**:
@@ -714,13 +727,14 @@ Come lavoro:
   righe contro il budget. Ogni delega chiusa ne ha da quattro a diciassette
 ```
 
-### E dopo, D018 e la fetta 03
+### E dopo, la fetta 03
 
-[D018](D018-la-scheda-di-dominio.md) è l'unica delega aperta, ed è quella che il prompt qui sopra
-consegna. Ha guadagnato una sezione il 2026-08-21 — _cosa prende in prestito, e cosa presta_ — che è
-dove la domanda sulle cose trasversali è andata a vivere, e da D026 ne guadagna un'altra: **questo
-dominio si amministra?**, che è la domanda che riempie `DOMAIN_SCREENS`.
+La fetta 03 comincia da una **scheda compilata** invece che da una schermata immaginata, ed è la
+differenza che [D018](D018-la-scheda-di-dominio.md) è servita a fare: il modulo sta in
+[design/domini/README.md](../design/domini/README.md), e un dominio nuovo lo compila **prima** che
+qualcuno ne scriva una riga.
 
-Poi la fetta 03, che comincia da una **scheda compilata** invece che da una schermata immaginata. Le
-tre cose da avere in mente prima di scrivere una riga stanno qui sopra, in fondo a _Il prossimo
-passo_.
+Le tre cose da avere in mente prima di scrivere quella riga stanno qui sopra, in fondo a _Il
+prossimo passo_. Una quarta è arrivata con D018 e va tenuta con le altre: **la forma va rivista alla
+quarta scheda compilata**, non prima — due sezioni oggi non discriminano, e con tre casi non si può
+sapere se sia un difetto della forma o il campione.
