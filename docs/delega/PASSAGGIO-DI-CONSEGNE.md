@@ -30,22 +30,22 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                                            |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                              |
-| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                     |
-| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                     |
-| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                          |
-| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                    |
-| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina                             |
-| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                   |
-| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                     |
-| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                             |
-| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                      |
-| `main`                   | fermo a `d018-la-scheda-di-dominio`. Il ramo di D027 sta **sopra** e aspetta la fusione di fine fetta                                                      |
-| `origin/main`            | **indietro**, e non di poco — vedi l'avvertimento qui sotto. Il numero non si scrive: lo dice `git rev-list --count origin/main..main`                     |
-| Albero di lavoro         | **pulito**                                                                                                                                                 |
-| Prossimo passo           | la **fetta 03**. Quali deleghe restino aperte lo dice [stato.md](../stato.md); il ramo di D027, `d027-un-grafico-e-una-serie`, non è ancora fuso su `main` |
+|                          |                                                                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                          |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                 |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md) |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                      |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina         |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato               |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
+| `main`                   | **allineato**: `d027-un-grafico-e-una-serie` è stato fuso in un `--ff-only`. Il ramo nuovo parte da `main`                             |
+| `origin/main`            | **indietro**, e non di poco — vedi l'avvertimento qui sotto. Il numero non si scrive: lo dice `git rev-list --count origin/main..main` |
+| Albero di lavoro         | **pulito**                                                                                                                             |
+| Prossimo passo           | la **fetta 03**. Quali deleghe restino aperte lo dice [stato.md](../stato.md), e D027 non è fra quelle: è chiusa e fusa                |
 
 > **⚠️ Il lavoro esiste solo su questa macchina.** `origin/main` è fermo al 2026-08-20, al commit
 > `84dbe47`, e da allora nessun `push`. Tutto quello che c'è dopo — la fetta 02 col caveau, il
