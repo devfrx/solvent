@@ -41,9 +41,9 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
 | `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
-| `main`                   | fermo alla fine della fetta 02: [D024](D024-il-telaio.md) e [D025](D025-il-tooltip.md) sono su un ramo che **non è stato fuso**        |
-| Albero di lavoro         | **pulito**. Il telaio e il tooltip stanno sul ramo `d024-d025-telaio-e-tooltip`, chiusi entrambi                                       |
-| Prossimo passo           | [D018](D018-la-scheda-di-dominio.md), l'unica delega aperta — e il suo ramo parte da `d024-d025-telaio-e-tooltip`, non da `main`       |
+| `main`                   | **allineato**: il telaio e il tooltip sono stati fusi da `d024-d025-telaio-e-tooltip` in un `--ff-only`                                |
+| Albero di lavoro         | **pulito**                                                                                                                             |
+| Prossimo passo           | [D018](D018-la-scheda-di-dominio.md), l'unica delega aperta. Il suo ramo parte da `main`                                               |
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -594,10 +594,9 @@ e il tooltip sono chiusi, e D018 è l'unica delega aperta rimasta.
 
 Attenzione a tre cose del punto di partenza:
 
-- **`main` non è il punto di partenza.** D024 e D025 sono chiuse sul ramo
-  `d024-d025-telaio-e-tooltip` e **non sono state fuse**: il ramo nuovo parte da lì, o nasce senza
-  il telaio. Se una delega **chiusa** ti dice di partire da un altro ramo, quella è la cronaca del
-  giorno in cui è stata scritta
+- **`main` è il punto di partenza**, ed è aggiornato: il telaio e il tooltip sono stati fusi alla
+  chiusura di D024 e D025. Il ramo nuovo parte da `main`. Se una delega **chiusa** ti dice di
+  partire da un altro ramo, quella è la cronaca del giorno in cui è stata scritta
 - **Il progetto è cambiato dopo lo STOP 2**, ed è la cosa che D018 deve sapere di sé: il telaio, i
   due temi, il tooltip, R16, R17 e INV-22 non c'erano quando questa delega è stata scritta. La
   scheda descrive il progetto del giorno in cui viene compilata, non quello dello STOP 2
