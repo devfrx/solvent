@@ -43,8 +43,25 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
 | `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
 | `main`                   | **allineato**: `d018-la-scheda-di-dominio` è stato fuso in un `--ff-only`. Il ramo nuovo parte da `main`                               |
+| `origin/main`            | **indietro**, e non di poco — vedi l'avvertimento qui sotto. Il numero non si scrive: lo dice `git rev-list --count origin/main..main` |
 | Albero di lavoro         | **pulito**                                                                                                                             |
 | Prossimo passo           | [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md) — **non preparata**: porta due decisioni da prendere con l'utente             |
+
+> **⚠️ Il lavoro esiste solo su questa macchina.** `origin/main` è fermo al 2026-08-20, al commit
+> `84dbe47`, e da allora nessun `push`. Tutto quello che c'è dopo — la fetta 02 col caveau, il
+> pagamento, la validazione del salvataggio, il design system, il telaio, il tooltip, D026 e D018 —
+> vive in un solo posto, e un disco che si rompe se lo porta via.
+>
+> **Non è stato spinto in autonomia** perché un `push` è visibile agli altri e non si disfa
+> pulendo: è una di quelle cose che si chiedono. Il comando è uno solo, quando lo si vuole:
+>
+> ```bash
+> git push origin main
+> ```
+>
+> Se invece è deliberato — il repo pubblico si aggiorna a fine fetta, o il progetto resta locale
+> finché non è presentabile — allora questa riga va cancellata e la ragione scritta al suo posto,
+> perché così com'è sembra una dimenticanza.
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -526,6 +543,22 @@ togliere un gate.
 - **Quando correggi un fatto sbagliato, cerca il concetto, non la frase.** Un `grep` sulla frase
   intera trova le copie identiche e lascia indietro le parafrasi — è successo davvero, con
   "progresso offline" scritto in quattro punti e corretto in due.
+
+## Come tornare operativi, da zero
+
+Quattro righe, e la prima è quella che sorprende chi arriva: **`npm install` non funziona in questa
+repo.** `electron-vite@5` regge `vite` fino alla 7 e il progetto è sulla 8; l'unico comando che
+installa è quello qui sotto, che però ignora i peer — per questo `@vue/devtools-api` e
+`vue-eslint-parser` sono dichiarati a mano. La causa vera è aperta ed è la correzione 8 di
+[D023](D023-il-design-system.md).
+
+```bash
+npm ci --legacy-peer-deps
+```
+
+Se poi `npm run dev` dice _Electron uninstall_, il binario non è stato scaricato e si completa con
+`node node_modules/electron/install.js`. Per guardare l'applicazione senza portarla in primo piano,
+vedi _Come si guarda l'applicazione senza toccarla_.
 
 ## Come verificare di non aver rotto niente
 
