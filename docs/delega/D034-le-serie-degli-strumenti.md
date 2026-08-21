@@ -1,7 +1,10 @@
 # D034 — Le serie degli strumenti
 
 - **Stato:** **Aperta** — scritta il 2026-08-21, non eseguita. Il ramo si chiami
-  `d034-le-serie-degli-strumenti` e parta da [D033](D033-il-bancomat-e-una-pagina.md)
+  `d034-le-serie-degli-strumenti` e parta dal ramo di
+  [D033](D033-il-bancomat-e-una-pagina.md) se esiste ancora, altrimenti da `main`: dal 2026-08-21 i
+  rami di lavoro si fondono e si cancellano, quindi il punto di partenza è `main` appena la delega a
+  monte è chiusa
 - **Dipende da:** [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md), che ha portato la prima
   serie e la libreria; [D033](D033-il-bancomat-e-una-pagina.md), che porta la pagina dove questi
   grafici stanno

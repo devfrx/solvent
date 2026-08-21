@@ -1,7 +1,9 @@
 # D033 — Il bancomat è una pagina
 
 - **Stato:** **Aperta** — scritta il 2026-08-21, non eseguita. Il ramo si chiami
-  `d033-il-bancomat-e-una-pagina` e parta da [D032](D032-la-commissione-scala-il-pavimento-no.md)
+  `d033-il-bancomat-e-una-pagina` e parta da **`main`**: il 2026-08-21 tutti i rami di lavoro sono
+  stati fusi e cancellati, quindi `d032-la-commissione-scala-il-pavimento-no` — che questa riga
+  nominava — non esiste più come etichetta, e il suo contenuto è in `main`
 - **Dipende da:** [D032](D032-la-commissione-scala-il-pavimento-no.md), che porta la commissione in
   percentuale — questa pagina la **disegna** in ogni anteprima e sulla carta;
   [D026](D026-dove-si-attacca-un-dominio.md), che ha dato a ogni dominio la sua pagina;

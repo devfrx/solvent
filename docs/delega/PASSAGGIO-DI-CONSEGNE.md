@@ -30,41 +30,42 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                                                   |
-| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                                                          |
-| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                                                          |
-| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                                               |
-| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                                                         |
-| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina — e da D033 il bancomat avrà una pagina **sua**, non più la home                                                                                                                                                 |
-| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                                                        |
-| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                                                          |
-| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                                                  |
-| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                                           |
-| `main`                   | **indietro di dodici commit.** Cinque deleghe vivono su rami impilati, e `d031-la-sovrapposizione-e-un-pezzo-del-kit` li contiene **tutti**: da `main`, `git merge --ff-only d031-la-sovrapposizione-e-un-pezzo-del-kit` li porta a casa in un colpo. Verificato, non supposto. Non è stato fatto: fondere è una di quelle cose che si chiedono |
-| `origin/main`            | **indietro**, e non di poco — vedi l'avvertimento qui sotto. Il numero non si scrive: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                          |
-| Albero di lavoro         | **pulito**                                                                                                                                                                                                                                                                                                                                      |
-| Prossimo passo           | **[D033](D033-il-bancomat-e-una-pagina.md)**, scritta e aperta: il bancomat diventa una pagina sua e il cruscotto un'altra. Poi [D034](D034-le-serie-degli-strumenti.md), i grafici. La fetta 03 viene dopo. Vedi _La seconda sessione del 2026-08-21_                                                                                          |
+|                          |                                                                                                                                                                                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                          |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                 |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                 |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                      |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina — e da D033 il bancomat avrà una pagina **sua**, non più la home                                                        |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                               |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                 |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                         |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                  |
+| `main`                   | **è il punto di partenza, e stavolta davvero.** Il 2026-08-21 tutti i rami di lavoro sono stati fusi con un `--ff-only` e cancellati: ne resta **uno solo**, e `git branch` lo dice in una riga                                                        |
+| `origin/main`            | **allineato.** Il 2026-08-21 sono stati spinti in un colpo i cinquantotto commit che mancavano dal 2026-08-20. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                 |
+| Albero di lavoro         | **pulito**                                                                                                                                                                                                                                             |
+| Prossimo passo           | **[D033](D033-il-bancomat-e-una-pagina.md)**, scritta e aperta: il bancomat diventa una pagina sua e il cruscotto un'altra. Poi [D034](D034-le-serie-degli-strumenti.md), i grafici. La fetta 03 viene dopo. Vedi _La seconda sessione del 2026-08-21_ |
 
-> **⚠️ Il lavoro esiste solo su questa macchina.** `origin/main` è fermo al 2026-08-20, al commit
-> `84dbe47`, e da allora nessun `push`. Sono **cinquantasette commit** — il numero non si scrive a
-> memoria, lo dice `git rev-list --count origin/main..HEAD` — e comprendono tutto ciò che il
-> progetto ha fatto dopo D018: la fetta 02 col caveau, il pagamento, la validazione del salvataggio,
-> il design system, il telaio, il tooltip, D026, D027, i devcheat, il telaio che non scorre, la
-> commissione che scala e il popover del kit. Vive in un solo posto, e un disco che si rompe se lo
-> porta via.
+> **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
+> al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
+> **cinquantotto** commit che mancavano sono stati fusi e spinti in un colpo, dopo che
+> `npm run verify` e `npm run verify:release` erano verdi **su `main` fuso**, non solo sul ramo di
+> lavoro.
 >
-> **Non è stato spinto in autonomia** perché un `push` è visibile agli altri e non si disfa
-> pulendo: è una di quelle cose che si chiedono. Il comando è uno solo, quando lo si vuole:
+> Nello stesso passaggio i **trentasette** rami di lavoro sono stati cancellati con `git branch -d`,
+> che si rifiuta di cancellare un ramo con lavoro non fuso: nessuno si è rifiutato, il che è la
+> prova che non c'era lavoro unico da nessuna parte. Ne resta uno, `main`.
+>
+> **Perché la riga resta invece di sparire:** che il lavoro sia spinto è una condizione, non un
+> fatto acquisito. Chi legge lo verifichi invece di crederci — costa un comando:
 >
 > ```bash
-> git push origin main
+> git rev-list --count origin/main..main
 > ```
 >
-> Se invece è deliberato — il repo pubblico si aggiorna a fine fetta, o il progetto resta locale
-> finché non è presentabile — allora questa riga va cancellata e la ragione scritta al suo posto,
-> perché così com'è sembra una dimenticanza.
+> Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
+> agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
 
 ## La seconda sessione del 2026-08-21: due deleghe chiuse, tre scritte
 
@@ -153,9 +154,14 @@ Verificato con i comandi, non ricordato.
 - **`npm run verify` verde** — 77 file, **814 test**. **`npm run verify:release` verde**, renderer a
   2.450,46 kB (sempre non minificato: il dubbio di D030 resta aperto e non è stato toccato).
 - **Nessun residuo di debug** nel diff della sessione: `console.log`, `debugger`, `TODO` — zero.
-- **Cinque commit** su `d031-la-sovrapposizione-e-un-pezzo-del-kit`, che discende da
-  `d032-la-commissione-scala-il-pavimento-no`, che discende da
-  `d030-il-contenuto-scorre-nel-telaio`.
+- **Cinque commit** su `d031-la-sovrapposizione-e-un-pezzo-del-kit`, che discendeva da
+  `d032-la-commissione-scala-il-pavimento-no`, che discendeva da
+  `d030-il-contenuto-scorre-nel-telaio`. **Quei rami non esistono più**: vedi il punto qui sotto.
+- **Tutto è stato fuso in `main` e spinto**, ed è l'ultima cosa fatta in questa sessione. Un
+  `--ff-only`, `verify` e `verify:release` verdi **su `main` fuso**, poi il `push`. Poi i
+  trentasette rami di lavoro cancellati con `git branch -d` — quello che si rifiuta se il lavoro
+  non è fuso: **nessuno si è rifiutato**, e questa è la prova che non c'era lavoro unico da nessuna
+  parte. Resta `main`, allineato con `origin/main`.
 - **Il ramo `d030-il-contenuto-scorre-nel-telaio` non punta più al commit di chiusura di D030.** I
   documenti delle tre deleghe nuove sono stati commessi stando su di lui, quindi l'etichetta è
   avanzata a `383c94b`. La delega D030 dichiara `1f3a0e1`, che è ancora nella storia ed è il commit
@@ -995,8 +1001,8 @@ Prima di scrivere una riga:
 - dichiara se spezzi la delega: sono ~450 righe e tocca tre cose insieme, e la sua intestazione
   chiede esplicitamente di dirlo prima di cominciare.
 
-Il ramo si chiami d033-il-bancomat-e-una-pagina e parta da
-d031-la-sovrapposizione-e-un-pezzo-del-kit, che contiene tutto (main non è ancora stato fuso).
+Il ramo si chiami d033-il-bancomat-e-una-pagina e parta da main, che è aggiornato e allineato
+con origin/main.
 
 La spunta a occhio si paga via CDP nella finestra vera, con il metodo di
 docs/delega/PASSAGGIO-DI-CONSEGNE.md: gli script non sono nel repo e vanno riscritti.
