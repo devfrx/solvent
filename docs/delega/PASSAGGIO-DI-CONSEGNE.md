@@ -41,6 +41,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
 | `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
+| `main`                   | **allineato** alla fine della fetta 02: un ramo nuovo parte da qui                                                                     |
 | Prossimo passo           | **[D018](D018-la-scheda-di-dominio.md)**. La fetta 02 è **conclusa**: D017, D019, D020 e D023 sono chiuse                              |
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
@@ -370,6 +371,13 @@ togliere un gate.
   sbagliato, e che la regola sembrava funzionare senza funzionare.
 - **Commit:** Conventional Commits con lo scope uguale all'ID della delega —
   `feat(D007): il ledger a partita doppia`. Un ramo per delega: `d007-kernel-ledger`.
+- **Il ramo si fonde su `main` quando la fetta è conclusa, non a ogni delega.** Per quattro deleghe
+  di fila i rami si sono impilati uno sull'altro e `main` è rimasto alla fetta 01: funzionava, e
+  costava una riga di avvertimento in ogni prompt — «parti dal ramo, non da `main`» — cioè
+  esattamente il tipo di istruzione che prima o poi qualcuno salta. Alla chiusura della fetta 02
+  sono state fuse tutte e quattro, in un `--ff-only` senza conflitti. Le deleghe chiuse continuano a
+  dire da quale ramo partivano, ed è giusto: raccontano il giorno in cui sono state scritte, non
+  dove si sta adesso.
 - **Quando una delega è finita:** marcala `Chiusa` con il commit, aggiorna
   [tracciabilita.md](../tracciabilita.md) se hai cambiato un meccanismo, e scrivi le **correzioni
   rispetto a com'era scritta la delega** — ogni delega chiusa finora ne ha da cinque a diciassette, e
@@ -525,8 +533,9 @@ D017 l'ha chiusa il 2026-08-21 — e D018 è l'unica delega aperta rimasta.
 
 Attenzione a due cose del punto di partenza:
 
-- `main` è indietro di quattro deleghe — né D019, né D020, né D023, né D017 sono state fuse. Il
-  ramo nuovo parte dalla punta di `d017-il-caveau`, non da `main`
+- **`main` è aggiornato**, e per la prima volta da quattro deleghe: D019, D020, D023 e D017 sono
+  state fuse alla chiusura della fetta 02. Il ramo nuovo parte da `main`, e se una delega **chiusa**
+  ti dice di partire da un ramo, quella è la cronaca del giorno in cui è stata scritta
 - **`npm install` non funziona in questa repo**, e non è colpa tua: `electron-vite@5` regge `vite`
   fino alla 7 e il progetto è sulla 8. L'unico comando che installa è `npm ci --legacy-peer-deps`,
   che però ignora i peer. È la correzione 8 di `docs/delega/D023-il-design-system.md`
