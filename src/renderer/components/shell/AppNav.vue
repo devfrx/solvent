@@ -8,15 +8,19 @@ import { useTheme } from '@renderer/ui/theme'
 import UiLabel from '@renderer/ui/UiLabel.vue'
 
 import type { Screen } from './screens'
-import { SCREEN_WORDING, SCREENS } from './screens'
+import { NAV_GROUPS, SCREEN_WORDING } from './screens'
 
 /**
  * D024 — la colonna: chi siamo in alto, dove si può andare in mezzo, cosa si può regolare in basso.
  *
  * **Nasce piatta**, senza gruppi e senza simboli, e non è una versione ridotta di quella del
- * canvas: è quella che il codice può riempire. Il canvas disegna diciotto domini raccolti in
- * quattro gruppi; qui ce ne sono due, e due voci non fanno due gruppi. I simboli arriveranno col
- * primo dominio che ne porta uno suo — sceglierli adesso vorrebbe dire inventarli.
+ * canvas: è quella che il codice può riempire. I simboli arriveranno col primo dominio che ne porta
+ * uno suo — sceglierli adesso vorrebbe dire inventarli.
+ *
+ * D026 le ha dato i **gruppi**, e il grilletto del registro YAGNI era esattamente questo: la terza
+ * destinazione. Con l'ADR 0033 sono quattro, divise fra i posti in cui si fa qualcosa e quelli in
+ * cui si guarda ciò che è successo. I gruppi non sono una gerarchia di indirizzi — le voci restano
+ * tutte allo stesso livello — quindi non fanno scattare il grilletto del router.
  *
  * Non decide dove si va: lo dice a chi la monta, e riceve indietro quale destinazione è quella
  * corrente. La lista la legge da `screens.ts`, la stessa che sceglie la vista, quindi una voce che
@@ -56,16 +60,21 @@ const sigil = computed<string>(() => name.value.slice(0, 1))
   </div>
 
   <nav class="destinations">
-    <button
-      v-for="screen of SCREENS"
-      :key="screen"
-      type="button"
-      class="destination"
-      :class="{ current: current === screen }"
-      @click="$emit('go', screen)"
-    >
-      {{ text(SCREEN_WORDING[screen].title) }}
-    </button>
+    <div v-for="group of NAV_GROUPS" :key="group.title" class="group">
+      <p class="group-title">
+        <UiLabel>{{ text(group.title) }}</UiLabel>
+      </p>
+      <button
+        v-for="screen of group.screens"
+        :key="screen"
+        type="button"
+        class="destination"
+        :class="{ current: current === screen }"
+        @click="$emit('go', screen)"
+      >
+        {{ text(SCREEN_WORDING[screen].title) }}
+      </button>
+    </div>
   </nav>
 
   <div class="foot">
@@ -112,8 +121,19 @@ const sigil = computed<string>(() => name.value.slice(0, 1))
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-5);
   padding: var(--space-4) var(--space-3);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.group-title {
+  margin: 0 0 var(--space-1);
+  padding: 0 var(--space-4);
 }
 
 .destination {

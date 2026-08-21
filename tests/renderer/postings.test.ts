@@ -4,7 +4,7 @@ import { fromString, toString } from '@core/contracts/money'
 
 import { income, spend, transfer } from '@core/kernel/Ledger'
 
-import { visibleRows } from '../../src/renderer/components/postings'
+import { visibleRows } from '../../src/renderer/components/ledger/postings'
 
 /**
  * Quali movimenti di una transazione arrivano davanti al giocatore.

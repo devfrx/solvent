@@ -3,10 +3,10 @@ import { storeToRefs } from 'pinia'
 import type { Component } from 'vue'
 import { ref } from 'vue'
 
-import AppHeader from './components/AppHeader.vue'
-import AppNav from './components/AppNav.vue'
-import type { Screen } from './components/screens'
-import { SCREEN_WORDING } from './components/screens'
+import AppHeader from './components/shell/AppHeader.vue'
+import AppNav from './components/shell/AppNav.vue'
+import type { Screen } from './components/shell/screens'
+import { SCREEN_WORDING } from './components/shell/screens'
 import { useTranslator } from './i18n'
 import type { GameStatus } from './stores/game'
 import { useGameStore } from './stores/game'
@@ -15,7 +15,9 @@ import UiHeading from './ui/UiHeading.vue'
 import UiShell from './ui/UiShell.vue'
 import UiText from './ui/UiText.vue'
 import HomeView from './views/HomeView.vue'
+import IncomeView from './views/IncomeView.vue'
 import StatsView from './views/StatsView.vue'
+import VaultView from './views/VaultView.vue'
 
 /**
  * Il guscio: rende i sette stati del ciclo di vita, e adesso li rende con delle parole.
@@ -48,11 +50,14 @@ const PLAYABLE: readonly GameStatus[] = ['playing', 'suspended', 'recovering']
  *
  * Fino a D024 la scelta era un `v-if` con un `v-else`, e con due destinazioni funzionava. Con tre
  * avrebbe smesso di funzionare **in silenzio**: il terzo nome sarebbe comparso nella colonna e al
- * clic si sarebbe vista la seconda vista. È la difesa contro A17 messa dove il difetto entrerebbe —
+ * clic si sarebbe vista la seconda vista. D026 ne ha portate quattro, e la difesa ha retto senza
+ * che nessuno la toccasse. È la difesa contro A17 messa dove il difetto entrerebbe —
  * non si può elencare un dominio che non esiste, perché non c'è niente da montare quando lo si preme.
  */
 const SCREEN_VIEWS: Readonly<Record<Screen, Component>> = {
   home: HomeView,
+  income: IncomeView,
+  vault: VaultView,
   stats: StatsView
 }
 
@@ -61,9 +66,9 @@ const { status, failure, failedDuring, awayFor } = storeToRefs(store)
 const { text, duration, failure: failureText } = useTranslator()
 
 /**
- * Dove siamo. È un `ref` e non un router: due destinazioni senza indirizzo da condividere non
- * giustificano una dipendenza (ADR 0015), e il giorno in cui ne servirà uno lo dirà una schermata
- * che vuole essere raggiungibile da fuori. I nomi e le parole stanno in `components/screens.ts`,
+ * Dove siamo. È un `ref` e non un router: quattro destinazioni piatte, senza un indirizzo da
+ * condividere, non giustificano una dipendenza (ADR 0015), e il giorno in cui ne servirà uno lo dirà una schermata
+ * che vuole essere raggiungibile da fuori. I nomi e le parole stanno in `components/shell/screens.ts`,
  * perché li legge anche la colonna.
  */
 const screen = ref<Screen>('home')

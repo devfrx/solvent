@@ -136,6 +136,7 @@ fetta 02 a chiuderla.
 | [0030](0030-il-telaio-e-una-forma-non-un-contenitore.md)                       | Il telaio è una forma, non un contenitore                      | **Accettata** | quale impaginazione il kit accetta, e quale rifiuta                     | A14             |
 | [0031](0031-il-tema-si-sceglie-e-non-si-ricorda.md)                            | Il tema si sceglie, e non si ricorda                           | **Accettata** | chi decide il tema, e perché la scelta non sopravvive alla finestra     | A14             |
 | [0032](0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)                | Le sovrapposizioni stanno nel livello superiore                | **Accettata** | dove sta ciò che copre il resto, e perché non ha una libreria           | A14             |
+| [0033](0033-un-dominio-ha-una-cartella-e-una-pagina.md)                        | Un dominio ha una cartella, e di norma una pagina              | **Accettata** | dove vive l'interfaccia di un dominio, e dove il giocatore la trova     | A17             |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è
@@ -188,6 +189,7 @@ domini costerebbe una migrazione.
 | Il tempo di gioco è un dominio, non il kernel                        | [0023](0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)                      | un `now` nel `SystemContext`: più diretto, ma aggiunge una chiave a `SavePayload`                                                                              |
 | Un sistema riceve per costruzione ciò che il contesto non porta      | [0024](0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md) | un singleton in `balance/`: nessun parametro in più, e una dipendenza che sparisce dalle firme                                                                 |
 | La capienza di un pool si chiede al dominio, non si legge da `POOLS` | [0025](0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)                  | il dominio controlla prima e il kernel non si tocca: costa zero, e sposta l'invariante della capienza fuori dal Ledger — cioè il difetto A05 con un altro nome |
+| Un dominio ha una cartella sua, e di norma una pagina sua            | [0033](0033-un-dominio-ha-una-cartella-e-una-pagina.md)                        | il criterio caso per caso — «una pagina è un posto dove si va apposta»: dà la risposta giusta sul caveau, e resta un giudizio che nessun test può verificare   |
 
 Le prime quattro sono **in vigore** dalla fetta 01 e sono state usate da due domini: cambiarle
 costa il Ledger, i suoi test e i due domini. I due momenti buoni per contestarle — prima di D007 e
@@ -199,11 +201,17 @@ applica. Contestarle oggi costa la modifica di un documento. Il momento in cui s
 essere gratuite è il blocco B per il tempo e il blocco D per i conti — la sequenza sta in
 [roadmap-fette.md](../roadmap-fette.md).
 
-L'ultima, il **0025**, era dello STOP 2 e stava nel mezzo: non costava ancora niente perché nessuna
+Il **0025** era dello STOP 2 e stava nel mezzo: non costava ancora niente perché nessuna
 riga la applicava. [D017](../delega/D017-il-caveau.md) l'ha applicata, e adesso il prezzo si può
 scrivere invece di stimarlo: costa una firma del kernel, un campo in più sul `Ledger`, una riga del
 bootstrap — e **restituisce** il `vi.mock` che `tests/kernel/ledger-capacity` teneva. Contestarla
 oggi costa più di ieri e molto meno di domani.
+
+L'**0033** è di [D026](../delega/D026-dove-si-attacca-un-dominio.md), ed è la prima riga di questa
+tabella che nasce già **in vigore**: costa le due pagine nuove, la colonna a gruppi, le cinque
+cartelle di `components/` e `tests/rules/domain-ui`. Contestarla non è gratis e non è caro: i file
+sono dove sono, e spostarli è un `git mv` più un giro di import. Il momento in cui diventerà caro è
+il primo dominio della fetta 04, che nascerà già dentro questa forma.
 
 ## Decisioni deliberatamente rimandate
 

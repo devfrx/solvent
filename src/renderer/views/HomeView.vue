@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
-import AtmPanel from '@renderer/components/AtmPanel.vue'
-import BankCard3d from '@renderer/components/BankCard3d.vue'
-import CashPanel from '@renderer/components/CashPanel.vue'
-import IncomePanel from '@renderer/components/IncomePanel.vue'
-import OperationList from '@renderer/components/OperationList.vue'
-import StatTile from '@renderer/components/StatTile.vue'
+import AtmPanel from '@renderer/components/atm/AtmPanel.vue'
+import BankCard3d from '@renderer/components/atm/BankCard3d.vue'
+import CashPanel from '@renderer/components/atm/CashPanel.vue'
+import OperationList from '@renderer/components/ledger/OperationList.vue'
+import StatTile from '@renderer/components/shell/StatTile.vue'
+import VaultAlarm from '@renderer/components/vault/VaultAlarm.vue'
 import { traceabilityKey, useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
 import UiLabel from '@renderer/ui/UiLabel.vue'
@@ -24,6 +24,11 @@ import UiPanel from '@renderer/ui/UiPanel.vue'
  * I cinque non sono indipendenti, ed è la parte che vale la pena sapere: **guadagnato meno speso
  * meno commissioni fa esattamente il patrimonio netto**, sempre. Non è una coincidenza — è INV-08,
  * la somma di tutti i conti che fa zero, guardata dal lato del giocatore.
+ *
+ * Da [D026](../../../docs/delega/D026-dove-si-attacca-un-dominio.md) questa pagina è **la pagina
+ * del bancomat**, e l'ADR 0018 non cambia: cambia il perché. Il caveau e il reddito hanno preso la
+ * loro ([ADR 0033](../../../docs/adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md)); del caveau
+ * resta qui il solo allarme, perché il muro si incontra giocando e non amministrando.
  */
 
 const store = useGameStore()
@@ -54,9 +59,8 @@ const { text, money } = useTranslator()
   />
 
   <CashPanel />
+  <VaultAlarm />
   <AtmPanel />
-
-  <IncomePanel />
 
   <p class="zone">
     <UiLabel>{{ text('home.zone.dashboard') }}</UiLabel>

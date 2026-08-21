@@ -66,8 +66,16 @@ export type ScreenKey =
   // altre — e non si traduce: le due lingue dicono la stessa cosa, e `tests/rules/product-identity`
   // lo verifica insieme agli altri posti in cui il nome vive (C03, ADR 0008).
   | 'app.name'
+  // Le destinazioni (D024, D026). Ognuna ha il nome di ciò che ci si amministra: la home è la
+  // pagina del bancomat (ADR 0018), le altre portano il nome del loro dominio (ADR 0033).
   | 'app.nav.home'
+  | 'app.nav.income'
+  | 'app.nav.vault'
   | 'app.nav.stats'
+  // I gruppi della colonna (D026). Due, e dicono il verbo: dove si **fa** qualcosa, e dove si
+  // **guarda** ciò che è successo. È la distinzione dell'ADR 0018 portata un piano sopra.
+  | 'app.nav.group.act'
+  | 'app.nav.group.look'
   // Il telaio (D024). L'interruttore del tema dice **quale tema è acceso**, non cosa succede
   // premendolo: è un interruttore a due posizioni, e la posizione è l'informazione (ADR 0031).
   | 'app.theme.light'
@@ -125,6 +133,8 @@ export type ScreenKey =
   // tutte: una schermata nuova non compila finché non sa dire a cosa serve.
   | 'stats.description'
   | 'home.description'
+  | 'income.description'
+  | 'vault.description'
   // La home (docs/design/mockups/home-atm.html). Le chiavi di questo blocco sono nate con D012,
   // che ha scritto il dizionario intero in un tempo solo perché una lingua completata in due
   // tempi è il difetto A13; D015 le ha usate, e dove il mockup si contraddiceva le ha corrette.

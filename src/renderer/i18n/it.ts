@@ -10,8 +10,13 @@ import type { Dictionary } from './index'
  */
 export const it: Dictionary = {
   'app.name': 'Solvent',
-  'app.nav.home': 'Home',
+  'app.nav.home': 'Bancomat',
+  'app.nav.income': 'Reddito',
+  'app.nav.vault': 'Caveau',
   'app.nav.stats': 'Statistiche',
+
+  'app.nav.group.act': 'Dove si opera',
+  'app.nav.group.look': 'Dove si guarda',
 
   'app.theme.light': 'Chiaro',
   'app.theme.dark': 'Scuro',
@@ -80,6 +85,13 @@ export const it: Dictionary = {
   'home.description':
     'Il bancomat e il cruscotto. Qui il denaro entra in contanti, si deposita pagando la ' +
     'commissione, e si vede quanto costa spostarlo.',
+  'income.description':
+    'Lo stipendio arriva da solo: qui si comprano le cose che lo fanno arrivare più in fretta.',
+
+  'vault.description':
+    'Quanti contanti puoi tenere addosso, e quanto costa tenerne di più. Quando è pieno lo ' +
+    'stipendio non entra: si deposita sul conto, oppure si amplia.',
+
   'home.zone.atm': 'Bancomat',
   'home.zone.dashboard': 'Cruscotto',
   'home.tile.income': 'Reddito',

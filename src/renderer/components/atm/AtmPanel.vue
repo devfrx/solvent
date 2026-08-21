@@ -15,7 +15,7 @@ import UiPanel from '@renderer/ui/UiPanel.vue'
 import UiText from '@renderer/ui/UiText.vue'
 import UiTooltip from '@renderer/ui/UiTooltip.vue'
 
-import PostingRows from './PostingRows.vue'
+import PostingRows from '../ledger/PostingRows.vue'
 
 /**
  * Il gesto centrale del gioco, e l'unica cosa che la home **chiede** invece di mostrare: dove

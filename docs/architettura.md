@@ -23,7 +23,7 @@ flowchart TD
     BOOT["main.ts<br/>il bootstrap"]
     APP["App.vue<br/>il guscio: i sette stati"]
     VIEWS["views/*.vue<br/>HomeView · StatsView"]
-    CMP["components/*<br/>i componenti di gioco · il guscio della colonna<br/>rotation · postings · screens"]
+    CMP["components/*<br/>shell · ledger · una cartella per dominio (ADR 0033)<br/>rotation · postings · screens"]
     UI["ui/*<br/>tokens · roles · theme · i pezzi<br/>non sa che gioco è"]
     I18N["i18n/*"]
     ST["stores/*"]
@@ -197,24 +197,39 @@ solvent/
 │     │  └─ loop.ts               # rAF + accumulatore -> tick a passo fisso
 │     ├─ stores/
 │     │  └─ game.ts               # unico store della fetta: stato, comandi, selettori
-│     ├─ views/
-│     │  ├─ HomeView.vue          # bancomat, upgrade, cruscotto, ultime operazioni
+│     ├─ views/                   # una per destinazione: INV-22 non ne ammette una in meno
+│     │  ├─ HomeView.vue          # la pagina del bancomat, con il cruscotto sotto (ADR 0018)
+│     │  ├─ IncomeView.vue        # la pagina del reddito: oggi un pulsante, e lo dice
+│     │  ├─ VaultView.vue         # la pagina del caveau
 │     │  └─ StatsView.vue
 │     ├─ ui/                      # il kit: non sa che gioco e' (ADR 0028)
 │     │  ├─ tokens.css            # i colori: l'unico posto dove un #hex e' ammesso (R15)
 │     │  ├─ fonts.css
 │     │  ├─ roles.ts              # ruoli di colore, misure, superfici — nessun Pool
+│     │  ├─ theme.ts              # quale tema e' acceso, e l'interruttore (ADR 0031)
+│     │  ├─ UiShell.vue           # il telaio: una forma, non un contenitore (ADR 0030)
+│     │  ├─ UiTooltip.vue         # l'unico modo di spiegare qualcosa (R17, ADR 0032)
 │     │  └─ Ui*.vue               # superficie, etichetta, cifra, targhetta, pulsante, prosa
-│     ├─ components/
-│     │  ├─ IncomePanel.vue       # l'upgrade: il listino letto prima di premere, un comando, un rifiuto
-│     │  ├─ BankCard3d.vue        # la carta: CSS 3D puro, zero logica
-│     │  ├─ rotation.ts           # la matematica della rotazione, pura e provata a parte
-│     │  ├─ CashPanel.vue         # contanti, capienza, barra, ampliamento, tracciabilita
-│     │  ├─ AtmPanel.vue          # importo, importi rapidi, anteprima, conferma
-│     │  ├─ PostingRows.vue       # i movimenti di una transazione, riga per riga
-│     │  ├─ postings.ts           # quali movimenti il giocatore vede - pura
-│     │  ├─ OperationList.vue     # l'estratto conto: le due viste ne mostrano quantita' diverse
-│     │  └─ StatTile.vue          # il riquadro del cruscotto: e' cio' che il test conta
+│     ├─ components/              # una cartella per proprietario, zero file sciolti (R18, ADR 0033)
+│     │  ├─ shell/                # dell'applicazione, di nessun dominio
+│     │  │  ├─ AppNav.vue         # la colonna: i gruppi, le destinazioni, l'interruttore del tema
+│     │  │  ├─ AppHeader.vue      # la testata: dove sei, e la striscia degli strumenti
+│     │  │  ├─ screens.ts         # destinazioni, gruppi, parole, e DOMAIN_SCREENS
+│     │  │  └─ StatTile.vue       # il riquadro del cruscotto: e' cio' che il test conta
+│     │  ├─ ledger/               # del registro
+│     │  │  ├─ PostingRows.vue    # i movimenti di una transazione, riga per riga
+│     │  │  ├─ postings.ts        # quali movimenti il giocatore vede - pura
+│     │  │  └─ OperationList.vue  # l'estratto conto: le due viste ne mostrano quantita' diverse
+│     │  ├─ atm/
+│     │  │  ├─ AtmPanel.vue       # importo, importi rapidi, anteprima, conferma
+│     │  │  ├─ BankCard3d.vue     # la carta: CSS 3D puro, zero logica
+│     │  │  ├─ CashPanel.vue      # il pool contanti: quanto, quanto ce ne sta, che traccia lascia
+│     │  │  └─ rotation.ts        # la matematica della rotazione, pura e provata a parte
+│     │  ├─ income/
+│     │  │  └─ IncomePanel.vue    # l'upgrade: il listino letto prima di premere, un comando, un rifiuto
+│     │  └─ vault/
+│     │     ├─ VaultPanel.vue     # la barra, lo spazio, il listino a due voci, l'ampliamento
+│     │     └─ VaultAlarm.vue     # il caveau visto dalla home: solo il muro, e solo se e' stato toccato
 │     └─ i18n/
 │        ├─ index.ts              # chiavi tipizzate, Translator, GameError
 │        ├─ it.ts
@@ -231,11 +246,14 @@ solvent/
    ├─ renderer/        createGame · loop · store · postings · rotation
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
                        eslint-disable · bus-synchronous · main-save-only · home-tiles
-                       no-logic-in-vue · no-literal-in-template · english-identifiers · doc-links
+                       no-logic-in-vue · no-literal-in-template · english-identifiers
+                       doc-links · docs-facts · markdown-form · project-state
                        domains-no-internal-pools · domains-no-money-literals
                        registry-completeness · registry-no-special-cases
-                       doc-links · english-identifiers
-                       no-logic-in-vue · no-literal-in-template
+                       no-barrel · forbidden-words · pure-rules · import-graph
+                       stateful-systems-reject-garbage · ui-kit-is-standalone
+                       no-color-literals · ui-kit-has-no-geometry · no-native-tooltips
+                       domain-ui
 ```
 
 ## Le regole e chi le fa rispettare
@@ -243,25 +261,26 @@ solvent/
 Legenda: **🔒 impossibile** = il tipo o la struttura non permettono di scriverlo.
 **✅ bloccato** = lint o test falliscono. **⚠️ parziale** = euristica, spiegata sotto.
 
-| #   | Regola                                     | Come è imposta                                                                                                                                                                                                                        | Forza   |
-| --- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| 1   | Nessuno store importa un altro store       | ESLint `no-restricted-imports` su `src/renderer/stores/**`                                                                                                                                                                            | ✅      |
-| 2   | Nessuna lista di sistemi scritta a mano    | Solo il Registry itera + test: sistemi registrati == file `domains/*/system.ts`                                                                                                                                                       | ✅      |
-| 3   | `Math.random` solo in `Rng.ts`             | ESLint `no-restricted-properties` globale, **senza eccezioni di file**: l'unica riga esente si motiva                                                                                                                                 | ✅      |
-| 4   | Nessun numero magico di tempo              | Tipi branded `Ticks` / `Seconds`: un `number` nudo non è assegnabile. + `no-magic-numbers` su `domains/**`                                                                                                                            | 🔒      |
-| 5   | Nessuna logica di dominio nei `.vue`       | ESLint su `**/*.vue` vieta `domains/*/rules` e `kernel/*` + test grep di backstop                                                                                                                                                     | ✅      |
-| 6   | Nessun denaro fuori dal Ledger             | I saldi vivono in una Map privata nella closure: non c'è nulla da assegnare. + lint di rete                                                                                                                                           | 🔒      |
-| 7   | Se un sistema ha stato, ha save/load/reset | Unione discriminata `System`: con `save` presente, `load` e `reset` sono obbligatori. Il tipo garantisce che un `load` **esista**, non quale stato accetti: quello è INV-20, e lo prova `tests/rules/stateful-systems-reject-garbage` | 🔒 / ✅ |
-| 8   | Il main scrive la versione del salvataggio | Il tipo `SavePayload` del renderer non ha un campo `version`                                                                                                                                                                          | 🔒      |
-| 9   | Ogni lista storica ha un limite dichiarato | `boundedList<T>(max)` è l'unico costruttore + il validatore rifiuta array oltre `max`                                                                                                                                                 | 🔒      |
-| 10  | Un solo stile di esito                     | `CommandHandler` ritorna `Result` per tipo + lint contro i literal con chiave `success`                                                                                                                                               | ⚠️      |
-| 11  | Denaro `Decimal` end-to-end                | `Money = Decimal` è una classe + lint sulle conversioni nei domini                                                                                                                                                                    | 🔒      |
-| 12  | Nessuna stringa utente hardcoded           | Test di parità i18n (✅) + test euristico sui template `.vue` (⚠️)                                                                                                                                                                    | ✅ / ⚠️ |
-| 13  | Un file `rules.ts` è puro                  | `tests/rules/pure-rules`: nessun `ctx`, nessun effetto, nessuna lettura dell'ora                                                                                                                                                      | ⚠️      |
-| 14  | Il kit UI non sa che gioco è               | ESLint `no-restricted-imports` su `src/renderer/ui/**` + `tests/rules/ui-kit-is-standalone`, che risolve anche i percorsi relativi                                                                                                    | ✅      |
-| 15  | Nessun colore fuori dai token              | `tests/rules/no-color-literals`: un'eccezione sola, `ui/tokens.css`, e non è configurabile                                                                                                                                            | ✅      |
-| 16  | Il kit non prende la geometria             | `tests/rules/ui-kit-has-no-geometry`: nessun `defineProps` di `ui/**` dichiara `gap`, `direction`, `width`… È il criterio dell'ADR 0030, reso verificabile                                                                            | ⚠️      |
-| 17  | Nessun tooltip nativo                      | `tests/rules/no-native-tooltips`: nessun attributo `title` in un `.vue` di `src/`. Distingue l'attributo di un elemento dalla proprietà di un componente, che si chiama `title` a ragione                                             | ⚠️      |
+| #   | Regola                                         | Come è imposta                                                                                                                                                                                                                        | Forza   |
+| --- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| 1   | Nessuno store importa un altro store           | ESLint `no-restricted-imports` su `src/renderer/stores/**`                                                                                                                                                                            | ✅      |
+| 2   | Nessuna lista di sistemi scritta a mano        | Solo il Registry itera + test: sistemi registrati == file `domains/*/system.ts`                                                                                                                                                       | ✅      |
+| 3   | `Math.random` solo in `Rng.ts`                 | ESLint `no-restricted-properties` globale, **senza eccezioni di file**: l'unica riga esente si motiva                                                                                                                                 | ✅      |
+| 4   | Nessun numero magico di tempo                  | Tipi branded `Ticks` / `Seconds`: un `number` nudo non è assegnabile. + `no-magic-numbers` su `domains/**`                                                                                                                            | 🔒      |
+| 5   | Nessuna logica di dominio nei `.vue`           | ESLint su `**/*.vue` vieta `domains/*/rules` e `kernel/*` + test grep di backstop                                                                                                                                                     | ✅      |
+| 6   | Nessun denaro fuori dal Ledger                 | I saldi vivono in una Map privata nella closure: non c'è nulla da assegnare. + lint di rete                                                                                                                                           | 🔒      |
+| 7   | Se un sistema ha stato, ha save/load/reset     | Unione discriminata `System`: con `save` presente, `load` e `reset` sono obbligatori. Il tipo garantisce che un `load` **esista**, non quale stato accetti: quello è INV-20, e lo prova `tests/rules/stateful-systems-reject-garbage` | 🔒 / ✅ |
+| 8   | Il main scrive la versione del salvataggio     | Il tipo `SavePayload` del renderer non ha un campo `version`                                                                                                                                                                          | 🔒      |
+| 9   | Ogni lista storica ha un limite dichiarato     | `boundedList<T>(max)` è l'unico costruttore + il validatore rifiuta array oltre `max`                                                                                                                                                 | 🔒      |
+| 10  | Un solo stile di esito                         | `CommandHandler` ritorna `Result` per tipo + lint contro i literal con chiave `success`                                                                                                                                               | ⚠️      |
+| 11  | Denaro `Decimal` end-to-end                    | `Money = Decimal` è una classe + lint sulle conversioni nei domini                                                                                                                                                                    | 🔒      |
+| 12  | Nessuna stringa utente hardcoded               | Test di parità i18n (✅) + test euristico sui template `.vue` (⚠️)                                                                                                                                                                    | ✅ / ⚠️ |
+| 13  | Un file `rules.ts` è puro                      | `tests/rules/pure-rules`: nessun `ctx`, nessun effetto, nessuna lettura dell'ora                                                                                                                                                      | ⚠️      |
+| 14  | Il kit UI non sa che gioco è                   | ESLint `no-restricted-imports` su `src/renderer/ui/**` + `tests/rules/ui-kit-is-standalone`, che risolve anche i percorsi relativi                                                                                                    | ✅      |
+| 15  | Nessun colore fuori dai token                  | `tests/rules/no-color-literals`: un'eccezione sola, `ui/tokens.css`, e non è configurabile                                                                                                                                            | ✅      |
+| 16  | Il kit non prende la geometria                 | `tests/rules/ui-kit-has-no-geometry`: nessun `defineProps` di `ui/**` dichiara `gap`, `direction`, `width`… È il criterio dell'ADR 0030, reso verificabile                                                                            | ⚠️      |
+| 17  | Nessun tooltip nativo                          | `tests/rules/no-native-tooltips`: nessun attributo `title` in un `.vue` di `src/`. Distingue l'attributo di un elemento dalla proprietà di un componente, che si chiama `title` a ragione                                             | ⚠️      |
+| 18  | Un dominio ha la sua cartella in `components/` | `tests/rules/domain-ui`: nessun file sciolto nella radice, ogni sottocartella è un dominio o una delle due dichiarate, e ogni dominio dice dove si guarda — anche quando la risposta è `null` (ADR 0033)                              | ✅      |
 
 **Quando entra ciascun meccanismo.** Alcune di queste regole sono già in vigore, altre nascono con
 la delega che le usa: la colonna _Delega_ di [tracciabilita.md](tracciabilita.md) dice quale, per

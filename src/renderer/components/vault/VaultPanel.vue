@@ -6,25 +6,28 @@ import type { PaymentOption } from '@core/contracts/payment'
 import type { Pool } from '@core/contracts/pools'
 
 import type { GameError } from '@renderer/i18n'
-import { traceabilityKey, useTranslator } from '@renderer/i18n'
+import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
 import UiButton from '@renderer/ui/UiButton.vue'
-import UiNumber from '@renderer/ui/UiNumber.vue'
 import UiPanel from '@renderer/ui/UiPanel.vue'
 import UiText from '@renderer/ui/UiText.vue'
-import UiTooltip from '@renderer/ui/UiTooltip.vue'
 
 /**
- * L'altra metà della dualità (P4): i contanti, e le due cose che li distinguono dalla carta — non
- * lasciano traccia, e **non ci stanno più**.
+ * Il caveau: il primo muro del gioco, e adesso il primo dominio con una pagina sua
+ * ([ADR 0033](../../../../docs/adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md)).
  *
- * Fino a D017 questo pannello diceva «Illimitata» e la barra non c'era: disegnarla sarebbe stato
- * disegnare una barra sempre vuota. Adesso il numero esiste, e con esso il primo muro del gioco.
+ * Fino a [D026](../../../../docs/delega/D026-dove-si-attacca-un-dominio.md) questo pannello non
+ * esisteva: era la metà bassa di `CashPanel.vue`, cresciuta lì perché il caveau tocca i contanti e
+ * i contanti avevano già un riquadro. Lo spostamento è un **taglio**, non una riscrittura — non un
+ * `computed` è nato qui, e i nove selettori sono gli stessi di prima.
  *
- * La capienza si **interroga**, non si definisce, e adesso a rispondere è la stessa funzione che il
- * Ledger fa rispettare (INV-18, ADR 0025): quello che si legge qui è quello che decide se lo
- * stipendio entra. Nemmeno un numero di questa schermata è calcolato qui — la larghezza della barra
- * compresa, che è una percentuale e viene dallo store (R05).
+ * La larghezza della barra è una percentuale e viene dallo store (R05). La capienza si
+ * **interroga**, non si definisce, e a rispondere è la stessa funzione che il Ledger fa rispettare
+ * (INV-18, ADR 0025).
+ *
+ * **Il riquadro non ha un titolo**, ed è una cosa vista guardando: la pagina si chiama già
+ * «Caveau», e ripeterlo a cento pixel di distanza è la stessa parola due volte. Il titolo torna il
+ * giorno in cui questa pagina ha **due** riquadri e serve dire quale è quale.
  *
  * Il pulsante «amplia» non si spegne e non **può** spegnersi (INV-21): quando i fondi non bastano
  * si smorza, e a spiegare è il rifiuto del Ledger con le due cifre. Con due strumenti a prezzi
@@ -33,8 +36,7 @@ import UiTooltip from '@renderer/ui/UiTooltip.vue'
  */
 
 const store = useGameStore()
-const { balances, cashCapacity, vaultProgress, vaultRoom, vaultFill, vaultIsFull, incomeWithheld } =
-  storeToRefs(store)
+const { cashCapacity, vaultProgress, vaultRoom, vaultFill, vaultIsFull } = storeToRefs(store)
 const { text, money, poolName, failure } = useTranslator()
 
 /**
@@ -60,11 +62,7 @@ const expand = (pool: Pool): void => {
 </script>
 
 <template>
-  <UiPanel :title="text('atm.cash.title')">
-    <p class="total">
-      <UiNumber :value="money(balances.cash)" tone="cash" size="xl" />
-    </p>
-
+  <UiPanel>
     <template v-if="cashCapacity !== null">
       <div class="gauge" :class="{ full: vaultIsFull }">
         <div class="fill" :style="{ width: vaultFill }"></div>
@@ -77,33 +75,10 @@ const expand = (pool: Pool): void => {
 
     <dl class="facts">
       <div class="fact">
-        <dt>
-          <UiTooltip :text="text('atm.cash.capacity.explained')">
-            {{ text('atm.cash.capacity') }}
-          </UiTooltip>
-        </dt>
-        <dd>{{ cashCapacity === null ? text('pool.unlimited') : money(cashCapacity) }}</dd>
-      </div>
-      <div class="fact">
         <dt>{{ text('vault.room') }}</dt>
         <dd>{{ vaultRoom === null ? text('pool.unlimited') : money(vaultRoom) }}</dd>
       </div>
-      <div class="fact">
-        <dt>
-          <UiTooltip :text="text('pool.traceability.explained')">
-            {{ text('pool.traceability') }}
-          </UiTooltip>
-        </dt>
-        <dd>{{ text(traceabilityKey('cash')) }}</dd>
-      </div>
     </dl>
-
-    <UiText v-if="vaultIsFull" tone="loss" size="xs" class="alarm">
-      {{ text('vault.full') }}
-    </UiText>
-    <UiText v-else-if="!incomeWithheld.isZero()" tone="loss" size="xs" class="alarm">
-      {{ text('vault.withholding', { amount: money(incomeWithheld) }) }}
-    </UiText>
 
     <UiText v-if="store.expansionPrices.length === 0" tone="ink-3" size="xs" class="alarm">
       {{ text('vault.at_max') }}
@@ -123,18 +98,13 @@ const expand = (pool: Pool): void => {
 </template>
 
 <style scoped>
-.total {
-  margin: 0;
-}
-
 /*
- * La barra della capienza, ed è il primo pezzo davvero nuovo di questa fetta. Resta qui, con il
- * suo stile scoped, perché la disegna **un** componente solo: entra in `ui/` il giorno in cui la
- * disegnano due (ADR 0028). Nessun colore scritto a mano — R15 rifiuterebbe un `#hex` — e il rosso
- * del caveau pieno è il ruolo `loss`, che è già quello che il gioco usa per «da qui non entra».
+ * La barra della capienza. Resta qui, con il suo stile scoped, perché la disegna **un** componente
+ * solo: entra in `ui/` il giorno in cui la disegnano due (ADR 0028). Nessun colore scritto a mano —
+ * R15 rifiuterebbe un `#hex` — e il rosso del caveau pieno è il ruolo `loss`, che è già quello che
+ * il gioco usa per «da qui non entra».
  */
 .gauge {
-  margin-top: var(--space-4);
   height: var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--color-sunken);

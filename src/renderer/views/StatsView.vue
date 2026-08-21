@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
-import OperationList from '@renderer/components/OperationList.vue'
+import OperationList from '@renderer/components/ledger/OperationList.vue'
 import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
 import UiNumber from '@renderer/ui/UiNumber.vue'

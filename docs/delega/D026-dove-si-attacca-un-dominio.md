@@ -1,9 +1,9 @@
 # D026 — Dove si attacca un dominio: la pagina, e le cartelle che la reggono
 
-- **Stato:** Aperta — scritta il 2026-08-21, subito dopo la chiusura di [D024](D024-il-telaio.md) e
-  [D025](D025-il-tooltip.md), su una domanda dell'utente: _dove vive l'interfaccia di un dominio?_
-  **Non è preparata per l'esecuzione**, e non è una dimenticanza: porta tre decisioni che non
-  spettano a chi la scrive. Vedi _Le decisioni aperte_
+- **Stato:** **Chiusa** — scritta il 2026-08-21 su una domanda dell'utente (_dove vive
+  l'interfaccia di un dominio?_) ed eseguita lo stesso giorno, sul ramo
+  `d026-dove-si-attacca-un-dominio`. Le tre decisioni sono state prese con l'utente prima di
+  toccare un file, e stanno più sotto in _Le tre decisioni, e come sono state prese_
 - **Dipende da:** [D024](D024-il-telaio.md) — la colonna, `components/screens.ts` e INV-22 sono il
   meccanismo su cui una pagina di dominio si attacca; senza il telaio questa delega dovrebbe
   costruirlo prima. **Non** dipende da [D018](D018-la-scheda-di-dominio.md): quella dice cosa un
@@ -211,3 +211,184 @@ tabella da rifare. Quello che si può dichiarare è il **perimetro**, e questo �
 - **Il caveau che diventa una destinazione perché è un dominio.** «Dominio» è una parola del codice.
   Quello che il giocatore apre è un **posto**, e i due elenchi possono non coincidere: se coincidono,
   è una decisione, non un fatto.
+
+## Le tre decisioni, e come sono state prese
+
+Portate all'utente **prima** di toccare un file, una alla volta, con due strade e i costi di
+ciascuna. Nessuna è stata presa da chi ha eseguito.
+
+### Decisione 1 — la home resta il bancomat
+
+**Scelta dall'utente.** L'[ADR 0018](../adr/0018-la-home-e-un-atm.md) **non** è stato superato: è
+stato confermato, e ha cambiato significato. La home non è più «un'eccezione ibrida»: è **la pagina
+del dominio `atm`**, con il cruscotto sotto perché il cruscotto non è di nessun dominio. Il tetto di
+sei riquadri e `tests/rules/home-tiles` non si sono toccati, e `views/HomeView.vue` non ha cambiato
+percorso — quindi INV-12 non è mai stato in pericolo.
+
+**Alternativa scartata:** la home diventa il cruscotto e il bancomat prende una destinazione sua.
+Costava un ADR superato, il bersaglio di `home-tiles` spostato, e un clic in più sul gesto centrale
+del gioco — cioè testualmente ciò che l'ADR 0018 vietava. In cambio dava uniformità, che qui è
+l'argomento più debole: `atm` è il dominio **meno** pagina che ci sia — non ha stato, non ticchetta,
+non si registra ([D014](D014-dominio-bancomat.md)).
+
+**Una cosa è stata dichiarata fuori scope subito.** L'utente ha chiesto anche un cruscotto **con
+grafici**, e una libreria per farli. Due argomenti l'hanno fermata: non esiste una serie storica da
+disegnare — `history` è una lista di venti transazioni tenuta solo in memoria, e `SavePayload` non
+contiene nessuno storico — e una libreria di grafici è una dipendenza nuova, quindi un ADR suo, come
+`vue-router` ([ADR 0015](../adr/0015-criterio-di-ammissione-delle-dipendenze.md)). Il posto di quel lavoro è una
+delega sua, con dentro **chi salva la serie** prima di **come si disegna**.
+
+### Decisione 2 — regola secca, con l'uscita dichiarata
+
+**Presa in autonomia su direttiva generale dell'utente** («la soluzione più coerente, senza debiti
+futuri, professionale, non pigra»), quindi **contestabile**: sta nell'indice
+[ADR](../adr/README.md).
+
+Ogni dominio ha la sua pagina; chi non ce l'ha lo **scrive**, con un `null` in `DOMAIN_SCREENS`.
+Oggi: `atm → home`, `income → income`, `vault → vault`, e nessun `null`.
+
+**Alternativa scartata:** il criterio caso per caso — «una pagina è un posto dove si va apposta, un
+muro si mette dove lo si incontra». È la formulazione con cui la decisione era nata, e sul caveau dà
+la risposta giusta. Il difetto è che resta un **giudizio**: nessun test lo può verificare, quindi
+sarebbe 👤 di review, che è la classe di regola che questo progetto ha visto rompersi tre volte. Con
+diciassette domini davanti, un giudizio ripetuto diciassette volte lo decide lo spazio disponibile —
+cioè esattamente come il caveau è finito dentro i contanti.
+
+**E la regola secca pura è stata scartata anche lei**, ed è la scoperta che ha prodotto il criterio
+vero: sarebbe **falsa**. `src/core/domains/calendar/`
+([ADR 0023](../adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)) è l'orologio del gioco e non
+ha niente da mostrare; nella [mappa dei domini](../prodotto/visione.md) il calore, gli eventi
+periodici e le indagini hanno la colonna _requisito_ vuota, perché non sono posti dove si va. Una
+regola falsa si aggira, e la si aggira mettendo il pezzo dove capita.
+
+### Decisione 3 — sottocartelle per proprietario
+
+**Presa in autonomia sulla stessa direttiva**, quindi contestabile insieme alla 2 — sono la stessa
+riga dell'indice, perché sono lo stesso ADR.
+
+Cinque cartelle, zero file sciolti: `shell/`, `ledger/`, `atm/`, `income/`, `vault/`. Le prime due
+sono la **lista chiusa** di ciò che non appartiene a un dominio, e i loro nomi dicono di chi è la
+roba. Non si chiamano `common/` né `shared/` perché sono due delle parole che **C09 vieta**, anche
+come segmento di percorso — e le vieta per la ragione che si sarebbe vista qui.
+
+**Alternativa scartata:** cartella piatta con il dominio nel nome del file (`AtmPanel.vue`,
+`VaultPanel.vue`). Costa zero e in un editor ordina uguale. Non regge due cose: un prefisso non sa
+dire «non appartengo a nessun dominio», quindi la colonna, la testata e l'estratto conto restano
+alla deriva; e con diciassette domini per tre o quattro file ciascuno la cartella arriva a sessanta
+voci, che è la forma in cui `finanx` teneva i propri componenti.
+
+## Cosa è stato verificato a occhio, e come
+
+`npm run dev` con `--remoteDebuggingPort 9222`, e la finestra interrogata dal di dentro senza
+portarla mai in primo piano — il modo sta in
+[PASSAGGIO-DI-CONSEGNE.md](PASSAGGIO-DI-CONSEGNE.md). Le destinazioni sono state **premute** con
+`Input.dispatchMouseEvent`, non navigate da codice, e a ogni tappa si è chiesto al documento —
+`data-theme`, i colori calcolati di `body`, i titoli dei riquadri, le voci della colonna — oltre che
+all'immagine.
+
+Otto combinazioni, quattro destinazioni per due temi, con l'interruttore in fondo alla colonna
+premuto in mezzo:
+
+| Destinazione | Tema   | Fondo                | Riquadri | Barra | Caselle | Titolo      |
+| ------------ | ------ | -------------------- | -------- | ----- | ------- | ----------- |
+| Bancomat     | scuro  | `rgb(16, 15, 12)`    | 8        | 0     | 5       | Bancomat    |
+| Reddito      | scuro  | `rgb(16, 15, 12)`    | 1        | 0     | 0       | Reddito     |
+| Caveau       | scuro  | `rgb(16, 15, 12)`    | 1        | 1     | 0       | Caveau      |
+| Statistiche  | scuro  | `rgb(16, 15, 12)`    | 2        | 0     | 0       | Statistiche |
+| Bancomat     | chiaro | `rgb(237, 234, 227)` | 8        | 0     | 5       | Bancomat    |
+| Reddito      | chiaro | `rgb(237, 234, 227)` | 1        | 0     | 0       | Reddito     |
+| Caveau       | chiaro | `rgb(237, 234, 227)` | 1        | 1     | 0       | Caveau      |
+| Statistiche  | chiaro | `rgb(237, 234, 227)` | 2        | 0     | 0       | Statistiche |
+
+**Ha trovato una cosa da correggere, ed è la ragione per cui si guarda.** Sulla pagina del caveau la
+parola «Caveau» compariva **due volte** a cento pixel di distanza: una nel titolo della schermata,
+una sul titolo del riquadro. Nessun gate poteva vederlo. Il riquadro ha perso il titolo, e la chiave
+`vault.title` è stata cancellata invece di restare inutilizzata — torna il giorno in cui quella
+pagina ha due riquadri e serve dire quale è quale.
+
+**E ha confermato sul campo la clausola dell'ADR 0033:** con il caveau pieno, `VaultAlarm` compare
+sulla home sotto i contanti — «Il caveau è pieno: lo stipendio non entra più» — e viene da
+`components/vault/`, non da un paragrafo dentro `CashPanel.vue`.
+
+## Come la regola nuova è stata rotta di proposito
+
+Quattro volte, una per verifica, e ogni volta è stato controllato **quale** riga diventa rossa, non
+che qualcosa diventasse rosso.
+
+| Cosa è stato scritto apposta                                  | Cosa è diventato rosso                                                                          |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `components/Loose.vue`, sciolto nella radice                  | `nessun file sta sciolto nella radice di components/` — `['src/renderer/components/Loose.vue']` |
+| `components/widgets/Thing.vue`, una cartella inventata        | `ogni cartella di components/ è un dominio, o una delle due dichiarate` — `['widgets']`         |
+| `src/core/domains/casino/rules.ts`, un dominio senza risposta | `ogni dominio dice dove si guarda, anche quando la risposta è null` — `['casino']`              |
+| `ghost: 'stats'` in `DOMAIN_SCREENS`, senza la sua cartella   | `un dominio con una destinazione ha la sua cartella` — `['ghost']`                              |
+
+Prima ancora, il test è stato scritto **prima** del codice che governa, ed era rosso per un motivo
+diverso e giusto: `components/shell/screens.ts` non esisteva.
+
+## Correzioni rispetto a com'era scritta la delega
+
+1. **`import-graph` non diventa rosso per una sottocartella di `components/`, e la delega lo dava
+   per certo.** _Cosa trovi già fatto_ diceva «è rosso per costruzione (C13). Sottocartelle di
+   `components/` **sono** cartelle nuove». Non lo sono, per come quel test è fatto: `NODES` sceglie
+   il nodo per **prefisso**, e `src/renderer/components/` prende tutto ciò che ci sta sotto.
+   Verificato prima di decidere, mettendo un file finto in `src/renderer/components/probe/`: otto
+   test verdi. Ne discendono due cose — nessun nodo nuovo nel diagramma, e **la regola nuova ha
+   dovuto essere un test suo**, perché nessun gate esistente l'avrebbe tenuta.
+2. **La decisione 1 non ha superato l'ADR 0018: l'ha confermato.** La delega prevedeva che potesse
+   superarlo, e la tabella _Da produrre_ teneva una riga per quel caso. L'intestazione dell'ADR 0018
+   non è stata toccata.
+3. **Le decisioni 1 e 2 hanno prodotto un criterio solo, non due.** La delega le teneva separate —
+   una di prodotto sulla home, una di prodotto sul caveau — e la risposta è la stessa frase: la
+   cartella è del dominio sempre, la pagina è del giocatore e c'è quando c'è qualcosa da
+   amministrare.
+4. **`CashPanel.vue` si è spezzato in tre, non in due.** La delega diceva «il pool da una parte, il
+   caveau dall'altra». Ne sono usciti `atm/CashPanel.vue`, `vault/VaultPanel.vue` e
+   `vault/VaultAlarm.vue`: senza il terzo, il muro sarebbe stato invisibile proprio dove il
+   giocatore lo incontra. È il pezzo che rende la clausola dell'ADR 0033 una cosa vera invece che
+   una previsione.
+5. **Sono nate due pagine, non una.** Il budget parlava di «una terza»; `income` ne ha presa una
+   anche lui, perché la regola secca non fa eccezioni per un dominio piccolo — e `IncomePanel` sulla
+   home era lo stesso difetto del caveau, solo più vecchio.
+6. **Il grilletto dei gruppi nella colonna è scattato**, come la delega diceva che poteva. È uscito
+   dal [registro YAGNI](../roadmap-fette.md) ed è entrato qui: `NAV_GROUPS` in `screens.ts`, due
+   gruppi, «Dove si opera» e «Dove si guarda». Non fa scattare il router: un gruppo è un titolo
+   sopra delle voci che restano tutte allo stesso livello, non una gerarchia di indirizzi.
+7. **La riga «le schermate dei domini che non esistono» del registro YAGNI ha guadagnato un
+   meccanismo.** Era un grilletto scritto in prosa; adesso `tests/rules/domain-ui` rifiuta una
+   cartella di `components/` che non abbia una cartella in `core/domains/` dietro.
+8. **L'albero delle cartelle di `architettura.md` era invecchiato di due deleghe.** Non conosceva
+   `AppNav.vue`, `AppHeader.vue`, `screens.ts`, `UiShell.vue`, `UiTooltip.vue` né `theme.ts` — cioè
+   tutto D024 e D025 — e l'elenco di `tests/rules/` ne dichiarava sedici su trentuno, con due nomi
+   ripetuti due volte. Il **diagramma** invece era aggiornato: è la differenza fra un disegno che un
+   test confronta e un albero che nessuno confronta.
+9. **La prosa dell'indice ADR indicizzava per posizione, e la riga nuova l'avrebbe spostata.**
+   «L'ultima, il **0025**» adesso è «Il **0025**» — la stessa trappola che
+   [PASSAGGIO-DI-CONSEGNE.md](PASSAGGIO-DI-CONSEGNE.md) descrive per la propria tabella, trovata in
+   un secondo documento.
+10. **Il titolo del riquadro del caveau è stato tolto, e con lui la chiave `vault.title`.** Trovato
+    guardando, non testando: la stessa parola due volte nella stessa schermata.
+11. **`git checkout` su un file rinominato riporta la versione staged, non quella nuova**, e questo
+    ha cancellato `screens.ts` dopo la quarta rottura di proposito. Chi rompe di proposito un file
+    che nella stessa delega è stato mosso con `git mv` rimetta a posto **il testo**, invece di
+    fidarsi di `git checkout`.
+12. **Cosa è trasversale e cosa è di dominio è rimasto fuori**, come la delega chiedeva, e ha
+    provato a rientrare due volte: la prima con il pool `cash`, che non è di nessun dominio e sta in
+    `components/atm/` perché è la pagina del bancomat a disegnarlo; la seconda con `StatTile`, che
+    sta in `shell/` perché è dell'applicazione. Nessuna delle due è stata generalizzata: quando un
+    secondo dominio disegnerà i contanti, quello sarà il grilletto.
+
+## Consuntivo
+
+| Cosa     | Budget                            | Consuntivo | Dove si legge                                                   |
+| -------- | --------------------------------- | ---------- | --------------------------------------------------------------- |
+| Sorgente | ~150 con due pagine, ~260 con tre | **+124**   | [stato.md](../stato.md): `src/renderer/` da 2.591 a 2.715 righe |
+| Test     | ~60 con due pagine, ~80 con tre   | **+81**    | `tests/rules/domain-ui.test.ts`, con lo stesso `codeLines`      |
+
+**Sotto il budget più basso pur avendo costruito la strada più cara**, e la ragione vale la pena
+saperla: due terzi di questa delega sono **spostamenti**, e un `git mv` non produce righe. Le righe
+nuove stanno quasi tutte in quattro file che prima non esistevano — `VaultPanel.vue`,
+`VaultAlarm.vue` e le due viste — più `screens.ts`, che ha guadagnato `NAV_GROUPS` e
+`DOMAIN_SCREENS`.
+
+Il test è **una riga sopra** il tetto alto della forbice, e la ragione è la quarta verifica: la
+delega ne prevedeva una, l'ADR 0033 ne ha volute quattro perché il difetto ha quattro forme.

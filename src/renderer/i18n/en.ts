@@ -9,8 +9,13 @@ import type { Dictionary } from './index'
  */
 export const en: Dictionary = {
   'app.name': 'Solvent',
-  'app.nav.home': 'Home',
+  'app.nav.home': 'ATM',
+  'app.nav.income': 'Income',
+  'app.nav.vault': 'Vault',
   'app.nav.stats': 'Stats',
+
+  'app.nav.group.act': 'Where you act',
+  'app.nav.group.look': 'Where you look',
 
   'app.theme.light': 'Light',
   'app.theme.dark': 'Dark',
@@ -77,6 +82,13 @@ export const en: Dictionary = {
   'home.description':
     'The ATM and the dashboard. Money arrives as cash, is deposited for a fee, and here you ' +
     'see what moving it costs.',
+  'income.description':
+    'The salary arrives on its own: here you buy the things that make it arrive faster.',
+
+  'vault.description':
+    'How much cash you can keep on you, and what it costs to keep more. When it is full the ' +
+    'salary does not come in: deposit it into the account, or expand.',
+
   'home.zone.atm': 'ATM',
   'home.zone.dashboard': 'Dashboard',
   'home.tile.income': 'Income',

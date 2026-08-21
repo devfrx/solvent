@@ -6,7 +6,7 @@ import {
   releasedOn,
   restingAt,
   transformOf
-} from '../../src/renderer/components/rotation'
+} from '../../src/renderer/components/atm/rotation'
 
 /**
  * La carta che gira, senza la carta.
