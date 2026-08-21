@@ -1,6 +1,6 @@
 # D029 — I devcheat
 
-- **Stato:** Chiusa — commit `PENDING`, ramo `d029-i-devcheat`. Scritta ed eseguita il 2026-08-21
+- **Stato:** Chiusa — commit `7a4611b`, ramo `d029-i-devcheat`. Scritta ed eseguita il 2026-08-21
 - **Dipende da:** [D028](D028-una-capienza-ferma-chi-sale.md). Senza INV-23 un cheat che regala
   denaro può portare un pool oltre il tetto e lasciarlo lì per sempre: lo strumento nato per
   sbloccare una partita la murerebbe da solo
