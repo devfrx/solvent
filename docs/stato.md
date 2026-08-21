@@ -33,7 +33,7 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 
 ## Documenti
 
-**83** markdown: 82 sotto `docs/`, più il `README.md` della radice.
+**84** markdown: 83 sotto `docs/`, più il `README.md` della radice.
 
 ## Codice
 

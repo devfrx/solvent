@@ -22,7 +22,8 @@ Mappa di tutto ciò che è scritto, a cosa serve, e quanto ci si può fidare che
 | [design/flusso-salvataggio.md](design/flusso-salvataggio.md)       | chi possiede il contratto di salvataggio, e come si migra                           | **vivo**        |
 | [design/ciclo-di-vita.md](design/ciclo-di-vita.md)                 | in quali stati può trovarsi l'applicazione                                          | **vivo**        |
 | [design/mappa-funzionale.md](design/mappa-funzionale.md)           | cosa fa il software e cosa deve reggere l'interfaccia, per chi progetta il design   | snapshot        |
-| [design/mockups/](design/mockups/)                                 | com'è fatta la schermata, e in quali stati                                          | snapshot        |
+| [design/domini/](design/domini/)                                   | il modulo che ogni dominio compila prima di essere scritto, e le schede compilate   | **vivo**        |
+| [design/mockups/](design/mockups/)                                 | i disegni consegnati, canvas compreso — la loro lettura, non la loro autorità       | snapshot        |
 | [delega/PASSAGGIO-DI-CONSEGNE.md](delega/PASSAGGIO-DI-CONSEGNE.md) | dove siamo, cosa non fare, qual è il prossimo passo — per chi arriva ora            | **vivo**        |
 | [delega/](delega/)                                                 | i pacchetti di lavoro: cosa fare, cosa non fare, quando è finito                    | si **chiudono** |
 

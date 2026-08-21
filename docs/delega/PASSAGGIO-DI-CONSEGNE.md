@@ -38,6 +38,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                      |
 | Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                |
 | Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina         |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato               |
 | Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
 | `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
@@ -117,6 +118,14 @@ un numero che nessuno conta.
 - **Un file `rules.ts` è puro, e c'è un test** (R13): niente `ctx`, niente `Date.now`, niente
   `emit`, niente import di valore da `Bus`, `Ledger` o `Registry`. Gli import di **soli tipi**
   passano.
+- **Un dominio non importa un altro dominio** (R19, da D018), e qui gli import di soli tipi **non**
+  passano: `tests/rules/domains-are-independent` risolve l'alias e i percorsi relativi. Ciò che un
+  dominio deve sapere di un altro arriva **per argomento**, e a consegnarlo è chi ha entrambi i capi
+  sotto mano — il bootstrap o lo store ([ADR 0024](../adr/0024-un-sistema-riceve-per-costruzione-cio-che-non-sta-nel-contesto.md)).
+- **Un dominio nuovo compila la sua [scheda](../design/domini/README.md) prima che qualcuno ne
+  scriva una riga** (D018), e la scheda si compila **leggendo `src/`**, non ricordandolo. Se il
+  dominio non esiste ancora, la scheda va riletta contro il codice il giorno dopo: è successo al
+  caveau, e ha smentito tre delle proprie righe.
 - **`no-magic-numbers` copre adesso anche `src/renderer/**/*.ts`** (R04). Un numero di gioco nella
   UI va in `balance/`; un numero di presentazione prende un nome.
 - **L'interfaccia di un dominio vive in `components/<dominio>/`, e da nessun'altra parte** (R18,
@@ -622,6 +631,8 @@ interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto co
 | Il reddito riceve lo **spazio** per costruzione, non importa il caveau       | [D017](D017-il-caveau.md) — correzione 3                                                                                  | `income` che importa `vault/rules`: nessun gate lo fermerebbe, e sarebbe il primo accoppiamento fra domini in un gioco che ne ha diciassette                            |
 | Il caveau sta in `ORDER.ECONOMY`, e non apre una fase nuova                  | [D017](D017-il-caveau.md) — correzione 9                                                                                  | una terza fase per un sistema che non ticchetta; e l'ordine conta davvero in un punto — `ECONOMY` carica prima di `INCOME`, cioè prima che il recupero ticchetti        |
 | Quanto resta fuori dal tick è un **importo**, non un `sì/no`                 | [D017](D017-il-caveau.md) — correzione 7                                                                                  | un booleano: farebbe sparire il caveau **quasi** pieno, che è il caso che il giocatore incontra per primo                                                               |
+| «Nessun dominio importa un altro dominio» diventa un test, non una nota      | [D018](D018-la-scheda-di-dominio.md) — correzione 1                                                                       | dichiararla 👤 di review: costa zero e lascia in piedi l'unica riga della metà kernel che promette più di quanto mantiene                                               |
+| Il canvas del design entra nella repo, formattato da Prettier                | [D018](D018-la-scheda-di-dominio.md) — `docs/design/mockups/`                                                             | tenerlo fuori: nessun agente lo troverebbe, e i documenti dovrebbero portare un percorso della scrivania di qualcuno                                                    |
 
 La ventiduesima è di **D013** e costa una riga di un test: è anche l'unica riga non di test che
 quella delega abbia toccato.
@@ -637,6 +648,19 @@ Ledger e i loro test. **D024, D025 e D026 non ne hanno aggiunte**: le loro scelt
 diventate ADR — 0030, 0031, 0032 e 0033 — e un ADR è già il posto dove una decisione si contesta.
 Le due di D026 stanno nella tabella _Decisioni prese in autonomia_ dell'[indice ADR](../adr/README.md),
 e sono la prima riga di quella tabella che nasce già **in vigore**.
+
+**Le due righe di [D018](D018-la-scheda-di-dominio.md) non sono diventate un ADR, e la differenza è
+di specie.** La prima — la regola sui domini scritta come test invece che dichiarata di review — è
+in vigore da subito e costa un file di `tests/rules/` e una riga in
+[tracciabilita.md](../tracciabilita.md): contestarla vuol dire cancellare quel file, non disfare
+niente. Non è un ADR perché non decide **cosa** il progetto fa: decide che una cosa già decisa venga
+imposta, ed è la stessa forma della validazione-come-test di
+[D020](D020-nessun-sistema-si-fida-del-salvataggio.md).
+
+La seconda è più piccola e ha un prezzo misurato: il canvas nella repo costa circa **0,8 s** di
+`format:check` ogni volta che qualcuno esegue `verify`, e il numero sta in
+[qualita.md](../qualita.md) con la data accanto invece che in questa riga. È la prima decisione del
+progetto in cui il costo di un documento si paga in un gate.
 
 Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
 recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE` scelti
@@ -680,6 +704,9 @@ Leggi in quest'ordine, e non scrivere niente prima di aver finito:
    le librerie di grafici dipingono i propri
 8. `src/renderer/views/HomeView.vue`, `src/renderer/components/shell/StatTile.vue` e
    `src/renderer/stores/game.ts` — dove il grafico andrebbe, e cosa lo store sa davvero
+9. `docs/design/mockups/README.md`, e poi `solvent-canvas.dc.html` — il canvas è **nella repo** da
+   D018. Va letto **nel sorgente**: il grafico che disegna non usa nessuna libreria, e il README
+   dice anche cosa nel canvas è invecchiato
 
 Stato: `npm run verify` e `npm run verify:release` **verdi**. Quali deleghe siano aperte lo dice
 `docs/stato.md`, che le conta.
@@ -708,7 +735,7 @@ Come lavoro:
 
 - **Un ramo `d027-un-grafico-e-una-serie`.** Non si commetta su `main`
 - **La delega si esegue, non si riscrive.** Se il testo è invecchiato o sbagliato, fermati e
-  dimmelo: è successo sei volte e ogni volta ha tolto lavoro invece di aggiungerlo
+  dimmelo: è successo a ogni delega finora, e ogni volta ha tolto lavoro invece di aggiungerlo
 - **Il budget di righe è un allarme, non un limite.** Se lo stai raddoppiando, stai risolvendo un
   problema diverso da quello descritto: dillo invece di continuare
 - **Fuori scope vuol dire fuori scope**

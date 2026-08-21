@@ -21,17 +21,31 @@ bene: `verify` non paga l'avvio di `npm` due volte per lo stesso gate. Sono temp
 quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre
 `npm run`.
 
-**Rimisurata alla chiusura di [D024](delega/D024-il-telaio.md) e
-[D025](delega/D025-il-tooltip.md)**, il 2026-08-21 e sulla stessa macchina: la catena intera
-**38,4 s**, con **726 test**. Era 36,4 s con 678 test a [D017](delega/D017-il-caveau.md), 34,7 s con 564 test a
+**Rimisurata alla chiusura di [D018](delega/D018-la-scheda-di-dominio.md)**, il 2026-08-21 e sulla
+stessa macchina: la catena intera **33,3 s**, con **745 test**. Era 38,4 s con 726 test a
+[D024](delega/D024-il-telaio.md) e [D025](delega/D025-il-tooltip.md), 36,4 s con 678 test a
+[D017](delega/D017-il-caveau.md), 34,7 s con 564 test a
 [D020](delega/D020-nessun-sistema-si-fida-del-salvataggio.md), 34,9 s con 558 a
-[D019](delega/D019-il-pagamento.md), e prima ancora 35,3 s. Da D019 a qui i test sono cresciuti di
-un terzo e la catena di tre secondi e mezzo, che è poco più della variazione fra due esecuzioni: il
-tempo non sta crescendo con i test — e la ragione è che quasi tutto il minuto lo pagano `typecheck`
-e `lint`, non `test`, che da solo ne fa cinque e mezzo. Il numero di test sta qui e non in [stato.md](stato.md) per la stessa ragione del tempo: non
-è derivabile dal repo senza eseguirli. Fino a D019 lo portava il
+[D019](delega/D019-il-pagamento.md), e prima ancora 35,3 s.
+
+**La catena è scesa di cinque secondi mentre i test crescevano**, ed è la prova più netta che questa
+pagina abbia dato finora della propria tesi: il tempo non lo pagano i test. Da D019 a qui sono
+cresciuti di un terzo e la catena si muove dentro la variazione fra due esecuzioni. I quattro gate
+misurati uno a uno, lo stesso giorno, dicono dove va il minuto — `typecheck` 13,5 s, `lint` 10,7 s,
+`format:check` 9,8 s, `test` 8,3 s — e la somma è più della catena perché `verify` non paga
+l'avvio di `npm` due volte.
+
+**`format:check` è l'unico salito, e si sa di quanto e perché:** circa **0,8 s** sono il canvas di
+Claude Design, che da D018 sta in `docs/design/mockups/` ed è un file di 315 kB. È un costo
+dichiarato invece che scoperto, e la scelta è contestabile — l'alternativa era tenerlo fuori dalla
+repo, dove nessun agente lo troverebbe.
+
+Il numero di test sta qui e non in [stato.md](stato.md) per la stessa ragione del tempo: non è
+derivabile dal repo senza eseguirli. Fino a D019 lo portava il
 [passaggio di consegne](delega/PASSAGGIO-DI-CONSEGNE.md), che lo aveva scaduto di due deleghe;
-adesso quella pagina punta qui invece di ricopiarlo.
+adesso quella pagina punta qui invece di ricopiarlo. **E questa pagina lo ha scaduto a sua volta:**
+D026 non l'ha rimisurata, quindi «726 test» è rimasto scritto per due deleghe. Nessun gate può
+vederlo — è il buco dichiarato in cima a [stato.md](stato.md).
 
 **Quanti siano i file, invece, questa pagina non lo dice più.** Fino a D019 diceva «558 test in 61
 file», e i file di test [stato.md](stato.md) li **conta**: era un fatto contabile ripetuto in un
@@ -99,10 +113,13 @@ non è derivabile dal repo senza compilarlo. Da D009 a D010 era rosso e non era 
 ma da qui in avanti ogni delega deve tenerlo verde.
 `tests/rules/gates.test.ts` impedisce che un gate sparisca da una delle due catene (INV-14).
 
-**Il peso, rimisurato a [D024](delega/D024-il-telaio.md) e [D025](delega/D025-il-tooltip.md), il
-2026-08-21.** Il modulo compilato è **619,60 kB** e il foglio di stile **26,64 kB** — erano 601,78 e
-20,46 a [D017](delega/D017-il-caveau.md). La differenza sono il telaio, tre pezzi di kit, il tooltip
-e venti chiavi in due lingue. I cinque file di carattere non si muovono.
+**Il peso, rimisurato a [D018](delega/D018-la-scheda-di-dominio.md), il 2026-08-21.** Il modulo
+compilato è **622,87 kB** e il foglio di stile **27,50 kB** — erano 619,60 e 26,64 a
+[D024](delega/D024-il-telaio.md) e [D025](delega/D025-il-tooltip.md), e 601,78 e 20,46 a
+[D017](delega/D017-il-caveau.md). La differenza fra le ultime due misure è **tutta di
+[D026](delega/D026-dove-si-attacca-un-dominio.md)** — due viste nuove, l'allarme del caveau e le
+parole che li accompagnano — perché D018 non ha toccato una riga di `src/`. I cinque file di
+carattere non si muovono.
 
 **Il motore, misurato invece che supposto.** L'[ADR 0032](adr/0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)
 poggia su due funzionalità del motore — il livello superiore e l'ancoraggio CSS — e la sua premessa è
