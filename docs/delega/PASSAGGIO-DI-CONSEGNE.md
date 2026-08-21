@@ -89,7 +89,8 @@ linguette: monta il **telaio** del kit e gli passa dentro la colonna e la testat
 [D019](D019-il-pagamento.md) tredici, [D020](D020-nessun-sistema-si-fida-del-salvataggio.md) nove,
 [D023](D023-il-design-system.md) undici, [D017](D017-il-caveau.md) sedici,
 [D024](D024-il-telaio.md) e [D025](D025-il-tooltip.md) quattro ciascuna,
-[D026](D026-dove-si-attacca-un-dominio.md) dodici. Leggile prima di fidarti del
+[D026](D026-dove-si-attacca-un-dominio.md) e
+[D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md) dodici ciascuna. Leggile prima di fidarti del
 testo di una delega ancora aperta — alcune di quelle correzioni riguardano proprio deleghe che non
 sono ancora state eseguite.
 
@@ -488,6 +489,45 @@ Le quattro cose che chi arriva adesso deve sapere:
    numero di partenza del controllo che la scheda si è data — se una sezione non ha mai cambiato
    una decisione va tolta, e la prova si fa alla **quarta** compilata.
 
+**[D027 — Un grafico è una serie](D027-un-grafico-e-una-serie-che-nessuno-tiene.md) è chiusa**, e il
+cruscotto ha smesso di dire solo com'è adesso. Sotto c'è la prima **serie storica** del progetto: un
+campione del patrimonio netto ogni cinque secondi di gioco, trenta in tutto, tenuti in memoria dallo
+store. La cadenza è una funzione pura accanto a quella che trasforma i frame in tick — `sampleOf` di
+fianco a `stepOf` in `runtime/loop.ts` — perché uno store non può importare un file che gli sta
+accanto (R01).
+
+Cinque cose che chi arriva adesso deve sapere, e le prime due sono le più costose da riscoprire:
+
+1. **La serie non si salva, e l'[ADR 0010](../adr/0010-liste-storiche-limitate-alla-definizione.md)
+   resta `Proposta` per la terza fetta di fila.** Non è pigrizia: senza il calendario dell'ADR 0023
+   un campione non sa **quando** è stato preso, quindi due barre affiancate possono distare un tick
+   o otto ore e il grafico le disegnerebbe uguali. Salvarla direbbe di più e mentirebbe.
+2. **È entrata una libreria, ed è la prima dipendenza di runtime dopo l'origine.** ApexCharts, con
+   l'[ADR 0034](../adr/0034-il-grafico-e-una-libreria.md). Il criterio dell'ADR 0015 **non la
+   promuoverebbe da solo** — l'altezza di una barra è una divisione — ed è scritto nell'ADR invece
+   che lasciato intendere: è entrata su richiesta dell'utente, a grafico in CSS già costruito e
+   guardato. Il modulo compilato passa da 622,87 kB a **2.437,92 kB**, in
+   [qualita.md](../qualita.md) con il grilletto per rimetterla in discussione.
+3. **La libreria si monta a mano, e c'è una ragione precisa.** `vue3-apexcharts` clona le opzioni
+   con `JSON.parse(JSON.stringify(…))`, e `JSON.stringify` cancella le funzioni: i formattatori
+   sparivano e l'asse scriveva `948627.0`. Chi pensasse di «semplificare» rimettendo l'involucro
+   rifarebbe quel giro.
+4. **R17 si è incrinata e nessun gate lo vede.** ApexCharts scrive elementi `<title>` dentro l'SVG
+   delle etichette dell'asse, cioè tooltip nativi del browser — quelli che
+   [D025](D025-il-tooltip.md) aveva tolto. `tests/rules/no-native-tooltips` guarda l'attributo nel
+   **sorgente**, quindi non può prenderli. Sono due, dichiarati nell'ADR 0034 e in
+   [rischi.md](../rischi.md).
+5. **L'asse del grafico non parte da zero**, ed è una misura: ancorato a zero, due minuti e mezzo di
+   gioco valgono **2 pixel su 120** a 100.000,00 €. Il caveau arriva a 250.000,00 €, quindi il
+   cruscotto avrebbe portato un rettangolo pieno per la maggior parte della partita.
+
+**E una cosa sull'ambiente, che è costata tempo:** la partita di sviluppo su questa macchina ha
+903.359,30 € di contanti contro una capienza di 1.000,00 €. È fatta a mano e viola l'invariante,
+quindi il Ledger rifiuta **ogni** transazione che tocchi i contanti e il reddito è fermo: il
+patrimonio non può muoversi, e qualunque grafico lì dentro appare piatto senza essere rotto. Per
+vedere una serie che sale serve un'altra partita — l'app accetta `--user-data-dir`, così il
+salvataggio vero non si tocca.
+
 Tre cose che chi apre la fetta 03 deve avere in mente prima di scrivere una riga:
 
 1. **A17 non è finita con la fetta 02.** Il caveau apre il black market, le aste e il calore, e
@@ -715,88 +755,34 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-Questo prompt **consegna una delega**, e una sola per volta. Con
-[D018](D018-la-scheda-di-dominio.md) chiusa ne resta **una** aperta:
-[D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md), i grafici del cruscotto — scritta il
-2026-08-21 e **non preparata**. I prompt che consegnavano D026 e D018 stanno nel `git log` di questo
-file: si recuperano da lì invece di tenerne tre in vita, che è la stessa ragione per cui i numeri
-stanno in un posto solo.
+**Non ce n'è uno, e non è una dimenticanza: non c'è una delega da consegnare.** Quale sia aperta lo
+dice [stato.md](../stato.md), che le conta; da lì si vede che la fetta 02 è chiusa e che la fetta 03
+non ha ancora la sua. Il prompt che consegnava D027 sta nel `git log` di questo file, insieme a
+quelli di D026 e D018: si recuperano da lì invece di tenerne quattro in vita, che è la stessa
+ragione per cui i numeri stanno in un posto solo.
 
-**D027 comincia con due decisioni, non con del codice.** Chi la esegue le porta all'utente prima di
-toccare un file, e il prompt lo dice apertamente: la prima decide chi tiene la serie storica — che
-oggi **non esiste** — e la seconda se entra una dipendenza nuova.
+**Chi arriva adesso ha davanti un lavoro di specie diversa: scrivere una delega, non eseguirne una.**
+Il materiale c'è tutto e non va inventato:
 
-```markdown
-Esegui la delega D027 nel progetto Solvent, in questa repo.
+- il [registro delle fette](../roadmap-fette.md) dice cosa viene dopo e in che ordine, e il
+  **blocco A** — black market e aste di box — è il primo che porta gli **oggetti**, cioè il primo
+  `boundedList` che entra davvero nel salvataggio e l'unica cosa che può far passare l'ADR 0010 ad
+  `Accettata`;
+- la [scheda di dominio](../design/domini/README.md) si compila **prima** che il dominio esista, e
+  la sua forma va rivista alla **quarta** compilata — la prossima sarà quella;
+- il [registro YAGNI](../roadmap-fette.md) ha i grilletti già scritti: si guarda quali sono scattati
+  invece di decidere a sentimento cosa costruire.
 
-Leggi in quest'ordine, e non scrivere niente prima di aver finito:
+Una delega di questo progetto si riconosce dalla forma: dipendenze, ADR vincolanti, budget dichiarato
+per **ogni** ramo che le decisioni aperte producono, _Da produrre_, _Invarianti_, _Fuori scope_,
+_Definizione di fatto_ e _Trappole note_. Le ventisette che ci sono servono da modello; D027 è quella
+da leggere per capire come si scrive una delega che porta decisioni **non** ancora prese.
 
-1. `docs/delega/PASSAGGIO-DI-CONSEGNE.md` — stato, regole, e le cose che sa solo lui. In
-   particolare _Cosa vale per qualunque delega_ e _Le decisioni contestabili_
-2. `docs/stato.md` — quanti sono gli ADR, le deleghe e i documenti, e in che stato. È **generato**:
-   non si scrive a mano, si rigenera con `npx vitest run tests/rules/project-state -u`
-3. `docs/delega/D027-un-grafico-e-una-serie-che-nessuno-tiene.md` — la delega che esegui.
-   Interamente, e in particolare _Il fatto che decide tutto: la serie non esiste_ e _Le decisioni
-   aperte_: sono due, non spettano a te, e vanno portate a me prima di scrivere una riga
-4. `docs/adr/0010-liste-storiche-limitate-alla-definizione.md` — è `Proposta`, e la decisione 1 può
-   farlo diventare `Accettata`. Una serie storica è esattamente ciò di cui parla
-5. `docs/adr/0015-criterio-di-ammissione-delle-dipendenze.md` — il criterio con cui una libreria
-   entra. La decisione 2 si pesa contro questo, non contro il gusto
-6. `docs/adr/0018-la-home-e-un-atm.md` — il tetto di sei riquadri e l'ordine delle due zone. Un
-   grafico che occupa il posto di un riquadro lo tocca
-7. `docs/adr/0028-il-kit-ui-non-sa-che-gioco-e.md` — **R15**: nessun colore vive fuori dai token, e
-   le librerie di grafici dipingono i propri
-8. `src/renderer/views/HomeView.vue`, `src/renderer/components/shell/StatTile.vue` e
-   `src/renderer/stores/game.ts` — dove il grafico andrebbe, e cosa lo store sa davvero
-9. `docs/design/mockups/README.md`, e poi `solvent-canvas.dc.html` — il canvas è **nella repo** da
-   D018. Va letto **nel sorgente**: il grafico che disegna non usa nessuna libreria, e il README
-   dice anche cosa nel canvas è invecchiato
-
-Stato: `npm run verify` e `npm run verify:release` **verdi**. Quali deleghe siano aperte lo dice
-`docs/stato.md`, che le conta.
-
-Come si comincia, ed è l'unica cosa che non puoi saltare:
-
-1. **Portami le due decisioni**, una alla volta, con due opzioni e i compromessi. Non decidere al
-   posto mio: la 1 crea il primo storico del progetto e tocca il salvataggio, la 2 può far entrare
-   una dipendenza — e una dipendenza è un ADR
-2. **Poi** il codice, con i gate che servono e ogni test nuovo rotto di proposito
-
-Attenzione a tre cose del punto di partenza:
-
-- **La serie non esiste, ed è il fatto che decide tutto.** `history` è una lista di venti
-  transazioni tenuta **solo in memoria**, e `SavePayload` contiene `ledger`, `rng` e `systems` —
-  nessuno storico. Un grafico disegnato oggi disegnerebbe numeri inventati, che è la correzione 1
-  di `docs/delega/D015-home-bancomat.md` con un altro vestito
-- **`main` è allineato**, e il ramo nuovo parte da lì. Se una delega chiusa ti dice di partire da un
-  altro ramo, quella è la cronaca del giorno in cui è stata scritta
-- **`npm install` non funziona in questa repo**, e non è colpa tua: `electron-vite@5` regge `vite`
-  fino alla 7 e il progetto è sulla 8. L'unico comando che installa è `npm ci --legacy-peer-deps`,
-  che però ignora i peer. È la correzione 8 di `docs/delega/D023-il-design-system.md`. Vale doppio
-  qui: se la decisione 2 sceglie una libreria, l'installazione è parte del lavoro, non un dettaglio
-
-Come lavoro:
-
-- **Un ramo `d027-un-grafico-e-una-serie`.** Non si commetta su `main`
-- **La delega si esegue, non si riscrive.** Se il testo è invecchiato o sbagliato, fermati e
-  dimmelo: è successo a ogni delega finora, e ogni volta ha tolto lavoro invece di aggiungerlo
-- **Il budget di righe è un allarme, non un limite.** Se lo stai raddoppiando, stai risolvendo un
-  problema diverso da quello descritto: dillo invece di continuare
-- **Fuori scope vuol dire fuori scope**
-- **Ogni test nuovo va rotto di proposito almeno una volta.** Un test che non si è mai visto
-  fallire non è una rete, è una decorazione
-- `npm run verify` verde alla fine, con l'**output incollato**. Non «dovrebbe passare»
-- **Le schermate che tocchi vanno guardate**, nei due temi, con l'interruttore in fondo alla
-  colonna. Il modo sta in _Come si guarda l'applicazione senza toccarla_
-- Niente `TODO`, niente `any`, niente scorciatoie presentate come soluzioni. Identificatori in
-  inglese, prosa in italiano
-- **Chiudere la delega significa rigenerare `docs/stato.md`**:
-  `npx vitest run tests/rules/project-state -u`. Se non lo fai, il gate è rosso — ed è voluto (C11)
-- **Se sposti un confine fra livelli, il diagramma di `docs/architettura.md` cambia nello stesso
-  commit**, e `tests/rules/import-graph` lo verifica nei due versi (C13)
-- Alla fine, in fondo alla delega: le **correzioni** rispetto a com'era scritta, e il consuntivo di
-  righe contro il budget. Ogni delega chiusa ne ha da quattro a diciassette
-```
+**Una cosa che vale la pena sapere prima di scriverne una nuova**, ed è la lezione di D027: il budget
+va dichiarato per ramo, e i rami vanno **contati**. D027 ne dichiarava uno su quattro e prometteva
+che gli altri tre si sarebbero stimati dopo le decisioni; quel dopo non è mai arrivato, e il ramo
+consegnato è finito senza un metro contro cui misurarsi. Non è un difetto grave — è la forma in cui
+un budget smette di servire.
 
 ### E dopo, la fetta 03
 

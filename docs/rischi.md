@@ -83,6 +83,21 @@ contrario: non "aggiorna i documenti che nomini", ma "cerca chi nomina ciò che 
 
 Dichiarati, non nascosti:
 
+- **Una libreria può rimettere dentro un difetto che un gate non vede.** È successo con
+  [D027](delega/D027-un-grafico-e-una-serie-che-nessuno-tiene.md): ApexCharts scrive elementi
+  `<title>` dentro l'SVG, cioè tooltip nativi del browser — quello che **R17** vieta e che
+  [D025](delega/D025-il-tooltip.md) aveva tolto. Il test guarda l'attributo `title` nel **sorgente**,
+  quindi un elemento iniettato a runtime da una dipendenza gli è invisibile per costruzione. Vale
+  per ogni regola di questo progetto che legge i file invece del DOM, ed è la classe intera che va
+  ricordata, non i due `<title>` di oggi. La difesa non è un gate: è che una dipendenza nuova costa
+  un ADR ([0015](adr/0015-criterio-di-ammissione-delle-dipendenze.md)), e che l'ADR dichiari cosa
+  la libreria porta dentro — l'[0034](adr/0034-il-grafico-e-una-libreria.md) lo fa.
+- **I colori di una libreria si coprono con un override, non con un'assenza.** Le etichette
+  dell'asse di ApexCharts nascono con un colore esadecimale scritto dentro; il blocco `:deep()` di
+  `NetWorthChart.vue` lo riporta nei token, e una proprietà CSS batte un attributo di presentazione.
+  Funziona, ed è fragile in un modo che **R15 non può misurare**: quelle classi non sono nostre, e
+  un aggiornamento della libreria può spostarle senza rendere rosso niente.
+
 - **Il CSS morto non è coperto.** TypeScript non vede i fogli di stile, e i `.vue` sono adesso
   **dieci** con **439 righe** di CSS dentro: la riga che stava qui diceva «con due componenti il
   problema non esiste», ed era il numero di D012 mai rimisurato
