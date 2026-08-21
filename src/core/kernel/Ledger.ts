@@ -10,7 +10,7 @@ import type { ResetScope } from '@core/contracts/lifecycle'
 import type { Money } from '@core/contracts/money'
 import { fromString, toString, ZERO } from '@core/contracts/money'
 import type { Pool } from '@core/contracts/pools'
-import { POOL_IDS, POOLS } from '@core/contracts/pools'
+import { POOL_IDS, POOLS, roomIn } from '@core/contracts/pools'
 import type { Result } from '@core/contracts/result'
 import { err, ok } from '@core/contracts/result'
 import type { LedgerSave } from '@core/contracts/save'
@@ -294,13 +294,23 @@ export const createLedger = (bus: Bus, capacities: Capacities = poolCapacity): L
       // ADR 0025 — si **chiede**, non si legge da `POOLS`: dopo un ampliamento il tetto di partenza
       // è la risposta sbagliata, e sarebbe quella che la UI mostra mentre il Ledger ne fa
       // rispettare un'altra (INV-18).
+      //
+      // D028 · INV-23 — la capienza ferma **chi sale**, non chi si trova già in alto. Il confronto
+      // con `current` non è una scorciatoia: senza, un saldo già oltre il tetto non potrebbe più
+      // nemmeno **scendere**, perché il risultato resterebbe sopra comunque. È successo davvero,
+      // e il sintomo non somigliava a un tetto: la partita si fermava intera — niente depositi,
+      // niente prelievi, niente ampliamenti, e il reddito muto.
       const capacity = capacities(pool)
-      if (capacity !== null && next.greaterThan(capacity)) {
+      if (capacity !== null && next.greaterThan(capacity) && next.greaterThan(current)) {
         return err({
           code: 'error.ledger.capacity_exceeded',
           pool,
           capacity,
-          fits: capacity.minus(current)
+          // `roomIn` e non `capacity.minus(current)`: sopra il tetto la sottrazione dà un numero
+          // negativo, e «ci stanno ancora -8.000,00 €» non è una quantità. È anche la **stessa**
+          // funzione da cui il reddito sa quanto accreditare, quindi la frase del rifiuto e
+          // l'accredito parziale non possono raccontare due cose diverse.
+          fits: roomIn(capacity, current) ?? ZERO
         })
       }
     }

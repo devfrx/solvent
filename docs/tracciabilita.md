@@ -111,6 +111,7 @@ segnala che un confine si sta spostando.
 | INV-20 | Nessun sistema con stato accetta un salvataggio che non riconosce         | ADR 0002 | `tests/rules/stateful-systems-reject-garbage` — deriva la spazzatura dallo stato buono, e la passa sotto l'id del sistema |
 | INV-21 | Un pulsante non si spegne mai: se non si può, c'è una frase               | ADR 0028 | `tests/rules/ui-kit-is-standalone` — nessun `disabled` scritto nel kit                                                    |
 | INV-22 | Ogni voce della colonna ha la sua schermata                               | ADR 0030 | 🔒 `Record<Screen, Component>` in `App.vue`: una destinazione senza vista non compila                                     |
+| INV-23 | Nessuna transazione fa **crescere** un pool oltre la sua capienza         | ADR 0035 | `tests/kernel/ledger-capacity` — chi è già sopra può solo scendere, e il rifiuto non promette spazio negativo             |
 
 Il buco fra INV-17 e INV-19 **è stato chiuso** da [D017](delega/D017-il-caveau.md): i numeri si
 assegnano quando si scrive la delega, e D019 si era infilata dopo D017 nell'ordine di scrittura ma

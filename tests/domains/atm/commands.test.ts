@@ -273,6 +273,17 @@ describe('il pool in arrivo, quando ha un tetto', () => {
     expect(toString(refused.error.fits)).toBe('100')
   })
 
+  it('e sopra il tetto non promette spazio negativo', () => {
+    // D028 — la stessa risposta del Ledger, e per la stessa ragione: «ci stanno ancora
+    // -8.000,00 €» era la frase che la partita di sviluppo mostrava sotto ogni pulsante. INV-18
+    // vale anche sui numeri del rifiuto, non solo sul tetto.
+    const refused = previewOf(WITHDRAW, money('500'), withCeiling('1000', '9000'))
+
+    expect(refused.ok).toBe(false)
+    if (refused.ok || refused.error.code !== 'error.ledger.capacity_exceeded') return
+    expect(toString(refused.error.fits)).toBe('0')
+  })
+
   it('e guarda quello che **arriva**, non quello che si è digitato', () => {
     // La commissione è trattenuta: chi preleva 500,00 € ne riceve 497,50. Con 497,50 € di spazio
     // l'operazione ci sta, e chiedere sull'importo lordo la rifiuterebbe per due euro e mezzo che

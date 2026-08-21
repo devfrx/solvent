@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { CASH_START_CAPACITY, POOL_IDS, POOLS, type Pool } from '@core/contracts/pools'
+import { fromString, toString } from '@core/contracts/money'
+import { CASH_START_CAPACITY, POOL_IDS, POOLS, roomIn, type Pool } from '@core/contracts/pools'
+
+const money = fromString
 
 /**
  * ADR 0017 — il denaro è plurale: le affordance di un pool sono dati, non `if` sparsi nei domini.
@@ -45,5 +48,25 @@ describe('POOLS', () => {
     // @ts-expect-error — ADR 0017: i pool non sono stringhe libere, altrimenti nulla è verificabile
     const invented: Pool = 'crypto'
     expect(invented).toBe('crypto')
+  })
+})
+
+describe('quanto ci sta ancora', () => {
+  it('è il tetto meno quello che c’è', () => {
+    expect(toString(roomIn(money('1000'), money('300')) ?? money('0'))).toBe('700')
+    expect(toString(roomIn(money('1000'), money('0')) ?? money('0'))).toBe('1000')
+    expect(toString(roomIn(money('1000'), money('1000')) ?? money('0'))).toBe('0')
+  })
+
+  it('senza tetto non è un numero: è “nessun limite”', () => {
+    // `null` e non un numero grandissimo: «ci sta tutto» e «ci stanno novanta miliardi» sono due
+    // risposte diverse, e la seconda prima o poi diventa un tetto per sbaglio.
+    expect(roomIn(null, money('999999999'))).toBeNull()
+  })
+
+  it('e non è mai negativo, nemmeno con un saldo sopra il tetto', () => {
+    // Un saldo sopra il tetto non è impossibile: basta un salvataggio più vecchio della curva.
+    // «Ci sta meno di niente» non è una quantità che qualcuno possa accreditare.
+    expect(toString(roomIn(money('1000'), money('4000')) ?? money('0'))).toBe('0')
   })
 })

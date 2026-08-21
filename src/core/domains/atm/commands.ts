@@ -1,7 +1,9 @@
 import type { CommandHandler } from '@core/contracts/commands'
 import type { Balances, LedgerError, Posting, TransactionMeta } from '@core/contracts/ledger'
 import type { Money } from '@core/contracts/money'
+import { ZERO } from '@core/contracts/money'
 import type { Pool } from '@core/contracts/pools'
+import { roomIn } from '@core/contracts/pools'
 import type { Result } from '@core/contracts/result'
 import { err, ok } from '@core/contracts/result'
 
@@ -115,7 +117,7 @@ export const previewOf = (
       code: 'error.ledger.capacity_exceeded',
       pool: operation.to,
       capacity,
-      fits: capacity.minus(current)
+      fits: roomIn(capacity, current) ?? ZERO
     })
   }
 

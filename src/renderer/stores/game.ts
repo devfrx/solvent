@@ -9,7 +9,7 @@ import type { Money } from '@core/contracts/money'
 import { ZERO } from '@core/contracts/money'
 import type { PriceList } from '@core/contracts/payment'
 import type { Pool } from '@core/contracts/pools'
-import { POOL_IDS, POOLS } from '@core/contracts/pools'
+import { POOL_IDS, POOLS, roomIn } from '@core/contracts/pools'
 import type { Result } from '@core/contracts/result'
 import type { SaveError } from '@core/contracts/save'
 
@@ -30,7 +30,6 @@ import {
   expansionPriceFor,
   expansionPrices,
   MAX_LEVEL,
-  roomIn,
   VAULT_POOL
 } from '@core/domains/vault/rules'
 import type { VaultError } from '@core/domains/vault/system'

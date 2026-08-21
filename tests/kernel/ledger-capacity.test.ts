@@ -5,7 +5,7 @@ import type { Pool } from '@core/contracts/pools'
 
 import { createBus } from '@core/kernel/Bus'
 import type { Capacities } from '@core/kernel/Ledger'
-import { createLedger, income, poolCapacity } from '@core/kernel/Ledger'
+import { createLedger, income, poolCapacity, spend } from '@core/kernel/Ledger'
 
 /**
  * ADR 0025 — la capienza di un pool **si chiede, non si legge**.
@@ -73,6 +73,54 @@ describe('la capienza di un pool', () => {
     expect(ledger.balance('cash').toString()).toBe('700')
     expect(ledger.balance('world').toString()).toBe('-700')
     expect(emitted).toBe(0)
+  })
+
+  it('un saldo già oltre il tetto può ancora **scendere**', () => {
+    // D028 — il caso che nessun test copriva, ed è quello che aveva murato viva la partita di
+    // sviluppo: 1.009.051,70 € di contanti contro un tetto di 1.000,00 €. Il controllo guardava
+    // solo il saldo che risulta, quindi rifiutava anche un deposito che **toglie** contanti — il
+    // giocatore non poteva né depositare, né prelevare, né ampliare il caveau.
+    const ledger = createLedger(createBus(), cappedAt(CAP))
+    ledger.load({
+      balances: { cash: '9000', card: '0', world: '-9000', sink: '0', fees: '0', house: '0' }
+    })
+
+    const result = ledger.transaction(spend('cash', money('500')), { reason: 'reason.atm.deposit' })
+
+    expect(result.ok).toBe(true)
+    expect(ledger.balance('cash').toString()).toBe('8500')
+  })
+
+  it('ma non può salire di un centesimo', () => {
+    // L'altra metà della stessa regola, e senza di lei «può scendere» diventerebbe «non c'è tetto»
+    // per chiunque sia già sopra: la capienza ferma **chi sale**, non chi si trova già in alto.
+    const ledger = createLedger(createBus(), cappedAt(CAP))
+    ledger.load({
+      balances: { cash: '9000', card: '0', world: '-9000', sink: '0', fees: '0', house: '0' }
+    })
+
+    const result = ledger.transaction(income('cash', money('0.01')), {
+      reason: 'reason.income.tick'
+    })
+
+    expect(result.ok).toBe(false)
+  })
+
+  it('e il rifiuto non promette spazio negativo', () => {
+    // Prima diceva «ci stanno ancora -8.000,00 €», che non è una quantità. `roomIn` è la stessa
+    // funzione da cui il reddito sa quanto accreditare, quindi la frase e l'accredito non possono
+    // più raccontare due cose diverse.
+    const ledger = createLedger(createBus(), cappedAt(CAP))
+    ledger.load({
+      balances: { cash: '9000', card: '0', world: '-9000', sink: '0', fees: '0', house: '0' }
+    })
+
+    const result = ledger.transaction(income('cash', money('1')), { reason: 'reason.income.tick' })
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    if (result.error.code !== 'error.ledger.capacity_exceeded') return
+    expect(result.error.fits.toString()).toBe('0')
   })
 
   it('un pool senza capienza non ha tetto', () => {

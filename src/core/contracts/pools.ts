@@ -1,5 +1,5 @@
 import type { Money } from './money'
-import { fromString } from './money'
+import { fromString, ZERO } from './money'
 
 /**
  * ADR 0017 — il denaro è plurale: `Pool` è una dimensione di prima classe, non un'etichetta
@@ -54,4 +54,24 @@ export const POOLS: Readonly<Record<Pool, PoolProps>> = {
   sink: { traceable: true, capacity: null, yields: false, player: false },
   fees: { traceable: true, capacity: null, yields: false, player: false },
   house: { traceable: true, capacity: null, yields: false, player: false }
+}
+
+/**
+ * Quanto ci sta **ancora**, `null` se non c'è tetto. È il fratello di `fitsIn`, che risponde «sì o
+ * no» alla stessa domanda, ed è ciò che permette al reddito di accreditare il parziale invece di
+ * incassare un rifiuto intero.
+ *
+ * Senza di lui il recupero dopo un'assenza tornerebbe **zero**: `recover()` fa un solo `tickAll`
+ * con tutti i tick arretrati, cioè una transazione sola da otto ore di reddito, e il Ledger la
+ * rifiuta intera perché una transazione è atomica (ADR 0019). Non sarebbe un muro: sarebbe un
+ * guasto travestito da regola.
+ *
+ * Mai negativo. Un saldo sopra il tetto non è impossibile — basta un ampliamento che un giorno
+ * riducesse la capienza, o un salvataggio più vecchio della curva — e «ci sta meno di niente» non
+ * è una quantità che qualcuno possa accreditare.
+ */
+export const roomIn = (capacity: Money | null, current: Money): Money | null => {
+  if (capacity === null) return null
+  const left = capacity.minus(current)
+  return left.isNegative() ? ZERO : left
 }

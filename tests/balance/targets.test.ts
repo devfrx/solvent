@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { toString } from '@core/contracts/money'
+import { roomIn } from '@core/contracts/pools'
 
 import { BALANCE } from '@core/balance/constants'
 import type { Modifiers } from '@core/balance/modifiers'
@@ -16,12 +17,7 @@ import { createRng } from '@core/kernel/Rng'
 
 import { incomePerSecond, upgradeModifier } from '../../src/core/domains/income/rules'
 import { createIncome } from '../../src/core/domains/income/system'
-import {
-  capacityFor,
-  expansionPrices,
-  roomIn,
-  VAULT_POOL
-} from '../../src/core/domains/vault/rules'
+import { capacityFor, expansionPrices, VAULT_POOL } from '../../src/core/domains/vault/rules'
 import { createVault } from '../../src/core/domains/vault/system'
 
 /**
