@@ -41,7 +41,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                 |
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                         |
 | `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                  |
-| `main`                   | **allineato**: `d026-dove-si-attacca-un-dominio` è stato fuso in un `--ff-only`. Il ramo nuovo parte da `main`                         |
+| `main`                   | **allineato**: `d018-la-scheda-di-dominio` è stato fuso in un `--ff-only`. Il ramo nuovo parte da `main`                               |
 | Albero di lavoro         | **pulito**                                                                                                                             |
 | Prossimo passo           | [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md) — **non preparata**: porta due decisioni da prendere con l'utente             |
 
