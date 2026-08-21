@@ -30,27 +30,30 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                                                                                                                                       |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                         |
-| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                |
-| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                |
-| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                     |
-| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                               |
-| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina                                                                                                                        |
-| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                              |
-| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                |
-| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                        |
-| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                 |
-| `main`                   | **indietro di sei commit.** Le tre deleghe del 2026-08-21 vivono su rami impilati: `d030-il-contenuto-scorre-nel-telaio` li contiene tutti e tre e si fonde con un `--ff-only`. Non è stato fatto: fondere è una di quelle cose che si chiedono       |
-| `origin/main`            | **indietro**, e non di poco — vedi l'avvertimento qui sotto. Il numero non si scrive: lo dice `git rev-list --count origin/main..main`                                                                                                                |
-| Albero di lavoro         | **pulito**                                                                                                                                                                                                                                            |
-| Prossimo passo           | **[D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md)**, che è aperta e ha un difetto vivo dentro. Poi D032, il bancomat, che **non è ancora scritta**: aspetta tre risposte dell'utente. La fetta 03 viene dopo. Vedi _La sessione del 2026-08-21_ |
+|                          |                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                                                   |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                                                          |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                                                          |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                                               |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                                                         |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina — e da D033 il bancomat avrà una pagina **sua**, non più la home                                                                                                                                                 |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                                                        |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                                                          |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                                                  |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                                           |
+| `main`                   | **indietro di dodici commit.** Cinque deleghe vivono su rami impilati, e `d031-la-sovrapposizione-e-un-pezzo-del-kit` li contiene **tutti**: da `main`, `git merge --ff-only d031-la-sovrapposizione-e-un-pezzo-del-kit` li porta a casa in un colpo. Verificato, non supposto. Non è stato fatto: fondere è una di quelle cose che si chiedono |
+| `origin/main`            | **indietro**, e non di poco — vedi l'avvertimento qui sotto. Il numero non si scrive: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                          |
+| Albero di lavoro         | **pulito**                                                                                                                                                                                                                                                                                                                                      |
+| Prossimo passo           | **[D033](D033-il-bancomat-e-una-pagina.md)**, scritta e aperta: il bancomat diventa una pagina sua e il cruscotto un'altra. Poi [D034](D034-le-serie-degli-strumenti.md), i grafici. La fetta 03 viene dopo. Vedi _La seconda sessione del 2026-08-21_                                                                                          |
 
 > **⚠️ Il lavoro esiste solo su questa macchina.** `origin/main` è fermo al 2026-08-20, al commit
-> `84dbe47`, e da allora nessun `push`. Tutto quello che c'è dopo — la fetta 02 col caveau, il
-> pagamento, la validazione del salvataggio, il design system, il telaio, il tooltip, D026 e D018 —
-> vive in un solo posto, e un disco che si rompe se lo porta via.
+> `84dbe47`, e da allora nessun `push`. Sono **cinquantasette commit** — il numero non si scrive a
+> memoria, lo dice `git rev-list --count origin/main..HEAD` — e comprendono tutto ciò che il
+> progetto ha fatto dopo D018: la fetta 02 col caveau, il pagamento, la validazione del salvataggio,
+> il design system, il telaio, il tooltip, D026, D027, i devcheat, il telaio che non scorre, la
+> commissione che scala e il popover del kit. Vive in un solo posto, e un disco che si rompe se lo
+> porta via.
 >
 > **Non è stato spinto in autonomia** perché un `push` è visibile agli altri e non si disfa
 > pulendo: è una di quelle cose che si chiedono. Il comando è uno solo, quando lo si vuole:
@@ -63,7 +66,135 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 > finché non è presentabile — allora questa riga va cancellata e la ragione scritta al suo posto,
 > perché così com'è sembra una dimenticanza.
 
-## La sessione del 2026-08-21: tre deleghe chiuse, due cose aperte
+## La seconda sessione del 2026-08-21: due deleghe chiuse, tre scritte
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. Il giorno è lo stesso
+della sezione qui sotto, ed è la ragione per cui adesso portano un numero: **questa è la più
+recente**, e quella sotto descrive uno stato già superato.
+
+**Cosa è stato chiuso.**
+
+| Delega                                                | Cos'era                                                                           |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [D032](D032-la-commissione-scala-il-pavimento-no.md)  | la commissione del bancomat era fissa, e a certe cifre smetteva di esistere       |
+| [D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md) | il pannello dei cheat non si chiudeva, e la sovrapposizione era scritta due volte |
+
+Più **tre deleghe nuove scritte**: D032 (poi eseguita), [D033](D033-il-bancomat-e-una-pagina.md) e
+[D034](D034-le-serie-degli-strumenti.md). Ognuna delle due chiuse ha portato il proprio ADR —
+[0038](../adr/0038-la-commissione-scala-il-pavimento-no.md) e
+[0039](../adr/0039-una-sovrapposizione-passa-dal-kit.md) — più l'accettazione dell'
+[ADR 0026](../adr/0026-la-precisione-del-denaro-e-dichiarata.md), che aspettava un grilletto da
+agosto, e la regola **R22**, rotta di proposito.
+
+### Le cinque cose che chi arriva adesso deve sapere
+
+**1. Le tre domande sul bancomat hanno risposta.** Non vanno più poste: stanno qui sotto, in _Le tre
+domande, e cosa ha risposto l'utente_. Riproporle sarebbe far rifare una decisione già presa.
+
+**2. Il pannello dei cheat si chiude, e la causa era una riga di CSS.** `.panel { display: flex }`
+su un elemento con `popover`: una regola d'autore vince su quella del motore a qualunque
+specificità, quindi il riquadro restava visibile anche chiuso. Per due stesure la colpa era stata
+data alla meccanica di apertura, che era giusta tutte e due le volte. Adesso la meccanica vive in
+`UiPopover`, e **R22 impedisce a chiunque altro di avere in mano un elemento con `popover`**.
+
+**3. La commissione del bancomat non è più un numero.** È `max(pavimento, importo × tasso)`, con due
+tassi asimmetrici — 1,5% versando, 2,0% prelevando — e un pavimento a 2,50 €. Ne discende che
+`store.atmFee` **non esiste più**: chi vuole sapere quanto costa un'operazione chiede un'anteprima.
+Un test verifica l'**assenza**, perché rimetterlo in buona fede è facile.
+
+**4. La precisione del denaro è passata da 20 a 40 cifre**, ed è l'ADR 0026 eseguito come era
+scritto. Non ha reso rosso nessuno degli ottocento test esistenti — misurato, non sperato — e le due
+soglie che quell'ADR prevedeva sono esatte: il centesimo esiste fino a 1e37, `transfer()` smette di
+bilanciare da 1e40.
+
+**5. La catena dei gate ha passato il minuto.** 66 s con 814 test, contro i 51,6 s con 794 di D030.
+**Il minuto non lo pagano i venti test nuovi**: sono cresciuti del 2,5% e la catena del 28%. Le due
+misure sono state prese con la finestra di sviluppo aperta, e nessuna delle due è il numero a
+macchina scarica — che nessuno ha ancora preso. Il dettaglio è in [qualita.md](../qualita.md).
+
+### Le tre domande, e cosa ha risposto l'utente
+
+Erano le tre che la sessione precedente aveva lasciato aperte. **Sono chiuse**, e le risposte hanno
+già prodotto D033 e D034.
+
+| Domanda                                   | Risposta                                                                                                                                           |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| La home fa due lavori: restano insieme?   | **No.** Si segue l'artboard `ATM` del canvas, funzionalità **e** disegno. L'ADR 0018 va superato — è D033                                          |
+| Si adotta la carta del canvas?            | **Sì**, quella nera con numero, intestatario e scadenza                                                                                            |
+| Si prepara la forma del gioco più grande? | **No**, non la striscia a sei voci. Ma i **grafici** sì, e più di quanti il canvas ne disegni: candele per contanti e carta, un'area per il totale |
+
+**Una quarta risposta, non richiesta e più importante delle tre:** _«quando si arriva ai milioni a
+chi frega di 2 €?»_ — è la frase da cui è nata D032, e ha corretto un difetto di gioco che nessun
+documento aveva visto.
+
+**Una quinta, sul reddito:** «va studiato bene perché porta funzionalità e/o guadagni potenzialmente
+core, quindi sarà fatto a parte in un futuro vicino». Non si tocca finché non arriva la sua fetta.
+
+### Le due decisioni prese dentro D031, e perché
+
+Erano dichiarate «da non risolvere in autonomia». L'utente le ha delegate con dei criteri —
+«coerenza, zero debiti futuri, professionalità, stato dell'arte, non pigrizia, non necessariamente
+la soluzione più invasiva» — e sono state prese così:
+
+- **Un pezzo solo, `UiPopover`, e `UiTooltip` ci si appoggia sopra.** La ragione decisiva non è
+  quella che la delega prevedeva («se restano due, fra sei mesi sono quattro»): è che `UiTooltip`
+  non era rotto **per fortuna** — non gli era servito scrivere `display`. Una regola rispettata per
+  caso non è una regola.
+- **Niente `UiMenu`.** Avrebbe **zero** chiamanti contro i due che il kit richiede (D023): il
+  pannello dei cheat è un elenco di pulsanti, e il menu contestuale del canvas non ha una riga di
+  codice. Il grilletto è scritto nell'ADR 0039: il primo menu vero.
+
+### Cosa c'è nell'albero di lavoro alla chiusura
+
+Verificato con i comandi, non ricordato.
+
+- **Niente di non commesso**: `git status` è vuoto, `git stash list` è vuoto, nessun file non
+  tracciato.
+- **`npm run verify` verde** — 77 file, **814 test**. **`npm run verify:release` verde**, renderer a
+  2.450,46 kB (sempre non minificato: il dubbio di D030 resta aperto e non è stato toccato).
+- **Nessun residuo di debug** nel diff della sessione: `console.log`, `debugger`, `TODO` — zero.
+- **Cinque commit** su `d031-la-sovrapposizione-e-un-pezzo-del-kit`, che discende da
+  `d032-la-commissione-scala-il-pavimento-no`, che discende da
+  `d030-il-contenuto-scorre-nel-telaio`.
+- **Il ramo `d030-il-contenuto-scorre-nel-telaio` non punta più al commit di chiusura di D030.** I
+  documenti delle tre deleghe nuove sono stati commessi stando su di lui, quindi l'etichetta è
+  avanzata a `383c94b`. La delega D030 dichiara `1f3a0e1`, che è ancora nella storia ed è il commit
+  giusto: è l'etichetta a essersi spostata, non il commit a essersi perso.
+
+### Cosa questa sessione ha lasciato indietro
+
+Censito, non nascosto.
+
+1. **La tabella delle regole in [architettura.md](../architettura.md) si ferma a R19.** R20, R21 e
+   R22 non ci sono. Le prime due mancavano già prima di questa sessione, la terza è di oggi.
+   L'elenco autorevole è [tracciabilita.md](../tracciabilita.md), che le ha tutte e tre: quella
+   tabella è un riassunto, e adesso è indietro di tre righe. Non è stato corretto qui perché
+   riguarda anche lavoro non di questa sessione, e correggerlo durante una chiusura è lavoro nuovo.
+2. **Gli script CDP vivono nello scratchpad, quindi la prossima sessione li riscrive.** Questa li ha
+   riscritti da zero e ha ripagato due volte le stesse trappole. Il **metodo** è descritto in _Come
+   si guarda l'applicazione senza toccarla_; il **codice** no. Metterli in `scripts/` è una
+   decisione che nessuno ha preso.
+3. **Nessuna misura della catena a macchina scarica.** Vedi il punto 5 qui sopra: prima di
+   ottimizzare qualcosa serve un numero preso senza la finestra di sviluppo aperta.
+
+### Due vicoli ciechi, per non ripercorrerli
+
+1. **Lo `Spazio` sintetico non attivava il pannello, e sembrava un difetto di accessibilità.** Non
+   lo era: l'evento CDP mandava `key: 'Space'` invece di `key: ' '`, quindi il motore non
+   sintetizzava il clic. A dirlo è stato un controllo preso **nello stesso ambiente** — lo stesso
+   `Spazio` non attivava nemmeno l'interruttore del tema, che nessuno aveva toccato. È la lezione di
+   [D030](D030-il-contenuto-scorre-nel-telaio.md) con un'altra faccia: una misura strana va
+   confrontata con un controllo preso allo stesso modo.
+2. **`Page.reload` via CDP chiude l'applicazione di sviluppo.** Provato una volta, il server è
+   uscito con codice 0. Per rileggere lo stato dopo una modifica conviene riavviare `npm run dev`,
+   non ricaricare la pagina da fuori.
+
+**E una trappola dello strumento che costa dieci minuti se non la si sa:** la porta 5173 può restare
+occupata da un'istanza precedente, e allora `electron-vite` passa alla 5174 **in silenzio**. Uno
+script CDP che filtra i bersagli sul numero di porta non trova più niente, e sembra che
+l'applicazione non sia partita. Si filtra su `localhost`, non sul numero.
+
+## La **prima** sessione del 2026-08-21: tre deleghe chiuse, due cose aperte
 
 Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione.
 
@@ -89,18 +220,24 @@ volta. `npm run verify` è **verde**; il conto dei test e il tempo della catena 
    capienza di 1.000,00 €, quindi ogni transazione rifiutata e ogni grafico piatto — **non vale
    più**: con INV-23 quel saldo può scendere, quindi deposito, prelievo e ampliamento funzionano di
    nuovo, e il cheat «svuota i contanti» lo riporta dentro le regole senza toccare il file.
-2. **Il pannello dei cheat esiste e ha un difetto aperto.** Si apre col pulsante `DEV` in basso a
-   destra e **non si chiude**. È la ragione per cui D031 è aperta, e la causa **non è
-   diagnosticata**: quello che è stato provato, e cosa resta da provare, sta scritto lì dentro. Chi
-   riprende non riparta dalle ipotesi.
-3. **Il bancomat è rimasto a metà, ed è deliberato.** L'utente ha chiesto di rifinire la home
-   «secondo il canvas», poi ha chiesto di **non toccarla** finché non avrà puntualizzato lui. Le tre
-   domande poste e rimaste senza risposta sono qui sotto: sono la prima cosa da chiedergli.
+2. ~~**Il pannello dei cheat esiste e ha un difetto aperto.**~~ **Superato.** Il pannello si
+   chiude da D031, e la causa era `.panel { display: flex }` su un elemento con `popover`. Il
+   dettaglio sta nella sezione della seconda sessione, qui sopra.
+3. **Il bancomat è rimasto a metà, ed è deliberato.** L'utente aveva chiesto di rifinire la home
+   «secondo il canvas», poi di **non toccarla** finché non avesse puntualizzato lui. **Ha
+   puntualizzato**: le tre domande qui sotto hanno risposta, e da lì è nata
+   [D033](D033-il-bancomat-e-una-pagina.md). Non sono più «la prima cosa da chiedergli».
 
 ### Le tre domande aperte sul bancomat
 
-Nessuna è stata decisa, e nessuna va decisa in autonomia: cambiano la forma di una schermata e di
-un ADR in vigore.
+> **Chiuse.** L'utente ha risposto a tutte e tre nella seconda sessione del 2026-08-21, e da quelle
+> risposte sono nate [D033](D033-il-bancomat-e-una-pagina.md) e
+> [D034](D034-le-serie-degli-strumenti.md). Le risposte stanno qui sopra, in _Le tre domande, e cosa
+> ha risposto l'utente_. **Non vanno riproposte.** Il testo che segue resta perché le domande, come
+> erano poste, spiegano perché quelle deleghe hanno la forma che hanno.
+
+Nessuna era stata decisa, e nessuna andava decisa in autonomia: cambiano la forma di una schermata e
+di un ADR in vigore.
 
 1. **La home fa due lavori** — è la pagina del bancomat (carta, contanti, deposita/preleva) **e** il
    cruscotto (cinque riquadri, grafico, operazioni recenti). Il canvas invece tiene le due cose
@@ -357,20 +494,25 @@ Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: all
 
 ## Il prossimo passo, in concreto
 
-**[D024](D024-il-telaio.md) e [D025](D025-il-tooltip.md) sono chiuse**, ed è la prima volta che due
-deleghe si chiudono in un commit solo: le due spunte che restavano — l'interruttore premuto, il
-tooltip toccato col tabulatore — si pagavano nella **stessa** sessione a occhio, e separarle avrebbe
-voluto dire aprire due volte la stessa finestra.
+**È [D033](D033-il-bancomat-e-una-pagina.md), ed è scritta.** Non c'è niente da decidere prima di
+cominciare: le tre domande che la bloccavano hanno risposta, e la delega è stata scritta **dopo**
+averle avute.
 
-Cosa c'è adesso: il **telaio** del design — colonna a sinistra, testata appiccicata, striscia degli
-strumenti — l'**interruttore del tema**, e il **tooltip**, che da R17 è l'unico modo di spiegare
-qualcosa. Tre regole nuove, R16, R17 e INV-22, rotte di proposito una per una.
+Cosa fa: il bancomat diventa una pagina sua, a due colonne come l'artboard `ATM` del canvas, e il
+cruscotto ne diventa un'altra. L'[ADR 0018](../adr/0018-la-home-e-un-atm.md) va in `Superata`, e
+sarebbe il **primo** del progetto — oggi ne conta zero ([stato.md](../stato.md)).
 
-**Le due verifiche a occhio non hanno trovato niente da correggere**, e vale la pena dire cosa hanno
-guardato, perché «guardato» da solo non è una misura: quattro combinazioni di schermata e tema, con
-`data-theme` e i colori calcolati letti a ogni clic; la bolla aperta col puntatore e col tabulatore,
-centrata sull'ancora al mezzo pixel; `Esc` che la chiude lasciando il fuoco dov'è. Le tabelle stanno
-in fondo alle due deleghe.
+**È la delega più grande dopo il kernel**, ~450 righe, e la sua intestazione lo dice chiedendo a chi
+la esegue di dichiarare se la spezza. Tre cose insieme: la lista delle destinazioni, la pagina nuova,
+la carta.
+
+**Poi [D034](D034-le-serie-degli-strumenti.md)**, i grafici a candele di contanti e carta. Ha **una
+decisione aperta** scritta in fondo — due grafici a candele oppure candele e linea — e non si esegue
+prima di averla presa con l'utente.
+
+**E [D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md) non è più a monte di niente.** La sua
+intestazione diceva di sbloccare la rifinitura del bancomat; l'artboard `ATM`, letto nel sorgente,
+non ha una sola sovrapposizione. È chiusa comunque, ma quella freccia nel grafo non c'è mai stata.
 
 ### Come si guarda l'applicazione senza toccarla
 
@@ -837,14 +979,38 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-**Non ce n'è uno, e non è una dimenticanza: non c'è una delega da consegnare.** Quale sia aperta lo
-dice [stato.md](../stato.md), che le conta; da lì si vede che la fetta 02 è chiusa e che la fetta 03
-non ha ancora la sua. Il prompt che consegnava D027 sta nel `git log` di questo file, insieme a
-quelli di D026 e D018: si recuperano da lì invece di tenerne quattro in vita, che è la stessa
-ragione per cui i numeri stanno in un posto solo.
+**Adesso ce n'è uno, e la sessione precedente non poteva averlo:** c'è una delega scritta, aperta e
+senza decisioni in sospeso. Quali siano aperte lo dice [stato.md](../stato.md), che le conta.
 
-**Chi arriva adesso ha davanti un lavoro di specie diversa: scrivere una delega, non eseguirne una.**
-Il materiale c'è tutto e non va inventato:
+```
+Esegui D033 — il bancomat è una pagina.
+
+La delega è docs/delega/D033-il-bancomat-e-una-pagina.md, ed è completa: le tre domande che la
+bloccavano hanno già risposta, e la delega è stata scritta dopo averle avute. Non riproporle.
+
+Prima di scrivere una riga:
+- leggi la delega per intero, comprese Trappole note;
+- leggi l'artboard ATM del canvas NEL SORGENTE — docs/design/mockups/solvent-canvas.dc.html,
+  righe 1702–2453 — non guardandolo;
+- dichiara se spezzi la delega: sono ~450 righe e tocca tre cose insieme, e la sua intestazione
+  chiede esplicitamente di dirlo prima di cominciare.
+
+Il ramo si chiami d033-il-bancomat-e-una-pagina e parta da
+d031-la-sovrapposizione-e-un-pezzo-del-kit, che contiene tutto (main non è ancora stato fuso).
+
+La spunta a occhio si paga via CDP nella finestra vera, con il metodo di
+docs/delega/PASSAGGIO-DI-CONSEGNE.md: gli script non sono nel repo e vanno riscritti.
+```
+
+**Poi viene [D034](D034-le-serie-degli-strumenti.md)**, che invece **ha** una decisione aperta in
+fondo — due grafici a candele, oppure candele per i contanti e linea per la carta — e non si esegue
+prima di averla presa con l'utente.
+
+I prompt che consegnavano D027, D026 e D018 stanno nel `git log` di questo file: si recuperano da lì
+invece di tenerne quattro in vita, che è la stessa ragione per cui i numeri stanno in un posto solo.
+
+**E dopo le due, torna il lavoro di specie diversa: scrivere una delega, non eseguirne una.** Il
+materiale c'è tutto e non va inventato:
 
 - il [registro delle fette](../roadmap-fette.md) dice cosa viene dopo e in che ordine, e il
   **blocco A** — black market e aste di box — è il primo che porta gli **oggetti**, cioè il primo

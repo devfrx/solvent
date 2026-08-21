@@ -21,13 +21,21 @@ bene: `verify` non paga l'avvio di `npm` due volte per lo stesso gate. Sono temp
 quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre
 `npm run`.
 
-**Rimisurata alla chiusura di [D030](delega/D030-il-contenuto-scorre-nel-telaio.md)**, il
-2026-08-21 e sulla stessa macchina: la catena intera **51,6 s**, con **794 test**. Il salto è
-grosso e va letto con prudenza: la misura è stata presa **mentre la finestra di sviluppo
-dell'utente girava**, quindi una parte è contesa di macchina e non lavoro nuovo. Va rifatta a
-macchina scarica prima di trattare 51,6 s come il numero vero — ma anche così è il primo valore che
-si avvicina alla soglia del minuto, e il rimedio è già censito nel
-[registro YAGNI](roadmap-fette.md): togliere l'avvio ripetuto di `npm`, non togliere un gate.
+**Rimisurata alla chiusura di [D031](delega/D031-la-sovrapposizione-e-un-pezzo-del-kit.md)**, il
+2026-08-21 e sulla stessa macchina: la catena intera **66 s**, con **814 test**. È il primo valore
+che **supera** il minuto, e la soglia che D030 vedeva avvicinarsi è stata passata.
+
+**Il minuto non lo pagano i venti test nuovi**, e va detto perché altrimenti la conclusione ovvia è
+quella sbagliata: fra D030 e qui i test sono cresciuti del 2,5% e la catena del 28%. La misura di
+D030 — 51,6 s — era già stata presa **mentre la finestra di sviluppo dell'utente girava**, e questa
+è stata presa nelle stesse condizioni, dopo una sessione intera di build e di finestre aperte. Le
+due sono confrontabili fra loro e **nessuna delle due è il numero a macchina scarica**, che nessuno
+ha ancora preso.
+
+Il rimedio resta quello censito nel [registro YAGNI](roadmap-fette.md) — togliere l'avvio ripetuto
+di `npm`, non togliere un gate — e adesso ha anche il suo grilletto tirato: la catena ha passato il
+minuto. Prima di stringere qualcosa però va presa **una** misura a macchina scarica, o si
+ottimizzerà contro il rumore invece che contro il costo.
 
 Prima, alla chiusura di [D018](delega/D018-la-scheda-di-dominio.md): **33,3 s** con **745 test**. Era 38,4 s con 726 test a
 [D024](delega/D024-il-telaio.md) e [D025](delega/D025-il-tooltip.md), 36,4 s con 678 test a

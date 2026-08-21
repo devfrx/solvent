@@ -212,6 +212,7 @@ solvent/
 │     │  ├─ roles.ts              # ruoli di colore, misure, superfici — nessun Pool
 │     │  ├─ theme.ts              # quale tema e' acceso, e l'interruttore (ADR 0031)
 │     │  ├─ UiShell.vue           # il telaio: una forma, non un contenitore (ADR 0030)
+│     │  ├─ UiPopover.vue         # il livello superiore, e nessun altro lo tocca (R22, ADR 0039)
 │     │  ├─ UiTooltip.vue         # l'unico modo di spiegare qualcosa (R17, ADR 0032)
 │     │  └─ Ui*.vue               # superficie, etichetta, cifra, targhetta, pulsante, prosa
 │     ├─ components/              # una cartella per proprietario, zero file sciolti (R18, ADR 0033)
