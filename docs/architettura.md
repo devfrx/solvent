@@ -23,17 +23,17 @@ flowchart TD
     BOOT["main.ts<br/>il bootstrap"]
     APP["App.vue<br/>il guscio: i sette stati"]
     VIEWS["views/*.vue<br/>HomeView · StatsView"]
-    CMP["components/*<br/>shell · ledger · una cartella per dominio (ADR 0033)<br/>rotation · postings · screens"]
+    CMP["components/*<br/>shell · ledger · dev · una cartella per dominio (ADR 0033)<br/>rotation · postings · screens"]
     UI["ui/*<br/>tokens · roles · theme · i pezzi<br/>non sa che gioco è"]
     I18N["i18n/*"]
     ST["stores/*"]
-    RT["runtime/*<br/>createGame · loop · host"]
+    RT["runtime/*<br/>createGame · loop · host · cheats"]
   end
 
   subgraph CORE["core — nessun Vue, Pinia o Electron"]
     DOM["domains/*<br/>rules · system"]
     BAL["balance/*<br/>constants · modifiers · targets"]
-    KER["kernel/*<br/>Clock · Rng · Bus · Registry · Ledger"]
+    KER["kernel/*<br/>Clock · Rng · Bus · Registry · Ledger<br/>Cheats · LedgerCheats (solo sviluppo)"]
     CON["contracts/*<br/>result · money · pools · ledger · lifecycle<br/>bounded · events · save · commands · payment"]
   end
 

@@ -58,6 +58,21 @@ export const en: Dictionary = {
     'built on.',
   'pool.capacity': 'Capacity',
 
+  // The development panel (D029). A player never sees it, and its words live in the dictionary all
+  // the same: the words of this project exist in one place only (R12).
+  'dev.title': 'DEV',
+  'dev.subtitle': 'Development shortcuts. They go through the rules of the game, not around them.',
+  'dev.amount': 'Amount',
+  'cheat.ledger.grant_cash': 'Grant cash',
+  'cheat.ledger.grant_card': 'Grant to the account',
+  'cheat.ledger.drain_cash': 'Empty the cash',
+  'cheat.ledger.drain_card': 'Empty the account',
+  'cheat.vault.level_up': 'Vault: one level up',
+  'cheat.vault.max_level': 'Vault: top level',
+  'cheat.vault.reset_level': 'Vault: back to level zero',
+  'cheat.income.toggle_upgrade': 'Income: flip the upgrade',
+  'reason.cheat.grant': 'Development grant',
+  'reason.cheat.drain': 'Development drain',
   'income.per_second': '+ {amount} / s',
   'income.upgrade.overtime.name': 'Overtime',
   'income.upgrade.overtime.desc': 'Raises the income of every source.',

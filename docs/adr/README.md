@@ -147,6 +147,7 @@ Il grilletto resta quello che il registro YAGNI ha scritto: il primo dominio che
 | [0033](0033-un-dominio-ha-una-cartella-e-una-pagina.md)                        | Un dominio ha una cartella, e di norma una pagina              | **Accettata** | dove vive l'interfaccia di un dominio, e dove il giocatore la trova     | A17             |
 | [0034](0034-il-grafico-e-una-libreria.md)                                      | Il grafico è una libreria, e la libreria disegna in SVG        | **Accettata** | con cosa si disegna un grafico, e come i suoi colori restano token      | A14             |
 | [0035](0035-una-capienza-ferma-chi-sale.md)                                    | Una capienza ferma chi sale, non chi si trova già in alto      | **Accettata** | quando un tetto rifiuta, e chi risponde «quanto ci sta ancora»          | A05             |
+| [0036](0036-i-cheat-passano-dalle-porte-del-gioco.md)                          | I cheat di sviluppo passano dalle porte del gioco              | **Accettata** | come si costruisce uno stato di gioco senza poter mentire su di esso    | A05             |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è

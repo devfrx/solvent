@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import type { Component } from 'vue'
-import { ref } from 'vue'
+import { defineAsyncComponent, ref } from 'vue'
 
 import AppHeader from './components/shell/AppHeader.vue'
 import AppNav from './components/shell/AppNav.vue'
@@ -61,6 +61,18 @@ const SCREEN_VIEWS: Readonly<Record<Screen, Component>> = {
   stats: StatsView
 }
 
+/**
+ * D029 — il pannello dei cheat, e **soltanto** in sviluppo.
+ *
+ * `import.meta.env.DEV` è sostituito dal compilatore, quindi in un pacchetto di rilascio questa
+ * riga diventa `null` e l'`import()` sparisce con lei: il componente non finisce nel bundle,
+ * invece di finirci e non mostrarsi mai. È la ragione per cui è dinamico — un import statico
+ * resterebbe dentro anche dietro a un `v-if` che è sempre falso.
+ */
+const DevPanel = import.meta.env.DEV
+  ? defineAsyncComponent(() => import('./components/dev/DevPanel.vue'))
+  : null
+
 const store = useGameStore()
 const { status, failure, failedDuring, awayFor } = storeToRefs(store)
 const { text, duration, failure: failureText } = useTranslator()
@@ -112,6 +124,8 @@ const startOver = (): void => void store.newGame()
         />
         <component :is="SCREEN_VIEWS[screen]" />
       </UiShell>
+
+      <component :is="DevPanel" v-if="DevPanel !== null" />
 
       <div v-if="status === 'recovering'" class="center veil">
         <span class="ring" aria-hidden="true"></span>

@@ -1,5 +1,6 @@
 import { createI18n, useI18n } from 'vue-i18n'
 
+import type { CheatId } from '@core/contracts/cheats'
 import type { Reason } from '@core/contracts/ledger'
 import type { Money } from '@core/contracts/money'
 import { toDisplayNumber } from '@core/contracts/money'
@@ -107,6 +108,11 @@ export type ScreenKey =
   | 'pool.cash.explained'
   | 'pool.card.explained'
   | 'pool.traceability.explained'
+  // Il pannello di sviluppo (D029). Non lo vede un giocatore, e le sue parole stanno qui lo stesso:
+  // un secondo posto in cui nascono le parole è il difetto A13 con un'altra etichetta.
+  | 'dev.title'
+  | 'dev.subtitle'
+  | 'dev.amount'
   | 'income.per_second'
   | 'income.upgrade.overtime.name'
   | 'income.upgrade.overtime.desc'
@@ -176,7 +182,13 @@ export type ScreenKey =
   | 'card.tier.gold'
   | 'card.hint.drag'
 
-export type MessageKey = Reason | ErrorCode | ScreenKey
+/**
+ * D029 — `CheatId` entra qui come `Reason`: un cheat è **fatto** della propria etichetta, e
+ * `Dictionary` è un `Record` totale, quindi un cheat senza parole in tutte e due le lingue non
+ * compila. Le etichette restano nel dizionario di rilascio — sono otto stringhe — ed è il prezzo
+ * dichiarato per non avere un secondo dizionario che vive solo in sviluppo e invecchia da solo.
+ */
+export type MessageKey = Reason | ErrorCode | ScreenKey | CheatId
 
 /**
  * Il dizionario di una lingua. `Record` e non una forma parziale: aggiungere una `Reason` o un

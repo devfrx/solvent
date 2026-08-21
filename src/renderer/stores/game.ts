@@ -3,6 +3,7 @@ import { computed, ref, shallowRef } from 'vue'
 
 import type { BoundedList } from '@core/contracts/bounded'
 import { boundedList, pushBounded } from '@core/contracts/bounded'
+import type { Cheat, CheatId, CheatResult } from '@core/contracts/cheats'
 import type { CommandHandler } from '@core/contracts/commands'
 import type { Balances, Posting, Transaction } from '@core/contracts/ledger'
 import type { Money } from '@core/contracts/money'
@@ -34,6 +35,7 @@ import {
 } from '@core/domains/vault/rules'
 import type { VaultError } from '@core/domains/vault/system'
 import type { VaultState } from '@core/domains/vault/types'
+import type { Cheats } from '@core/kernel/Cheats'
 import type { Milliseconds, Ticks } from '@core/kernel/Clock'
 import { clock, milliseconds, ticks } from '@core/kernel/Clock'
 
@@ -140,6 +142,12 @@ const FULL_BAR = 100
 export interface Runtime {
   readonly game: Game
   readonly host: Host
+  /**
+   * D029 — i cheat di sviluppo, oppure niente. Opzionale e non `Cheats | null` perché un test che
+   * non li usa non deve scrivere `cheats: null` per compilare: chi non li consegna non li ha, ed è
+   * lo stesso verso di `TransactionMeta.accepts`.
+   */
+  readonly cheats?: Cheats
 }
 
 let provided: Runtime | null = null
@@ -156,7 +164,7 @@ const runtimeOrThrow = (): Runtime => {
 }
 
 export const useGameStore = defineStore('game', () => {
-  const { game, host } = runtimeOrThrow()
+  const { game, host, cheats } = runtimeOrThrow()
 
   const status = ref<GameStatus>('startup')
   const failure = ref<GameFailure | null>(null)
@@ -655,7 +663,41 @@ export const useGameStore = defineStore('game', () => {
     return bought
   }
 
+  /**
+   * D029 — eseguire un cheat, e rispecchiare ciò che il Ledger non annuncia.
+   *
+   * I saldi arrivano da soli con `money.posted`; il livello del caveau e il potenziamento del
+   * reddito no, perché caricare uno stato non è un movimento economico e nessuno lo dice — è la
+   * stessa trappola di `expandVault` e di `buyUpgrade`. Rileggerli entrambi dopo **qualunque**
+   * cheat costa due letture e toglie la classe di difetto in cui il pannello funziona e lo schermo
+   * resta indietro.
+   *
+   * Il rifiuto torna al chiamante invece di essere ingoiato: un cheat che dice di no ha le stesse
+   * ragioni di un comando di gioco, e vederle è metà del motivo per cui il pannello esiste.
+   */
+  const runCheat = (id: CheatId, amount?: Money): CheatResult => {
+    if (cheats === undefined) throw new Error('nessun cheat consegnato a questo runtime')
+    const done = cheats.run(id, amount)
+    readVault()
+    readIncome()
+    return done
+  }
+
+  /**
+   * L'elenco dei cheat, vuoto fuori dallo sviluppo: è ciò che decide se il pannello ha qualcosa da
+   * disegnare.
+   *
+   * `computed` e non un array nudo, ed è costato una prova a schermo: `storeToRefs` estrae **solo**
+   * ciò che è un `ref` o un `computed`, quindi un array normale esce `undefined` e il `v-for` non
+   * disegna niente — senza un errore, senza un avviso, con il pannello che si apre vuoto. Il valore
+   * non cambia mai durante una partita, il che è esattamente ciò che rendeva l'array nudo
+   * plausibile.
+   */
+  const devCheats = computed<readonly Cheat[]>(() => cheats?.all() ?? [])
+
   return {
+    devCheats,
+    runCheat,
     status,
     failure,
     failedDuring,

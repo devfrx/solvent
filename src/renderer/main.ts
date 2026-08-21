@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import './ui/tokens.css'
 import { createTranslations, DEFAULT_LOCALE } from './i18n'
+import { installCheats } from './runtime/cheats'
 import { createGame } from './runtime/createGame'
 import { createBrowserHost } from './runtime/host'
 import { provideRuntime, useGameStore } from './stores/game'
@@ -22,7 +23,16 @@ const host = createBrowserHost()
 // `index.html` sarebbe l'unica che non lo segue (R12).
 host.setLanguage(DEFAULT_LOCALE)
 
-provideRuntime({ game: createGame(), host })
+const game = createGame()
+
+/**
+ * D029 — l'unico posto del progetto che chiede «siamo in sviluppo?» per i cheat, ed è qui perché
+ * qui si decidono già le cose dell'ambiente. `import.meta.env.DEV` non è una variabile: il
+ * compilatore la **sostituisce** con `false` in un pacchetto di rilascio, quindi questo ramo
+ * sparisce e con lui `installCheats`, il registro e i tre file che dichiarano i cheat — nessuno
+ * li raggiunge più. La misura del bundle sta in fondo a D029.
+ */
+provideRuntime(import.meta.env.DEV ? { game, host, cheats: installCheats(game) } : { game, host })
 
 const app = createApp(App)
 app.use(createPinia())

@@ -19,6 +19,12 @@ export type Reason =
   | 'reason.atm.deposit'
   | 'reason.atm.withdraw'
   | 'reason.vault.expand'
+  // D029 — un cheat di sviluppo muove denaro come tutti gli altri, quindi ha una ragione sua e
+  // compare nel registro delle operazioni. Non c'è denaro invisibile: nascondere un movimento
+  // renderebbe il registro una fonte di cui non ci si può più fidare, che è il difetto A05 visto
+  // dal lato di chi legge invece che di chi scrive.
+  | 'reason.cheat.grant'
+  | 'reason.cheat.drain'
 
 /** Il raggruppamento per la telemetria economica. Cresce quando una schermata lo mostra. */
 export type Category = 'income' | 'purchase' | 'transfer' | 'fee'

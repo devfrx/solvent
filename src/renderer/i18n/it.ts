@@ -60,6 +60,21 @@ export const it: Dictionary = {
     'gioco è costruito.',
   'pool.capacity': 'Capienza',
 
+  // Il pannello di sviluppo (D029). Non arriva mai davanti a un giocatore, ma passa dal dizionario
+  // come tutto il resto: le parole del progetto vivono in un posto solo (R12).
+  'dev.title': 'DEV',
+  'dev.subtitle': 'Scorciatoie di sviluppo. Passano dalle regole del gioco, non le aggirano.',
+  'dev.amount': 'Importo',
+  'cheat.ledger.grant_cash': 'Regala contanti',
+  'cheat.ledger.grant_card': 'Regala sul conto',
+  'cheat.ledger.drain_cash': 'Svuota i contanti',
+  'cheat.ledger.drain_card': 'Svuota il conto',
+  'cheat.vault.level_up': 'Caveau: un livello in più',
+  'cheat.vault.max_level': 'Caveau: livello massimo',
+  'cheat.vault.reset_level': 'Caveau: torna al livello zero',
+  'cheat.income.toggle_upgrade': 'Reddito: inverti il potenziamento',
+  'reason.cheat.grant': 'Regalo di sviluppo',
+  'reason.cheat.drain': 'Svuotamento di sviluppo',
   'income.per_second': '+ {amount} / s',
   'income.upgrade.overtime.name': 'Straordinari',
   'income.upgrade.overtime.desc': 'Aumenta il reddito di tutte le fonti.',

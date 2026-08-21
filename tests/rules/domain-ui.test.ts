@@ -35,14 +35,19 @@ const COMPONENTS_ROOT = 'src/renderer/components'
 const SCREENS = 'src/renderer/components/shell/screens.ts'
 
 /**
- * Le cartelle di `components/` che non appartengono a un dominio. È una lista **chiusa**: due voci
- * oggi, e ognuna dice di chi è la roba che contiene.
+ * Le cartelle di `components/` che non appartengono a un dominio. È una lista **chiusa**, e ogni
+ * voce dice di chi è la roba che contiene.
  *
  * Non si chiamano `common` né `shared` — sono due delle parole che C09 vieta, e le vieta per la
  * ragione che si vedrebbe proprio qui: una cartella il cui nome non dice di chi è la roba raccoglie
  * tutto ciò che nessuno ha voglia di collocare.
+ *
+ * `dev` è la terza, da [D029](../../docs/delega/D029-i-devcheat.md), e non è un'eccezione alla
+ * regola: contiene interfaccia che **non è gioco**, quindi non ha un dominio a cui appartenere né
+ * una destinazione in cui vivere. Il giorno in cui ci finisse dentro un pannello che mostra un
+ * numero del gioco, quel pannello sarebbe nel posto sbagliato.
  */
-const NOT_DOMAINS: readonly string[] = ['shell', 'ledger']
+const NOT_DOMAINS: readonly string[] = ['shell', 'ledger', 'dev']
 
 const normalize = (path: string): string => path.split(sep).join('/')
 
