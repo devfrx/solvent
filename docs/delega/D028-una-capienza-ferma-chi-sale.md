@@ -1,6 +1,6 @@
 # D028 — Una capienza ferma chi sale
 
-- **Stato:** Chiusa — commit `PENDING`, ramo `d028-la-capienza-ferma-chi-sale`. Scritta ed eseguita
+- **Stato:** Chiusa — commit `a86850d`, ramo `d028-la-capienza-ferma-chi-sale`. Scritta ed eseguita
   il 2026-08-21, la prima delega dopo la fetta 02
 - **Dipende da:** [D017](D017-il-caveau.md), che ha acceso la capienza dei contanti — prima della
   fetta 02 il ramo esisteva ed era spento, quindi il difetto non era raggiungibile
