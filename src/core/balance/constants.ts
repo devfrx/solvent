@@ -19,6 +19,14 @@ const RECOVERY_HOURS = 8
 const SECONDS_PER_HOUR = 3600
 
 /**
+ * Ogni quanto la serie del patrimonio netto prende un campione, in secondi di gioco.
+ *
+ * Si scrive in secondi e si converte con il Clock, come `RECOVERY_HOURS`: `50` scritto a mano
+ * sarebbe il difetto A04 con un altro nome — la frequenza dei tick riscritta in un secondo posto.
+ */
+const NET_WORTH_SAMPLE_SECONDS = 5
+
+/**
  * Il più grande degli importi rapidi del bancomat, che è anche quello con cui la schermata si
  * apre. Sta in una costante sua invece di essere ripescato in fondo alla lista: due letture dello
  * stesso numero sono due letture che prima o poi divergono.
@@ -149,5 +157,33 @@ export const BALANCE = {
    * Il tetto è qui e non nel loop, e si scrive in ore convertite dal Clock: `288000` scritto a
    * mano sarebbe il difetto A04 con un altro nome.
    */
-  RECOVERY_CAP: clock.secondsToTicks(seconds(RECOVERY_HOURS * SECONDS_PER_HOUR))
+  RECOVERY_CAP: clock.secondsToTicks(seconds(RECOVERY_HOURS * SECONDS_PER_HOUR)),
+
+  /**
+   * Quanti campioni tiene la serie del patrimonio netto (D027). È il tetto della lista limitata,
+   * quindi anche quante barre il grafico disegna quando la serie è piena: una barra per campione,
+   * senza aggregare niente.
+   *
+   * **Trenta come il canvas**, che disegna trenta barre — è l'unico numero di quel grafico che si
+   * può prendere così com'è, perché è un conteggio e non una durata. La sua etichetta «30 days»
+   * invece non si può: i giorni di gioco non esistono, e non esisteranno finché non nasce il
+   * calendario dell'ADR 0023, che è ancora `Proposta` e non ha una riga di codice.
+   *
+   * Trenta campioni a uno ogni cinque secondi fanno due minuti e mezzo, e la finestra è scelta per
+   * quello che ci sta dentro: il reddito base riempie il caveau di partenza — 1.000,00 € a
+   * 12,00 €/s — in poco più di ottanta secondi. Il giocatore vede la salita, il muro che la
+   * appiattisce, e cosa succede dopo. Una finestra più corta mostrerebbe solo la salita, che è la
+   * metà noiosa.
+   */
+  NET_WORTH_SAMPLES: 30,
+
+  /**
+   * Ogni quanti tick si prende un campione. Il numero è in `NET_WORTH_SAMPLE_SECONDS`, qui c'è
+   * solo la conversione: chi bilancia guarda i secondi, non i tick.
+   *
+   * Un tetto e una cadenza sono **due** numeri e non uno derivato dall'altro, per la ragione di
+   * `VAULT_PRICES_CARD`: cambiare quanto è lunga la finestra e cambiare quanto è fitta sono due
+   * decisioni diverse, e legarle vorrebbe dire non poterne cambiare una sola.
+   */
+  NET_WORTH_SAMPLE_EVERY: clock.secondsToTicks(seconds(NET_WORTH_SAMPLE_SECONDS))
 } as const

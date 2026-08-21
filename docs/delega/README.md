@@ -229,7 +229,7 @@ configurato dopo che c'erano già 156 file.
 | [D024](D024-il-telaio.md)                                 | Il telaio: dove ogni schermata si attacca                             | 359 codice + 96 test          | **Chiusa** |
 | [D025](D025-il-tooltip.md)                                | Il tooltip: la spiegazione che non occupa posto                       | 164 codice + 48 test          | **Chiusa** |
 | [D026](D026-dove-si-attacca-un-dominio.md)                | Dove si attacca un dominio: la pagina, e le cartelle che la reggono   | 124 codice + 81 test          | **Chiusa** |
-| [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md)  | Un grafico è una serie, e nessuno la tiene                            | ~120 codice + ~60 test        | **Aperta** |
+| [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md)  | Un grafico è una serie, e nessuno la tiene                            | 170 codice + 158 test         | **Chiusa** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede
@@ -293,6 +293,19 @@ tre, e la prima non è di disegno: nel progetto **non esiste nessuna serie stori
 lavoro vero è decidere chi la tiene. Il canvas che l'utente ha allegato ha già risposto alla
 seconda senza saperlo — il suo grafico non usa nessuna libreria — ma la risposta va pesata contro
 ciò che verrà dopo, non contro un mock.
+
+**È stata eseguita, e il consuntivo va letto sapendo una cosa: quel budget non è mai stato il suo.**
+I ~120 codice più ~60 test valevano dichiaratamente per **un** incrocio delle due decisioni — serie
+in memoria e grafico in CSS — e la delega diceva che gli altri tre non si stimano prima. Quell'
+incrocio è stato costruito e guardato; poi la decisione 2 è cambiata su richiesta dell'utente, la
+libreria è entrata con l'[ADR 0034](../adr/0034-il-grafico-e-una-libreria.md), e il ramo consegnato
+non ha un budget contro cui misurarsi. Le 170 righe della tabella sono quindi una **misura senza
+metro**, non uno sforamento del 42%.
+
+E il numero che conta davvero non è in quella colonna: la libreria porta il modulo compilato da
+622,87 kB a **2.437,92 kB**, in [qualita.md](../qualita.md) con il grilletto per rimetterla in
+discussione. D027 è la prima delega del progetto in cui il costo di una decisione si legge nel
+bundle invece che nel diff.
 
 **D024 e D025 sono state eseguite insieme e chiuse in un commit solo**, ed è la prima volta: le due
 spunte che restavano — l'interruttore premuto, il tooltip toccato col tabulatore — si pagano nella

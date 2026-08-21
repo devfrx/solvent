@@ -5,6 +5,7 @@ import AtmPanel from '@renderer/components/atm/AtmPanel.vue'
 import BankCard3d from '@renderer/components/atm/BankCard3d.vue'
 import CashPanel from '@renderer/components/atm/CashPanel.vue'
 import OperationList from '@renderer/components/ledger/OperationList.vue'
+import NetWorthChart from '@renderer/components/shell/NetWorthChart.vue'
 import StatTile from '@renderer/components/shell/StatTile.vue'
 import VaultAlarm from '@renderer/components/vault/VaultAlarm.vue'
 import { traceabilityKey, useTranslator } from '@renderer/i18n'
@@ -29,6 +30,11 @@ import UiPanel from '@renderer/ui/UiPanel.vue'
  * del bancomat**, e l'ADR 0018 non cambia: cambia il perché. Il caveau e il reddito hanno preso la
  * loro ([ADR 0033](../../../docs/adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md)); del caveau
  * resta qui il solo allarme, perché il muro si incontra giocando e non amministrando.
+ *
+ * Da [D027](../../../docs/delega/D027-un-grafico-e-una-serie-che-nessuno-tiene.md) il cruscotto
+ * ha anche un **grafico**, e sta sotto i riquadri: quelli dicono com'è adesso, lui dice come è
+ * andata — che è, secondo l'ADR 0018, l'unica ragione per riaprire un idle. Non è un sesto
+ * riquadro travestito: non porta cifre, e il posto libero della griglia resta libero.
  */
 
 const store = useGameStore()
@@ -98,6 +104,8 @@ const { text, money } = useTranslator()
       hint="home.tile.fees.explained"
     />
   </div>
+
+  <NetWorthChart />
 
   <UiPanel :title="text('atm.recent.title')">
     <OperationList :operations="recentOperations" />

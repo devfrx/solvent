@@ -1,10 +1,10 @@
 # D027 — Un grafico è una serie, e nessuno la tiene
 
-- **Stato:** Aperta — scritta il 2026-08-21, subito dopo la chiusura di
-  [D026](D026-dove-si-attacca-un-dominio.md), su richiesta dell'utente: il cruscotto della home
-  deve avere dei grafici, e la libreria con cui disegnarli va scelta. **Non è preparata per
-  l'esecuzione**, e non è una dimenticanza: porta due decisioni che non spettano a chi la scrive.
-  Vedi _Le decisioni aperte_
+- **Stato:** **Chiusa** — eseguita il 2026-08-21. Le due decisioni sono state prese con l'utente, e
+  la seconda è stata presa **due volte**: prima CSS, poi — a grafico costruito e guardato —
+  libreria, da cui l'[ADR 0034](../adr/0034-il-grafico-e-una-libreria.md). Guardare l'applicazione
+  ne ha aggiunte altre due che la delega non prevedeva. Vedi _Le decisioni prese_, _Le correzioni_ e
+  _Il consuntivo_ in fondo
 - **Dipende da:** [D026](D026-dove-si-attacca-un-dominio.md) — il cruscotto ha un posto solo da
   quando la home è la pagina del dominio `atm` e il cruscotto è la fascia sotto, che non appartiene
   a nessun dominio ([ADR 0033](../adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md)). Prima di
@@ -203,3 +203,149 @@ La tabella non si può chiudere prima delle due decisioni. Quello che si può di
 - **Il grafico piatto.** La prima cosa che il campionamento vedrà è lo stipendio che sale in linea
   retta, perché è l'unica cosa che oggi succede da sola. Se il grafico è bello solo con dei dati
   finti, non è pronto: si dice, invece di riempirlo.
+
+---
+
+## Le decisioni prese
+
+Erano due sulla carta. Sono diventate **quattro**, e le due in più sono nate guardando
+l'applicazione — che è la stessa strada da cui è nata [D026](D026-dove-si-attacca-un-dominio.md).
+
+### 1 — chi tiene la serie: **lo store, in memoria**
+
+L'alternativa scartata era salvarla dentro un sistema, e con lei l'[ADR 0010](../adr/0010-liste-storiche-limitate-alla-definizione.md)
+sarebbe passato ad `Accettata`. Costa più di come la delega lo dipingeva — un sistema con stato vive
+sotto `src/core/domains/`, quindi sarebbe stato un **dominio nuovo**, con la sua riga in
+`DOMAIN_SCREENS` e la sua [scheda](../design/domini/README.md) compilata prima di scriverne una riga
+(D018) — ma non è il costo ad aver deciso.
+
+**Ha deciso il calendario che non c'è.** Senza l'[ADR 0023](../adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)
+un campione non sa **quando** è stato preso: due barre affiancate possono distare un tick o otto
+ore, e il grafico le disegnerebbe uguali. Una serie che riparte a ogni avvio dice meno ed è vera;
+una salvata direbbe di più e mentirebbe. Il grilletto dell'ADR 0010 resta quello che il
+[registro YAGNI](../roadmap-fette.md) gli aveva già dato: il primo dominio che possiede **cose**.
+
+### 2 — libreria o CSS: **prima CSS, poi la libreria**
+
+La prima risposta è stata CSS, e non per pigrizia: il criterio dell'[ADR 0015](../adr/0015-criterio-di-ammissione-delle-dipendenze.md)
+rifiuta una dipendenza quando la definizione di «corretto» è ovvia, e l'altezza di una barra è una
+divisione. Il grafico in CSS è stato **costruito, provato e guardato** nella finestra vera.
+
+Poi l'utente ha chiesto una libreria, e la domanda è cambiata: non più «serve», ma «quale può
+entrare senza disfare R15». La risposta è ApexCharts e sta nell'[ADR 0034](../adr/0034-il-grafico-e-una-libreria.md),
+con le quattro scartate e il perché di ciascuna.
+
+### 3 — la scala del grafico: **la finestra si adatta alla serie**
+
+Non era nella delega. È nata da una misura presa guardando: con un asse ancorato a zero, trenta
+campioni di crescita normale muovono tutta l'altezza in una partita nuova, un quarto a 5.000,00 €,
+l'1,7% a 100.000,00 € e lo **0,19%** a 900.000,00 €. Il caveau arriva a 250.000,00 €, quindi il
+cruscotto avrebbe portato un rettangolo pieno per la maggior parte della partita: vero e inutile.
+
+Il prezzo è dichiarato: l'altezza di una barra non è «quanti soldi», è «dove sei nell'intervallo
+osservato». A renderlo leggibile ci sono l'asse con i suoi numeri e il valore che compare toccando
+una barra — ed è metà della ragione per cui la libreria si ripaga.
+
+### 4 — l'involucro Vue della libreria: **tolto**
+
+`vue3-apexcharts` è stato installato e disinstallato nella stessa sessione. Clona le opzioni con
+`JSON.parse(JSON.stringify(…))` a ogni aggiornamento, e `JSON.stringify` **cancella le funzioni**:
+l'asse scriveva `948627.0` invece di `948.627,00 €`. Visto succedere nella finestra vera, poi
+confermato nel suo sorgente. La libreria si monta a mano: venti righe di ciclo di vita, e una
+dipendenza in meno.
+
+## Le correzioni, rispetto a com'era scritta
+
+1. **«Un `boundedList` dentro `SystemsSave`» non è un `boundedList` dentro `SystemsSave`: è un
+   dominio nuovo.** La tabella della decisione 1 lo dipingeva come una struttura da aggiungere. Un
+   sistema con stato vive sotto `src/core/domains/`, e da lì discendono `tests/rules/domain-ui`, una
+   riga in `DOMAIN_SCREENS` e la scheda di dominio di D018 — nove sezioni di gioco e dodici domande
+   kernel, per un campionatore che non è un dominio di gioco. Il costo vero della strada B non era
+   scritto.
+2. **La delega non dice che il grafico va guardato contro un patrimonio grande, ed è l'unica cosa
+   che contava.** Le sue trappole prevedevano il grafico piatto per mancanza di dati; il difetto
+   vero è l'opposto — con **troppi** dati e una scala da zero, un patrimonio che cresce diventa
+   invisibile. Nessuna delle cinque trappole lo prevedeva, e nessun test poteva vederlo.
+3. **La decisione 2 non era una decisione sola.** Scelta la libreria, restava «quale», e il vincolo
+   che decide non è nella delega: R15 è un test, quindi una libreria a `<canvas>` è fuori a
+   prescindere dal merito. La delega lo diceva in prosa — «una libreria che dipinge i propri colori
+   non è configurabile in due temi senza combatterla» — senza trarne la conseguenza operativa, che è
+   **SVG o niente**.
+4. **`tests/rules/core-deps` non è la lista di cosa può entrare.** La delega lo nomina come «ciò che
+   elenca cosa può entrare». Guarda solo `src/core/**` (INV-01): una dipendenza del renderer non lo
+   attraversa mai. Nessun gate del progetto elenca le dipendenze di runtime — a fermarle è l'ADR
+   0015, che è una regola di review.
+5. **Il costo dell'installazione non era quello previsto.** La delega avvisava che `npm install` è
+   rotto e che «l'installazione è parte del lavoro». È vero e non è bastato: `npm install` fallisce
+   con `ERESOLVE`, ma `npm install <pacchetto> --legacy-peer-deps` funziona, e il conflitto
+   `vite`/`electron-vite` **non c'entra niente** con una libreria di grafici. Costo reale:
+   trascurabile. Il costo vero era altrove — l'involucro Vue rotto, che nessuno poteva prevedere.
+6. **Il peso nel bundle è di un altro ordine di grandezza rispetto a quanto la delega lasciava
+   intendere.** «Il peso nel bundle del renderer, che sta in qualita.md con la data accanto»
+   suggerisce un aggiornamento di misura. Il modulo passa da **622,87 kB a 2.437,92 kB**: quasi
+   quadruplicato, per un grafico a barre. Sta in [qualita.md](../qualita.md) con il grilletto per
+   rimetterlo in discussione.
+7. **Il cruscotto guadagna dei numeri, e la delega li vietava.** L'invariante «il grafico non è un
+   riquadro travestito» resta rispettato — nessun `<StatTile>` nuovo, nessuna cifra grande, nessun
+   delta — ma l'asse porta due importi e il puntatore ne rivela un terzo. Non sono statistiche in
+   più: sono ciò che rende leggibile un asse che non parte da zero, e senza la decisione 3 non
+   esisterebbero.
+8. **R17 si incrina, e nessun gate lo vede.** ApexCharts scrive un elemento `<title>` dentro l'SVG
+   delle etichette dell'asse, cioè un tooltip nativo del browser — quello che
+   [D025](D025-il-tooltip.md) aveva tolto. `tests/rules/no-native-tooltips` guarda l'attributo
+   `title` nel **sorgente**, quindi non può prenderlo. Sono due, portano lo stesso testo già
+   visibile accanto, e restano dichiarati nell'[ADR 0034](../adr/0034-il-grafico-e-una-libreria.md)
+   invece che scoperti fra tre deleghe.
+9. **La riga del registro YAGNI che sarebbe scattata non è scattata.** «Gli stati vuoti, e i loro
+   sette significati» ha come grilletto «il primo elenco che può essere vuoto in un modo che
+   significa qualcosa». Il grafico è vuoto per i primi secondi di ogni partita, ed è un vuoto che
+   significa «aspetta» — ma dura cinque secondi e non è uno stato in cui il giocatore sosta.
+   Dichiarato invece che tirato.
+10. **Il canvas è stato letto e poi contraddetto tre volte.** Non usa librerie (e ne abbiamo presa
+    una), impila due segmenti contanti/carta (e il grafico ha un colore solo, perché su una scala
+    che taglia il fondo una barra impilata mente sulla composizione), e porta una cifra grande con
+    un delta (che è il settimo riquadro travestito). Il canvas resta la fonte del **disegno**, non
+    l'arbitro delle decisioni.
+11. **La partita di sviluppo su questa macchina è bloccata, e va saputo prima di guardare.** Il
+    salvataggio ha 903.359,30 € di contanti contro una capienza di 1.000,00 €: è fatto a mano e
+    viola l'invariante, quindi il Ledger rifiuta ogni transazione che tocchi i contanti e il reddito
+    è fermo. Il patrimonio **non può muoversi**, e un grafico piatto lì è la verità — non un difetto
+    del grafico. Chi vuole vedere una serie che sale deve costruirsi un'altra partita.
+12. **La delega dice «~60 righe di test» e ne servono quasi il triplo.** Non per prolissità: la
+    cadenza dei campioni ha un caso che nessun budget prevedeva — il ritorno da otto ore vale **un**
+    campione, non millecinquecento — e provarlo richiede il finto browser, non una funzione pura.
+
+## Il consuntivo, contro il budget
+
+Il budget era **~120 righe di sorgente e ~60 di test**, e valeva dichiaratamente per **un solo
+incrocio**: serie in memoria e grafico in CSS. Quell'incrocio è stato costruito. Poi la decisione 2
+è cambiata, e la delega diceva che gli altri tre non si stimano prima delle decisioni — quindi il
+ramo effettivamente consegnato **non ha un budget** contro cui misurarsi.
+
+| Cosa                | Misura   | Contro                                                   |
+| ------------------- | -------- | -------------------------------------------------------- |
+| `src/renderer/`     | **+167** | il budget di ~120 valeva per il ramo CSS, non per questo |
+| `src/core/balance/` | **+3**   | i due numeri della cadenza                               |
+| Sorgente, in tutto  | **+170** | +42% sul budget di un ramo che non è stato consegnato    |
+| Test                | **+158** | ~60 dichiarate, e il ritorno da otto ore ne è la causa   |
+
+Il metodo è `codeLines` di `tests/helpers/projectState.ts`, lo stesso di [stato.md](../stato.md):
+commenti e righe vuote escluse.
+
+**Il numero che conta però non è nessuno di questi, ed è nel bundle:** +1.815 kB, in
+[qualita.md](../qualita.md).
+
+## Cosa è stato verificato a occhio, e come
+
+Con la porta di debug aperta (`npx electron-vite dev --remoteDebuggingPort 9222`), interrogando il
+documento invece dell'immagine — il metodo del [passaggio di consegne](PASSAGGIO-DI-CONSEGNE.md).
+
+| Cosa                        | Come, e cosa si è visto                                                                                               |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| La serie è **vera**         | vista riempirsi campione per campione: 1, 3, 6, 8, **11** barre nella versione CSS, e 3 → 4 in quella con la libreria |
+| La cadenza                  | il primo campione arriva a cadenza scaduta e non prima, misurato nel finto browser prima che a schermo                |
+| Il colore viene dai token   | `fill` reso: `color-mix(in srgb, var(--color-ink) 85%, transparent)` — un token, non un colore della libreria         |
+| I due temi                  | il riempimento passa da `srgb 0.945…` a `srgb 0.082…` premendo l'interruttore, **senza ridisegnare il grafico**       |
+| L'asse è in lingua          | `948.627,00 €` e `858.281,60 €`, non `948627.0` — ed è la prova che il formattatore sopravvive senza l'involucro Vue  |
+| Il tooltip nativo che resta | **2** elementi `<title>` dentro l'SVG, contati nel documento: è la correzione 8                                       |
+| La finestra che si adatta   | con un campione solo l'asse è 858.281,60–948.627,00 attorno a 903.454,30, cioè ciò che `windowOf` ha calcolato        |

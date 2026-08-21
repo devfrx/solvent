@@ -48,6 +48,38 @@ export const stepOf = (accumulated: Milliseconds, cap: Ticks, clock: Clock): Ste
   return { elapsed: cap, pending, dropped: ticks(whole - cap) }
 }
 
+/** Se adesso va preso un campione, e quanti tick restano sotto la soglia. */
+export interface Sampling {
+  readonly due: boolean
+  readonly pending: Ticks
+}
+
+/**
+ * D027 — dal tick al campione. È lo **stesso** accumulatore di `stepOf` un piano più su: là il
+ * frame diventa tick, qui il tick diventa campione, e in tutti e due i casi il resto torna
+ * indietro invece di essere buttato.
+ *
+ * Vive qui e non accanto a chi la usa per una ragione che è una regola: `no-restricted-imports`
+ * vieta a uno store di importare qualunque cosa stia accanto a sé (R01), quindi una funzione pura
+ * scritta in `stores/` non sarebbe raggiungibile dallo store. `stepOf` ha già questa forma — è
+ * esportata da qui e chiamata da `recover()` — e questa la segue.
+ *
+ * **Il tetto del recupero produce un campione solo, non millecinquecento.** Tornare dopo otto ore
+ * arriva qui come un `elapsed` enorme, e non ci sono valori intermedi da campionare: il reddito
+ * arretrato entra in una transazione sola (`income/system.ts`), quindi di saldi ce n'è **uno**.
+ * Dividere quel salto in barre finte sarebbe disegnare numeri che nessuno ha mai avuto — la
+ * correzione 1 di D015 con un altro vestito.
+ *
+ * `every` è un intero positivo che arriva da `balance/`, quindi non c'è una guardia contro lo
+ * zero: sarebbe un ramo che nessun test può raggiungere passando dal gioco, cioè codice che si
+ * prova solo da sé stesso.
+ */
+export const sampleOf = (pending: Ticks, elapsed: Ticks, every: Ticks): Sampling => {
+  const accumulated = pending + elapsed
+  if (accumulated < every) return { due: false, pending: ticks(accumulated) }
+  return { due: true, pending: ticks(accumulated % every) }
+}
+
 export type Cancel = () => void
 
 export interface LoopDeps {

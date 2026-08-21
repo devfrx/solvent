@@ -10,6 +10,7 @@ import type { LoadedSave, SavePayload, SaveResult } from '@core/contracts/save'
 import { BALANCE } from '@core/balance/constants'
 import { upgradePrices } from '@core/domains/income/rules'
 import { capacityFor, expansionPrices, MAX_LEVEL } from '@core/domains/vault/rules'
+import { clock, ticks } from '@core/kernel/Clock'
 import { income } from '@core/kernel/Ledger'
 
 import { createGame, type Game } from '../../src/renderer/runtime/createGame'
@@ -202,6 +203,78 @@ describe('il mirror', () => {
 
     expect(store.history.max).toBe(20)
     expect(store.history.items).toHaveLength(20)
+  })
+})
+
+describe('la serie del patrimonio netto', () => {
+  /*
+   * Le tre durate si **derivano** dal Clock invece di essere riscritte: `5000` e `28800000` a mano
+   * sarebbero il tick rate in un secondo posto, cioè il difetto A04 dentro un test.
+   */
+  const TICK = clock.ticksToMilliseconds(ticks(1))
+  const EVERY = clock.ticksToMilliseconds(BALANCE.NET_WORTH_SAMPLE_EVERY)
+  /** Il tetto del recupero, in millisecondi: la notte più lunga che il gioco riconosce. */
+  const A_NIGHT = clock.ticksToMilliseconds(BALANCE.RECOVERY_CAP)
+
+  /** Fa passare del tempo davvero, frame per frame, come farebbe il browser. */
+  const run = (elapsed: number): void => {
+    stage.advance(elapsed)
+    stage.frame()
+  }
+
+  it('non prende niente prima della cadenza, e il primo campione arriva a cadenza scaduta', async () => {
+    const store = await start()
+    stage.frame()
+
+    run(EVERY - TICK)
+    expect(store.netWorthSeries.items).toHaveLength(0)
+
+    run(TICK)
+    expect(store.netWorthSeries.items).toHaveLength(1)
+  })
+
+  it('e il campione porta i saldi che il tick ha appena prodotto, non quelli di prima', async () => {
+    // Cinque secondi di reddito base sono 60,00 €: il campione è **dopo** il tick, non prima.
+    const store = await start()
+    stage.frame()
+    run(EVERY)
+
+    expect(toString(store.netWorthSeries.items[0] ?? fromString('0'))).toBe('60')
+  })
+
+  it('ne prende uno per intervallo, e la lista ha un limite dichiarato', async () => {
+    const store = await start()
+    stage.frame()
+
+    for (let taken = 0; taken < BALANCE.NET_WORTH_SAMPLES + 2; taken += 1) run(EVERY)
+
+    expect(store.netWorthSeries.max).toBe(BALANCE.NET_WORTH_SAMPLES)
+    expect(store.netWorthSeries.items).toHaveLength(BALANCE.NET_WORTH_SAMPLES)
+  })
+
+  it('una notte a finestra nascosta vale **un** campione, non uno per intervallo trascorso', async () => {
+    // È il caso che il grafico deve dire invece di nascondere: di saldi ne esiste uno solo,
+    // perché il reddito arretrato entra in una transazione sola. Millecinquecento barre finte
+    // sarebbero millecinquecento numeri che nessuno ha mai avuto.
+    const store = await start()
+    stage.frame()
+
+    stage.setVisible(false)
+    stage.setVisible(true)
+    run(A_NIGHT)
+
+    expect(store.netWorthSeries.items).toHaveLength(1)
+  })
+
+  it('una partita nuova la azzera: la scala non è quella della partita buttata via', async () => {
+    const store = await start()
+    stage.frame()
+    run(EVERY)
+    expect(store.netWorthSeries.items).toHaveLength(1)
+
+    await store.newGame()
+
+    expect(store.netWorthSeries.items).toEqual([])
   })
 })
 

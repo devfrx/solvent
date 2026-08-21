@@ -106,6 +106,13 @@ export const en: Dictionary = {
   'home.tile.fees.explained':
     'What moving money has cost. It is the price of making traceable what was not.',
 
+  'home.chart.title': 'Net worth over time',
+  'home.chart.explained':
+    'One bar every {seconds} seconds of play. The height is the change within the window, not the total: the lowest sample sits at the floor, the highest at the top. After a long pause a single bar covers all the time that passed.',
+  'home.chart.how_to_read': 'How to read it',
+  'home.chart.oldest': 'Earlier',
+  'home.chart.newest': 'Now',
+
   'atm.account.title': 'On the account',
   'atm.cash.title': 'Cash',
   'atm.cash.capacity': 'Vault capacity',

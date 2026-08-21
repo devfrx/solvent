@@ -13,7 +13,7 @@ affidate a un occhio, e stanno in [qualita.md](qualita.md) con la data accanto.
 
 ## Decisioni
 
-**33** ADR: 29 `Accettata`, 4 `Proposta`, 0 `Superata`.
+**34** ADR: 30 `Accettata`, 4 `Proposta`, 0 `Superata`.
 
 - `Proposta`: 0010, 0022, 0023, 0026
 - `Superata`: _nessuno_
@@ -23,9 +23,9 @@ dall'intestazione del suo ADR, ed è da lì che questo elenco arriva.
 
 ## Deleghe
 
-**27** deleghe: 26 `Chiusa`, 0 `In corso`, 1 `Aperta`.
+**27** deleghe: 27 `Chiusa`, 0 `In corso`, 0 `Aperta`.
 
-- `Aperta`: D027
+- `Aperta`: _nessuno_
 - `In corso`: _nessuno_
 
 L'ordine in cui si eseguono non è questo elenco: è il grafo in
@@ -33,12 +33,12 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 
 ## Documenti
 
-**84** markdown: 83 sotto `docs/`, più il `README.md` della radice.
+**85** markdown: 84 sotto `docs/`, più il `README.md` della radice.
 
 ## Codice
 
-**74** file sotto `src/`, di cui **26** `.vue`.
-**71** file di test. I domini sono 3: `atm`, `income`, `vault`.
+**76** file sotto `src/`, di cui **27** `.vue`.
+**72** file di test. I domini sono 3: `atm`, `income`, `vault`.
 
 Le righe sono **righe di codice**: commenti e righe vuote escluse, con lo stesso metodo per
 tutti — ed è `codeLines` in `tests/helpers/projectState.ts` a definirlo, così due misure restano
@@ -48,9 +48,9 @@ confrontabili.
 | ----------------------------- | ---- | ----- |
 | `src/core/contracts/`         | 10   | 150   |
 | `src/core/kernel/`            | 5    | 476   |
-| `src/core/balance/`           | 3    | 100   |
+| `src/core/balance/`           | 3    | 103   |
 | `src/core/domains/`           | 9    | 318   |
 | `src/main/` + `src/preload/`  | 8    | 246   |
-| `src/renderer/`               | 39   | 2.712 |
-| — di cui `src/renderer/i18n/` | 3    | 497   |
-| — di cui CSS dentro i `.vue`  | 26   | 661   |
+| `src/renderer/`               | 41   | 2.879 |
+| — di cui `src/renderer/i18n/` | 3    | 514   |
+| — di cui CSS dentro i `.vue`  | 27   | 689   |

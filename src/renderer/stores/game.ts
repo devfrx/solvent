@@ -35,12 +35,12 @@ import {
 } from '@core/domains/vault/rules'
 import type { VaultError } from '@core/domains/vault/system'
 import type { VaultState } from '@core/domains/vault/types'
-import type { Milliseconds } from '@core/kernel/Clock'
-import { milliseconds } from '@core/kernel/Clock'
+import type { Milliseconds, Ticks } from '@core/kernel/Clock'
+import { clock, milliseconds, ticks } from '@core/kernel/Clock'
 
 import type { Game, GameLoadError } from '@renderer/runtime/createGame'
 import type { Host } from '@renderer/runtime/host'
-import { createLoop, stepOf } from '@renderer/runtime/loop'
+import { createLoop, sampleOf, stepOf } from '@renderer/runtime/loop'
 
 /**
  * L'unico store della fetta, e un **lettore**: riceve dal Bus e rispecchia. Non calcola niente.
@@ -59,6 +59,11 @@ import { createLoop, stepOf } from '@renderer/runtime/loop'
  * dell'aritmetica — il patrimonio netto e l'ordine delle ultime operazioni — e sono presentazione,
  * non gioco: un `.vue` non può sommare (R05), e il registro YAGNI diceva che quel selettore sarebbe
  * nato col pannello che lo consuma. È questo.
+ *
+ * Da D027 tiene anche la **serie** del patrimonio netto, ed è la prima lista di questo file che non
+ * è un mirror: `history` rispecchia ciò che il Bus ha appena detto, `netWorthSeries` decide **ogni
+ * quanto** guardare. La regola che lo decide è pura e sta in `runtime/loop.ts`, accanto a quella
+ * che trasforma i frame in tick — è lo stesso accumulatore un piano più su.
  */
 
 /**
@@ -168,6 +173,37 @@ export const useGameStore = defineStore('game', () => {
   const balances = shallowRef<Balances>(game.ctx.ledger.balances())
   const history = shallowRef<BoundedList<Transaction>>(boundedList<Transaction>(HISTORY_MAX))
   const savedAt = ref<number | null>(null)
+
+  /**
+   * D027 — la serie del patrimonio netto, cioè **lo stesso numero** che il riquadro del cruscotto
+   * mostra, preso a intervalli regolari.
+   *
+   * Un campione è un `Money` e non l'intero `Balances`, ed è la conseguenza di una decisione di
+   * disegno: il grafico ha una scala che si adatta alla finestra, e su una scala che taglia il
+   * fondo una barra impilata direbbe una bugia sulla composizione (`components/shell/series.ts`).
+   * Tenere qui i sei saldi per disegnarne uno solo sarebbe conservare per un grafico che non
+   * esiste.
+   *
+   * A sommare è `netWorth`, la **stessa** `computed` che il riquadro legge: due somme del
+   * patrimonio in due punti sono due patrimoni, ed è la trappola che questo progetto ha già chiuso
+   * per la commissione del bancomat e per la capienza del caveau.
+   *
+   * **Non entra nel salvataggio**, come `history`, e per una ragione in più: senza il calendario
+   * dell'ADR 0023 un campione non sa **quando** è stato preso, quindi due barre affiancate
+   * potrebbero distare un tick o otto ore e il grafico le disegnerebbe uguali. Una serie che
+   * riparte a ogni avvio dice meno ed è vera; una salvata direbbe di più e mentirebbe. Il giorno in
+   * cui il calendario esiste, questa riga è il primo posto da rileggere — e allora l'ADR 0010 avrà
+   * il suo meccanismo intero.
+   */
+  const netWorthSeries = shallowRef<BoundedList<Money>>(
+    boundedList<Money>(BALANCE.NET_WORTH_SAMPLES)
+  )
+
+  /**
+   * Quanti tick sono passati dall'ultimo campione. È l'accumulatore di `sampleOf`, e vive qui come
+   * `hiddenAt`: un valore che nessuna schermata guarda non ha ragione di essere reattivo.
+   */
+  let sinceSample: Ticks = ticks(0)
 
   /**
    * I numeri del reddito che la UI mostra e non può calcolare: un `.vue` non importa
@@ -432,6 +468,14 @@ export const useGameStore = defineStore('game', () => {
       // è l'unico mirror che va riletto a ogni passo. Con il caveau che ha spazio è `ZERO` contro
       // `ZERO`, cioè lo stesso oggetto, e il `ref` non sveglia nessuno.
       withheld.value = game.income.withheld()
+
+      // Il campione si prende **dopo** il tick, quindi porta i saldi che il tick ha appena
+      // prodotto: l'evento del Ledger è già passato di qui sopra, perché il Bus è sincrono
+      // (ADR 0016). Prenderlo prima disegnerebbe sempre il gioco di un passo fa.
+      const sampling = sampleOf(sinceSample, step.elapsed, BALANCE.NET_WORTH_SAMPLE_EVERY)
+      sinceSample = sampling.pending
+      if (sampling.due) netWorthSeries.value = pushBounded(netWorthSeries.value, netWorth.value)
+
       // Il primo frame dopo il ritorno dal nascondimento porta con sé tutto il tempo passato: è
       // quello che chiude `Recupero`, e non c'è un secondo percorso che lo faccia.
       if (status.value === 'recovering') status.value = 'playing'
@@ -496,6 +540,10 @@ export const useGameStore = defineStore('game', () => {
     status.value = 'loading'
     game.reset('hard')
     history.value = boundedList<Transaction>(HISTORY_MAX)
+    // La serie è di **questa** partita: tenerla farebbe cominciare il grafico della partita nuova
+    // con il patrimonio di quella buttata via, cioè con la sua scala.
+    netWorthSeries.value = boundedList<Money>(BALANCE.NET_WORTH_SAMPLES)
+    sinceSample = ticks(0)
     savedAt.value = null
     failure.value = null
     failedDuring.value = null
@@ -641,6 +689,16 @@ export const useGameStore = defineStore('game', () => {
     feesPaid,
     operations,
     recentOperations,
+    netWorthSeries,
+    /**
+     * Ogni quanti secondi di gioco la serie prende un campione. Il grafico lo **dice** al
+     * giocatore, perché senza quel numero non sa quanto larga è la finestra che sta guardando.
+     *
+     * È un numero nudo e non un `ref`: non cambia mai durante una partita, e avvolgerlo
+     * suggerirebbe il contrario. Passa da qui perché un `.vue` non può importare né `balance/` né
+     * il Clock (R05), e sono i due che servono a rispondere.
+     */
+    netWorthSampleSeconds: clock.ticksToSeconds(BALANCE.NET_WORTH_SAMPLE_EVERY),
     start,
     newGame,
     retry,

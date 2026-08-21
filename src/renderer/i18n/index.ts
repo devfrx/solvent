@@ -150,6 +150,14 @@ export type ScreenKey =
   | 'home.tile.earned.explained'
   | 'home.tile.spent.explained'
   | 'home.tile.fees.explained'
+  // Il grafico del cruscotto (D027). Il canvas chiama il suo «Net worth · 30 days», e quella
+  // seconda meta' non si puo' tradurre: i giorni di gioco non esistono finche' non nasce il
+  // calendario dell'ADR 0023. Le chiavi qui sotto dicono cio' che il grafico e' davvero.
+  | 'home.chart.title'
+  | 'home.chart.explained'
+  | 'home.chart.how_to_read'
+  | 'home.chart.oldest'
+  | 'home.chart.newest'
   | 'atm.account.title'
   | 'atm.cash.title'
   | 'atm.cash.capacity'

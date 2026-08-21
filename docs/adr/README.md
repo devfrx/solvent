@@ -97,8 +97,16 @@ L'eccezione è **0010**, che ha il meccanismo **a metà**: `boundedList<T>(max)`
 obbligatorio, ma la seconda frase della decisione — «il validatore del salvataggio rifiuta un array
 che supera il `max` dichiarato» — non ha niente da validare, perché nel payload della versione 1
 non c'è nessun array. La lista delle ultime operazioni ha il suo limite ed è un mirror che riparte
-vuoto: non attraversa il disco. Metà meccanismo non è una decisione in vigore, ed è il caveau della
-fetta 02 a chiuderla.
+vuoto: non attraversa il disco. Metà meccanismo non è una decisione in vigore.
+
+**A chiuderla non è stato il caveau, e questa riga lo diceva.** La fetta 02 prometteva «il primo
+`boundedList` con dati veri dentro» e non l'ha mantenuto: il caveau conserva contanti **e oggetti**,
+ma gli oggetti nascono col black market, e un inventario vuoto è l'astrazione che l'ADR 0014 vieta
+([roadmap-fette.md](../roadmap-fette.md)). Nemmeno [D027](../delega/D027-un-grafico-e-una-serie-che-nessuno-tiene.md)
+la chiude, e per una ragione sua: la serie del patrimonio netto **potrebbe** entrare nel salvataggio,
+e resta fuori perché senza il calendario dell'[ADR 0023](0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md)
+un campione non sa quando è stato preso — due barre affiancate potrebbero distare un tick o otto ore.
+Il grilletto resta quello che il registro YAGNI ha scritto: il primo dominio che possiede **cose**.
 
 ## Le decisioni
 
@@ -137,6 +145,7 @@ fetta 02 a chiuderla.
 | [0031](0031-il-tema-si-sceglie-e-non-si-ricorda.md)                            | Il tema si sceglie, e non si ricorda                           | **Accettata** | chi decide il tema, e perché la scelta non sopravvive alla finestra     | A14             |
 | [0032](0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)                | Le sovrapposizioni stanno nel livello superiore                | **Accettata** | dove sta ciò che copre il resto, e perché non ha una libreria           | A14             |
 | [0033](0033-un-dominio-ha-una-cartella-e-una-pagina.md)                        | Un dominio ha una cartella, e di norma una pagina              | **Accettata** | dove vive l'interfaccia di un dominio, e dove il giocatore la trova     | A17             |
+| [0034](0034-il-grafico-e-una-libreria.md)                                      | Il grafico è una libreria, e la libreria disegna in SVG        | **Accettata** | con cosa si disegna un grafico, e come i suoi colori restano token      | A14             |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è

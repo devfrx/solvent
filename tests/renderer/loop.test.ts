@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { clock, milliseconds, ticks } from '@core/kernel/Clock'
 
-import { createLoop, stepOf, type Step } from '../../src/renderer/runtime/loop'
+import { createLoop, sampleOf, stepOf, type Step } from '../../src/renderer/runtime/loop'
 import { createStage } from '../helpers/host'
 
 /**
@@ -48,6 +48,41 @@ describe('la regola dell’accumulatore', () => {
       pending: 0,
       dropped: 0
     })
+  })
+})
+
+describe('la cadenza dei campioni', () => {
+  /** Cinque secondi a dieci tick al secondo, come `BALANCE.NET_WORTH_SAMPLE_EVERY`. */
+  const EVERY = ticks(50)
+
+  it('sotto la soglia non c’è niente da campionare, e il tempo resta', () => {
+    expect(sampleOf(ticks(0), ticks(49), EVERY)).toEqual({ due: false, pending: 49 })
+  })
+
+  it('la soglia esatta chiede un campione e non lascia resto', () => {
+    expect(sampleOf(ticks(0), ticks(50), EVERY)).toEqual({ due: true, pending: 0 })
+  })
+
+  it('oltre la soglia il resto sopravvive, altrimenti la cadenza slitta', () => {
+    // Venticinque tick avanzati: il prossimo campione arriva dopo venticinque, non dopo
+    // cinquanta. Buttarli via allungherebbe di poco ogni intervallo, cioè in modo invisibile.
+    expect(sampleOf(ticks(0), ticks(75), EVERY)).toEqual({ due: true, pending: 25 })
+  })
+
+  it('e l’accumulatore di prima si somma a quello che arriva', () => {
+    expect(sampleOf(ticks(40), ticks(45), EVERY)).toEqual({ due: true, pending: 35 })
+  })
+
+  it('otto ore di assenza valgono un campione, non uno per ogni soglia attraversata', () => {
+    // Il recupero arriva qui come un `elapsed` enorme, e di saldi ne esiste **uno**: il reddito
+    // arretrato entra in una transazione sola. Che i campioni non possano essere più d'uno lo
+    // dice il tipo — `due` è un booleano — e questo test dice che il resto non ci sopravvive.
+    expect(sampleOf(ticks(0), ticks(288_000), EVERY)).toEqual({ due: true, pending: 0 })
+  })
+
+  it('il resto non supera mai la soglia, per quanto lungo sia il passo', () => {
+    const long = sampleOf(ticks(49), ticks(1_000_003), EVERY)
+    expect(long.pending).toBeLessThan(EVERY)
   })
 })
 

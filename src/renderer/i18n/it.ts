@@ -109,6 +109,13 @@ export const it: Dictionary = {
   'home.tile.fees.explained':
     'Quanto è costato spostare il denaro. È il prezzo di rendere tracciabile ciò che non lo era.',
 
+  'home.chart.title': 'Patrimonio netto nel tempo',
+  'home.chart.explained':
+    'Una barra ogni {seconds} secondi di gioco. L’altezza è la variazione dentro la finestra, non il totale: il campione più basso sta sul fondo, il più alto in cima. Dopo una pausa lunga una barra sola copre tutto il tempo passato.',
+  'home.chart.how_to_read': 'Come si legge',
+  'home.chart.oldest': 'Prima',
+  'home.chart.newest': 'Adesso',
+
   'atm.account.title': 'Sul conto',
   'atm.cash.title': 'Contanti',
   'atm.cash.capacity': 'Capienza del caveau',

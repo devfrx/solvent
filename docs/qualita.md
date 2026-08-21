@@ -121,6 +121,27 @@ compilato è **622,87 kB** e il foglio di stile **27,50 kB** — erano 619,60 e 
 parole che li accompagnano — perché D018 non ha toccato una riga di `src/`. I cinque file di
 carattere non si muovono.
 
+**Il peso, rimisurato a [D027](delega/D027-un-grafico-e-una-serie-che-nessuno-tiene.md), il
+2026-08-21 — e questa volta la differenza non è un arrotondamento.** Il modulo compilato è
+**2.437,92 kB** e il foglio di stile **28,83 kB**, contro 622,87 e 27,50 a
+[D018](delega/D018-la-scheda-di-dominio.md). Il modulo è **quasi quadruplicato**, e la causa è una
+sola: `apexcharts` ([ADR 0034](adr/0034-il-grafico-e-una-libreria.md)). Circa 1.815 kB per un
+grafico a barre.
+
+Va scritto qui perché è il numero che rende contestabile quella decisione invece che opinabile.
+Tre cose che chi lo rilegge deve sapere:
+
+- **Non si tratta di configurare meglio il bundler.** ApexCharts non ha una build modulare: si
+  importa intera o non si importa, e il grafico usa un tipo su una ventina.
+- **È un'applicazione desktop**, quindi il peso non si paga in rete a ogni apertura come su un sito:
+  si paga una volta nell'installatore e poi in memoria. È la ragione per cui il numero è accettabile
+  e non un difetto.
+- **Il grilletto per rimetterla in discussione è scritto**: la prima misura in cui l'avvio della
+  finestra si fa sentire, oppure il giorno in cui i candlestick del blocco C **non** arrivano — se
+  quella metà della giustificazione non si spende, resta una libreria intera per un grafico a barre.
+
+I cinque file di carattere non si muovono.
+
 **Il motore, misurato invece che supposto.** L'[ADR 0032](adr/0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)
 poggia su due funzionalità del motore — il livello superiore e l'ancoraggio CSS — e la sua premessa è
 che il motore sia uno solo e recente. Chiesto a lui invece che al changelog:

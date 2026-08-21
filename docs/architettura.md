@@ -219,7 +219,9 @@ solvent/
 │     │  │  ├─ AppNav.vue         # la colonna: i gruppi, le destinazioni, l'interruttore del tema
 │     │  │  ├─ AppHeader.vue      # la testata: dove sei, e la striscia degli strumenti
 │     │  │  ├─ screens.ts         # destinazioni, gruppi, parole, e DOMAIN_SCREENS
-│     │  │  └─ StatTile.vue       # il riquadro del cruscotto: e' cio' che il test conta
+│     │  │  ├─ StatTile.vue       # il riquadro del cruscotto: e' cio' che il test conta
+│     │  │  ├─ series.ts          # i due estremi dell'asse del grafico - pura
+│     │  │  └─ NetWorthChart.vue  # il grafico: ApexCharts montata a mano (ADR 0034)
 │     │  ├─ ledger/               # del registro
 │     │  │  ├─ PostingRows.vue    # i movimenti di una transazione, riga per riga
 │     │  │  ├─ postings.ts        # quali movimenti il giocatore vede - pura
@@ -247,7 +249,7 @@ solvent/
    ├─ save/            schema - roundtrip - kernel-roundtrip - migrations - ipc - preload
    ├─ balance/         modifiers · targets
    ├─ i18n/            parity · translator
-   ├─ renderer/        createGame · loop · store · postings · rotation
+   ├─ renderer/        createGame · loop · store · postings · rotation · theme · series
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
                        eslint-disable · bus-synchronous · main-save-only · home-tiles
                        no-logic-in-vue · no-literal-in-template · english-identifiers
