@@ -115,6 +115,13 @@ flowchart TD
   D024 --> D030["D030 · Il contenuto scorre nel telaio"]
   D025 --> D031["D031 · La sovrapposizione è un pezzo del kit"]
   D029 --> D031
+  D014 --> D032["D032 · La commissione scala, il pavimento no"]
+  D017 --> D032
+  D032 --> D033["D033 · Il bancomat è una pagina"]
+  D026 --> D033
+  D027 --> D033
+  D033 --> D034["D034 · Le serie degli strumenti"]
+  D027 --> D034
 ```
 
 **D017 e D018 non si toccano**, ed è il primo caso del progetto: una scrive codice, l'altra solo
@@ -122,6 +129,11 @@ documenti, e nessuna aspetta l'altra. Il grafo lo mostra facendole partire entra
 freccia resta assente anche adesso che D017 è chiusa: una delega che viene **prima** non è una
 delega da cui si **dipende**, e disegnarla sarebbe scrivere nel grafo una cronologia invece di un
 vincolo.
+
+**D031 e D033 non si toccano**, ed è il secondo caso dopo D017/D018. L'intestazione di D031 dichiara
+di sbloccare la rifinitura del bancomat, e non è più vero: la pagina `ATM` del canvas, letta nel
+sorgente, non ha una sola sovrapposizione. La freccia che ci si aspetterebbe **non c'è**, e il
+perché sta in [D033](D033-il-bancomat-e-una-pagina.md), _Perché D031 non è più a monte_.
 
 **L'ordine in cui sono state eseguite però non era indifferente, ed è andata bene.** D017 per prima
 significa che il caveau **esiste**, quindi tutte e tre le schede di prova di D018 si compilano
@@ -239,6 +251,9 @@ configurato dopo che c'erano già 156 file.
 | [D029](D029-i-devcheat.md)                                | I devcheat: costruire uno stato invece di aspettarlo                             | 318 codice + 249 test         | **Chiusa** |
 | [D030](D030-il-contenuto-scorre-nel-telaio.md)            | Il contenuto scorre nel telaio, e la testata sta ferma                           | 12 codice + 22 test           | **Chiusa** |
 | [D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md)     | La sovrapposizione è un pezzo del kit, non una cosa che ogni componente riscrive | non stimato                   | **Aperta** |
+| [D032](D032-la-commissione-scala-il-pavimento-no.md)      | La commissione scala, il pavimento no                                            | ~90                           | **Aperta** |
+| [D033](D033-il-bancomat-e-una-pagina.md)                  | Il bancomat è una pagina, e il cruscotto è un'altra                              | ~450                          | **Aperta** |
+| [D034](D034-le-serie-degli-strumenti.md)                  | Le serie degli strumenti: una candela non si campiona, si accumula               | ~200                          | **Aperta** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede

@@ -23,9 +23,9 @@ dall'intestazione del suo ADR, ed è da lì che questo elenco arriva.
 
 ## Deleghe
 
-**31** deleghe: 30 `Chiusa`, 0 `In corso`, 1 `Aperta`.
+**34** deleghe: 30 `Chiusa`, 0 `In corso`, 4 `Aperta`.
 
-- `Aperta`: D031
+- `Aperta`: D031, D032, D033, D034
 - `In corso`: _nessuno_
 
 L'ordine in cui si eseguono non è questo elenco: è il grafo in
@@ -33,7 +33,7 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 
 ## Documenti
 
-**92** markdown: 91 sotto `docs/`, più il `README.md` della radice.
+**95** markdown: 94 sotto `docs/`, più il `README.md` della radice.
 
 ## Codice
 
