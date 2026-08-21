@@ -1,6 +1,6 @@
 # D027 — Un grafico è una serie, e nessuno la tiene
 
-- **Stato:** **Chiusa** — eseguita il 2026-08-21. Le due decisioni sono state prese con l'utente, e
+- **Stato:** **Chiusa** — `ece5561`, il 2026-08-21. Le due decisioni sono state prese con l'utente, e
   la seconda è stata presa **due volte**: prima CSS, poi — a grafico costruito e guardato —
   libreria, da cui l'[ADR 0034](../adr/0034-il-grafico-e-una-libreria.md). Guardare l'applicazione
   ne ha aggiunte altre due che la delega non prevedeva. Vedi _Le decisioni prese_, _Le correzioni_ e
