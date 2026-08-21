@@ -1,6 +1,6 @@
 # D031 — La sovrapposizione è un pezzo del kit
 
-- **Stato:** Chiusa — ramo `d031-la-sovrapposizione-e-un-pezzo-del-kit`, che parte da
+- **Stato:** Chiusa — commit `d9863d6`, ramo `d031-la-sovrapposizione-e-un-pezzo-del-kit`, che parte da
   [D032](D032-la-commissione-scala-il-pavimento-no.md) e non da `d030` come diceva: D032 ha chiuso
   prima, e le due non si toccano. Scritta il 2026-08-21, eseguita lo stesso giorno
 - **Dipende da:** [D025](D025-il-tooltip.md), che ha portato la prima sovrapposizione, e
