@@ -1,6 +1,6 @@
 # D032 — La commissione scala, il pavimento no
 
-- **Stato:** Chiusa — ramo `d032-la-commissione-scala-il-pavimento-no`, che parte da
+- **Stato:** Chiusa — commit `83422a3`, ramo `d032-la-commissione-scala-il-pavimento-no`, che parte da
   `d030-il-contenuto-scorre-nel-telaio` perché i sei commit del 2026-08-21 non sono ancora fusi in
   `main`. Scritta ed eseguita il 2026-08-21
 - **Dipende da:** [D014](D014-dominio-bancomat.md), che ha costruito la commissione fissa, e
