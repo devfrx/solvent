@@ -2,7 +2,7 @@
 
 - **Stato:** **Chiusa** — scritta ed eseguita il 2026-08-21, insieme a [D024](D024-il-telaio.md)
   e subito dopo di lei: il telaio porta il primo posto stretto in cui una parola in più non ci sta.
-  Chiusa lo stesso giorno sul ramo `d024-d025-telaio-e-tooltip`, commit `da annotare`, nella stessa
+  Chiusa lo stesso giorno sul ramo `d024-d025-telaio-e-tooltip`, commit `29ff535`, nella stessa
   sessione a occhio di D024. Vedi _Come è andata_ in fondo
 - **Dipende da:** [D023](D023-il-design-system.md) — il tooltip è un pezzo del kit, e senza il kit
   sarebbe il secondo posto in cui nascono dei colori. **Non** dipende da [D024](D024-il-telaio.md):

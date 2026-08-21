@@ -2,7 +2,7 @@
 
 - **Stato:** **Chiusa** — scritta ed eseguita il 2026-08-21, rileggendo il canvas di Claude Design
   da cui [D023](D023-il-design-system.md) aveva preso le fondamenta lasciando qui l'impaginazione.
-  Chiusa lo stesso giorno sul ramo `d024-d025-telaio-e-tooltip`, commit `da annotare`, insieme a
+  Chiusa lo stesso giorno sul ramo `d024-d025-telaio-e-tooltip`, commit `29ff535`, insieme a
   [D025](D025-il-tooltip.md): le due spunte che restavano aperte erano una sola sessione a occhio.
   Vedi _Come è andata_ in fondo
 - **Dipende da:** [D023](D023-il-design-system.md) — il telaio è fatto dei pezzi del kit, e senza il
