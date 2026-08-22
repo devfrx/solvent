@@ -252,7 +252,7 @@ configurato dopo che c'erano già 156 file.
 | [D030](D030-il-contenuto-scorre-nel-telaio.md)            | Il contenuto scorre nel telaio, e la testata sta ferma                           | 12 codice + 22 test           | **Chiusa** |
 | [D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md)     | La sovrapposizione è un pezzo del kit, non una cosa che ogni componente riscrive | 130 codice + 34 test          | **Chiusa** |
 | [D032](D032-la-commissione-scala-il-pavimento-no.md)      | La commissione scala, il pavimento no                                            | 204 codice + 209 test         | **Chiusa** |
-| [D033](D033-il-bancomat-e-una-pagina.md)                  | Il bancomat è una pagina, e il cruscotto è un'altra                              | ~450                          | **Aperta** |
+| [D033](D033-il-bancomat-e-una-pagina.md)                  | Il bancomat è una pagina, e il cruscotto è un'altra                              | 700 codice + 317 test         | **Chiusa** |
 | [D034](D034-le-serie-degli-strumenti.md)                  | Le serie degli strumenti: una candela non si campiona, si accumula               | ~200                          | **Aperta** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015

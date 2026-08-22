@@ -1,8 +1,14 @@
 # ADR 0018 — La home è cruscotto **e** bancomat, con il bancomat al primo posto
 
-- **Stato:** **Accettata** — [D015](../delega/D015-home-bancomat.md): la home è le due zone in
-  quest'ordine, la commissione si vede prima della conferma, e `tests/rules/home-tiles` conta i
-  riquadri. Rivista il 2026-08-19 su decisione dell'utente
+- **Stato:** **Superata** da [ADR 0040](0040-il-bancomat-e-il-cruscotto-sono-due-pagine.md) —
+  [D033](../delega/D033-il-bancomat-e-una-pagina.md): il bancomat e il cruscotto sono due pagine, e
+  il tetto dei riquadri difende il cruscotto invece del bancomat. **La domanda di questo ADR non è
+  cambiata**, e il 0040 la ricopia per intero: è la risposta a essere stata sostituita. Tutto il
+  resto di ciò che sta scritto qui — la commissione prima della conferma, il rifiuto con un motivo,
+  la carta come oggetto — **vale ancora**
+- **Stato precedente:** **Accettata** — [D015](../delega/D015-home-bancomat.md): la home è le due
+  zone in quest'ordine, la commissione si vede prima della conferma, e `tests/rules/home-tiles`
+  conta i riquadri. Rivista il 2026-08-19 su decisione dell'utente
 - **Data:** 2026-08-19
 - **Origine:** preferenze [P3](../prodotto/preferenze.md#p3--la-home-è-cruscotto-e-bancomat) e [P5](../prodotto/preferenze.md#p5--la-carta-è-un-oggetto-3d-ruotabile)
 
@@ -57,7 +63,8 @@ premuto è un bancomat scorretto, e questo gioco parla di soldi.
 - `tests/rules/home-tiles.test.ts` conta i riquadri statistici nella vista home e fallisce oltre
   sei. Regola meccanizzata, non affidata alla review. Esiste da
   [D015](../delega/D015-home-bancomat.md), ed è **⚠️ parziale**: conta i tag e rifiuta un `v-for`
-  su un riquadro, ma un `v-for` su un contenitore che ne avvolge uno le sfugge.
+  su un riquadro, ma un `v-for` su un contenitore che ne avvolge uno le sfugge. Da D033 si chiama
+  `tests/rules/board-tiles` e guarda `BoardView.vue`: stesso tetto, ragione riscritta.
 - I riquadri sono **cinque**, non sei: il tetto è un tetto, non una quota, e i numeri vivi della
   fetta 01 sono cinque. Il sesto posto è libero, ed è la forma in cui questo ADR si mostra a chi
   arriverà con una statistica nuova.

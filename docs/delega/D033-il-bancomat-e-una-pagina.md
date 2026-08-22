@@ -1,6 +1,12 @@
 # D033 — Il bancomat è una pagina
 
-- **Stato:** **Aperta** — scritta il 2026-08-21, non eseguita. Il ramo si chiami
+- **Stato:** **Chiusa** — eseguita il 2026-08-22 sul ramo `d033-il-bancomat-e-una-pagina`, che
+  parte da `main`. **Non spezzata**: l'intestazione lo chiedeva, e la ragione per non farlo è che
+  non esiste uno stato intermedio che compili — `home` sparisce solo se `atm` e `board` esistono
+  nello stesso commit (INV-22 e il `Record` totale su `Screen`), e la rinomina i18n attraversa le
+  due pagine e la carta. Un ramo, tre commit sequenziati. Le correzioni rispetto a com'era scritta
+  sono in fondo
+- **Stato precedente:** **Aperta** — scritta il 2026-08-21, non eseguita. Il ramo si chiami
   `d033-il-bancomat-e-una-pagina` e parta da **`main`**: il 2026-08-21 tutti i rami di lavoro sono
   stati fusi e cancellati, quindi `d032-la-commissione-scala-il-pavimento-no` — che questa riga
   nominava — non esiste più come etichetta, e il suo contenuto è in `main`
@@ -272,24 +278,24 @@ ragione va riscritta nel test.
 
 ## Definizione di fatto
 
-- [ ] `atm` e `board` sono due destinazioni, e `home` non esiste più — né come schermata, né come
+- [x] `atm` e `board` sono due destinazioni, e `home` non esiste più — né come schermata, né come
       prefisso di chiave i18n.
-- [ ] L'ADR 0018 è `Superata` e l'ADR 0040 dice perché. `docs/stato.md` conta **un** `Superata`.
-- [ ] La pagina del bancomat ha le due colonne del canvas, e sotto la soglia diventa una con
+- [x] L'ADR 0018 è `Superata` e l'ADR 0040 dice perché. `docs/stato.md` conta **un** `Superata`.
+- [x] La pagina del bancomat ha le due colonne del canvas, e sotto la soglia diventa una con
       l'operazione **prima**.
-- [ ] L'importo si digita, e il campo rifiuta ciò che non è un importo senza far cadere la pagina.
-- [ ] `MAX` propone sempre un importo che **passa**, nelle due direzioni — verificato col caveau
+- [x] L'importo si digita, e il campo rifiuta ciò che non è un importo senza far cadere la pagina.
+- [x] `MAX` propone sempre un importo che **passa**, nelle due direzioni — verificato col caveau
       quasi pieno, che è il caso in cui la sottrazione ingenua sbaglia.
-- [ ] La nota «min · max» è **derivata**, non scritta: cambiare `ATM_FEE_FLOOR` la cambia.
-- [ ] `1,00 €` è ancora rifiutato premendo, e il rifiuto si legge nel suo blocco col codice.
-- [ ] La carta ha le due facce del canvas, gira col trascinamento come prima, e il retro non
+- [x] La nota «min · max» è **derivata**, non scritta: cambiare `ATM_FEE_FLOOR` la cambia.
+- [x] `1,00 €` è ancora rifiutato premendo, e il rifiuto si legge nel suo blocco col codice.
+- [x] La carta ha le due facce del canvas, gira col trascinamento come prima, e il retro non
       dichiara meccaniche che non esistono.
-- [ ] `CashPanel` e `HomeView` non esistono più, e niente li importa.
-- [ ] La parità i18n è verde: nessuna chiave orfana dopo la rinomina (R13).
-- [ ] Le quattro combinazioni schermata × tema guardate **nella finestra vera** via CDP, con i
+- [x] `CashPanel` e `HomeView` non esistono più, e niente li importa.
+- [x] La parità i18n è verde: nessuna chiave orfana dopo la rinomina (R13).
+- [x] Le quattro combinazioni schermata × tema guardate **nella finestra vera** via CDP, con i
       colori calcolati letti nel documento — è il metodo di
       [PASSAGGIO-DI-CONSEGNE](PASSAGGIO-DI-CONSEGNE.md), e l'immagine da sola non basta.
-- [ ] `npm run verify` verde, `npm run verify:release` verde, `docs/stato.md` rigenerato.
+- [x] `npm run verify` verde, `npm run verify:release` verde, `docs/stato.md` rigenerato.
 
 ## Trappole note
 
@@ -325,3 +331,119 @@ ragione va riscritta nel test.
 8. **Due colonne che diventano una non sono due `@media`.** Il kit non fa geometria (R16) e il
    telaio è una forma, non un contenitore (ADR 0030): la griglia sta nella pagina, che è il posto
    dove la geometria è ammessa.
+
+---
+
+## Cosa è stato verificato a occhio, e come
+
+Con il metodo di [PASSAGGIO-DI-CONSEGNE](PASSAGGIO-DI-CONSEGNE.md): `npx electron-vite dev --remoteDebuggingPort 9222`, la finestra interrogata dal di dentro via CDP, mai portata in primo piano. Gli script vivono nello scratchpad e questa sessione li ha riscritti da zero, come la precedente.
+
+Le quattro combinazioni **schermata × tema** con i colori calcolati letti nel documento:
+`atm`/`board` × chiaro/scuro. Il fondo passa da `rgb(237, 234, 227)` a `rgb(16, 15, 12)` e
+l'inchiostro da `rgb(21, 20, 15)` a `rgb(241, 237, 226)` — cioè i token cambiano davvero e non solo
+l'immagine. Zero `z-index` sulla pagina del bancomat, nessuno scorrimento orizzontale su nessuna
+delle quattro, colonne 499px e 353px (il 7 e il 5 del canvas).
+
+E poi le cose che un'immagine non dice:
+
+- premuto `1,00 €` → il blocco del rifiuto compare con `RIFIUTATO · ATM · FEE EXCEEDS AMOUNT` e la
+  frase «La commissione di 2,50 € si mangia tutti i 1,00 €», il pulsante resta premibile e
+  smorzato, e la nota sotto diventa «Il pulsante resta vivo»;
+- premuto `Massimo` → il campo riceve `1.000,00` e l'anteprima passa, con
+  −1.000,00 / +985,00 / +15,00;
+- scambiato il verso col pulsante centrale → i due lati si invertono e, col caveau pieno, il
+  massimo prelevabile è `0,00 €` e il rifiuto è `LEDGER · CAPACITY EXCEEDED`. È la risposta onesta:
+  non esiste un importo che passa, e proporne uno sarebbe la bugia che `largestThatFits` esiste per
+  non dire;
+- trascinata la carta → da `rotateX(6deg) rotateY(-14deg)` a `rotateX(-4deg) rotateY(180deg)`, cioè
+  il retro, con `rotation.ts` non toccato;
+- ristretta la finestra da 1600px a 800px a passi → le due colonne diventano una a 1120px, con
+  l'operazione **prima** (`y` 159 contro 652), e a nessuna larghezza qualcosa esce dal proprio
+  contenitore.
+
+## Correzioni rispetto a com'era scritta la delega
+
+1. **La trappola 3 dice il falso su un arrotondamento, ed è stato misurato.** «Per eccesso, `MAX`
+   proporrebbe un centesimo che non ci sta»: con i due tassi in vigore non succede **mai** —
+   300.000 valori di spazio per ciascuno, più altri quattro tassi di prova, zero sconfinamenti. Il
+   motivo è che anche la commissione arrotonda per eccesso, e restituisce il centesimo che
+   l'importo aveva preso. **Per difetto resta comunque la scelta giusta**, ma per un'altra ragione:
+   è sicura per **qualunque** tasso — `netto ≤ importo × (1 − tasso) ≤ spazio` per costruzione —
+   mentre per eccesso dipende da una coincidenza aritmetica fra il tasso e la griglia dei
+   centesimi. Una difesa che regge per caso è una difesa che nessuno sa quando smette.
+2. **E per la stessa ragione «un centesimo in più no» è falso sopra la soglia**, sempre: nei casi in
+   cui comanda la percentuale, l'importo massimo più un centesimo ci sta ancora — misurato al
+   100%. Sotto la soglia, dove la commissione è il pavimento, è esattamente vero, e il test lo
+   asserisce **lì**. Il centesimo lasciato sul tavolo è dichiarato invece che inseguito: prenderlo
+   vorrebbe dire risalire di un centesimo per volta dentro una regola pura.
+3. **`largestThatFits` ha un argomento che la delega non nomina, e un patto in fondo.** L'argomento
+   è quanto c'è alla **partenza**: senza, il massimo depositando sarebbe l'infinito, perché la
+   carta non ha tetto. Il patto è l'ultima riga — se nemmeno l'importo più grande possibile copre
+   la propria commissione, la risposta è **zero**. Senza, con meno del pavimento in contanti `MAX`
+   proporrebbe una cifra che viene rifiutata, che è il difetto per cui la funzione esiste.
+4. **Due valori nuovi in `contracts/money.ts`, che la delega non elencava.** `roundDownToCents` era
+   già annunciato dal commento di `roundUpToCents` — «se un giorno servisse arrotondare un'uscita,
+   quella è un'altra funzione con un altro nome» — e `ONE` serve a leggere un tasso al contrario:
+   sta lì perché un letterale monetario dentro `domains/` è rosso
+   (`tests/rules/domains-no-money-literals`).
+5. **Il confine di presentazione guadagna `plainMoney`.** Il campo tiene testo, e quel testo deve
+   essere ciò che il giocatore scriverebbe: con `money()` i pulsanti rapidi scriverebbero
+   «500,00 €» accanto a un simbolo già stampato, con `toString()` scriverebbero «500», che è una
+   forma che il gioco non mostra da nessuna parte. `plainMoney` scrive `5.102,04` in italiano e
+   `5,102.04` in inglese, e `readAmount` rilegge tutte e due — c'è un test che chiude il giro.
+6. **Il codice del rifiuto si ricava, non si scrive.** Il canvas ne disegna quattro a mano;
+   `refusalCode` li ricava dal codice che l'errore porta già con sé. Aggiungere al dizionario una
+   seconda etichetta per ogni codice sarebbe stato due nomi per lo stesso rifiuto, cioè A13 con
+   un'altra faccia. Non si traduce: la frase c'è ed è quella che `failure` compone, questo è
+   l'identificativo.
+7. **`home.zone.atm` e `home.zone.dashboard` non traslocano: spariscono.** La delega diceva «il
+   titolo della zona passa a `BoardView`», e sarebbe stata l'etichetta «Cruscotto» sotto il titolo
+   «Cruscotto». Servivano a dividere due zone dentro una pagina, e la divisione adesso è la pagina.
+   È la stessa misura che ha eliminato `CashPanel`.
+8. **Il saldo esce dal fronte della carta, e `atm.account.title` con lui.** Non è nella lista della
+   delega, e discende dalla sua stessa regola: il saldo della carta è già il lato `A CARTA` del
+   blocco `DA ⇄ A`. Il canvas lo aveva già capito — il suo fronte non porta cifre di gioco.
+9. **`card.tier.gold` sparisce.** Il fronte del canvas dice `SOLVENT` e `DEBIT`, non un livello.
+   L'oro resta, ma è il **materiale**, e il materiale vive nei token: l'aggancio dell'ADR 0018 alla
+   progressione non aveva bisogno della parola.
+10. **`atm.deposit`, `atm.withdraw`, `atm.deposit.title` e `atm.withdraw.title` spariscono.** Con
+    `DA ⇄ A` la direzione è una cosa che si **vede**, non due linguette che si escludono, e il
+    verbo resta dove serve — sul pulsante, insieme all'importo: «Deposita 500,00 €». Il `Record`
+    totale su `AtmOperationKind` resta, con una chiave invece di tre.
+11. **Il rifiuto della conferma si azzera anche scambiando il verso**, non solo ripremendo. La
+    trappola 5 dice «resta finché non si ripreme», e vale contro il campo che cambia a ogni
+    carattere; ma un rifiuto che parlava di un prelievo, letto sotto un pulsante che adesso
+    deposita, è peggio di nessun rifiuto.
+12. **La lettura del campo ha un'ambiguità, ed è dichiarata invece che nascosta.** `10,999` può
+    essere diecimila o dieci-e-spiccioli, e nessuna regola le distingue. `readAmount` legge
+    diecimila, perché il gioco scrive sempre due decimali esatti — un terzo decimale non può venire
+    da un numero letto sullo schermo. In tutti i casi l'anteprima lo mostra **prima** che si
+    confermi (INV-11), quindi l'errore si vede invece di essere pagato.
+13. **Tre difetti che solo la finestra vera poteva dire**, e nessuno dei tre sarebbe uscito da un
+    test. La carta si schiacciava a 251px perché `.stage` è un flex e un elemento flessibile si
+    stringe anche con una larghezza dichiarata. Da lì la soglia delle due colonne è diventata
+    **misurata** — 70rem, non i ~62 scritti a occhio la prima volta — perché più in basso non si
+    avevano due colonne strette: si aveva una carta rotta. E il retro della carta era illeggibile,
+    inchiostro scuro su oro cupo: le tre righe che il retro esiste per portare non si vedevano.
+    Adesso c'è `--metal-back-ink`.
+14. **Il numero della carta e i suoi due compagni sono decorazione dichiarata, e stanno nello
+    `<script setup>`.** `no-magic-numbers` copre `src/renderer/**/*.ts` e **non** i `.vue` — è
+    scritto in `eslint.config.js`, con il grilletto per estenderlo — quindi la difesa qui è il
+    commento, non il lint. Sono comunque stringhe, non numeri, e nessuna regola le legge.
+15. **Un'osservazione, non una correzione: lo stesso numero compare due volte a schermo, e non è
+    della pagina.** La striscia della testata (D024) mostra contanti e carta su **ogni**
+    destinazione, e il blocco `DA ⇄ A` li mostra di nuovo. La misura che ha eliminato `CashPanel`
+    parla di una schermata; questa è la cornice, ed è l'unico posto in cui quei due saldi si
+    leggono sulle altre quattro pagine. Toglierla sarebbe una decisione sul telaio, non su questa
+    pagina, e non è stata presa qui.
+16. **`z-index: 12` e `10` esistono sul cruscotto, e sono di ApexCharts.** R21 e
+    `tests/rules/no-z-index` guardano `src/`, quindi sono verdi e hanno ragione: quei numeri stanno
+    nel CSS della libreria (ADR 0034). È scritto qui perché la prossima misura presa nel documento
+    li ritroverà, e senza questa riga sembrerebbero una violazione.
+17. **Tre trappole dello strumento, due nuove.** La porta 5173 era occupata ed `electron-vite` è
+    passata alla 5174 in silenzio — filtrare su `localhost` invece che sul numero è servito
+    davvero. `requestAnimationFrame` **non si risolve mai** in una finestra che non compone frame,
+    quindi aspettare un frame dopo un clic sintetico blocca lo script per sempre: si aspetta con
+    `setTimeout`. E dentro un template literal JavaScript la sequenza «backslash s» perde il
+    backslash e resta una `s`, quindi una normalizzazione degli spazi scritta così cancella le
+    esse — «Massimo» era diventato «Ma imo».

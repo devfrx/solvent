@@ -104,15 +104,17 @@ altro dominio.
 
 ### 9 · Questo dominio si amministra?
 
-**Sì — e la sua pagina è la `home`.** È l'unico dei tre a non avere una destinazione con il proprio
-nome, e non è un'eccezione: la home **è** la pagina del bancomat, con il cruscotto sotto perché il
-cruscotto non è di nessun dominio
-([ADR 0033](../../adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md), che lascia in vigore l'
-[ADR 0018](../../adr/0018-la-home-e-un-atm.md)).
+**Sì — e la sua pagina è `atm`, che porta il suo nome.** Da
+[D033](../../delega/D033-il-bancomat-e-una-pagina.md) è una destinazione sua: due colonne, a
+sinistra ciò che si fa e a destra ciò che si guarda
+([ADR 0040](../../adr/0040-il-bancomat-e-il-cruscotto-sono-due-pagine.md)).
 
-Ne discende la ragione per cui `DOMAIN_SCREENS` è una **mappa** e non l'elenco delle cartelle: il
-nome del dominio e il nome della destinazione possono non coincidere, e il bancomat è il caso che lo
-dimostra.
+**Fino a D033 la risposta era un'altra**, e vale la pena tenerla scritta perché spiega una forma
+del codice: il bancomat stava sulla `home` insieme al cruscotto, ed era l'unico dei tre domini a non
+avere una destinazione col proprio nome. Da lì la ragione per cui `DOMAIN_SCREENS` è una **mappa**
+e non l'elenco delle cartelle — il nome del dominio e il nome della destinazione possono non
+coincidere. Quella libertà resta utile e resta usata al contrario: `board` e `stats` sono
+destinazioni che non hanno un dominio dietro. Semplicemente non è più il bancomat a dimostrarlo.
 
 ---
 

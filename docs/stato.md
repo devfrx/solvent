@@ -13,19 +13,19 @@ affidate a un occhio, e stanno in [qualita.md](qualita.md) con la data accanto.
 
 ## Decisioni
 
-**39** ADR: 36 `Accettata`, 3 `Proposta`, 0 `Superata`.
+**40** ADR: 36 `Accettata`, 3 `Proposta`, 1 `Superata`.
 
 - `Proposta`: 0010, 0022, 0023
-- `Superata`: _nessuno_
+- `Superata`: 0018
 
 Il perché di ciascuna sta nel [compendio](adr/README.md); uno stato si legge
 dall'intestazione del suo ADR, ed è da lì che questo elenco arriva.
 
 ## Deleghe
 
-**34** deleghe: 32 `Chiusa`, 0 `In corso`, 2 `Aperta`.
+**34** deleghe: 33 `Chiusa`, 0 `In corso`, 1 `Aperta`.
 
-- `Aperta`: D033, D034
+- `Aperta`: D034
 - `In corso`: _nessuno_
 
 L'ordine in cui si eseguono non è questo elenco: è il grafo in
@@ -33,7 +33,7 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 
 ## Documenti
 
-**97** markdown: 96 sotto `docs/`, più il `README.md` della radice.
+**98** markdown: 97 sotto `docs/`, più il `README.md` della radice.
 
 ## Codice
 

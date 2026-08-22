@@ -22,7 +22,7 @@ flowchart TD
   subgraph REND["renderer — Vue 3 + Pinia"]
     BOOT["main.ts<br/>il bootstrap"]
     APP["App.vue<br/>il guscio: i sette stati"]
-    VIEWS["views/*.vue<br/>HomeView · StatsView"]
+    VIEWS["views/*.vue<br/>AtmView · BoardView · StatsView"]
     CMP["components/*<br/>shell · ledger · dev · una cartella per dominio (ADR 0033)<br/>rotation · postings · screens"]
     UI["ui/*<br/>tokens · roles · theme · i pezzi<br/>non sa che gioco è"]
     I18N["i18n/*"]
@@ -202,7 +202,8 @@ solvent/
 │     ├─ stores/
 │     │  └─ game.ts               # unico store della fetta: stato, comandi, selettori
 │     ├─ views/                   # una per destinazione: INV-22 non ne ammette una in meno
-│     │  ├─ HomeView.vue          # la pagina del bancomat, con il cruscotto sotto (ADR 0018)
+│     │  ├─ AtmView.vue           # la pagina del bancomat, due colonne (ADR 0040)
+│     │  ├─ BoardView.vue         # il cruscotto: i riquadri e il grafico (ADR 0040)
 │     │  ├─ IncomeView.vue        # la pagina del reddito: oggi un pulsante, e lo dice
 │     │  ├─ VaultView.vue         # la pagina del caveau
 │     │  └─ StatsView.vue
@@ -252,7 +253,7 @@ solvent/
    ├─ i18n/            parity · translator
    ├─ renderer/        createGame · loop · store · postings · rotation · theme · series
    └─ rules/           lint-rules · gates · core-deps · product-identity · no-todo · tick-rate
-                       eslint-disable · bus-synchronous · main-save-only · home-tiles
+                       eslint-disable · bus-synchronous · main-save-only · board-tiles
                        no-logic-in-vue · no-literal-in-template · english-identifiers
                        doc-links · docs-facts · markdown-form · project-state
                        domains-no-internal-pools · domains-no-money-literals

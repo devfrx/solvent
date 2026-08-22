@@ -98,14 +98,17 @@ la ragione di riaprire il gioco. Ma il bancomat è il gesto che rende la dualit�
 scelta invece che un'etichetta, e un gesto sepolto si fa meno.
 
 **Il rischio, e come è chiuso:** il cruscotto si mangia sempre il bancomat, perché le statistiche
-crescono e il bancomat no. Quindi il cruscotto della home ha un **tetto di sei riquadri**,
-verificato da un test. Il settimo non si aggiunge: sostituisce, oppure va nella schermata
-Statistiche. Vedi [ADR 0018](../adr/0018-la-home-e-un-atm.md).
+crescono e il bancomat no. La prima risposta è stata un **tetto di sei riquadri** su una pagina
+condivisa, verificato da un test ([ADR 0018](../adr/0018-la-home-e-un-atm.md)); da
+[D033](../delega/D033-il-bancomat-e-una-pagina.md) la risposta è **due pagine**
+([ADR 0040](../adr/0040-il-bancomat-e-il-cruscotto-sono-due-pagine.md)), perché il contenuto nuovo
+si misura in grafici e un grafico non è un riquadro.
 
-**Come si applica:** fatto in [D015](../delega/D015-home-bancomat.md). Il bancomat sta in alto e
-non si comprime; la schermata Statistiche esiste dal primo giorno, altrimenti il settimo riquadro
-non ha dove andare. I riquadri sono **cinque** e il tetto è sei: un posto libero, perché una quota
-riempita con un numero inventato non è un tetto. A contarli è `tests/rules/home-tiles`.
+**Come si applica:** fatto in [D015](../delega/D015-home-bancomat.md) e rifatto in D033. Il
+bancomat ha la sua pagina e si apre per primo; il cruscotto ha la sua, e il tetto di sei è rimasto
+difendendo lui invece del bancomat. I riquadri sono **cinque** e il tetto è sei: un posto libero,
+perché una quota riempita con un numero inventato non è un tetto. A contarli è
+`tests/rules/board-tiles`.
 
 ---
 
