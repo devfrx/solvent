@@ -140,8 +140,10 @@ carattere non si muovono.
 2026-08-21 — e questa volta la differenza non è un arrotondamento.** Il modulo compilato è
 **2.437,92 kB** e il foglio di stile **28,83 kB**, contro 622,87 e 27,50 a
 [D018](delega/D018-la-scheda-di-dominio.md). Il modulo è **quasi quadruplicato**, e la causa è una
-sola: `apexcharts` ([ADR 0034](adr/0034-il-grafico-e-una-libreria.md)). Circa 1.815 kB per un
-grafico a barre.
+sola: `apexcharts` ([ADR 0034](adr/0034-il-grafico-e-una-libreria.md)), e la differenza fra le
+due misure valeva circa 1.815 kB. **Quella cifra non è il peso della libreria**, ed è stato creduto
+per un giorno: erano due build **non** minificate, quindi ci stavano dentro anche i commenti di
+ApexCharts. Il numero vero sta nella misura del 2026-08-22, più sotto.
 
 Va scritto qui perché è il numero che rende contestabile quella decisione invece che opinabile.
 Tre cose che chi lo rilegge deve sapere:
@@ -156,6 +158,35 @@ Tre cose che chi lo rilegge deve sapere:
   quella metà della giustificazione non si spende, resta una libreria intera per un grafico a barre.
 
 I cinque file di carattere non si muovono.
+
+**Il peso, rimisurato a [D035](delega/D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md), il
+2026-08-22 — e stavolta la differenza non viene da una riga di gioco.** Il renderer non era
+**minificato**, e la causa non era nostra: `electron-vite` impone `minify: false` come default del
+preset del renderer, e chi non lo scrive lo eredita. Dichiarandolo, sullo stesso commit:
+
+| Renderer                | JS          | CSS      |
+| ----------------------- | ----------- | -------- |
+| com'era, non minificato | 2.474,51 kB | 38,20 kB |
+| minificato              | 1.198,01 kB | 20,85 kB |
+
+Il pacchetto **dimezza**, e nessuna riga di `src/` è cambiata per ottenerlo. Nel JS non minificato
+c'erano ottantacinque occorrenze di «ADR 00»: i commenti di questo progetto viaggiavano dentro
+l'applicazione. Le due che restano sono i messaggi di due errori del Ledger, e devono restare.
+
+**E il numero che conta davvero.** Con `apexcharts` isolata in un chunk suo, minificata:
+
+| Cosa                                                                | Peso      |
+| ------------------------------------------------------------------- | --------- |
+| `apexcharts`                                                        | 931,04 kB |
+| tutto il resto — Vue, Pinia, vue-i18n, `decimal.js`, l'intero gioco | 266,22 kB |
+
+È il numero su cui poggia il grilletto dell'[ADR 0034](adr/0034-il-grafico-e-una-libreria.md), e
+sostituisce i «circa 1.815 kB» di cui sopra. **La correzione non indebolisce quella decisione, la
+rende più netta**: la libreria del grafico pesa **tre volte e mezzo** tutto il resto
+dell'applicazione messo insieme.
+
+I cinque file di carattere pesano **103,63 kB** in tutto, misurati lo stesso giorno, e non stanno
+nel modulo: sono cinque `woff2` accanto a lui.
 
 **Il motore, misurato invece che supposto.** L'[ADR 0032](adr/0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)
 poggia su due funzionalità del motore — il livello superiore e l'ancoraggio CSS — e la sua premessa è

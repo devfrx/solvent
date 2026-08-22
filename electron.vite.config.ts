@@ -30,6 +30,20 @@ export default defineConfig({
   },
   renderer: {
     plugins: [vue()],
-    resolve: { alias: { '@core': core, '@renderer': renderer } }
+    resolve: { alias: { '@core': core, '@renderer': renderer } },
+
+    // `minify: false` è il default del **preset del renderer** di electron-vite — sta nel suo
+    // `electronRendererConfigPresetPlugin` e viene fuso con questa configurazione, quindi chi non
+    // lo scrive lo eredita (D035, punto 2). È lo stesso difetto dell'ADR 0026 con un'altra
+    // libreria: un default che nessuno aveva scelto e che nessun documento nominava.
+    //
+    // Il dubbio aperto da D030 e passato di mano per tre deleghe finiva qui, e la domanda era
+    // rivolta al file sbagliato: si guardava l'output invece delle opzioni con cui era prodotto.
+    // Senza questa riga il pacchetto porta i commenti del sorgente, e pesa il doppio.
+    //
+    // `'oxc'` e non `true`: dice **chi** minifica, invece di lasciarlo scegliere al default — che è
+    // il difetto che questa riga esiste per chiudere. E non `'esbuild'`, misurato: Vite 8 non lo
+    // porta più con sé, e chiederlo fa fallire `build` con «Cannot find package 'esbuild'».
+    build: { minify: 'oxc' }
   }
 })
