@@ -13,7 +13,7 @@ affidate a un occhio, e stanno in [qualita.md](qualita.md) con la data accanto.
 
 ## Decisioni
 
-**40** ADR: 36 `Accettata`, 3 `Proposta`, 1 `Superata`.
+**41** ADR: 37 `Accettata`, 3 `Proposta`, 1 `Superata`.
 
 - `Proposta`: 0010, 0022, 0023
 - `Superata`: 0018
@@ -23,9 +23,9 @@ dall'intestazione del suo ADR, ed è da lì che questo elenco arriva.
 
 ## Deleghe
 
-**35** deleghe: 33 `Chiusa`, 0 `In corso`, 2 `Aperta`.
+**35** deleghe: 34 `Chiusa`, 0 `In corso`, 1 `Aperta`.
 
-- `Aperta`: D034, D035
+- `Aperta`: D034
 - `In corso`: _nessuno_
 
 L'ordine in cui si eseguono non è questo elenco: è il grafo in
@@ -33,7 +33,7 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 
 ## Documenti
 
-**99** markdown: 98 sotto `docs/`, più il `README.md` della radice.
+**100** markdown: 99 sotto `docs/`, più il `README.md` della radice.
 
 ## Codice
 
@@ -46,11 +46,11 @@ confrontabili.
 
 | Cartella                      | File | Righe |
 | ----------------------------- | ---- | ----- |
-| `src/core/contracts/`         | 11   | 186   |
+| `src/core/contracts/`         | 11   | 191   |
 | `src/core/kernel/`            | 7    | 549   |
 | `src/core/balance/`           | 3    | 105   |
 | `src/core/domains/`           | 11   | 371   |
 | `src/main/` + `src/preload/`  | 8    | 246   |
-| `src/renderer/`               | 46   | 3.475 |
+| `src/renderer/`               | 46   | 3.477 |
 | — di cui `src/renderer/i18n/` | 3    | 595   |
 | — di cui CSS dentro i `.vue`  | 30   | 938   |

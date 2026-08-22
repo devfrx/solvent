@@ -45,7 +45,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `main`                   | **è il punto di partenza, e stavolta davvero.** Il 2026-08-21 tutti i rami di lavoro sono stati fusi con un `--ff-only` e cancellati: ne resta **uno solo**, e `git branch` lo dice in una riga                                                                                                                   |
 | `origin/main`            | **allineato.** Il 2026-08-21 sono stati spinti in un colpo i cinquantotto commit che mancavano dal 2026-08-20. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                            |
 | Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`. Alla chiusura del 2026-08-22 [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) e i documenti che la accompagnano sono stati **committati**, e l'albero è tornato pulito — vedi _Cosa c'è nell'albero di lavoro alla chiusura_ |
-| Prossimo passo           | **[D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md)**, scritta e aperta: le correzioni dell'audit del 2026-08-22. Poi [D034](D034-le-serie-degli-strumenti.md), i grafici, che **ha una decisione aperta**. La fetta 03 dopo. Vedi _La sessione del 2026-08-22_                                         |
+| Prossimo passo           | **[D034](D034-le-serie-degli-strumenti.md)**, i grafici, che **ha una decisione aperta** e non si esegue prima di averla presa. [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) è chiusa. La fetta 03 dopo                                                                                            |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -646,28 +646,16 @@ Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: all
 
 ## Il prossimo passo, in concreto
 
-**È [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md), ed è scritta.** Niente la blocca:
-la sola decisione che porta — il grilletto del router — riguarda un punto solo e non ferma gli
-altri sette.
+**È [D034](D034-le-serie-degli-strumenti.md)**, i grafici a candele di contanti e carta. Ha **una
+decisione aperta** scritta in fondo — due grafici a candele oppure candele e linea — e **non si
+esegue prima di averla presa con l'utente**: è l'unica cosa che la blocca.
 
-Cosa fa: chiude i sette difetti correggibili dell'audit del 2026-08-22, alla radice. La notazione
-del denaro dichiarata accanto alla sua precisione, il renderer che si compila minificato, le quattro
-dipendenze che il bundle già contiene tolte da `dependencies`, i documenti vivi che smettono di
-descrivere la `home`, due righe del registro YAGNI rimesse d'accordo con la realtà, un selettore che
-toglie l'ultima tabella scritta due volte, e il loop che riprogramma il frame anche quando `onStep`
-lancia.
-
-**È piccola in righe e larga in file** — ~45 di codice, ~110 di test, ~70 di documenti — e la
-ragione per cui sette cose che non si somigliano stanno insieme è in _Le tre radici_, dentro la
-delega. Produce l'ADR **0041** e l'invariante **INV-24**.
-
-**Perché prima di D034 e non dopo:** D034 rimisura il peso del renderer, e farlo dopo che la
-minificazione è decisa significa misurarlo una volta invece che due, su un numero che vuol dire
-qualcosa. Non è una dipendenza e il grafo non porta la freccia.
-
-**Poi [D034](D034-le-serie-degli-strumenti.md)**, i grafici a candele di contanti e carta. Ha **una
-decisione aperta** scritta in fondo — due grafici a candele oppure candele e linea — e non si esegue
-prima di averla presa con l'utente.
+**[D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) è chiusa**, ed è la ragione per cui
+D034 adesso misura un numero che vuol dire qualcosa: il renderer si compila minificato, quindi il
+peso che D034 rimisurerà è quello vero invece del doppio. Le dieci correzioni rispetto a com'era
+scritta stanno in fondo alla delega, e due meritano di essere sapute prima di aprirla: il punto 8 si
+risolve **al contrario** di come la delega lo prescriveva, e le occorrenze di `home` nei documenti
+vivi erano dieci invece delle sette che l'audit aveva contato.
 
 **E [D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md) non è più a monte di niente.** La sua
 intestazione diceva di sbloccare la rifinitura del bancomat; l'artboard `ATM`, letto nel sorgente,
@@ -1092,6 +1080,8 @@ interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto co
 | Il canvas del design entra nella repo, formattato da Prettier                | [D018](D018-la-scheda-di-dominio.md) — `docs/design/mockups/`                                                             | tenerlo fuori: nessun agente lo troverebbe, e i documenti dovrebbero portare un percorso della scrivania di qualcuno                                                                                          |
 | La serie del patrimonio netto sta in **memoria**, non nel salvataggio        | [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md) — decisione 1                                                    | un dominio nuovo che la salva, e con lui l'ADR 0010 ad `Accettata`: senza il calendario dell'ADR 0023 un campione non sa quando è stato preso, quindi due barre affiancate possono distare un tick o otto ore |
 | L'asse del grafico **non parte da zero**: la finestra si adatta alla serie   | [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md) — decisione 3                                                    | l'asse ancorato a zero, che è la verità più stretta e diventa illeggibile presto: misurato, a 100.000,00 € due minuti e mezzo di gioco valgono 2 pixel su 120                                                 |
+| Il grilletto del router **non** è scattato: la gerarchia è nella colonna     | [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) — _La decisione aperta_                                       | dichiararlo scattato e aprire una delega per `vue-router`: una dipendenza e un ADR per cinque destinazioni piatte, nessuna raggiungibile da fuori, nessuna con uno stato nell'URL, nessuna dentro un'altra    |
+| Il frame si riprogramma **prima** di `onStep`, non dentro un `finally`       | [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) — correzione 1                                                | il `try`/`finally` che la delega prescriveva: chiude il lancio e lascia in piedi lo `stop()` chiamato da dentro `onStep`, che si vedrebbe riprogrammare il frame subito dopo l'annullamento                   |
 
 La ventiduesima è di **D013** e costa una riga di un test: è anche l'unica riga non di test che
 quella delega abbia toccato.
@@ -1108,7 +1098,7 @@ diventate ADR — 0030, 0031, 0032 e 0033 — e un ADR è già il posto dove una
 Le due di D026 stanno nella tabella _Decisioni prese in autonomia_ dell'[indice ADR](../adr/README.md),
 e sono la prima riga di quella tabella che nasce già **in vigore**.
 
-**Le due righe in fondo sono di [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md)**, e sono
+**Le due righe di [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md)**, e sono
 le prime del progetto prese su una **direttiva generale** invece che su una domanda: l'utente ha
 risposto «segui le tue raccomandazioni» a tutte e due le decisioni della delega, e questa pagina
 dice che in quel caso si decide e si marca. Costano lo store, un componente e una funzione pura, e
@@ -1130,6 +1120,15 @@ La seconda è più piccola e ha un prezzo misurato: il canvas nella repo costa c
 [qualita.md](../qualita.md) con la data accanto invece che in questa riga. È la prima decisione del
 progetto in cui il costo di un documento si paga in un gate.
 
+**Le due righe di [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md)** sono le seconde del
+progetto prese su una **direttiva generale** — «seguo le tue raccomandazioni» — dopo quelle di D027,
+e questa pagina dice che in quel caso si decide e si marca. La prima non costa ancora niente:
+nessuna riga di codice la applica, e contestarla vuol dire riaprire una voce del registro YAGNI. La
+seconda costa `runtime/loop.ts` e i suoi test, ed è l'unica del progetto che **contraddica la delega
+che la conteneva** — la ragione sta nella correzione 1 di D035, ed è una misura invece di
+un'opinione: c'è un test che vede rosso lo `stop()` chiamato da dentro `onStep`, sia con il codice
+di prima sia con il `finally` che la delega prescriveva.
+
 Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
 recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE_FLOOR` scelti
 da D014, e i quattro importi rapidi del bancomat — 1 · 10 · 100 · 500 — scelti da D015. Sono di
@@ -1139,42 +1138,31 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-C'è una delega scritta e aperta, e niente da decidere prima di cominciare. Quali siano aperte lo
-dice [stato.md](../stato.md), che le conta.
+C'è una delega scritta e aperta, e **una cosa da decidere prima di cominciare**. Quali siano aperte
+lo dice [stato.md](../stato.md), che le conta.
 
 ```
-Esegui D035 — ciò che non si dichiara lo sceglie un altro.
+Esegui D034 — le serie degli strumenti.
 
-La delega è docs/delega/D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md, ed è completa:
-raccoglie i sette difetti correggibili dell'audit del 2026-08-22, ognuno con la misura che lo
-dimostra e con cosa fare. È autosufficiente — non serve il report dell'audit, che non è nel repo.
+La delega è docs/delega/D034-le-serie-degli-strumenti.md. Leggila per intero prima di
+scrivere una riga, comprese le Trappole note.
 
-Prima di scrivere una riga:
-- leggi la delega per intero, comprese Trappole note: la 2 e la 3 costano una mattina se non
-  le sai, e riguardano due punti diversi;
-- guarda che le misure siano ancora vere. La tabella dei pesi è del 2026-08-22 su quel commit:
-  se src/ si è mosso vanno rifatte, non ricopiate. Il rapporto invece non invecchia.
+PRIMA DI COMINCIARE: D034 ha una decisione aperta in fondo — due grafici a candele,
+oppure candele per i contanti e linea per la carta. Va posta all'utente, e questa volta
+blocca: cambia cosa la delega produce, non un dettaglio dentro un punto.
 
-Otto punti, e l'ordine conviene questo: prima 1 (la notazione del denaro) perché è il solo
-difetto che ferma il gioco, poi 8 e 7 che sono codice, poi 2 e 3 che sono configurazione e
-vogliono verify:release guardato NELL'OUTPUT, infine 4, 5 e 6 che sono documenti.
+Il peso del renderer che D034 rimisura è quello **minificato**: D035 ha dichiarato
+minify: 'oxc' in electron.vite.config.ts, e i numeri di partenza stanno in docs/qualita.md
+con la data del 2026-08-22. Non ricopiarli: rimisurali, perche' src/ si muove.
 
-Due cose che la delega dichiara e che non vanno riaperte di iniziativa propria:
-- il punto sul confine di presentazione (gli importi grandi che perdono il centesimo a schermo)
-  è in Fuori scope perché l'utente l'ha rimandato. È rimandato, non dimenticato;
-- la decisione del router in fondo alla delega va posta all'utente quando arrivi al punto 6.
-  Non blocca gli altri sette.
-
-Il ramo si chiami d035-cio-che-non-si-dichiara-lo-sceglie-un-altro e parta da main.
+Il ramo si chiami d034-le-serie-degli-strumenti e parta da main.
 Verifica che main sia ancora allineato: git rev-list --count origin/main..main
 
 Ogni test nuovo va visto rosso di proposito una volta — la definizione di fatto lo chiede
-punto per punto, ed è il modo in cui questo progetto ha scoperto che una regola non funzionava.
+punto per punto, ed è il modo in cui questo progetto ha scoperto che una regola non
+funzionava, e in cui D035 ha scoperto che la propria correzione del loop era scritta al
+contrario.
 ```
-
-**Poi viene [D034](D034-le-serie-degli-strumenti.md)**, che invece **ha** una decisione aperta in
-fondo — due grafici a candele, oppure candele per i contanti e linea per la carta — e non si esegue
-prima di averla presa con l'utente.
 
 I prompt delle deleghe già consegnate stanno nel `git log` di questo file: si recuperano da lì
 invece di tenerli tutti in vita, che è la stessa ragione per cui i numeri stanno in un posto solo.

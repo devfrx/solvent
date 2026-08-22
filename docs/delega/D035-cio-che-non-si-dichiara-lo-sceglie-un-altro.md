@@ -1,7 +1,10 @@
 # D035 — Ciò che non si dichiara lo sceglie un altro
 
-- **Stato:** **Aperta** — scritta il 2026-08-22, non eseguita. Il ramo si chiami
-  `d035-cio-che-non-si-dichiara-lo-sceglie-un-altro` e parta da **`main`**
+- **Stato:** Chiusa — ramo `d035-cio-che-non-si-dichiara-lo-sceglie-un-altro`, che parte da
+  `main`. Scritta ed eseguita il 2026-08-22. Tutti e otto i punti; la decisione del router è stata
+  presa su **direttiva generale** dell'utente, quindi decisa in autonomia e marcata come
+  contestabile. Le correzioni rispetto a com'era scritta sono in fondo, e la prima ribalta il
+  punto 8
 - **Dipende da:** niente che non sia già chiuso. Tocca codice che esiste da
   [D032](D032-la-commissione-scala-il-pavimento-no.md) e da
   [D033](D033-il-bancomat-e-una-pagina.md), e documenti che D033 ha lasciato indietro
@@ -424,3 +427,69 @@ destinazioni sono cinque e la colonna le raggruppa in due gruppi da D026.
 destinazioni è raggiungibile da fuori, nessuna ha uno stato nell'URL, e nessuna ne contiene un'altra.
 La gerarchia è nella **colonna**, non nella navigazione. Ma è una decisione dell'utente, e questa
 delega non la prende.
+
+## Correzioni rispetto a com'era scritta la delega
+
+1. **Il punto 8 si risolve al contrario di come la delega lo prescrive, e la sua motivazione era
+   invertita.** «Avvolgere `onStep` in un `try` e riprogrammare nel `finally`», scriveva, perché
+   riprogrammare **prima** «apre un caso che oggi non esiste: un `onStep` che chiamasse
+   `loop.stop()` si vedrebbe riprogrammare il frame subito dopo». Misurato, quel caso è il buco
+   del `finally`, non dell'altra strada: con `stop()` chiamato da dentro `onStep`, il `finally`
+   riprogramma **dopo** l'annullamento e resuscita un loop appena fermato. Riprogrammando prima,
+   `cancel` porta già il frame nuovo e `stop()` lo annulla. **E quel buco esiste già oggi**, per la
+   stessa ragione per cui esiste quello che la delega descrive — `cancel = schedule(frame)` sta
+   dopo `onStep`: c'è un test in `tests/renderer/loop` che lo vede rosso prima della correzione, e
+   le due proprietà si chiudono con una riga spostata invece che con tre aggiunte.
+2. **`minify: 'esbuild'` non compila su questa Vite, e il valore giusto è `'oxc'`.** Vite 8 non
+   porta più esbuild con sé: `build` fallisce con «Cannot find package 'esbuild'», perché
+   `transformWithEsbuild` è deprecata e adesso pretende il pacchetto installato a parte. `'oxc'` è
+   il minificatore che questa Vite usa di suo, e dichiararlo per nome resta meglio di `true` — dice
+   **chi** minifica, che è tutto il punto della riga.
+3. **Le occorrenze di «home» nei documenti vivi erano dieci, non sette**, ed è esattamente la
+   trappola 4 applicata all'audit che l'ha scritta. Le tre in più: `docs/README.md` («la home è un
+   bancomat con la carta che si gira», nel racconto di cosa ogni delega ha consegnato), e due righe
+   di [roadmap-fette.md](../roadmap-fette.md) — «le quattro righe della home» nel grilletto dello
+   stipendio, e «il pannello è la home di D015» nella voce chiusa degli importi. Nessuna delle tre
+   contiene le parole che la trappola suggeriva di cercare: le trova solo rileggere le righe
+   intorno a quelle già note.
+4. **L'ADR 0034 non è stato toccato, e non per dimenticanza.** La delega chiedeva di rileggerlo
+   contro il numero corretto. Non lo ripete: dice «Il peso nel bundle sta in
+   [qualita.md](../qualita.md) con la data accanto». Correggere qualita.md ha corretto il suo
+   grilletto senza aprirlo — è C11 che fa il proprio lavoro, e vale la pena registrarlo perché è la
+   prima volta che quella regola **risparmia** una modifica invece di imporne una.
+5. **I pesi sono stati rifatti e non ricopiati** (trappola 5), e le differenze sono tutte di
+   commenti aggiunti da questa delega: JS non minificato 2.474,51 kB contro i 2.469,77 della
+   tabella, minificato 1.198,01 contro 1.197,87, il resto del bundle 266,22 contro 266,08.
+   `apexcharts` è **931,04 kB** identica, e il rapporto — più del triplo di tutto il resto — non si
+   muove di un decimale.
+6. **Le occorrenze di «ADR 00» nel JS compilato erano ottantacinque, non ottantadue.** Misurate
+   sulla build di partenza di questa delega. Dopo la minificazione ne restano **due**, e sono i
+   messaggi di `UnbalancedTransactionError` e del rifiuto della transazione annidata: sono stringhe
+   di runtime, e devono restare.
+7. **`package-lock.json` va aggiornato insieme a `package.json`, e la delega non lo nomina.** Senza,
+   `npm ci --legacy-peer-deps` — l'unico comando che installa in questa repo — fallirebbe per
+   disallineamento fra i due file, cioè il punto 3 romperebbe il primo comando del _Come tornare
+   operativi_. Rigenerato con `npm install --package-lock-only --legacy-peer-deps`: nove righe di
+   differenza, i quattro pacchetti spostati e i loro `"dev": true`, nessun cambio di versione.
+8. **Il peso dei cinque caratteri in [qualita.md](../qualita.md) diceva 116 kB e sono 103,63.**
+   Trovato rimisurando il renderer, cioè la cosa che il punto 2 chiedeva di rimisurare. Non è un
+   reperto dell'audit: è la regola «un numero che riguarda ciò che stai toccando si rimisura invece
+   di ricopiarlo», applicata alla riga accanto.
+9. **La decisione del router è stata presa su direttiva generale invece che su risposta puntuale.**
+   L'utente ha risposto «seguo le tue raccomandazioni», e
+   [PASSAGGIO-DI-CONSEGNE.md](PASSAGGIO-DI-CONSEGNE.md) prescrive che in quel caso si decida in
+   autonomia e si marchi la decisione come contestabile. È l'opzione **B**: il grilletto non è
+   scattato, la riga resta nel registro con un grilletto detto meglio — «la prima destinazione che
+   ne **contiene** un'altra» — e senza conteggio.
+10. **Nel registro YAGNI resta una «home», ed è deliberato.** È dentro la citazione del grilletto
+    vecchio, nella riga che spiega perché è stato riscritto. Una frase che dichiara di essere
+    scaduta non è una frase al presente, e cancellarla toglierebbe proprio la parte che impedisce
+    di riscrivere lo stesso grilletto fra sei mesi.
+11. **Il budget è stato sforato in righe e centrato in codice, e la differenza dice qualcosa.**
+    Dichiarava ~45 di codice, ~110 di test, ~70 di documenti; il diff porta 105, 172 e oltre
+    duecento. Ma per il conteggio che questo progetto usa davvero — `codeLines` in
+    `tests/helpers/projectState.ts`, che i commenti non li conta — le righe di codice nuove sono
+    **sette**: cinque in `contracts/` e due nel renderer. Tutto il resto è prosa, ed è la forma che
+    questa delega doveva avere: sette difetti nati da default non dichiarati si chiudono
+    dichiarandoli, e una dichiarazione è per metà il commento che dice perché esiste. Chi scrive il
+    prossimo budget lo dica in quale delle due unità lo sta scrivendo.
