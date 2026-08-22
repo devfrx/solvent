@@ -1,6 +1,6 @@
 # D035 — Ciò che non si dichiara lo sceglie un altro
 
-- **Stato:** Chiusa — ramo `d035-cio-che-non-si-dichiara-lo-sceglie-un-altro`, che parte da
+- **Stato:** Chiusa — commit `fd73071`, ramo `d035-cio-che-non-si-dichiara-lo-sceglie-un-altro`, che parte da
   `main`. Scritta ed eseguita il 2026-08-22. Tutti e otto i punti; la decisione del router è stata
   presa su **direttiva generale** dell'utente, quindi decisa in autonomia e marcata come
   contestabile. Le correzioni rispetto a com'era scritta sono in fondo, e la prima ribalta il
