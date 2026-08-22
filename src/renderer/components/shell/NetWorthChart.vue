@@ -84,7 +84,7 @@ const amountAt = (value: number): string => money(fromNumber(value))
 const optionsFor = (data: readonly number[]): ApexOptions => ({
   chart: {
     type: 'area',
-    height: 140,
+    height: 168,
     toolbar: { show: false },
     zoom: { enabled: false },
     animations: { enabled: false },
@@ -98,7 +98,7 @@ const optionsFor = (data: readonly number[]): ApexOptions => ({
    * vestito. Fra due campioni non sappiamo cosa è successo — è proprio la ragione per cui gli
    * strumenti hanno le candele e questo no.
    */
-  stroke: { curve: 'straight', width: 2 },
+  stroke: { curve: 'straight', width: 1.5 },
   /**
    * **Pieno, non sfumato, e il motivo è R15.** Un `type: 'gradient'` è stato provato e tolto: per
    * costruire il primo stop ApexCharts **risolve** il colore e lo scrive nell'SVG come letterale —
@@ -108,7 +108,7 @@ const optionsFor = (data: readonly number[]): ApexOptions => ({
    * `color-mix(in srgb, var(--color-ink) 18%, transparent)`, che è la stessa forma già misurata a
    * D027 per le barre.
    */
-  fill: { type: 'solid', opacity: 0.18 },
+  fill: { type: 'solid', opacity: 0.1 },
   /**
    * Il pallino compare solo passandoci sopra, e nasce con `stroke: #fff` dalla libreria: bianco
    * scritto a mano, che a tema scuro è un anello luminoso attorno a un punto. Senza contorno il
@@ -117,7 +117,18 @@ const optionsFor = (data: readonly number[]): ApexOptions => ({
   markers: { size: 0, strokeWidth: 0 },
   colors: ['var(--color-ink)'],
   dataLabels: { enabled: false },
-  grid: { show: false, padding: { top: 0, right: 0, bottom: 0, left: 0 } },
+  /**
+   * **Le due righe orizzontali sono accese, quelle verticali no.** Le orizzontali passano per i due
+   * estremi dell'asse e sono ciò che li tiene su: senza, i due numeri galleggiavano accanto a un
+   * disegno che non li toccava, e una serie piatta lasciava mezzo riquadro vuoto. Le verticali
+   * segnerebbero i campioni, e i campioni **non hanno un quando** — è la stessa ragione per cui
+   * l'asse orizzontale non si disegna (ADR 0023). Il colore lo dà il CSS di `ChartPanel.vue`.
+   */
+  grid: {
+    show: true,
+    xaxis: { lines: { show: false } },
+    padding: { top: -14, right: 0, bottom: 0, left: 0 }
+  },
   series: [{ name: text('board.chart.title'), data: [...data] }],
   xaxis: {
     labels: { show: false },

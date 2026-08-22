@@ -209,18 +209,21 @@ cresciuta di una riga perché sapeva già disegnarli. Il grilletto scritto lì s
 cui i candlestick del blocco C **non** arrivano» — non scatterà più: sono arrivati.
 
 **Rimisurato di nuovo il 2026-08-23**, dopo l'estrazione del guscio condiviso dei due grafici
-(`ChartPanel.vue` e `apex.ts`), con lo stesso metodo.
+(`ChartPanel.vue` e `apex.ts`) **e** la rifinitura che è seguita — griglia, riempimento più tenue,
+riquadro più alto, carta nera. Stesso metodo.
 
-| Renderer minificato   | JS          | CSS      |
-| --------------------- | ----------- | -------- |
-| a D034, il 23         | 1.202,15 kB | 21,78 kB |
-| dopo il guscio, il 23 | 1.202,01 kB | 21,24 kB |
+| Renderer minificato             | JS          | CSS      |
+| ------------------------------- | ----------- | -------- |
+| a D034, il 23                   | 1.202,15 kB | 21,78 kB |
+| dopo guscio e rifinitura, il 23 | 1.202,06 kB | 21,31 kB |
 
 **Mezzo chilobyte di CSS in meno**, ed è la sola metà che si muove davvero: il vestito `:deep()`
-esisteva in due copie e adesso in una. Il JS cala di **140 byte**, cioè niente — le venti righe di
-ciclo di vita uscite dai due componenti rientrano quasi intere come funzione condivisa, ed è ciò
-che ci si aspetta quando si toglie una copia e non del lavoro. **Il peso non era la ragione
-dell'estrazione**, e questa riga sta qui perché il numero fosse misurato invece che supposto.
+esisteva in due copie e adesso in una — la rifinitura ne ha poi rimessi settanta byte, che è quanto
+costano una regola di griglia e un commento. Il JS è fermo a meno di cento byte, cioè niente: le
+venti righe di ciclo di vita uscite dai due componenti rientrano quasi intere come funzione
+condivisa, ed è ciò che ci si aspetta quando si toglie una copia e non del lavoro. **Il peso non era
+la ragione dell'estrazione**, e questa riga sta qui perché il numero fosse misurato invece che
+supposto.
 
 **Il motore, misurato invece che supposto.** L'[ADR 0032](adr/0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)
 poggia su due funzionalità del motore — il livello superiore e l'ancoraggio CSS — e la sua premessa è

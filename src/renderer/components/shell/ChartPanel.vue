@@ -81,7 +81,7 @@ const { text } = useTranslator()
  * dice, ed è del grafico che la scrive.
  */
 .plot {
-  min-height: 140px;
+  min-height: 168px;
 }
 
 :deep(.apexcharts-yaxis text),
@@ -90,6 +90,16 @@ const { text } = useTranslator()
   font-size: var(--text-micro);
   letter-spacing: var(--track-label);
   fill: var(--color-ink-3);
+}
+
+/*
+ * **Le due righe che tengono su i numeri dell'asse.** Senza, i due estremi galleggiavano accanto a
+ * un disegno che non li toccava, e una serie piatta lasciava mezzo riquadro vuoto senza niente
+ * dentro. Sono la stessa riga che `UiPanel` usa per staccare l'intestazione, cioè la più tenue del
+ * sistema: devono reggere lo sguardo, non dividere il riquadro in tre.
+ */
+:deep(.apexcharts-gridline) {
+  stroke: var(--color-line-soft);
 }
 
 :deep(.apexcharts-tooltip) {

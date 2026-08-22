@@ -123,32 +123,61 @@
   --radius-pill: 999px;
 
   /*
-   * **I materiali.** Non sono ruoli: sono di che cosa è fatto un oggetto. La carta è d'oro in tutti
-   * e due i temi, come un oggetto vero, quindi qui non c'è `light-dark()` — e non è una svista.
+   * **I materiali.** Non sono ruoli: sono di che cosa è fatto un oggetto. La carta è **nera** in
+   * tutti e due i temi, come un oggetto vero, quindi qui non c'è `light-dark()` — e non è una
+   * svista.
    *
    * Stanno qui perché R15 non ha eccezioni: un file esente sarebbe una lista da mantenere, cioè la
-   * regola che si apre da sola. I valori sono quelli che la carta aveva già: D023 sposta il colore,
-   * non lo ridisegna. Ridisegnarla è una decisione visiva, e ha il suo grilletto nel registro YAGNI.
+   * regola che si apre da sola.
+   *
+   * **Era d'oro fino al 2026-08-23**, e questo blocco portava la riga «ridisegnarla è una decisione
+   * visiva, e ha il suo grilletto nel registro YAGNI». La decisione è stata presa: nero metallico.
+   * Cambiare materiale è cambiare **questi** valori e nient'altro — nessuna riga di
+   * `BankCard3d.vue` conosce un colore, ed è la prova che il confine di D023 regge.
+   *
+   * I neri sono **caldi**, non grigi: derivano dalla stessa famiglia di `--color-ink`, e un nero
+   * neutro accanto a una carta di questo progetto si legge come una macchia fredda. Il fronte non è
+   * piatto — bordo, corpo e una banda di luce di grafite — perché un rettangolo di un colore solo è
+   * un rettangolo, non un oggetto.
    */
-  --metal-edge: #3a3016;
-  --metal-mid: #8a6d24;
-  --metal-shine: #d9b451;
-  --metal-ink: #231a07;
-  --metal-back-edge: #2a2413;
-  --metal-back-mid: #6d5620;
+  --metal-edge: #0c0b09;
+  --metal-mid: #1a1814;
+  --metal-shine: #35322b;
   /*
-   * L'inchiostro del **retro**, e non è lo stesso del fronte. Il fronte è chiaro — l'oro lucido —
-   * e vuole una scritta scura; il retro è cupo, e la stessa scritta scura ci sparisce dentro.
-   * Misurato guardando la carta girata nella finestra vera (D033): le tre righe che il retro
-   * esiste per portare erano illeggibili.
+   * L'inchiostro del **fronte**, e adesso è chiaro: con l'oro il fronte era la faccia luminosa e
+   * voleva una scritta scura. Con il nero i due versi si scambiano, ed è l'unica riga di questo
+   * blocco che cambia **ruolo** invece che valore.
    */
-  --metal-back-ink: #f3e6c4;
-  --metal-chip-light: #f5e2a0;
-  --metal-chip-dark: #b8912f;
-  --metal-chip-ink: #3a2f10;
-  --metal-stripe: #120f06;
+  --metal-ink: #ece7db;
+  --metal-back-edge: #080807;
+  --metal-back-mid: #141310;
+  /*
+   * L'inchiostro del **retro**, e non è lo stesso del fronte. Il retro è più cupo del fronte —
+   * lo era anche da oro — quindi la sua scritta è di un passo più tenue: le tre righe che il retro
+   * esiste per portare devono leggersi senza gridare. Misurato guardando la carta girata nella
+   * finestra vera (D033, e di nuovo cambiando materiale).
+   */
+  --metal-back-ink: #d8d3c6;
+  /*
+   * **Il chip resta d'oro**, ed è la sola cosa che lo è. Su una carta nera vera il chip è dorato, e
+   * toglierlo lascerebbe un rettangolo monocromo: è il punto caldo che dice che l'oggetto è fatto
+   * di due materiali invece che stampato.
+   */
+  --metal-chip-light: #cdb87e;
+  --metal-chip-dark: #8b7434;
+  /* Le scritte incise sul fronte — titolare e scadenza — un passo sotto l'inchiostro principale. */
+  --metal-chip-ink: #8f897b;
+  --metal-stripe: #030302;
   --metal-shadow: rgb(0 0 0 / 90%);
-  --metal-sheen: rgb(255 255 255 / 7%);
+  /*
+   * Il filo di luce sul bordo, ed è **la riga che tiene in piedi il tema scuro**. Era al 7% con
+   * l'oro, dove non serviva: una carta chiara si stacca da sé. Una carta nera sul fondo scuro no —
+   * `--metal-mid` e `--color-surface` sono lo stesso buio a un paio di cifre di distanza, e l'ombra
+   * portata è nera, quindi non stacca niente. Visto nella finestra vera: al 9% il bordo in alto a
+   * sinistra spariva dentro il pannello. È l'unico modo di separarla senza cambiare **materiale**
+   * fra i due temi, che è il patto di questo blocco.
+   */
+  --metal-sheen: rgb(255 255 255 / 16%);
   --metal-chip-inset: rgb(0 0 0 / 25%);
 }
 

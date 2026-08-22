@@ -109,7 +109,7 @@ const bubbleFor =
 const optionsFor = (data: readonly CandlePoint[], candles: readonly Candle[]): ApexOptions => ({
   chart: {
     type: 'candlestick',
-    height: 140,
+    height: 168,
     toolbar: { show: false },
     zoom: { enabled: false },
     animations: { enabled: false },
@@ -124,7 +124,12 @@ const optionsFor = (data: readonly CandlePoint[], candles: readonly Candle[]): A
     }
   },
   dataLabels: { enabled: false },
-  grid: { show: false, padding: { top: 0, right: 0, bottom: 0, left: 0 } },
+  /** Le due righe orizzontali, e non le verticali: la ragione è scritta in `NetWorthChart`. */
+  grid: {
+    show: true,
+    xaxis: { lines: { show: false } },
+    padding: { top: -14, right: 0, bottom: 0, left: 0 }
+  },
   series: [
     { name: text(props.title), data: data.map((point) => ({ x: point.x, y: [...point.y] })) }
   ],

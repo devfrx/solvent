@@ -234,7 +234,11 @@ const release = (): void => {
     0 0 0 1px var(--metal-sheen) inset;
 }
 
-/* L'oro non è un secondo accento: è il materiale della carta, e cambierà con la progressione. */
+/*
+ * Il nero non è un secondo accento: è il **materiale** della carta, e cambierà con la progressione.
+ * Era oro fino al 2026-08-23; a cambiare sono stati i soli `--metal-*` in `tokens.css`, e qui non
+ * si è toccata una riga. Il giorno in cui un'era ne cambia di nuovo il materiale, il lavoro è lì.
+ */
 .front {
   background: linear-gradient(
     135deg,
@@ -355,11 +359,17 @@ const release = (): void => {
   margin: 10px 0 12px;
 }
 
+/*
+ * Il pannello della firma, e viene dall'**inchiostro** del retro invece che dall'oro del chip. Con
+ * la carta d'oro le due cose coincidevano; con la carta nera no — restava una barra dorata in mezzo
+ * al retro, l'unico pezzo rimasto del materiale di prima. Su una carta vera quel pannello è chiaro,
+ * perché ci si scrive sopra.
+ */
 .strip {
   flex: 1;
   height: 14px;
   border-radius: 3px;
-  background: color-mix(in srgb, var(--metal-chip-light) 40%, transparent);
+  background: color-mix(in srgb, var(--metal-back-ink) 22%, transparent);
 }
 
 .back .caption {
