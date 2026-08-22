@@ -1,11 +1,11 @@
 # D033 — Il bancomat è una pagina
 
-- **Stato:** **Chiusa** — eseguita il 2026-08-22 sul ramo `d033-il-bancomat-e-una-pagina`, che
-  parte da `main`. **Non spezzata**: l'intestazione lo chiedeva, e la ragione per non farlo è che
-  non esiste uno stato intermedio che compili — `home` sparisce solo se `atm` e `board` esistono
-  nello stesso commit (INV-22 e il `Record` totale su `Screen`), e la rinomina i18n attraversa le
-  due pagine e la carta. Un ramo, tre commit sequenziati. Le correzioni rispetto a com'era scritta
-  sono in fondo
+- **Stato:** Chiusa — commit `459e78b`, ramo `d033-il-bancomat-e-una-pagina`, che parte da `main`.
+  Scritta il 2026-08-21, eseguita il 2026-08-22. **Non spezzata**, e l'intestazione chiedeva di
+  dichiararlo: non esiste uno stato intermedio che compili — `home` sparisce solo se `atm` e
+  `board` esistono nello stesso commit (INV-22 e il `Record` totale su `Screen`), e la rinomina
+  i18n attraversa le due pagine e la carta. Un ramo, cinque commit sequenziati. Le correzioni
+  rispetto a com'era scritta sono in fondo
 - **Stato precedente:** **Aperta** — scritta il 2026-08-21, non eseguita. Il ramo si chiami
   `d033-il-bancomat-e-una-pagina` e parta da **`main`**: il 2026-08-21 tutti i rami di lavoro sono
   stati fusi e cancellati, quindi `d032-la-commissione-scala-il-pavimento-no` — che questa riga
