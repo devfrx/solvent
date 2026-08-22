@@ -44,12 +44,19 @@ import { pointsOf, windowOf } from './series'
  * sopra, e un grafico con una cifra grande e un delta sarebbe il settimo riquadro con un vestito
  * che `tests/rules/board-tiles` non sa contare: il tetto si rispetta nello scopo, e da D033 difende
  * il cruscotto da se stesso invece che il bancomat dal cruscotto (ADR 0040). I
- * numeri che ci sono — i due estremi dell'asse e il valore che compare toccando una barra — non
+ * numeri che ci sono — i due estremi dell'asse e il valore che compare toccando la linea — non
  * sono statistiche in più: sono ciò che rende leggibile un asse che non parte da zero.
  *
- * Per i primi campioni il grafico ha **meno barre di trenta**, e all'avvio non ne ha nessuna: la
+ * Per i primi campioni il grafico ha **meno di trenta punti**, e all'avvio non ne ha nessuno: la
  * cadenza è una regola sola e non ha un'eccezione per il primo istante. Riempirlo aspettando
  * sarebbe inventare, che è la correzione 1 di D015.
+ *
+ * **Da [D034](../../../../docs/delega/D034-le-serie-degli-strumenti.md) è un'area e non delle
+ * barre**, e la serie non è cambiata di una riga: sono opzioni della libreria. Le barre venivano
+ * dal canvas del design, che su questo punto non è l'autorità — il grafico è nato dopo di lui. Il
+ * motivo è che adesso non è più solo: sotto ci sono due grafici a **candele**, uno per strumento,
+ * e tre serie di rettangoli affiancate direbbero che le tre cose sono la stessa. Un'area continua
+ * dice «questo è l'andamento generale», che è il lavoro che gli resta.
  */
 
 const store = useGameStore()
@@ -75,11 +82,11 @@ const amountAt = (value: number): string => money(fromNumber(value))
  * solo mentre il giocatore guarda un'altra cosa è rumore. Il progetto non anima niente altrove.
  *
  * Una serie vuota non ha una finestra e nessuno gliela chiede: senza campioni l'asse resta quello
- * che la libreria sceglie da sé, perché non c'è nessuna barra da misurarci contro.
+ * che la libreria sceglie da sé, perché non c'è nessun campione da misurarci contro.
  */
 const optionsFor = (data: readonly number[]): ApexOptions => ({
   chart: {
-    type: 'bar',
+    type: 'area',
     height: 140,
     toolbar: { show: false },
     zoom: { enabled: false },
@@ -88,7 +95,29 @@ const optionsFor = (data: readonly number[]): ApexOptions => ({
     fontFamily: 'inherit',
     parentHeightOffset: 0
   },
-  plotOptions: { bar: { columnWidth: '78%', borderRadius: 2, borderRadiusApplication: 'end' } },
+  /**
+   * **Dritta, non morbida.** Una curva interpolata disegnerebbe dei patrimoni fra un campione e il
+   * successivo: numeri che nessuno ha mai avuto, che è la correzione 1 di D015 con un altro
+   * vestito. Fra due campioni non sappiamo cosa è successo — è proprio la ragione per cui gli
+   * strumenti hanno le candele e questo no.
+   */
+  stroke: { curve: 'straight', width: 2 },
+  /**
+   * **Pieno, non sfumato, e il motivo è R15.** Un `type: 'gradient'` è stato provato e tolto: per
+   * costruire il primo stop ApexCharts **risolve** il colore e lo scrive nell'SVG come letterale —
+   * `stop-color="rgba(21,20,15,0.28)"`, visto nella finestra vera. Un valore cotto non cambia con il
+   * tema, e la sola ragione per cui questa libreria è entrata è che non serva ridisegnare niente
+   * (ADR 0034). Il riempimento pieno invece resta un token: la libreria lo avvolge in
+   * `color-mix(in srgb, var(--color-ink) 18%, transparent)`, che è la stessa forma già misurata a
+   * D027 per le barre.
+   */
+  fill: { type: 'solid', opacity: 0.18 },
+  /**
+   * Il pallino compare solo passandoci sopra, e nasce con `stroke: #fff` dalla libreria: bianco
+   * scritto a mano, che a tema scuro è un anello luminoso attorno a un punto. Senza contorno il
+   * problema non esiste, e ciò che resta è un punto del colore della serie.
+   */
+  markers: { size: 0, strokeWidth: 0 },
   colors: ['var(--color-ink)'],
   dataLabels: { enabled: false },
   grid: { show: false, padding: { top: 0, right: 0, bottom: 0, left: 0 } },
@@ -119,9 +148,9 @@ onMounted(() => {
 })
 
 /**
- * Un campione nuovo sposta **anche** l'asse, non solo le barre: la finestra si adatta alla serie,
+ * Un campione nuovo sposta **anche** l'asse, non solo la linea: la finestra si adatta alla serie,
  * quindi le due cose cambiano insieme e si passano insieme. Aggiornare le sole serie lascerebbe
- * l'asse su un intervallo vecchio, cioè barre alte in modo sbagliato.
+ * l'asse su un intervallo vecchio, cioè un andamento alto in modo sbagliato.
  */
 watch(points, (data) => {
   void chart?.updateOptions(optionsFor(data))

@@ -14,6 +14,7 @@ import { capacityFor, expansionPrices, MAX_LEVEL } from '@core/domains/vault/rul
 import { clock, ticks } from '@core/kernel/Clock'
 import { income } from '@core/kernel/Ledger'
 
+import type { Candle } from '../../src/renderer/runtime/candles'
 import { createGame, type Game } from '../../src/renderer/runtime/createGame'
 import { ATM_KINDS, provideRuntime, useGameStore } from '../../src/renderer/stores/game'
 import { createStage, type Stage, type StageOptions } from '../helpers/host'
@@ -276,6 +277,106 @@ describe('la serie del patrimonio netto', () => {
     await store.newGame()
 
     expect(store.netWorthSeries.items).toEqual([])
+  })
+})
+
+describe('le serie degli strumenti', () => {
+  const TICK = clock.ticksToMilliseconds(ticks(1))
+  const EVERY = clock.ticksToMilliseconds(BALANCE.INSTRUMENT_CANDLE_EVERY)
+
+  const run = (elapsed: number): void => {
+    stage.advance(elapsed)
+    stage.frame()
+  }
+
+  /** I quattro numeri di una candela. Una candela che non c'è ritorna niente, e il confronto lo dice. */
+  const numbersOf = (candle: Candle | undefined): readonly string[] =>
+    candle === undefined
+      ? []
+      : [candle.open, candle.high, candle.low, candle.close].map((value) => toString(value))
+
+  it('non chiudono niente prima della cadenza, e la prima candela arriva a cadenza scaduta', async () => {
+    const store = await start()
+    stage.frame()
+
+    run(EVERY - TICK)
+    expect(store.cashCandles.items).toHaveLength(0)
+
+    run(TICK)
+    expect(store.cashCandles.items).toHaveLength(1)
+  })
+
+  it('un intervallo senza movimento è una candela piatta, non un buco nella serie', async () => {
+    // La carta non si muove finché il giocatore non tocca il bancomat. Se la serie si aggiornasse
+    // **solo** quando il Ledger posta, qui non ci sarebbe niente da disegnare — e un grafico vuoto
+    // direbbe «non lo so» invece di «questo strumento è fermo», che è ciò che sta succedendo.
+    const store = await start()
+    stage.frame()
+
+    run(EVERY)
+    run(EVERY)
+
+    expect(store.cardCandles.items.map(numbersOf)).toEqual([
+      ['0', '0', '0', '0'],
+      ['0', '0', '0', '0']
+    ])
+  })
+
+  it('e i contanti portano il massimo e il minimo toccati **dentro**, non i due estremi', async () => {
+    // Il caso che la definizione di fatto chiede per nome: un saldo che sale, scende e torna, tutto
+    // fra due chiusure. Il reddito li alza a ogni tick, un deposito li abbassa, e i quattro numeri
+    // della candela finiscono tutti e quattro diversi — che è la cosa che una fotografia non sa
+    // dire nemmeno prendendola quattro volte.
+    const store = await start()
+    stage.frame()
+
+    run(EVERY) // la prima candela chiude a 60,00 €, e la seconda apre lì
+    store.confirm('deposit', fromString('10')) // scende a 50,00 €: il minimo
+    run(EVERY - TICK) // risale a 108,80 €: il massimo
+    store.confirm('deposit', fromString('10')) // e ridiscende
+    run(TICK) // chiude a 100,00 €
+
+    expect(numbersOf(store.cashCandles.items[1])).toEqual(['60', '108.8', '50', '100'])
+  })
+
+  it('la prima candela apre sul saldo caricato, non su zero', async () => {
+    // Senza, riaprire una partita con 340,00 € in tasca disegnerebbe una prima candela che sale da
+    // zero: una salita che non è mai successa, e per giunta quella che decide la scala dell'asse.
+    const payload = freshPayload()
+    const loaded: SavePayload = {
+      ...payload,
+      ledger: { balances: { ...payload.ledger.balances, cash: '340', world: '-340' } }
+    }
+
+    const store = await start({ load: found(loaded, SAVED_AT), wallClock: SAVED_AT })
+    stage.frame()
+    run(EVERY)
+
+    expect(numbersOf(store.cashCandles.items[0])).toEqual(['340', '400', '340', '400'])
+  })
+
+  it('ne tengono una per intervallo, e le liste hanno il loro limite dichiarato', async () => {
+    const store = await start()
+    stage.frame()
+
+    for (let closed = 0; closed < BALANCE.INSTRUMENT_CANDLES + 2; closed += 1) run(EVERY)
+
+    expect(store.cashCandles.max).toBe(BALANCE.INSTRUMENT_CANDLES)
+    expect(store.cashCandles.items).toHaveLength(BALANCE.INSTRUMENT_CANDLES)
+    expect(store.cardCandles.max).toBe(BALANCE.INSTRUMENT_CANDLES)
+    expect(store.cardCandles.items).toHaveLength(BALANCE.INSTRUMENT_CANDLES)
+  })
+
+  it('una partita nuova le azzera, come la serie del patrimonio', async () => {
+    const store = await start()
+    stage.frame()
+    run(EVERY)
+    expect(store.cashCandles.items).toHaveLength(1)
+
+    await store.newGame()
+
+    expect(store.cashCandles.items).toEqual([])
+    expect(store.cardCandles.items).toEqual([])
   })
 })
 

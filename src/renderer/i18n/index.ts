@@ -166,6 +166,13 @@ export type ScreenKey =
   | 'board.chart.how_to_read'
   | 'board.chart.oldest'
   | 'board.chart.newest'
+  | 'board.candles.cash.title'
+  | 'board.candles.card.title'
+  | 'board.candles.explained'
+  | 'board.candles.open'
+  | 'board.candles.high'
+  | 'board.candles.low'
+  | 'board.candles.close'
   // La pagina del bancomat (D033, artboard `ATM` del canvas). Le frasi vengono dal disegno, che è
   // in inglese: è la fonte del **contenuto**, non del testo — ognuna entra in tutte e due le
   // lingue, perché la parità è un gate.

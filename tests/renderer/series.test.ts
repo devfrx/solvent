@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest'
 
 import { fromString } from '@core/contracts/money'
 
-import { pointsOf, windowOf } from '../../src/renderer/components/shell/series'
+import {
+  candlePointsOf,
+  candleWindowOf,
+  pointsOf,
+  windowOf
+} from '../../src/renderer/components/shell/series'
+import type { Candle } from '../../src/renderer/runtime/candles'
 
 /**
  * I due numeri che ApexCharts non sa dedurre da sé: dove comincia e dove finisce l'asse.
@@ -70,6 +76,66 @@ describe('quando niente si è mosso', () => {
     // Qui anche la frazione del livello è zero: senza il minimo assoluto l'asse sarebbe 0–0, cioè
     // una divisione per zero dentro la libreria invece che dentro il nostro codice.
     const window = windowOf([0, 0])
+    expect(window.max).toBeGreaterThan(window.min)
+  })
+})
+
+/** Una candela scritta come quattro stringhe, nell'ordine in cui si legge: apre, tocca, chiude. */
+const candle = (open: string, high: string, low: string, close: string): Candle => ({
+  open: fromString(open),
+  high: fromString(high),
+  low: fromString(low),
+  close: fromString(close)
+})
+
+describe('le candele attraversano lo stesso confine', () => {
+  it('portano fuori tutti e quattro i numeri, e nell’ordine che la libreria vuole', () => {
+    // ApexCharts legge `y` come apertura, massimo, minimo, chiusura. Scambiarne due disegnerebbe
+    // candele plausibili e sbagliate, che è il difetto peggiore di questa famiglia.
+    expect(candlePointsOf([candle('1000', '1400', '600', '1200')])).toEqual([
+      { x: 0, y: [1000, 1400, 600, 1200] }
+    ])
+  })
+
+  it('le numera nell’ordine in cui hanno chiuso: la prima è la più vecchia', () => {
+    const points = candlePointsOf([
+      candle('1', '1', '1', '1'),
+      candle('2', '2', '2', '2'),
+      candle('3', '3', '3', '3')
+    ])
+
+    expect(points.map((point) => point.x)).toEqual([0, 1, 2])
+  })
+
+  it('una serie vuota non produce candele', () => {
+    expect(candlePointsOf([])).toEqual([])
+  })
+})
+
+describe('la finestra di un grafico a candele', () => {
+  it('si misura su ciò che le candele hanno toccato, non su dove hanno chiuso', () => {
+    // Se l'asse guardasse solo apertura e chiusura, lo stoppino uscirebbe dal grafico: la candela
+    // qui sotto apre e chiude a 1.000,00 € e in mezzo è arrivata a 1.400,00 €.
+    const window = candleWindowOf(candlePointsOf([candle('1000', '1400', '600', '1000')]))
+
+    expect(window.max).toBeGreaterThan(1400)
+    expect(window.min).toBeLessThan(600)
+  })
+
+  it('e su tutte le candele, non solo sull’ultima', () => {
+    const window = candleWindowOf(
+      candlePointsOf([candle('100', '900', '100', '900'), candle('900', '950', '900', '950')])
+    )
+
+    expect(window.min).toBeLessThan(100)
+    expect(window.max).toBeGreaterThan(950)
+  })
+
+  it('una carta ferma a zero ha comunque una finestra', () => {
+    // La serie della carta è piatta finché il giocatore non tocca il bancomat, ed è il caso in cui
+    // un asse che comincia e finisce sullo stesso numero non sarebbe un asse.
+    const window = candleWindowOf(candlePointsOf([candle('0', '0', '0', '0')]))
+
     expect(window.max).toBeGreaterThan(window.min)
   })
 })

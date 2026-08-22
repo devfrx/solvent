@@ -1,6 +1,8 @@
 import type { Money } from '@core/contracts/money'
 import { toDisplayNumber } from '@core/contracts/money'
 
+import type { Candle } from '@renderer/runtime/candles'
+
 /**
  * D027 — da una serie di patrimoni ai due numeri che il grafico non sa dedurre da sé.
  *
@@ -74,3 +76,41 @@ export const windowOf = (points: readonly number[]): Window => {
 
   return { min: lowest - pad, max: highest + pad }
 }
+
+/**
+ * D034 — un punto del grafico a candele, nella forma che ApexCharts vuole: una `x` e i quattro
+ * numeri in `y`, nell'ordine **apertura, massimo, minimo, chiusura**. L'ordine è della libreria e
+ * non nostro: scambiarne due disegnerebbe candele plausibili e sbagliate.
+ *
+ * La `x` è la posizione della candela nella serie, e non un istante: senza il calendario
+ * dell'[ADR 0023](../../../../docs/adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md) una
+ * candela non sa **quando** ha chiuso, e un asse con delle date sopra sarebbe la stessa bugia che
+ * D027 ha già rifiutato per le barre del patrimonio. L'asse orizzontale infatti non si disegna.
+ */
+export interface CandlePoint {
+  readonly x: number
+  readonly y: readonly number[]
+}
+
+/**
+ * ADR 0006 — lo stesso confine di `pointsOf`, attraversato quattro volte per candela invece di una
+ * per campione. Vale la stessa riga: `toDisplayNumber` sta qui perché la conversione è una
+ * decisione, e non nel componente.
+ */
+export const candlePointsOf = (candles: readonly Candle[]): readonly CandlePoint[] =>
+  candles.map((candle, index) => ({
+    x: index,
+    y: [candle.open, candle.high, candle.low, candle.close].map((value) => toDisplayNumber(value))
+  }))
+
+/**
+ * La finestra di un grafico a candele, che è `windowOf` su **tutti** i numeri invece che sulle sole
+ * chiusure. Guardare solo apertura e chiusura lascerebbe gli stoppini fuori dall'asse — cioè
+ * taglierebbe via esattamente ciò per cui una candela esiste.
+ *
+ * Apertura e chiusura stanno dentro l'escursione per costruzione (`runtime/candles.ts`), quindi
+ * passarle non cambia il risultato: si passano lo stesso perché «tutti e quattro» è una regola più
+ * corta da leggere di «il secondo e il terzo».
+ */
+export const candleWindowOf = (points: readonly CandlePoint[]): Window =>
+  windowOf(points.flatMap((point) => point.y))

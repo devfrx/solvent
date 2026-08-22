@@ -124,10 +124,19 @@ export const en: Dictionary = {
 
   'board.chart.title': 'Net worth over time',
   'board.chart.explained':
-    'One bar every {seconds} seconds of play. The height is the change within the window, not the total: the lowest sample sits at the floor, the highest at the top. After a long pause a single bar covers all the time that passed.',
+    'One sample every {seconds} seconds of play. The height is the change within the window, not the total: the lowest sample sits at the floor, the highest at the top. After a long pause a single sample covers all the time that passed.',
   'board.chart.how_to_read': 'How to read it',
   'board.chart.oldest': 'Earlier',
   'board.chart.newest': 'Now',
+
+  'board.candles.cash.title': 'Cash over time',
+  'board.candles.card.title': 'Card over time',
+  'board.candles.open': 'Open',
+  'board.candles.high': 'High',
+  'board.candles.low': 'Low',
+  'board.candles.close': 'Close',
+  'board.candles.explained':
+    'One candle every {seconds} seconds of play, carrying four numbers instead of one: where the balance opened, how high it went, how low it went, where it closed. An interval where nothing happened is a flat candle, and that is exactly what it says. The series are not saved: they start over every time you open the game, and the chart stays empty until the first candle closes.',
 
   'atm.from': 'From',
   'atm.to': 'To',

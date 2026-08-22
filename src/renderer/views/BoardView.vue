@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
+import InstrumentChart from '@renderer/components/shell/InstrumentChart.vue'
 import NetWorthChart from '@renderer/components/shell/NetWorthChart.vue'
 import StatTile from '@renderer/components/shell/StatTile.vue'
 import { useTranslator } from '@renderer/i18n'
@@ -28,10 +29,21 @@ import { useGameStore } from '@renderer/stores/game'
  * sotto i riquadri: quelli dicono com'è adesso, lui dice com'è andata — che è, secondo l'ADR 0018,
  * l'unica ragione per riaprire un idle. Non è un sesto riquadro travestito: non porta cifre, e il
  * posto libero della griglia resta libero.
+ *
+ * Da [D034](../../../docs/delega/D034-le-serie-degli-strumenti.md) sotto di lui ce ne sono altri
+ * **due**, uno per strumento, e sono lo stesso componente montato due volte. L'ordine è la
+ * risposta a tre domande sempre più strette: com'è adesso, com'è andato il totale, e come si sono
+ * mossi i due strumenti che il totale somma. L'ultima è quella che il patrimonio netto nasconde
+ * meglio — i contanti salgono da soli e sbattono contro un tetto, la carta non si muove finché non
+ * decidi tu, e una somma liscia non lo fa vedere.
+ *
+ * I due grafici sono **affiancati**: metterli in colonna li farebbe leggere come due momenti
+ * diversi, e sono lo stesso momento visto su due strumenti. Il confronto è tutto il punto.
  */
 
 const store = useGameStore()
-const { incomePerSecond, netWorth, earned, spent, feesPaid } = storeToRefs(store)
+const { incomePerSecond, netWorth, earned, spent, feesPaid, cashCandles, cardCandles } =
+  storeToRefs(store)
 const { text, money } = useTranslator()
 </script>
 
@@ -70,6 +82,11 @@ const { text, money } = useTranslator()
   </div>
 
   <NetWorthChart />
+
+  <div class="instruments">
+    <InstrumentChart title="board.candles.cash.title" :candles="cashCandles.items" />
+    <InstrumentChart title="board.candles.card.title" :candles="cardCandles.items" />
+  </div>
 </template>
 
 <style scoped>
@@ -77,5 +94,12 @@ const { text, money } = useTranslator()
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-3);
+}
+
+.instruments {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
 }
 </style>

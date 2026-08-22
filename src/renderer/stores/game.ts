@@ -39,6 +39,8 @@ import type { Cheats } from '@core/kernel/Cheats'
 import type { Milliseconds, Ticks } from '@core/kernel/Clock'
 import { clock, milliseconds, ticks } from '@core/kernel/Clock'
 
+import type { Candle } from '@renderer/runtime/candles'
+import { nextCandle, openCandle, updateCandle } from '@renderer/runtime/candles'
 import type { Game, GameLoadError } from '@renderer/runtime/createGame'
 import type { Host } from '@renderer/runtime/host'
 import { createLoop, sampleOf, stepOf } from '@renderer/runtime/loop'
@@ -207,10 +209,47 @@ export const useGameStore = defineStore('game', () => {
   )
 
   /**
+   * D034 — una serie di candele per ogni **strumento**, cioè per le due pozze che sono del
+   * giocatore (`POOLS[pool].player`). Il patrimonio netto dice come è andato il totale, e il totale
+   * è la cosa meno interessante di questo gioco: la tensione è fra due strumenti che si comportano
+   * in modo opposto — i contanti salgono da soli e sbattono contro un tetto, la carta non si muove
+   * finché non decidi tu — e una somma che sale liscia nasconde esattamente quella differenza.
+   *
+   * Sono due `boundedList` come `netWorthSeries`, con lo stesso limite dichiarato al punto di
+   * definizione (R09), e **non entrano nel salvataggio** per le stesse due ragioni: sono di questa
+   * partita, e senza il calendario dell'ADR 0023 una candela non sa quando è stata chiusa. INV-06
+   * non si muove.
+   */
+  const cashCandles = shallowRef<BoundedList<Candle>>(
+    boundedList<Candle>(BALANCE.INSTRUMENT_CANDLES)
+  )
+  const cardCandles = shallowRef<BoundedList<Candle>>(
+    boundedList<Candle>(BALANCE.INSTRUMENT_CANDLES)
+  )
+
+  /**
+   * Le due candele **in corso**, quelle che l'intervallo non ha ancora chiuso. Vivono qui come
+   * `sinceSample`: nessuna schermata le guarda — il grafico disegna solo ciò che è chiuso — quindi
+   * non hanno ragione di essere reattive.
+   *
+   * Si aggiornano a ogni transazione e non a ogni tick: il saldo cambia **solo** quando il Ledger
+   * posta, e lo store è già lì per il mirror. Un secondo giro sul Bus non servirebbe a niente.
+   */
+  let openCash: Candle = openCandle(balances.value.cash)
+  let openCard: Candle = openCandle(balances.value.card)
+
+  /**
    * Quanti tick sono passati dall'ultimo campione. È l'accumulatore di `sampleOf`, e vive qui come
    * `hiddenAt`: un valore che nessuna schermata guarda non ha ragione di essere reattivo.
    */
   let sinceSample: Ticks = ticks(0)
+
+  /**
+   * Lo stesso accumulatore per le candele, e **non** è `sinceSample` riusato: un intervallo di
+   * candela e una cadenza di campionamento sono due decisioni diverse, e i due numeri che le
+   * governano sono già due in `balance/constants.ts`.
+   */
+  let sinceCandle: Ticks = ticks(0)
 
   /**
    * I numeri del reddito che la UI mostra e non può calcolare: un `.vue` non importa
@@ -527,13 +566,30 @@ export const useGameStore = defineStore('game', () => {
   game.ctx.bus.on('money.posted', (posted) => {
     balances.value = posted.balances
     history.value = pushBounded(history.value, posted.transaction)
+    // Le candele in corso guardano **qui**, che è l'unico punto in cui un saldo cambia. Fra due
+    // chiusure possono passare decine di transazioni, e ciascuna può spostare il massimo o il
+    // minimo: è l'informazione che una fotografia presa a intervalli non avrebbe mai.
+    openCash = updateCandle(openCash, posted.balances.cash)
+    openCard = updateCandle(openCard, posted.balances.card)
   })
+
+  /**
+   * Le candele in corso ripartono dai saldi che ci sono adesso. Serve dove un saldo cambia **senza**
+   * una transazione — cioè dopo un caricamento e dopo il recupero — e senza, la prima candela di una
+   * partita riaperta salirebbe da zero al patrimonio caricato: una salita mai avvenuta, e per giunta
+   * quella che decide la scala dell'asse.
+   */
+  const reopen = (): void => {
+    openCash = openCandle(balances.value.cash)
+    openCard = openCandle(balances.value.card)
+  }
 
   /** Caricare non è un movimento economico, quindi non emette: il mirror va riletto a mano. */
   const mirror = (): void => {
     balances.value = game.ctx.ledger.balances()
     readIncome()
     readVault()
+    reopen()
   }
 
   const fail = (cause: GameFailure, phase: FailurePhase): void => {
@@ -560,6 +616,19 @@ export const useGameStore = defineStore('game', () => {
       const sampling = sampleOf(sinceSample, step.elapsed, BALANCE.NET_WORTH_SAMPLE_EVERY)
       sinceSample = sampling.pending
       if (sampling.due) netWorthSeries.value = pushBounded(netWorthSeries.value, netWorth.value)
+
+      // A chiudere una candela è il **tempo**, non una transazione, ed è la ragione per cui questa
+      // riga sta qui e non nel mirror: un intervallo in cui nessuno ha mosso niente produce una
+      // candela piatta, che dice «questo strumento è fermo». Aspettare una transazione lascerebbe
+      // un buco nella serie della carta ogni volta che il giocatore non tocca il bancomat.
+      const candling = sampleOf(sinceCandle, step.elapsed, BALANCE.INSTRUMENT_CANDLE_EVERY)
+      sinceCandle = candling.pending
+      if (candling.due) {
+        cashCandles.value = pushBounded(cashCandles.value, openCash)
+        cardCandles.value = pushBounded(cardCandles.value, openCard)
+        openCash = nextCandle(openCash)
+        openCard = nextCandle(openCard)
+      }
 
       // Il primo frame dopo il ritorno dal nascondimento porta con sé tutto il tempo passato: è
       // quello che chiude `Recupero`, e non c'è un secondo percorso che lo faccia.
@@ -629,6 +698,11 @@ export const useGameStore = defineStore('game', () => {
     // con il patrimonio di quella buttata via, cioè con la sua scala.
     netWorthSeries.value = boundedList<Money>(BALANCE.NET_WORTH_SAMPLES)
     sinceSample = ticks(0)
+    // E le candele con lei, per la stessa ragione: una candela della partita buttata via aprirebbe
+    // la prima della partita nuova sul suo saldo.
+    cashCandles.value = boundedList<Candle>(BALANCE.INSTRUMENT_CANDLES)
+    cardCandles.value = boundedList<Candle>(BALANCE.INSTRUMENT_CANDLES)
+    sinceCandle = ticks(0)
     savedAt.value = null
     failure.value = null
     failedDuring.value = null
@@ -821,6 +895,10 @@ export const useGameStore = defineStore('game', () => {
      * il Clock (R05), e sono i due che servono a rispondere.
      */
     netWorthSampleSeconds: clock.ticksToSeconds(BALANCE.NET_WORTH_SAMPLE_EVERY),
+    cashCandles,
+    cardCandles,
+    /** Quanto dura un intervallo di candela, in secondi di gioco, e per la ragione qui sopra. */
+    instrumentCandleSeconds: clock.ticksToSeconds(BALANCE.INSTRUMENT_CANDLE_EVERY),
     start,
     newGame,
     retry,

@@ -27,6 +27,16 @@ const SECONDS_PER_HOUR = 3600
 const NET_WORTH_SAMPLE_SECONDS = 5
 
 /**
+ * Quanto dura un intervallo di candela, in secondi di gioco (D034).
+ *
+ * Sta in una costante sua e **non** riusa `NET_WORTH_SAMPLE_SECONDS`, che oggi porta lo stesso
+ * numero: un intervallo di candela e una cadenza di campionamento sono due cose diverse, e la
+ * prima volta che si vorrà una candela più larga si scoprirebbe di stare spostando anche il
+ * grafico del patrimonio.
+ */
+const INSTRUMENT_CANDLE_SECONDS = 5
+
+/**
  * Il più grande degli importi rapidi del bancomat, che è anche quello con cui la schermata si
  * apre. Sta in una costante sua invece di essere ripescato in fondo alla lista: due letture dello
  * stesso numero sono due letture che prima o poi divergono.
@@ -218,5 +228,30 @@ export const BALANCE = {
    * `VAULT_PRICES_CARD`: cambiare quanto è lunga la finestra e cambiare quanto è fitta sono due
    * decisioni diverse, e legarle vorrebbe dire non poterne cambiare una sola.
    */
-  NET_WORTH_SAMPLE_EVERY: clock.secondsToTicks(seconds(NET_WORTH_SAMPLE_SECONDS))
+  NET_WORTH_SAMPLE_EVERY: clock.secondsToTicks(seconds(NET_WORTH_SAMPLE_SECONDS)),
+
+  /**
+   * Quante candele tiene la serie di **uno** strumento (D034). È il tetto della lista limitata, e
+   * anche quante candele il grafico disegna quando la serie è piena.
+   *
+   * **Trenta, come la serie del patrimonio, e la coincidenza è voluta**: i tre grafici stanno sulla
+   * stessa pagina, quindi coprono la stessa finestra — due minuti e mezzo — e si possono leggere
+   * uno accanto all'altro. Se coprissero finestre diverse, confrontare la salita dei contanti con
+   * l'andamento del patrimonio sarebbe confrontare due momenti, cioè una bugia disegnata bene.
+   *
+   * Che siano due costanti e non una è la ragione scritta sopra a `INSTRUMENT_CANDLE_SECONDS`, ed è
+   * la stessa di `VAULT_PRICES_CARD`: due valori uguali si possono cambiare uno alla volta, un
+   * valore riusato no.
+   */
+  INSTRUMENT_CANDLES: 30,
+
+  /**
+   * Ogni quanti tick una candela chiude e comincia la successiva. Il numero è in
+   * `INSTRUMENT_CANDLE_SECONDS`, qui c'è solo la conversione: chi bilancia guarda i secondi.
+   *
+   * Cinque secondi sono cinquanta tick, cioè fino a cinquanta movimenti del saldo dentro una
+   * candela sola: abbastanza perché l'oscillazione dei contanti — il reddito che sale, il tetto del
+   * caveau che ferma, il bancomat che abbassa — ci stia dentro tutta.
+   */
+  INSTRUMENT_CANDLE_EVERY: clock.secondsToTicks(seconds(INSTRUMENT_CANDLE_SECONDS))
 } as const
