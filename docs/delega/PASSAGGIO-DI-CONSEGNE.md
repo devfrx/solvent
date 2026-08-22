@@ -958,7 +958,7 @@ non ha una sola sovrapposizione. È chiusa comunque, ma quella freccia nel grafo
 
 ### Come si guarda l'applicazione senza toccarla
 
-**Tre trappole del guardare, e la terza è anche la via d'uscita.** Le prime due sono state pagate
+**Quattro trappole del guardare, e la terza è anche la via d'uscita.** Le prime due sono state pagate
 scrivendo D024 e D025; la terza le risolve tutte.
 
 1. Una cattura della finestra può **non dipingere l'ultima banda** in fondo, e per venti minuti il
@@ -982,6 +982,36 @@ WebSocket passano `Runtime.evaluate` — per **chiedere al documento** invece ch
 spunta a occhio da adesso in poi, e le spunte a occhio sono l'unica classe di verifica che nessun
 gate può dare. Serve anche l'altra metà, ed è la lezione della prima trappola: l'immagine dice se
 qualcosa è bello, il documento dice se c'è. Le due domande sono diverse e vogliono due strumenti.
+
+**La quarta, pagata il 2026-08-23 estraendo il guscio dei grafici: con la porta aperta la finestra
+c'è, ma è `hidden` — e allora il gioco non gira.** Il ciclo di gioco è su
+`requestAnimationFrame` (`runtime/host.ts`), e Chromium non lo consegna a una pagina non visibile:
+il saldo resta fermo, nessuna candela chiude, e sembra che ciò che hai appena scritto non aggiorni
+niente. Non è un difetto tuo. A dirlo in un colpo:
+
+```js
+;({ visibilita: document.visibilityState, frame: 'chiedilo a requestAnimationFrame' })
+```
+
+`Page.captureScreenshot` **forza un frame**, quindi fra due catture il gioco avanza di un passo: è
+la ragione per cui i saldi in due immagini sono diversi mentre fra due `Runtime.evaluate` sono
+identici. Non serve a far girare il gioco, serve a non farsi ingannare dalle immagini.
+
+**La via d'uscita è non aspettare il gioco: si muove lo stato a mano, dal di dentro.** Lo store è
+raggiungibile dalla pagina, e da lì una serie si sostituisce invece di aspettare che si riempia —
+che è anche più severo, perché prova il ramo che vuoi provare invece di quello che capita:
+
+```js
+const store = document
+  .querySelector('#app')
+  .__vue_app__._context.config.globalProperties.$pinia._s.get('game')
+store.cashCandles = { ...store.cashCandles, items: [...store.cashCandles.items, candelaNuova] }
+```
+
+Due avvertenze, e la prima è costata mezz'ora: le serie sono `shallowRef`, quindi **spingere dentro
+`items` non aggiorna niente** — si sostituisce il valore intero, che è quello che fa lo store. E
+quello che tocchi va rimesso a posto: `store.cashCandles = originale`, o stai guardando una partita
+che non esiste.
 
 ### E da lì è nata [D026](D026-dove-si-attacca-un-dominio.md), che è chiusa
 
