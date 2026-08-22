@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { ApexOptions } from 'apexcharts'
-import ApexCharts from 'apexcharts'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 
 import type { Money } from '@core/contracts/money'
 import { fromNumber } from '@core/contracts/money'
@@ -10,10 +9,9 @@ import type { MessageKey } from '@renderer/i18n'
 import { useTranslator } from '@renderer/i18n'
 import type { Candle } from '@renderer/runtime/candles'
 import { useGameStore } from '@renderer/stores/game'
-import UiLabel from '@renderer/ui/UiLabel.vue'
-import UiPanel from '@renderer/ui/UiPanel.vue'
-import UiTooltip from '@renderer/ui/UiTooltip.vue'
 
+import { useApexChart } from './apex'
+import ChartPanel from './ChartPanel.vue'
 import { candlePointsOf, candleWindowOf, type CandlePoint } from './series'
 
 /**
@@ -34,7 +32,8 @@ import { candlePointsOf, candleWindowOf, type CandlePoint } from './series'
  * Il resto è la forma di `NetWorthChart.vue`, e le tre ragioni scritte lì valgono qui senza
  * cambiare una parola: la libreria si monta a mano perché l'involucro Vue cancella i formattatori,
  * i colori restano token perché ApexCharts disegna in SVG, e il grafico non porta cifre in pianta
- * stabile perché il tetto dell'ADR 0018 si rispetta nello scopo.
+ * stabile perché il tetto dell'ADR 0018 si rispetta nello scopo. Il guscio è `ChartPanel.vue` e il
+ * montaggio è `apex.ts`: quello che resta qui è la serie, le opzioni e la bolla.
  */
 
 const props = defineProps<{
@@ -74,20 +73,30 @@ const rowsOf = (candle: Candle): readonly (readonly [MessageKey, Money])[] => [
   ['board.candles.close', candle.close]
 ]
 
+/**
+ * **L'involucro porta una classe nostra**, e non è cosmesi: è ciò che permette a R23 di esistere
+ * come regola esatta invece che come test parziale. La bolla scritta a mano entra dentro l'elemento
+ * della libreria, quindi vestirla vorrebbe dire nominare una classe della libreria una seconda
+ * volta, fuori da `ChartPanel.vue`. Con una classe nostra il confine resta netto: la **cornice**
+ * della bolla è del riquadro, la sua **disposizione** è di chi la scrive.
+ */
 const bubbleFor =
   (candles: readonly Candle[]) =>
   ({ dataPointIndex }: { readonly dataPointIndex: number }): string => {
     const candle = candles[dataPointIndex]
     if (candle === undefined) return ''
 
-    return rowsOf(candle)
+    const rows = rowsOf(candle)
       .map(([label, amount]) => `<b>${text(label)}</b><span>${money(amount)}</span>`)
       .join('')
+
+    return `<div class="candle-bubble">${rows}</div>`
   }
 
 /**
  * Le opzioni, e la regola che le governa è quella di `NetWorthChart`: **qui dentro entrano solo i
- * colori della serie**, nella forma `var(…)`; assi e bolla si vestono con il CSS in fondo.
+ * colori della serie**, nella forma `var(…)`; assi e cornice della bolla si vestono nel CSS di
+ * `ChartPanel.vue`.
  *
  * **Il verde sale, e ciò che non sale è del colore del testo.** È la stessa mappa di
  * `components/ledger/postings.ts` — denaro che entra `gain`, denaro che esce `ink` — e non è una
@@ -137,95 +146,43 @@ const optionsFor = (data: readonly CandlePoint[], candles: readonly Candle[]): A
 })
 
 const frame = ref<HTMLElement | null>(null)
-let chart: ApexCharts | null = null
 
-onMounted(() => {
-  const element = frame.value
-  if (element === null) return
-  chart = new ApexCharts(element, optionsFor(points.value, props.candles))
-  void chart.render()
-})
-
-/**
- * Una candela nuova sposta **anche** l'asse, non solo le candele: la finestra si adatta alla serie,
- * quindi le due cose cambiano insieme e si passano insieme. E con loro la bolla, che legge le
- * `Candle` di questo aggiornamento — una bolla ferma su una serie vecchia mostrerebbe gli importi
- * di una candela che nel frattempo è scorsa via.
- */
-watch(points, (data) => {
-  void chart?.updateOptions(optionsFor(data, props.candles))
-})
-
-onBeforeUnmount(() => {
-  chart?.destroy()
-  chart = null
-})
+useApexChart(frame, () => optionsFor(points.value, props.candles))
 </script>
 
 <template>
-  <UiPanel :title="text(title)">
-    <template #actions>
-      <UiTooltip
-        :text="text('board.candles.explained', { seconds: store.instrumentCandleSeconds })"
-        side="bottom"
-      >
-        <UiLabel>{{ text('board.chart.how_to_read') }}</UiLabel>
-      </UiTooltip>
-    </template>
-
-    <div ref="frame" class="plot"></div>
-
-    <p class="axis">
-      <UiLabel>{{ text('board.chart.oldest') }}</UiLabel>
-      <UiLabel>{{ text('board.chart.newest') }}</UiLabel>
-    </p>
-  </UiPanel>
+  <ChartPanel
+    :title="title"
+    hint="board.candles.explained"
+    :seconds="store.instrumentCandleSeconds"
+  >
+    <div ref="frame"></div>
+  </ChartPanel>
 </template>
 
 <style scoped>
 /*
- * Il vestito della libreria, ed è quello di `NetWorthChart` più le quattro righe della bolla. Vale
- * la stessa dichiarazione: `:deep()` tocca classi che non sono nostre, ed è il prezzo dell'ADR 0034.
- * Nessun colore scritto a mano — R15 rifiuterebbe un esadecimale anche qui dentro.
+ * La disposizione della bolla a candele: quattro etichette e quattro importi in due colonne. La
+ * cornice — fondo, bordo, raggio, ombra, caratteri — è di `ChartPanel.vue`, e quella non si tocca
+ * da qui.
+ *
+ * Serve `:deep()` perché questo blocco di HTML lo costruisce la libreria a runtime, quindi non
+ * porta l'identificatore di ambito che il compilatore mette sul resto del template. La classe però
+ * è nostra, ed è la differenza che tiene R23 vera.
  */
-.plot {
-  min-height: 140px;
-}
-
-:deep(.apexcharts-yaxis text),
-:deep(.apexcharts-xaxis text) {
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--track-label);
-  fill: var(--color-ink-3);
-}
-
-:deep(.apexcharts-tooltip) {
-  background: var(--color-raised);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
-  color: var(--color-ink-2);
+:deep(.candle-bubble) {
   display: grid;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
   gap: 0 var(--space-3);
   grid-template-columns: auto auto;
   padding: var(--space-2) var(--space-3);
 }
 
-:deep(.apexcharts-tooltip b) {
+:deep(.candle-bubble b) {
   color: var(--color-ink-3);
   font-weight: inherit;
 }
 
-:deep(.apexcharts-tooltip span) {
+:deep(.candle-bubble span) {
   text-align: right;
-}
-
-.axis {
-  display: flex;
-  justify-content: space-between;
-  margin: var(--space-2) 0 0;
 }
 </style>

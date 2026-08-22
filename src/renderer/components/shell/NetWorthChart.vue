@@ -1,17 +1,15 @@
 <script setup lang="ts">
 import type { ApexOptions } from 'apexcharts'
-import ApexCharts from 'apexcharts'
 import { storeToRefs } from 'pinia'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 
 import { fromNumber } from '@core/contracts/money'
 
 import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
-import UiLabel from '@renderer/ui/UiLabel.vue'
-import UiPanel from '@renderer/ui/UiPanel.vue'
-import UiTooltip from '@renderer/ui/UiTooltip.vue'
 
+import { useApexChart } from './apex'
+import ChartPanel from './ChartPanel.vue'
 import { pointsOf, windowOf } from './series'
 
 /**
@@ -27,11 +25,10 @@ import { pointsOf, windowOf } from './series'
  * ([ADR 0034](../../../../docs/adr/0034-il-grafico-e-una-libreria.md)). Quello che resta a noi sono
  * i due estremi dell'asse, che vivono in `series.ts` e si provano senza montare niente (R05).
  *
- * **La libreria si monta a mano, senza l'involucro `vue3-apexcharts`, e non è preferenza.** Quel
- * pacchetto clona le opzioni con `JSON.parse(JSON.stringify(…))` a ogni aggiornamento, e
- * `JSON.stringify` **cancella le funzioni**: i formattatori sparivano e l'asse scriveva `948627.0`
- * invece di 948.627,00 €. Visto succedere nella finestra vera, poi confermato leggendo il suo
- * sorgente. Montarla da qui costa una ventina di righe di ciclo di vita e toglie una dipendenza.
+ * **Da questo file sono usciti il guscio e il ciclo di vita**, e non per snellirlo: il riquadro con
+ * il suo vestito è `ChartPanel.vue`, il montaggio a mano della libreria è `apex.ts`, e ognuno dei
+ * due porta scritta la ragione per cui è uscito. Qui resta ciò che di questo grafico è **solo di
+ * questo grafico**: la serie e le sue opzioni.
  *
  * **I colori restano nostri**, ed è la ragione per cui la scelta è caduta su questa libreria e non
  * su una a `<canvas>`: ApexCharts disegna in SVG, quindi `var(--color-ink)` finisce dentro un
@@ -75,8 +72,8 @@ const amountAt = (value: number): string => money(fromNumber(value))
 
 /**
  * Le opzioni, e la regola che le governa: **qui dentro entra un colore solo**, quello della serie,
- * e nella forma `var(…)`. Tutto il resto — assi e bolla del valore — si veste con il CSS in fondo a
- * questo file, dove i token sono a casa loro.
+ * e nella forma `var(…)`. Tutto il resto — assi e bolla del valore — si veste con il CSS di
+ * `ChartPanel.vue`, dove i token sono a casa loro e dove un gate tiene il vestito in un file solo.
  *
  * Le animazioni sono spente: arriva un campione ogni pochi secondi, e un grafico che si riordina da
  * solo mentre il giocatore guarda un'altra cosa è rumore. Il progetto non anima niente altrove.
@@ -138,89 +135,16 @@ const optionsFor = (data: readonly number[]): ApexOptions => ({
 })
 
 const frame = ref<HTMLElement | null>(null)
-let chart: ApexCharts | null = null
 
-onMounted(() => {
-  const element = frame.value
-  if (element === null) return
-  chart = new ApexCharts(element, optionsFor(points.value))
-  void chart.render()
-})
-
-/**
- * Un campione nuovo sposta **anche** l'asse, non solo la linea: la finestra si adatta alla serie,
- * quindi le due cose cambiano insieme e si passano insieme. Aggiornare le sole serie lascerebbe
- * l'asse su un intervallo vecchio, cioè un andamento alto in modo sbagliato.
- */
-watch(points, (data) => {
-  void chart?.updateOptions(optionsFor(data))
-})
-
-onBeforeUnmount(() => {
-  chart?.destroy()
-  chart = null
-})
+useApexChart(frame, () => optionsFor(points.value))
 </script>
 
 <template>
-  <UiPanel :title="text('board.chart.title')">
-    <template #actions>
-      <UiTooltip
-        :text="text('board.chart.explained', { seconds: store.netWorthSampleSeconds })"
-        side="bottom"
-      >
-        <UiLabel>{{ text('board.chart.how_to_read') }}</UiLabel>
-      </UiTooltip>
-    </template>
-
-    <div ref="frame" class="plot"></div>
-
-    <p class="axis">
-      <UiLabel>{{ text('board.chart.oldest') }}</UiLabel>
-      <UiLabel>{{ text('board.chart.newest') }}</UiLabel>
-    </p>
-  </UiPanel>
+  <ChartPanel
+    title="board.chart.title"
+    hint="board.chart.explained"
+    :seconds="store.netWorthSampleSeconds"
+  >
+    <div ref="frame"></div>
+  </ChartPanel>
 </template>
-
-<style scoped>
-/*
- * Il vestito della libreria, ed è tutto qui: ApexCharts porta il proprio foglio di stile con i
- * propri colori — le etichette dell'asse nascono con un `fill` esadecimale scritto dentro — e
- * questo blocco lo riporta nei token. Una proprietà CSS batte un attributo di presentazione, quindi
- * l'override vince; è anche il prezzo dichiarato dell'ADR 0034, perché `:deep()` tocca classi che
- * non sono nostre e un aggiornamento della libreria può spostarle. Nessun colore scritto a mano:
- * R15 rifiuterebbe un esadecimale anche qui dentro.
- */
-.plot {
-  min-height: 140px;
-}
-
-:deep(.apexcharts-yaxis text),
-:deep(.apexcharts-xaxis text) {
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--track-label);
-  fill: var(--color-ink-3);
-}
-
-:deep(.apexcharts-tooltip) {
-  background: var(--color-raised);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
-  color: var(--color-ink-2);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-}
-
-:deep(.apexcharts-tooltip-series-group) {
-  background: transparent;
-  padding: var(--space-2) var(--space-3);
-}
-
-.axis {
-  display: flex;
-  justify-content: space-between;
-  margin: var(--space-2) 0 0;
-}
-</style>
