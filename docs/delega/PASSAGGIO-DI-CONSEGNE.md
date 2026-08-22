@@ -30,22 +30,22 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                                                                                                                                                                                                   |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                     |
-| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                            |
-| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                            |
-| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                 |
-| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                           |
-| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                                                                               |
-| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                          |
-| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                            |
-| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                    |
-| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                             |
-| `main`                   | **è il punto di partenza, e stavolta davvero.** Il 2026-08-21 tutti i rami di lavoro sono stati fusi con un `--ff-only` e cancellati: ne resta **uno solo**, e `git branch` lo dice in una riga                                                                                                                   |
-| `origin/main`            | **allineato.** Il 2026-08-21 sono stati spinti in un colpo i cinquantotto commit che mancavano dal 2026-08-20. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                            |
-| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`. Alla chiusura del 2026-08-22 [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) e i documenti che la accompagnano sono stati **committati**, e l'albero è tornato pulito — vedi _Cosa c'è nell'albero di lavoro alla chiusura_ |
-| Prossimo passo           | **[D034](D034-le-serie-degli-strumenti.md)**, i grafici, che **ha una decisione aperta** e non si esegue prima di averla presa. [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) è chiusa. La fetta 03 dopo                                                                                            |
+|                          |                                                                                                                                                                                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                           |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                  |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                  |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                       |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                 |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                     |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                  |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                          |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                   |
+| `main`                   | **è il punto di partenza, e stavolta davvero.** Il 2026-08-21 tutti i rami di lavoro sono stati fusi con un `--ff-only` e cancellati: ne resta **uno solo**, e `git branch` lo dice in una riga                                                         |
+| `origin/main`            | **allineato.** Il 2026-08-21 sono stati spinti in un colpo i cinquantotto commit che mancavano dal 2026-08-20. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                  |
+| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`. La seconda sessione del 2026-08-22 si è chiusa senza niente fuori dai commit — né lavoro a metà, né `stash`, né file temporanei — e il ramo di D035 è stato fuso e cancellato |
+| Prossimo passo           | **[D034](D034-le-serie-degli-strumenti.md)**, i grafici, che **ha una decisione aperta** e non si esegue prima di averla presa. [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) è chiusa. La fetta 03 dopo                                  |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -67,10 +67,118 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 > Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
 > agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
 
-## La sessione del 2026-08-22: D033 chiusa, un audit, D035 scritta
+## La seconda sessione del 2026-08-22: D035 eseguita, e la delega contraddetta due volte
 
 Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
 recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
+
+**Cosa è stato chiuso.**
+
+| Delega                                                      | Cos'era                                                                     |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) | i sette difetti correggibili dell'audit del 2026-08-22, più quello sul loop |
+
+Tutti e otto i punti, in sette commit su un ramo, fuso su `main` con un `--ff-only` e spinto. Ha
+prodotto l'[ADR 0041](../adr/0041-la-rappresentazione-del-denaro-e-dichiarata.md), l'invariante
+**INV-24** e **undici** correzioni rispetto a com'era scritta. Prima della delega, una correzione a
+questa pagina: due righe dichiaravano non committato un lavoro che il commit stesso che le conteneva
+aveva committato (`fb35bef`).
+
+### Le sei cose che chi arriva adesso deve sapere
+
+**1. Il renderer si compila minificato, e il pacchetto dimezza.** `electron.vite.config.ts` dichiara
+`minify: 'oxc'`. I pesi, con la data accanto, stanno in [qualita.md](../qualita.md) e non si
+ripetono qui — ma il rapporto sì, perché è ciò che conta: **ApexCharts pesa più del triplo di tutto
+il resto dell'applicazione messo insieme**, Vue e Pinia e il gioco intero compresi. Il grilletto
+dell'[ADR 0034](../adr/0034-il-grafico-e-una-libreria.md) poggia su quel numero, e adesso è quello
+vero. **D034 va eseguita dopo questa** proprio per questo: rimisura il peso del renderer, e adesso
+misura una volta sola un numero che vuol dire qualcosa.
+
+**2. Una delega può essere sbagliata nel punto in cui sembra più ragionata, e questa lo era.** Il
+punto 8 prescriveva un `try`/`finally` intorno a `onStep`, e scartava «riprogrammare prima»
+motivando che avrebbe aperto il caso di un `onStep` che chiama `stop()`. **Misurato, quel caso è il
+buco del `finally`**, non dell'altra strada — e nel codice come stava esisteva già. La correzione è
+una riga spostata invece di tre aggiunte, e c'è un test che vede rosso lo `stop()` chiamato da
+dentro `onStep` in tutte e due le forme scartate. La lezione di metodo è più grande del difetto: una
+motivazione scritta in una delega ha lo stesso statuto di un numero scritto in un documento vivo —
+si rimisura, non si ricopia. Costa un test scoprirlo.
+
+**3. `minify: 'esbuild'` non compila su questa Vite**, e vale la pena saperlo perché è il valore che
+verrebbe in mente per primo. Vite 8 non porta più esbuild con sé: `transformWithEsbuild` è deprecata
+e pretende il pacchetto installato a parte, quindi `build` fallisce con «Cannot find package
+'esbuild'». Il minificatore di questa Vite è `oxc`.
+
+**4. Le occorrenze di `home` nei documenti vivi erano dieci, non le sette che l'audit aveva
+contato**, ed è la trappola 4 della delega applicata all'audit che l'aveva scritta. Le tre in più —
+nel racconto di [docs/README.md](../README.md) e in due righe del
+[registro delle fette](../roadmap-fette.md) — non contengono nessuna delle parole che quella
+trappola suggeriva di cercare. Si trovano solo rileggendo le righe **intorno** a quelle già note, ed
+è l'unica tecnica che ha funzionato.
+
+**5. Spostare una dipendenza tocca anche `package-lock.json`, e la delega non lo diceva.** Senza,
+`npm ci --legacy-peer-deps` — l'unico comando che installa in questa repo — fallirebbe per
+disallineamento fra i due file. Si rigenera con
+`npm install --package-lock-only --legacy-peer-deps`, che non cambia nessuna versione.
+
+**6. Due decisioni sono state prese in autonomia su direttiva generale**, e stanno in fondo alle
+_Decisioni contestabili_. Il grilletto del router **non** è scattato — la gerarchia è nella colonna,
+non nella navigazione, e nessuna delle destinazioni è raggiungibile da fuori, ha uno stato nell'URL
+o ne contiene un'altra — quindi `vue-router` resta nel registro con un grilletto detto meglio e
+**senza conteggio**. L'altra è quella del punto 2 qui sopra, ed è l'unica decisione contestabile del
+progetto che contraddica la delega che la conteneva.
+
+### Cosa c'è nell'albero di lavoro alla chiusura
+
+Verificato con i comandi, non ricordato.
+
+- **`npm run verify` e `npm run verify:release` verdi su `main` fuso**, non solo sul ramo, ed è la
+  procedura che questa pagina prescrive prima di spingere. I test nuovi di D035 sono dieci, e tutti
+  sono stati visti rossi di proposito prima di essere resi verdi.
+- **`main` è spinto e allineato**, e il ramo `d035-…` è stato cancellato con `git branch -d`, che si
+  rifiuta di cancellare un ramo con lavoro non fuso. Ne resta uno.
+- **Niente fuori dai commit**: `git status` pulito, `git stash list` vuoto, `git clean -nd` senza
+  candidati. `npm audit` a zero.
+- **Nessun residuo di debug** in `src/`: nessun `console.log`, nessun `TODO`. Le sonde di misura —
+  la configurazione temporanea che isola ApexCharts in un chunk suo — sono state disfatte, e la
+  configurazione vera è tornata quella di prima più la riga della minificazione.
+
+### Cosa questa sessione ha lasciato indietro
+
+Censito, non nascosto. I primi tre erano già aperti prima, e restano.
+
+1. **La tabella delle regole in [architettura.md](../architettura.md) si ferma a R19**, e adesso è
+   indietro di tre righe da tre sessioni. R20, R21 e R22 stanno in
+   [tracciabilita.md](../tracciabilita.md), che è l'elenco autorevole. Costa tre righe.
+2. **Nessuna misura della catena a macchina scarica.** Aperta da tre sessioni. Va rimisurata con
+   metodo e scritta una volta, non dedotta.
+3. **Gli script CDP vivono ancora nello scratchpad**, e questa sessione non li ha usati — il lavoro
+   non aveva niente da guardare a occhio. Metterli in `scripts/` resta una decisione che nessuno ha
+   preso.
+4. **Il peso dei cinque caratteri diceva 116 kB e sono 103,63.** Corretto in
+   [qualita.md](../qualita.md) rimisurandolo, ma è il segnale che quella pagina ha altri numeri
+   della stessa età che nessuno ha guardato: le misure di D017 e D018 non sono state ricontrollate,
+   e non erano nello scopo.
+5. **Il difetto del punto 8 non ha un gate.** È stato chiuso con due test sul comportamento, e va
+   bene così; ma «un frame si riprogramma prima dell'effetto» è una proprietà che nessuna regola
+   sorveglia, e il loop è l'unico posto del progetto in cui vive. Se ne nascesse un secondo, la
+   classe tornerebbe scoperta.
+
+### Un vicolo cieco, per non ripercorrerlo
+
+**Per misurare ApexCharts da sola serve un `manualChunks`, e scriverlo nel blocco `renderer` rompe
+il build.** `mergeConfig` **sostituisce** `rollupOptions` invece di sommarlo, quindi con quel blocco
+sparisce anche l'`input` che il preset di electron-vite mette da sé, e il comando muore con
+«build.rollupOptions.input option is required». Va rimesso a mano —
+`input: resolve(renderer, 'index.html')` — e il commento del blocco `preload`, in quello stesso
+file, documentava già la stessa trappola per `external` da prima. Leggerlo sarebbe costato meno che
+scoprirla.
+
+## La **prima** sessione del 2026-08-22: D033 chiusa, un audit, D035 scritta
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. Il giorno è lo stesso
+della sezione qui sopra, ed è la ragione per cui portano un numero. **Non è più la più recente:**
+sopra c'è la seconda sessione dello stesso giorno, che ha eseguito D035, e questa descrive uno stato
+già superato.
 
 **Cosa è stato chiuso.**
 
