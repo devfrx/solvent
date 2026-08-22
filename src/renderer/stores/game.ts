@@ -115,10 +115,10 @@ interface AtmDirection {
 }
 
 /**
- * Quante operazioni mostra la home. Poche righe (ADR 0018): il registro intero è della schermata
- * Statistiche, che ha spazio per tutte e venti.
+ * Quante operazioni mostra la pagina del bancomat. Poche righe (ADR 0018): il registro intero è
+ * della schermata Statistiche, che ha spazio per tutte e venti.
  */
-const RECENT_ON_HOME = 4
+const RECENT_ON_ATM = 4
 
 /**
  * R09 · ADR 0010 — la lista nasce con il suo limite, dichiarato qui dove si legge.
@@ -490,11 +490,11 @@ export const useGameStore = defineStore('game', () => {
 
   /**
    * Le operazioni dalla più recente: un estratto conto si legge dall'alto, e `pushBounded` accoda
-   * in fondo. La home ne mostra poche, la schermata Statistiche tutte quelle che ci sono.
+   * in fondo. Il bancomat ne mostra poche, la schermata Statistiche tutte quelle che ci sono.
    */
   const operations = computed<readonly Transaction[]>(() => [...history.value.items].reverse())
   const recentOperations = computed<readonly Transaction[]>(() =>
-    operations.value.slice(0, RECENT_ON_HOME)
+    operations.value.slice(0, RECENT_ON_ATM)
   )
 
   /**

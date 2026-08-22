@@ -35,8 +35,8 @@ import VaultView from './views/VaultView.vue'
 /**
  * Gli stati in cui il tavolo da gioco resta a schermo. `recovering` è fra questi, e non è un
  * dettaglio: prima di questa delega il recupero **sostituiva** la schermata, quindi ogni ritorno
- * dalla finestra nascosta smontava la home — e con lei l'importo scelto al bancomat e il verso
- * della carta. Un alt-tab di due secondi azzerava ciò che il giocatore aveva appena impostato.
+ * dalla finestra nascosta smontava la schermata del bancomat — e con lei l'importo scelto e il
+ * verso della carta. Un alt-tab di due secondi azzerava ciò che il giocatore aveva appena impostato.
  *
  * Adesso il recupero è un **velo**: dice che sta succedendo qualcosa senza portare via ciò che
  * c'era sotto. La macchina a stati non cambia — `Sospeso → Recupero → InGioco` resta il percorso

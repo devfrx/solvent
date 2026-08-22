@@ -8,7 +8,7 @@ import PostingRows from './PostingRows.vue'
 /**
  * Un estratto conto: una riga per operazione, con dentro i suoi movimenti.
  *
- * Serve due volte — poche righe sulla home (ADR 0018), tutte quelle che la lista limitata conserva
+ * Serve due volte — poche righe sul bancomat (ADR 0018), tutte quelle che la lista limitata conserva
  * sulla schermata Statistiche — e prima di questa delega era **copiato** nelle due viste, con tre
  * blocchi di CSS identici carattere per carattere. Due copie di uno stile che nessuno lega fra
  * loro divergono al primo ritocco, e la copia rimasta indietro non fa rumore: è il seme del

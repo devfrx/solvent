@@ -6,15 +6,15 @@ import { useGameStore } from '@renderer/stores/game'
 import UiText from '@renderer/ui/UiText.vue'
 
 /**
- * Il caveau visto dalla home, ed è la clausola dell'[ADR 0033](../../../../docs/adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md)
+ * Il caveau visto dalla pagina del bancomat, ed è la clausola dell'[ADR 0033](../../../../docs/adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md)
  * che si guadagna il posto: **un pezzo di un dominio può comparire fuori dalla sua pagina, ma esce
  * dalla sua cartella.**
  *
  * Senza questo file ci sarebbero due strade, e sono le due che l'ADR esclude. Mettere l'allarme
  * dentro `CashPanel.vue` rifarebbe il difetto che [D026](../../../../docs/delega/D026-dove-si-attacca-un-dominio.md)
  * è nata per chiudere — l'interfaccia del caveau dentro un file del bancomat. Lasciarlo solo sulla
- * pagina del caveau lo renderebbe invisibile: il giocatore scopre il muro **mentre gioca alla
- * home**, non mentre amministra il caveau.
+ * pagina del caveau lo renderebbe invisibile: il giocatore scopre il muro **mentre gioca al
+ * bancomat**, non mentre amministra il caveau.
  *
  * Non disegna un riquadro: è un avviso, e un avviso sta attaccato a ciò che commenta. Quando non
  * c'è niente da dire non rende niente, e non lascia nemmeno lo spazio.

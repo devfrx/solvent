@@ -18,7 +18,7 @@ import { SCREEN_WORDING } from './screens'
  * D024 — la testata: dove sei, e quanto hai.
  *
  * La seconda metà è la ragione per cui questa striscia esiste. Prima, sulla schermata Statistiche i
- * saldi sparivano: per sapere quanto si aveva bisognava tornare alla home. In un idle il saldo è il
+ * saldi sparivano: per sapere quanto si aveva bisognava tornare al bancomat. In un idle il saldo è il
  * numero che si guarda **mentre si fa altro**, quindi il posto giusto è quello che non cambia mai.
  *
  * Non c'è la ricerca, non c'è il contatore di calore, non ci sono le caselle di attenzione: il
