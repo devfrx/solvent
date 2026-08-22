@@ -14,17 +14,17 @@
 
 ### 1 · L'etichetta
 
-| #   | Voce              | Bancomat                                                                                                 |
-| --- | ----------------- | -------------------------------------------------------------------------------------------------------- |
-| 1   | **Rendimento**    | **negativo**, sempre. Ogni operazione lascia 2,50 € al conto delle commissioni                           |
-| 2   | **Varianza**      | **zero**. Non usa l'Rng: dato un importo e un verso, la commissione è sempre la stessa                   |
-| 3   | **Liquidità**     | **è la liquidità**. Non la possiede: la converte, ed è l'unico che sa farlo                              |
-| 4   | **Tracciabilità** | **è il punto in cui si sceglie**. Depositare rende il denaro tracciabile, e non si torna indietro gratis |
-| 5   | **Calore**        | **zero**, oggi. Sarà il primo a guadagnarne quando arriverà la fetta 04                                  |
-| 6   | **Attenzione**    | bassa per gesto, **la più alta per frequenza**: è il gesto più ripetuto del gioco                        |
-| 7   | **Pozza**         | forma 1, **presa in prestito**. Vedi _Come muore_: da solo non satura affatto                            |
-| 8   | **Pagamento**     | **nessun listino**, ed è l'unica azione del gioco senza. Vedi _Cosa questa compilazione ha trovato_      |
-| 9   | **Requisito**     | **una carta**. Dichiarato nella visione, non ancora imposto dal codice: oggi nessun dominio si sblocca   |
+| #   | Voce              | Bancomat                                                                                                       |
+| --- | ----------------- | -------------------------------------------------------------------------------------------------------------- |
+| 1   | **Rendimento**    | **negativo**, sempre. Ogni operazione lascia alle commissioni **almeno** 2,50 €: è il pavimento, non l'importo |
+| 2   | **Varianza**      | **zero**. Non usa l'Rng: dato un importo e un verso, la commissione è sempre la stessa                         |
+| 3   | **Liquidità**     | **è la liquidità**. Non la possiede: la converte, ed è l'unico che sa farlo                                    |
+| 4   | **Tracciabilità** | **è il punto in cui si sceglie**. Depositare rende il denaro tracciabile, e non si torna indietro gratis       |
+| 5   | **Calore**        | **zero**, oggi. Sarà il primo a guadagnarne quando arriverà la fetta 04                                        |
+| 6   | **Attenzione**    | bassa per gesto, **la più alta per frequenza**: è il gesto più ripetuto del gioco                              |
+| 7   | **Pozza**         | forma 1, **presa in prestito**. Vedi _Come muore_: da solo non satura affatto                                  |
+| 8   | **Pagamento**     | **nessun listino**, ed è l'unica azione del gioco senza. Vedi _Cosa questa compilazione ha trovato_            |
+| 9   | **Requisito**     | **una carta**. Dichiarato nella visione, non ancora imposto dal codice: oggi nessun dominio si sblocca         |
 
 ### 2 · Il ciclo
 
@@ -52,15 +52,23 @@ scomposizione esatta di un'operazione che il Ledger poi rifiuta.
 **Forma 1 — non ci sta. E non è sua:** è la capienza del caveau, che rifiuta il prelievo quando i
 contanti in arrivo non entrano.
 
-Da solo, il bancomat **non satura affatto — migliora con la scala.** La commissione è un importo
-fisso: prelevare 10,00 € ne perde un quarto, prelevarne 500,00 € lo 0,5%. Raddoppiare l'importo
-dimezza il costo relativo, che è l'esatto contrario di ciò che la regola 3 della
-[visione](../../prodotto/visione.md) chiede a uno strumento.
+Da solo, il bancomat **non satura — e oltre una soglia smette anche di migliorare.** Fino alla
+soglia di attraversamento, che è il pavimento diviso il tasso — 125,00 € prelevando, 166,67 €
+versando — comanda il pavimento e il costo relativo scende: 10,00 € prelevati ne perdono un quarto,
+100,00 € il 2,5%. Sopra comanda la percentuale, e il costo resta **piatto al 2%** qualunque sia
+l'importo: il 2% di un milione sono 20.000 €. Raddoppiare non dimezza più niente.
+
+**Fino a [D032](../../delega/D032-la-commissione-scala-il-pavimento-no.md) questa riga diceva il
+contrario**, e vale la pena tenerlo scritto. Con la commissione fissa il bancomat _migliorava_ con
+la scala, e su un milione 2,50 € non li notava nessuno: non uno squilibrio, ma il gesto centrale del
+gioco che diventava gratuito esattamente quando la scelta cominciava a contare qualcosa
+([ADR 0038](../../adr/0038-la-commissione-scala-il-pavimento-no.md)).
 
 **Non è un difetto, ed è la ragione per cui questa domanda va posta anche a chi non produce niente.**
 Il bancomat non è una fonte di guadagno: è una **valvola**. Una valvola che peggiorasse con la scala
 renderebbe il gioco più piccolo invece che più difficile — e la scelta «quanto sposto» sparirebbe,
-perché la risposta sarebbe sempre «poco».
+perché la risposta sarebbe sempre «poco». Una che resta proporzionale si fa sentire per sempre senza
+chiudersi mai, ed è il pareggio che D032 ha scelto.
 
 Quello che lo tiene onesto è il caveau: si può prelevare grosso solo se si ha dove metterlo.
 
