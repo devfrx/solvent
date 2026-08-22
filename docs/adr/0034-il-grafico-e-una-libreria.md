@@ -5,6 +5,14 @@
   `fill` reso nella finestra vera è `color-mix(in srgb, var(--color-ink) 85%, transparent)` — cioè
   un token, non un colore della libreria
 - **Data:** 2026-08-21
+- **Aggiornata:** 2026-08-23 — la conseguenza «se un secondo grafico nascesse, quelle venti righe
+  sono ciò che si estrae» è stata riscossa, perché il secondo grafico è nato con
+  [D034](../delega/D034-le-serie-degli-strumenti.md): il ciclo di vita è
+  `components/shell/apex.ts` e il vestito `:deep()` è `components/shell/ChartPanel.vue`, che la
+  regola **R23** tiene in un file solo (`tests/rules/chart-dress`). Nello stesso passaggio decade
+  un'altra riga di questa intestazione: da [D035](../delega/D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md)
+  `apexcharts` **non è più in `dependencies`** — si compila dentro il renderer, e di runtime resta
+  solo `zod`. Il corpo non cambia: racconta il giorno in cui è stato scritto
 - **Richiesto da:** [ADR 0015](0015-criterio-di-ammissione-delle-dipendenze.md), che pretende un ADR
   per ogni dipendenza nuova
 
