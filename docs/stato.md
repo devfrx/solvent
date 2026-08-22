@@ -37,8 +37,8 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 
 ## Codice
 
-**84** file sotto `src/`, di cui **29** `.vue`.
-**77** file di test. I domini sono 3: `atm`, `income`, `vault`.
+**85** file sotto `src/`, di cui **29** `.vue`.
+**78** file di test. I domini sono 3: `atm`, `income`, `vault`.
 
 Le righe sono **righe di codice**: commenti e righe vuote escluse, con lo stesso metodo per
 tutti — ed è `codeLines` in `tests/helpers/projectState.ts` a definirlo, così due misure restano
@@ -46,11 +46,11 @@ confrontabili.
 
 | Cartella                      | File | Righe |
 | ----------------------------- | ---- | ----- |
-| `src/core/contracts/`         | 11   | 183   |
+| `src/core/contracts/`         | 11   | 186   |
 | `src/core/kernel/`            | 7    | 549   |
 | `src/core/balance/`           | 3    | 105   |
-| `src/core/domains/`           | 11   | 353   |
+| `src/core/domains/`           | 11   | 371   |
 | `src/main/` + `src/preload/`  | 8    | 246   |
-| `src/renderer/`               | 44   | 3.141 |
+| `src/renderer/`               | 45   | 3.182 |
 | — di cui `src/renderer/i18n/` | 3    | 550   |
 | — di cui CSS dentro i `.vue`  | 29   | 766   |

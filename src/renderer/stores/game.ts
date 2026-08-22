@@ -17,6 +17,7 @@ import type { SaveError } from '@core/contracts/save'
 import { BALANCE } from '@core/balance/constants'
 import type { AtmError, AtmOperation } from '@core/domains/atm/commands'
 import { DEPOSIT, previewOf, WITHDRAW } from '@core/domains/atm/commands'
+import { largestThatFits } from '@core/domains/atm/rules'
 import type { IncomeError } from '@core/domains/income/commands'
 import {
   canBuyUpgrade,
@@ -287,6 +288,15 @@ export const useGameStore = defineStore('game', () => {
   const defaultAmount = shallowRef<Money>(BALANCE.ATM_DEFAULT_AMOUNT)
 
   /**
+   * Il pavimento della commissione (D032). Passa da qui perché un `.vue` non può importare
+   * `balance/` (R05), e alla pagina serve per **derivare** il minimo invece di scriverlo: sotto
+   * quella cifra la commissione si mangia l'importo, e cambiarla in `constants.ts` cambia la nota
+   * a schermo. Il minimo del canvas — «min €10» — è un numero scritto a mano, e questo è il motivo
+   * per cui non si copia.
+   */
+  const feeFloor = shallowRef<Money>(BALANCE.ATM_FEE_FLOOR)
+
+  /**
    * INV-18 — il tetto dei due strumenti, letto dalla **stessa** funzione che il Ledger fa
    * rispettare (ADR 0025). Non una seconda lettura da tenere allineata: la stessa, chiamata da due
    * parti. La carta risponde "illimitato", e per lei è la risposta definitiva.
@@ -399,6 +409,35 @@ export const useGameStore = defineStore('game', () => {
   const feeRates = shallowRef<Readonly<Record<AtmOperationKind, Money>>>({
     deposit: directions.deposit.operation.feeRate,
     withdraw: directions.withdraw.operation.feeRate
+  })
+
+  /**
+   * Il più grande importo che **passa**, per direzione: è ciò che il pulsante `MAX` propone, e la
+   * seconda metà della nota «minimo · massimo».
+   *
+   * A rispondere è `largestThatFits`, la gemella di `fitsIn` (D033): questo file non fa la
+   * sottrazione, la consegna soltanto — il tetto della destinazione, quanto ci sta già dentro, il
+   * tasso del verso e quanto c'è alla partenza. Il bancomat non conosce il caveau, e chi ha
+   * entrambi i capi sotto mano è lo store (ADR 0024).
+   *
+   * È una `computed`, e le sue sorgenti devono essere **reattive**: i saldi lo sono per l'evento
+   * del Ledger, il tetto del caveau per `readVault`. Chiederlo al Ledger come fa `preview` sarebbe
+   * corretto una volta sola — `preview` risponde a un gesto, questa alimenta una riga che sta a
+   * schermo mentre il caveau si riempie.
+   */
+  const maximums = computed<Readonly<Record<AtmOperationKind, Money>>>(() => {
+    const current = balances.value
+    const largestFor = (kind: AtmOperationKind): Money => {
+      const { operation } = directions[kind]
+      return largestThatFits(
+        operation.to === VAULT_POOL ? cashCapacity.value : cardCapacity.value,
+        current[operation.to],
+        operation.feeRate,
+        current[operation.from]
+      )
+    }
+
+    return { deposit: largestFor('deposit'), withdraw: largestFor('withdraw') }
   })
 
   /**
@@ -729,6 +768,8 @@ export const useGameStore = defineStore('game', () => {
     atmFeeRates: feeRates,
     atmAmounts: amounts,
     atmDefaultAmount: defaultAmount,
+    atmFeeFloor: feeFloor,
+    atmMaximums: maximums,
     cashCapacity,
     cardCapacity,
     vaultProgress: progress,

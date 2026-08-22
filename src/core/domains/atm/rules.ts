@@ -1,5 +1,5 @@
 import type { Money } from '@core/contracts/money'
-import { roundUpToCents, ZERO } from '@core/contracts/money'
+import { ONE, roundDownToCents, roundUpToCents, ZERO } from '@core/contracts/money'
 
 import { BALANCE } from '@core/balance/constants'
 
@@ -77,3 +77,57 @@ export const isFeeWithinAmount = (amount: Money, fee: Money): boolean => fee.les
  */
 export const fitsIn = (capacity: Money | null, current: Money, incoming: Money): boolean =>
   capacity === null || current.plus(incoming).lessThanOrEqualTo(capacity)
+
+/** Il minore dei due. `Math.min` non sa niente di `Decimal`, e `decimal.js` non entra qui (INV-01). */
+const smaller = (left: Money, right: Money): Money => (left.lessThan(right) ? left : right)
+
+/**
+ * Il più grande importo il cui **netto** entra in `room`, senza guardare quanto ce n'è alla
+ * partenza: è la metà della risposta che riguarda la destinazione.
+ *
+ * Il candidato piatto — `room` più il pavimento — vale finché la sua percentuale non supera il
+ * pavimento: da lì in poi la commissione ha smesso di essere fissa, e con essa quella formula.
+ */
+const upTo = (room: Money, rate: Money): Money => {
+  if (!room.greaterThan(ZERO)) return ZERO
+
+  const flat = room.plus(BALANCE.ATM_FEE_FLOOR)
+  return flat.mul(rate).greaterThan(BALANCE.ATM_FEE_FLOOR)
+    ? roundDownToCents(room.div(ONE.minus(rate)))
+    : flat
+}
+
+/**
+ * La domanda gemella di `fitsIn`: quello dice «ci sta?», questa dice **«quanto ci sta?»**.
+ *
+ * È lo stesso paio di `roomIn` e `capacityOf` in `contracts/pools.ts`, e non è un caso: è la forma
+ * che l'[ADR 0025](../../../../docs/adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md) ha
+ * già scelto una volta. Esiste perché un pulsante `MAX` che propone una cifra e poi la fa
+ * rifiutare è peggio di un pulsante che non c'è.
+ *
+ * **Non è `spazio + commissione`.** Con la commissione in percentuale ciò che arriva è
+ * `importo × (1 − tasso)`, quindi il più grande importo che ci sta è `spazio ÷ (1 − tasso)` —
+ * e va arrotondato **per difetto**, perché un centesimo in più è proprio il rifiuto che questa
+ * funzione esiste per evitare. Sotto la soglia di attraversamento la commissione è il pavimento e
+ * non scala, quindi lì la relazione torna a essere una somma: a scegliere fra le due è il
+ * candidato stesso, confrontato con il pavimento — le due formule non hanno bisogno di sapere
+ * dov'è la soglia, perché la soglia è dove smettono di essere d'accordo.
+ *
+ * L'ultima riga è il patto: se nemmeno il più grande importo possibile riesce a coprire la propria
+ * commissione, la risposta è **zero** — non c'è un importo che passa, e proporne uno sarebbe la
+ * bugia da cui tutto questo è partito. A dirlo sono le due funzioni qui sopra, non un secondo
+ * confronto che le somiglia.
+ *
+ * Come `fitsIn`, la capienza e i saldi arrivano **per argomento**: il bancomat non conosce il
+ * caveau, e a mettergli in mano entrambi i capi è lo store (ADR 0024).
+ */
+export const largestThatFits = (
+  capacity: Money | null,
+  current: Money,
+  rate: Money,
+  available: Money
+): Money => {
+  const largest =
+    capacity === null ? available : smaller(available, upTo(capacity.minus(current), rate))
+  return isFeeWithinAmount(largest, atmFee(largest, rate)) ? largest : ZERO
+}

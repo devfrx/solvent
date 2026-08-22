@@ -47,6 +47,16 @@ const CENTS = 2
 
 export const ZERO: Money = new Decimal(0)
 
+/**
+ * L'intero, cioè il cento per cento. Sta accanto a `ZERO` per la stessa ragione: sono i due valori
+ * che nessun bilanciamento decide, e che quindi non hanno niente da fare in `balance/`.
+ *
+ * Serve a trasformare un tasso nel suo **complemento** — quanto resta di un importo dopo che la
+ * commissione ha preso la sua parte — ed è l'unica operazione del progetto in cui un tasso e un
+ * importo si incontrano senza moltiplicarsi ([D033](../../../docs/delega/D033-il-bancomat-e-una-pagina.md)).
+ */
+export const ONE: Money = new Decimal(1)
+
 /** Il denaro attraversa il confine di persistenza come stringa decimale (INV-04). */
 export const fromString = (value: string): Money => new Decimal(value)
 
@@ -78,3 +88,23 @@ export const toDisplayNumber = (money: Money): number => money.toNumber()
  */
 export const roundUpToCents = (money: Money): Money =>
   money.toDecimalPlaces(CENTS, Decimal.ROUND_UP)
+
+/**
+ * Arrotonda ai centesimi **per difetto**, ed è l'arrotondamento opposto a quello qui sopra.
+ *
+ * Nasce con [D033](../../../docs/delega/D033-il-bancomat-e-una-pagina.md), dove serve due volte e
+ * per lo stesso motivo: **non promettere un centesimo che non c'è**. Il massimo prelevabile lo
+ * propone un pulsante, quindi un centesimo di troppo diventa un rifiuto subito dopo aver premuto;
+ * l'importo digitato può avere tre decimali, e il terzo non è denaro che questo gioco sappia
+ * contare.
+ *
+ * `roundUpToCents` lo dichiarava già: «se un giorno servisse arrotondare un'uscita, quella è
+ * un'altra funzione con un altro nome». È questa, e le due **non si condividono** — la commissione
+ * sale, ciò che si offre al giocatore scende, e sono due frasi diverse sullo stesso gioco.
+ *
+ * `ROUND_DOWN` in decimal.js è «verso zero», che su un importo positivo coincide con «verso il
+ * basso». Su un negativo lascia il valore **più vicino** a zero: qui capita solo con un importo
+ * digitato col segno meno, che è un rifiuto in ogni caso, e nessuna delle due letture lo salva.
+ */
+export const roundDownToCents = (money: Money): Money =>
+  money.toDecimalPlaces(CENTS, Decimal.ROUND_DOWN)

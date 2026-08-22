@@ -490,6 +490,66 @@ describe('i comandi', () => {
   })
 })
 
+describe('il massimo del bancomat', () => {
+  const fund = (pool: Pool, amount: string): void => {
+    game.ctx.ledger.transaction(income(pool, fromString(amount)), { reason: 'reason.income.tick' })
+  }
+
+  it('depositando è tutto il contante che c’è: la carta non ha un tetto', async () => {
+    const store = await start()
+    fund('cash', '750')
+
+    expect(toString(store.atmMaximums.deposit)).toBe('750')
+  })
+
+  it('prelevando tiene conto del caveau, e non è il saldo della carta', async () => {
+    // Caveau di partenza da 1.000,00 € con 900,00 € dentro: sulla carta ce ne sono diecimila, ma
+    // a decidere è lo spazio rimasto — cento euro, più il pavimento che la commissione trattiene.
+    const store = await start()
+    fund('card', '10000')
+    fund('cash', '900')
+
+    expect(toString(store.atmMaximums.withdraw)).toBe('102.5')
+  })
+
+  it('e ciò che propone passa davvero, che è la sola ragione per cui esiste', async () => {
+    // Il caso in cui la sottrazione ingenua sbaglia: il caveau quasi pieno. Premere `MAX` e
+    // vedersi rifiutare è il difetto che questa riga esiste per rendere impossibile.
+    const store = await start()
+    fund('card', '10000')
+    fund('cash', '900')
+
+    const moved = store.confirm('withdraw', store.atmMaximums.withdraw)
+
+    expect(moved.ok).toBe(true)
+    expect(toString(store.balances.cash)).toBe('1000')
+  })
+
+  it('si muove quando il caveau si amplia, perché il tetto è cambiato', async () => {
+    // Se leggesse la capienza una volta sola alla costruzione, la nota «massimo» resterebbe quella
+    // del livello zero per tutta la partita. È la trappola che D017 ha già pagato una volta.
+    const store = await start()
+    fund('card', '100000')
+    fund('cash', '900')
+    const before = toString(store.atmMaximums.withdraw)
+
+    // L'ampliamento si paga con la carta, che qui è larga: quello che cambia è il **tetto**.
+    expect(store.expandVault('card').ok).toBe(true)
+
+    expect(toString(store.atmMaximums.withdraw)).not.toBe(before)
+    expect(store.confirm('withdraw', store.atmMaximums.withdraw).ok).toBe(true)
+  })
+
+  it('è zero quando non c’è un importo che passa, invece di proporne uno rifiutato', async () => {
+    const store = await start()
+    fund('cash', '1000')
+
+    // Caveau pieno: prelevare non ha dove mettere il contante. E depositando, con il caveau che
+    // trattiene tutto, il massimo resta il saldo — è il prelievo a non avere risposta.
+    expect(toString(store.atmMaximums.withdraw)).toBe('0')
+  })
+})
+
 describe('i selettori del reddito', () => {
   /** Il listino dell'upgrade offre **solo** la carta (ADR 0027), e il reddito entra in contanti. */
   const fundCard = (amount: string): void => {

@@ -8,7 +8,8 @@ import {
   atmFee,
   fitsIn,
   isFeeWithinAmount,
-  isValidAmount
+  isValidAmount,
+  largestThatFits
 } from '../../../src/core/domains/atm/rules'
 import { capacityFor } from '../../../src/core/domains/vault/rules'
 
@@ -151,5 +152,86 @@ describe('la capienza di un pool', () => {
     expect(fitsIn(capacity, money('700'), money('300.01'))).toBe(false)
     expect(fitsIn(capacity, money('0'), money('1000'))).toBe(true)
     expect(fitsIn(capacity, money('1000'), money('0.01'))).toBe(false)
+  })
+})
+
+describe('quanto ci sta', () => {
+  const CENT = money('0.01')
+
+  /** Ciò che arriva davvero a destinazione: l'importo meno la commissione che l'operazione trattiene. */
+  const arriving = (amount: typeof IN, rate: typeof IN): typeof IN =>
+    amount.minus(atmFee(amount, rate))
+
+  /** Un caveau con dentro `used` e un tetto a `cap`, e sulla carta abbastanza da non essere il limite. */
+  const withdrawable = (cap: string, used: string, rate: typeof IN): typeof IN =>
+    largestThatFits(money(cap), money(used), rate, money('99999999'))
+
+  it('senza tetto è tutto quello che c’è alla partenza: depositando la carta non ne ha uno', () => {
+    expect(largestThatFits(null, money('0'), IN, money('812.34')).toString()).toBe('812.34')
+  })
+
+  it('non propone mai più di quanto ce n’è da spostare', () => {
+    // Il tetto della destinazione è larghissimo: a comandare è il saldo di partenza.
+    expect(largestThatFits(money('1000000'), money('0'), OUT, money('40')).toString()).toBe('40')
+  })
+
+  it('sotto la soglia è lo spazio più il pavimento, ed è esatto al centesimo', () => {
+    // Qui la commissione non scala, quindi la relazione è una somma e il bordo è netto: il netto
+    // riempie il caveau **esattamente**, e un centesimo in più non ci sta più.
+    const largest = withdrawable('1000', '900', OUT)
+
+    expect(largest.toString()).toBe(BALANCE.ATM_FEE_FLOOR.plus(money('100')).toString())
+    expect(arriving(largest, OUT).toString()).toBe('100')
+    expect(arriving(largest.plus(CENT), OUT).greaterThan(money('100'))).toBe(true)
+  })
+
+  it('sopra la soglia non è una sottrazione: è lo spazio diviso ciò che resta del tasso', () => {
+    // Il caveau quasi pieno è il caso che la sottrazione ingenua sbaglia: `spazio + pavimento`
+    // proporrebbe 5.002,50 €, che di commissione ne paga 100,05 e ne fa arrivare 4.902,45 —
+    // cioè quasi cento euro di spazio lasciati vuoti, non un centesimo di troppo.
+    const largest = withdrawable('20000', '15000', OUT)
+
+    expect(largest.toString()).toBe('5102.04')
+    expect(arriving(largest, OUT).lessThanOrEqualTo(money('5000'))).toBe(true)
+  })
+
+  it('e ciò che ne arriva ci sta sempre, in tutti e due i versi e a ogni riempimento', () => {
+    // La proprietà che questa funzione promette, provata invece che raccontata: qualunque sia lo
+    // spazio rimasto, ciò che il massimo fa arrivare entra — e la commissione non se lo mangia.
+    const capacity = money('20000')
+
+    for (const rate of [IN, OUT]) {
+      for (let filled = 0; filled <= 20000; filled += 137) {
+        const used = money(String(filled))
+        const largest = withdrawable('20000', String(filled), rate)
+        if (largest.isZero()) continue
+
+        expect(fitsIn(capacity, used, arriving(largest, rate))).toBe(true)
+        expect(isFeeWithinAmount(largest, atmFee(largest, rate))).toBe(true)
+      }
+    }
+  })
+
+  it('sopra la soglia resta al più un centesimo sotto il massimo assoluto, e la ragione è l arrotondamento', () => {
+    // Misurato, non supposto: la commissione arrotonda **per eccesso**, e quel mezzo centesimo
+    // restituisce un centesimo di gioco all'importo. Prenderlo vorrebbe dire risalire di un
+    // centesimo per volta dentro una regola pura; lasciarlo costa un centesimo che nessuno vede.
+    const largest = withdrawable('20000', '15000', OUT)
+
+    expect(arriving(largest.plus(CENT), OUT).lessThanOrEqualTo(money('5000'))).toBe(true)
+    expect(arriving(largest.plus(CENT).plus(CENT), OUT).greaterThan(money('5000'))).toBe(true)
+  })
+
+  it('è zero quando non esiste un importo che passa, invece di proporne uno che verrà rifiutato', () => {
+    // Caveau pieno: qualunque cifra arrivi, non c'è dove metterla.
+    expect(withdrawable('1000', '1000', OUT).toString()).toBe('0')
+
+    // E depositando meno del pavimento: la commissione se lo mangerebbe, quindi non c'è un
+    // massimo da offrire. È il patto di questa funzione — un `MAX` che propone un rifiuto è
+    // peggio di un `MAX` che dice zero.
+    expect(largestThatFits(null, money('0'), IN, BALANCE.ATM_FEE_FLOOR).toString()).toBe('0')
+    expect(largestThatFits(null, money('0'), IN, BALANCE.ATM_FEE_FLOOR.plus(CENT)).toString()).toBe(
+      BALANCE.ATM_FEE_FLOOR.plus(CENT).toString()
+    )
   })
 })

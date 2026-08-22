@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest'
 import {
   fromNumber,
   fromString,
+  ONE,
+  roundDownToCents,
   roundUpToCents,
   toDisplayNumber,
   toString,
@@ -130,5 +132,34 @@ describe('l arrotondamento ai centesimi', () => {
     // centesimo — ma un valore gia' tondo non si muove.
     expect(toString(roundUpToCents(fromString('2.5')))).toBe('2.5')
     expect(toString(roundUpToCents(ZERO))).toBe('0')
+  })
+})
+
+/**
+ * D033 — l'arrotondamento opposto, e il valore che serve a leggere un tasso al contrario.
+ */
+describe('l arrotondamento per difetto', () => {
+  it('taglia a due decimali senza mai alzare', () => {
+    expect(toString(roundDownToCents(fromString('4.999')))).toBe('4.99')
+    expect(toString(roundDownToCents(fromString('132.65306122')))).toBe('132.65')
+  })
+
+  it('non è il gemello di quello per eccesso, ed è tutto il punto', () => {
+    // Sullo stesso numero i due rispondono diverso: la commissione sale, ciò che si offre al
+    // giocatore scende. Se un giorno coincidessero, uno dei due sarebbe di troppo.
+    expect(toString(roundUpToCents(fromString('0.001')))).toBe('0.01')
+    expect(toString(roundDownToCents(fromString('0.009')))).toBe('0')
+  })
+
+  it('non tocca ciò che è già ai centesimi', () => {
+    expect(toString(roundDownToCents(fromString('2.5')))).toBe('2.5')
+    expect(toString(roundDownToCents(ZERO))).toBe('0')
+  })
+})
+
+describe('ONE', () => {
+  it('è l intero, e serve a chiedere quanto resta dopo un tasso', () => {
+    expect(toString(ONE)).toBe('1')
+    expect(toString(ONE.minus(fromString('0.02')))).toBe('0.98')
   })
 })
