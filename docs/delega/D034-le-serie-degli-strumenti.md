@@ -1,10 +1,10 @@
 # D034 — Le serie degli strumenti
 
-- **Stato:** **Chiusa** — ramo `d034-le-serie-degli-strumenti`, che parte da `main`. Scritta il
-  2026-08-21, eseguita il 2026-08-23. La decisione aperta è stata posta all'utente, che ha risposto
-  con la **direttiva generale**: decisa in autonomia su tutte e due le metà, e marcata come
-  contestabile. Le correzioni rispetto a com'era scritta sono in fondo, e la prima sposta un file
-  di cartella
+- **Stato:** **Chiusa** — commit `23306a1`, ramo `d034-le-serie-degli-strumenti`, che parte da
+  `main`. Scritta il 2026-08-21, eseguita il 2026-08-23. La decisione aperta è stata posta
+  all'utente, che ha risposto con la **direttiva generale**: decisa in autonomia su tutte e due le
+  metà, e marcata come contestabile. Le correzioni rispetto a com'era scritta sono in fondo, e la
+  prima sposta un file di cartella
 - **Dipende da:** [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md), che ha portato la prima
   serie e la libreria; [D033](D033-il-bancomat-e-una-pagina.md), che porta la pagina dove questi
   grafici stanno
