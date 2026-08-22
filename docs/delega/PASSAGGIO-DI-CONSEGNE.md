@@ -30,22 +30,22 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                                                                                                                                        |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                          |
-| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                 |
-| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                 |
-| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                      |
-| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                |
-| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina — e da D033 il bancomat avrà una pagina **sua**, non più la home                                                        |
-| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                               |
-| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                 |
-| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                         |
-| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                  |
-| `main`                   | **è il punto di partenza, e stavolta davvero.** Il 2026-08-21 tutti i rami di lavoro sono stati fusi con un `--ff-only` e cancellati: ne resta **uno solo**, e `git branch` lo dice in una riga                                                        |
-| `origin/main`            | **allineato.** Il 2026-08-21 sono stati spinti in un colpo i cinquantotto commit che mancavano dal 2026-08-20. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                 |
-| Albero di lavoro         | **pulito**                                                                                                                                                                                                                                             |
-| Prossimo passo           | **[D033](D033-il-bancomat-e-una-pagina.md)**, scritta e aperta: il bancomat diventa una pagina sua e il cruscotto un'altra. Poi [D034](D034-le-serie-degli-strumenti.md), i grafici. La fetta 03 viene dopo. Vedi _La seconda sessione del 2026-08-21_ |
+|                          |                                                                                                                                                                                                                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                          |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                 |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                 |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                      |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                                                    |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                               |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                 |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                         |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                  |
+| `main`                   | **è il punto di partenza, e stavolta davvero.** Il 2026-08-21 tutti i rami di lavoro sono stati fusi con un `--ff-only` e cancellati: ne resta **uno solo**, e `git branch` lo dice in una riga                                                                                        |
+| `origin/main`            | **allineato.** Il 2026-08-21 sono stati spinti in un colpo i cinquantotto commit che mancavano dal 2026-08-20. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                 |
+| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`. Alla chiusura del 2026-08-22 portava [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) e i documenti che la accompagnano, **non committati** — vedi _Cosa c'è nell'albero di lavoro alla chiusura_ |
+| Prossimo passo           | **[D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md)**, scritta e aperta: le correzioni dell'audit del 2026-08-22. Poi [D034](D034-le-serie-degli-strumenti.md), i grafici, che **ha una decisione aperta**. La fetta 03 dopo. Vedi _La sessione del 2026-08-22_              |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -67,11 +67,145 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 > Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
 > agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
 
+## La sessione del 2026-08-22: D033 chiusa, un audit, D035 scritta
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
+recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
+
+**Cosa è stato chiuso.**
+
+| Delega                                   | Cos'era                                                                            |
+| ---------------------------------------- | ---------------------------------------------------------------------------------- |
+| [D033](D033-il-bancomat-e-una-pagina.md) | la home faceva due lavori; adesso il bancomat è una pagina e il cruscotto un'altra |
+
+**Non spezzata**, e la sua intestazione chiedeva di dichiararlo: non esiste uno stato intermedio che
+compili — `home` sparisce solo se `atm` e `board` esistono nello stesso commit. Ha portato l'
+[ADR 0040](../adr/0040-il-bancomat-e-il-cruscotto-sono-due-pagine.md) e **il primo `Superata` del
+progetto**, l'[ADR 0018](../adr/0018-la-home-e-un-atm.md), più diciassette correzioni rispetto a
+com'era scritta.
+
+Poi la sessione ha fatto una cosa di specie diversa: **un audit dell'intera codebase**, da cui è
+nata [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md), scritta e non eseguita.
+
+### Le sei cose che chi arriva adesso deve sapere
+
+**1. Il salvataggio ha un tetto, ed è a 1e21 €.** `decimal.js` ha `toExpPos = 21`: oltre quella
+cifra `toString()` scrive `1e+21`, e il regex dello schema di salvataggio rifiuta quella forma.
+`SaveStore` torna `error.save.invalid` **prima** di toccare il disco, la partita va in `failed` con
+fase `saving`, e da lì la finestra non si chiude. Misurato attraverso Ledger e schema veri; a 1e20
+passa. **Non si incontra giocando** — a 18,00 €/s servirebbero 5,5e19 secondi — ma la
+[visione](../prodotto/visione.md) dichiara un bersaglio a ~1e30, e l'
+[ADR 0026](../adr/0026-la-precisione-del-denaro-e-dichiarata.md) certifica come misurata una soglia
+di 1e37. È il punto 1 di D035.
+
+**2. Il renderer non era minificato, e la causa non era nostra.** `electron-vite` imposta
+`minify: false` come default del preset del renderer, e chi non lo scrive lo eredita. **Il dubbio
+che [D030](D030-il-contenuto-scorre-nel-telaio.md) aveva aperto e che tre deleghe si sono passate
+è chiuso**, e non era una configurazione del bundler da trovare: era un default da dichiarare.
+Misurato, il pacchetto **dimezza**. E il numero che conta: ApexCharts pesa **931 kB**, non i ~1.815
+che [qualita.md](../qualita.md) dichiara — cioè più del triplo di tutto il resto
+dell'applicazione messo insieme. È il punto 2 di D035, e rende la decisione dell'
+[ADR 0034](../adr/0034-il-grafico-e-una-libreria.md) più contestabile di prima, non meno.
+
+**3. Il pacchetto di rilascio porterebbe due volte ciò che è già nel bundle.** `apexcharts`,
+`decimal.js` e i due `@fontsource` stanno in `dependencies` ma il renderer li impacchetta tutti:
+solo `zod` è davvero esterna, e a dirlo è l'output compilato del main, non il sorgente. Sono circa
+22 MB. `vue`, `pinia` e `vue-i18n` stanno **già** in `devDependencies` per questa ragione, quindi è
+un'incoerenza dentro lo stesso file. È il punto 3 di D035.
+
+**4. La classe di difetto che questo progetto dichiara scoperta ha colpito di nuovo, subito.**
+D033 ha cancellato la schermata `home` e ha ripulito il codice con un commit apposta — e i
+documenti vivi la nominano ancora in sette punti. Il peggiore: in
+[preferenze.md](../prodotto/preferenze.md) D033 ha riscritto il **corpo** di P3 e ha lasciato in
+piedi il **titolo** che afferma il contrario. Nessun gate può vederlo, ed è scritto in fondo a
+questa pagina da prima. Sono i punti 4, 5 e 6 di D035.
+
+**5. Una decisione è stata rimandata dall'utente, e non è dimenticata.** Il confine di
+presentazione converte `Money` in `number`, cioè in float64: da ~1e14 € gli importi a schermo
+perdono il centesimo — `99999999999999,99` esce come `…,98` — mentre il Ledger resta in equilibrio.
+Le tre strade sono un formattatore proprio sulla stringa, `BigInt` con i centesimi, o una notazione
+compatta oltre una soglia; la terza cambia come il gioco si legge, quindi è una decisione di
+prodotto. Sta in _Fuori scope_ di D035 con scritto che è rimandata: **chi esegue quella delega non
+la riapra di iniziativa propria.**
+
+**6. Cosa l'audit NON ha trovato, che vale quanto ciò che ha trovato.** Zero problemi di sicurezza,
+verificati invece che supposti: le tre difese di Electron accese, il preload a tre funzioni, nessun
+`innerHTML`, nessun `v-html`, nessun `eval`, nessun collegamento esterno, la scrittura
+temporaneo-`fsync`-`rename`, lo schema `zod` eseguito, `npm audit` a zero. E il kernel, i contratti,
+i domini e la persistenza non hanno prodotto **un solo** reperto di correttezza oltre a quello sulla
+scala. Sei reperti su nove stanno fuori da `src/`.
+
+### Come è stato fatto l'audit, e perché conta per il prossimo
+
+Il metodo è la parte riusabile, e senza di essa il prossimo audit ricomincia da zero.
+
+**Non si cercano le classi che un gate già sorveglia.** Questa codebase ha una cintura di test di
+regola strutturale — l'elenco sta in [tracciabilita.md](../tracciabilita.md) — e cercarci dentro le
+classi che quei test impediscono è tempo speso a riscoprire che funzionano. L'audit ha guardato
+**solo** dove nessun gate guarda: la semantica, i confini numerici, la configurazione di rilascio, e
+la coerenza fra i documenti vivi e il codice. È la ragione per cui sei reperti su nove stanno fuori
+da `src/`.
+
+**Ogni reperto è stato dimostrato eseguendo, non leggendo.** Il tetto del salvataggio con una sonda
+che attraversa Ledger e schema veri; la minificazione compilando due volte e confrontando; il peso
+di ApexCharts isolandola in un chunk suo; il difetto del loop con un `schedule` finto. Le sonde
+vivevano in file temporanei sotto `tests/`, cancellati alla fine — l'albero è tornato pulito e la
+suite è tornata al conto di partenza.
+
+**E una trappola dello strumento che vale la prossima volta:** `npm run verify 2>&1 | tail -40`
+restituisce il codice d'uscita di `tail`, non di `verify`. La prima esecuzione dell'audit è sembrata
+verde mentre `tsc` non era nemmeno installato. Si redirige su file e si legge `$?`, oppure non si
+mette niente dopo la pipe.
+
+### Cosa c'è nell'albero di lavoro alla chiusura
+
+Verificato con i comandi, non ricordato.
+
+- **`npm run verify` verde**, e il conto dei test è quello di partenza: le sonde dell'audit sono
+  state cancellate. `npm run build` verde. `npm audit` a zero vulnerabilità.
+- **Nessun residuo di debug**, nessun file temporaneo: `git status` vede solo il lavoro voluto.
+- **D035 è scritta e non eseguita**, insieme all'aggiornamento del grafo e dell'indice in
+  [README.md](README.md) e a [stato.md](../stato.md) rigenerato.
+- **Niente è stato committato in questa sessione dopo D033**, ed è deliberato: il commit porta lo
+  scope della delega e si chiede.
+- **Il codice di gioco non è stato toccato dall'audit.** Nessun fix è stato applicato: D035 li
+  descrive tutti e non ne esegue nessuno.
+
+### Cosa questa sessione ha lasciato indietro
+
+Censito, non nascosto.
+
+1. **La tabella delle regole in [architettura.md](../architettura.md) si ferma a R19**, e adesso è
+   indietro di tre righe da due sessioni. R20, R21 e R22 stanno in
+   [tracciabilita.md](../tracciabilita.md), che è l'elenco autorevole. **D035 non la copre**, ed è
+   una scelta: quella delega raccoglie i reperti dell'audit, e questo era già censito prima. Costa
+   tre righe e sta bene accanto al suo punto 4, se chi esegue vuole prendersela.
+2. **Nessuna misura della catena a macchina scarica.** Resta aperta da due sessioni. Il numero
+   preso oggi — a macchina scarica, senza finestra di sviluppo — è nettamente più basso di quello
+   in [qualita.md](../qualita.md), il che conferma la diagnosi scritta lì: il minuto non lo pagavano
+   i test. Va rimisurato con metodo e scritto una volta, non dedotto da qui.
+3. **Gli script CDP vivono ancora nello scratchpad**, quindi la prossima sessione li riscrive per
+   la terza volta. Metterli in `scripts/` è una decisione che nessuno ha ancora preso.
+4. **Il peso del renderer in [qualita.md](../qualita.md) è di D027 e non è stato rimisurato da
+   D033.** Non è stato corretto qui perché il punto 2 di D035 lo rimisura comunque, e farlo due
+   volte vorrebbe dire scriverci sopra un numero che vive un giorno.
+
+### Due decisioni prese scrivendo D035, e perché
+
+- **Sette reperti in una delega sola, non tre.** Il precedente è [D016](D016-correzioni-audit.md),
+  che ne assorbì diciassette da un audit; l'alternativa era spezzare per radice, come fecero D021 e
+  D022. Il titolo dice la ragione: tutti e sette sono «una decisione che nessuno ha preso l'ha presa
+  qualcun altro», e separarli avrebbe nascosto proprio la cosa che li rende un problema solo.
+- **La decisione del router è rimasta aperta dentro la delega**, con le due opzioni e il trade-off,
+  invece di essere risolta scrivendo. La riga del registro YAGNI porta un grilletto — «la terza
+  destinazione con una gerarchia» — che potrebbe essere scattato tre destinazioni fa, e deciderlo
+  scrivendo una delega sarebbe prendere in autonomia una decisione sull'architettura del renderer.
+
 ## La seconda sessione del 2026-08-21: due deleghe chiuse, tre scritte
 
 Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. Il giorno è lo stesso
-della sezione qui sotto, ed è la ragione per cui adesso portano un numero: **questa è la più
-recente**, e quella sotto descrive uno stato già superato.
+della sezione qui sotto, ed è la ragione per cui portano un numero. **Non è più la più recente:**
+sopra c'è la sessione del 2026-08-22, e questa descrive uno stato già superato.
 
 **Cosa è stato chiuso.**
 
@@ -280,13 +414,20 @@ sta nelle alternative scartate dell'[ADR 0037](../adr/0037-il-telaio-non-scorre-
   `npm run build`, quindi non è un residuo — ma chi apre quel file e lo trova strano adesso sa
   perché.
 
-### Un dubbio che questa sessione non ha sciolto
+### Un dubbio che questa sessione non ha sciolto — **e che l'audit ha sciolto**
 
 `npm run build` produce un renderer **non minificato** — i commenti del sorgente sono ancora dentro
 il bundle, ed è così che si è scoperto. Ne discende che i 2.437,92 kB dichiarati in
 [qualita.md](../qualita.md) sono il peso di un pacchetto non minificato, non il peso di ApexCharts.
 Non è stato toccato: è nel [registro YAGNI](../roadmap-fette.md) con il suo grilletto, e prima di
 stringere qualcosa va saputo quanto pesa davvero la libreria, o si ottimizza il file sbagliato.
+
+> **Sciolto il 2026-08-22.** Non era una configurazione del bundler da trovare: `electron-vite`
+> imposta `minify: false` come **default del preset del renderer**, e chi non lo scrive lo eredita.
+> Misurato, il pacchetto dimezza; ApexCharts pesa 931 kB e non i ~1.815 che quella sottrazione
+> lasciava credere. Il dubbio è durato tre deleghe perché la domanda era posta al file sbagliato —
+> si guardava l'output invece delle opzioni con cui era prodotto. Il rimedio è il punto 2 di
+> [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md).
 
 **Perché questa tabella non porta più i numeri.** Li portava, ed erano sbagliati: da
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) i fatti contabili stanno in un posto solo
@@ -297,10 +438,14 @@ che ce ne sia una sola.
 I contratti sono in `src/core/contracts/`, Clock, Rng, Bus, Registry e Ledger in
 `src/core/kernel/`, i numeri di gioco in `src/core/balance/`, lo schema del salvataggio e i tre
 canali IPC in `src/main/save/`, i tre domini in `src/core/domains/`. In `src/renderer/` ci sono il
-bootstrap, il loop, l'unico store, il guscio `App.vue`, le **quattro** viste sotto `views/` — una
-per destinazione — e i componenti di gioco sotto `components/`, che da
-[D026](D026-dove-si-attacca-un-dominio.md) **non è più piatta**: cinque cartelle, una per
-proprietario, e zero file sciolti. Il kit che non sa che gioco è sta sotto `ui/`, e le parole del
+bootstrap, il loop, l'unico store, il guscio `App.vue`, le viste sotto `views/` — **una per
+destinazione**, e INV-22 non ne ammette una in meno — e i componenti di gioco sotto `components/`,
+che da [D026](D026-dove-si-attacca-un-dominio.md) **non è più piatta**: una cartella per
+proprietario, e zero file sciolti. Quante siano non si scrive qui, ed è la lezione di
+[D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) applicata a un punto in cui aveva già
+morso due volte: questa riga ha detto «quattro viste» dopo che D033 ne aveva fatte cinque, e
+«cinque cartelle» dopo che D029 ne aveva aggiunta una sesta. La regola non invecchia, il conto sì —
+e a tenerlo è `tests/rules/domain-ui`. Il kit che non sa che gioco è sta sotto `ui/`, e le parole del
 gioco sotto `i18n/`. Da [D024](D024-il-telaio.md) il guscio non disegna più le
 linguette: monta il **telaio** del kit e gli passa dentro la colonna e la testata. Ogni delega chiusa ha in fondo le
 **correzioni** rispetto a com'era scritta: [D002](D002-contratti.md) ne ha sette,
@@ -500,17 +645,24 @@ Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: all
 
 ## Il prossimo passo, in concreto
 
-**È [D033](D033-il-bancomat-e-una-pagina.md), ed è scritta.** Non c'è niente da decidere prima di
-cominciare: le tre domande che la bloccavano hanno risposta, e la delega è stata scritta **dopo**
-averle avute.
+**È [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md), ed è scritta.** Niente la blocca:
+la sola decisione che porta — il grilletto del router — riguarda un punto solo e non ferma gli
+altri sette.
 
-Cosa fa: il bancomat diventa una pagina sua, a due colonne come l'artboard `ATM` del canvas, e il
-cruscotto ne diventa un'altra. L'[ADR 0018](../adr/0018-la-home-e-un-atm.md) va in `Superata`, e
-sarebbe il **primo** del progetto — oggi ne conta zero ([stato.md](../stato.md)).
+Cosa fa: chiude i sette difetti correggibili dell'audit del 2026-08-22, alla radice. La notazione
+del denaro dichiarata accanto alla sua precisione, il renderer che si compila minificato, le quattro
+dipendenze che il bundle già contiene tolte da `dependencies`, i documenti vivi che smettono di
+descrivere la `home`, due righe del registro YAGNI rimesse d'accordo con la realtà, un selettore che
+toglie l'ultima tabella scritta due volte, e il loop che riprogramma il frame anche quando `onStep`
+lancia.
 
-**È la delega più grande dopo il kernel**, ~450 righe, e la sua intestazione lo dice chiedendo a chi
-la esegue di dichiarare se la spezza. Tre cose insieme: la lista delle destinazioni, la pagina nuova,
-la carta.
+**È piccola in righe e larga in file** — ~45 di codice, ~110 di test, ~70 di documenti — e la
+ragione per cui sette cose che non si somigliano stanno insieme è in _Le tre radici_, dentro la
+delega. Produce l'ADR **0041** e l'invariante **INV-24**.
+
+**Perché prima di D034 e non dopo:** D034 rimisura il peso del renderer, e farlo dopo che la
+minificazione è decisa significa misurarlo una volta invece che due, su un numero che vuol dire
+qualcosa. Non è una dipendenza e il grafo non porta la freccia.
 
 **Poi [D034](D034-le-serie-degli-strumenti.md)**, i grafici a candele di contanti e carta. Ha **una
 decisione aperta** scritta in fondo — due grafici a candele oppure candele e linea — e non si esegue
@@ -568,9 +720,10 @@ delega sbagliata.
    Quello che manca è l'ordine **dentro** `components/`, che oggi è piatta.
 
 **D026 è stata eseguita e chiusa lo stesso giorno.** Le tre decisioni sono state prese con
-l'utente: la home **resta il bancomat** — l'ADR 0018 è stato confermato invece che superato, e
-adesso si sa perché: la home _è_ la pagina del dominio `atm` — ogni dominio ha la sua pagina salvo
-dichiarare `null`, e `components/` si divide in cinque cartelle per proprietario. Ne è uscito
+l'utente: la home **restava il bancomat** — l'ADR 0018 fu confermato invece che superato, e la home
+_era_ la pagina del dominio `atm`; **quella metà non vale più, ed è D033 ad averla superata** —
+ogni dominio ha la sua pagina salvo dichiarare `null`, e `components/` si divide per proprietario,
+una cartella ciascuno. Ne è uscito
 l'[ADR 0033](../adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md), la regola **R18** e
 `tests/rules/domain-ui`, rotta di proposito quattro volte. Le destinazioni sono quattro, quindi il
 grilletto dei **gruppi nella colonna** è scattato ed è uscito dal registro.
@@ -985,35 +1138,46 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-**Adesso ce n'è uno, e la sessione precedente non poteva averlo:** c'è una delega scritta, aperta e
-senza decisioni in sospeso. Quali siano aperte lo dice [stato.md](../stato.md), che le conta.
+C'è una delega scritta e aperta, e niente da decidere prima di cominciare. Quali siano aperte lo
+dice [stato.md](../stato.md), che le conta.
 
 ```
-Esegui D033 — il bancomat è una pagina.
+Esegui D035 — ciò che non si dichiara lo sceglie un altro.
 
-La delega è docs/delega/D033-il-bancomat-e-una-pagina.md, ed è completa: le tre domande che la
-bloccavano hanno già risposta, e la delega è stata scritta dopo averle avute. Non riproporle.
+La delega è docs/delega/D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md, ed è completa:
+raccoglie i sette difetti correggibili dell'audit del 2026-08-22, ognuno con la misura che lo
+dimostra e con cosa fare. È autosufficiente — non serve il report dell'audit, che non è nel repo.
 
 Prima di scrivere una riga:
-- leggi la delega per intero, comprese Trappole note;
-- leggi l'artboard ATM del canvas NEL SORGENTE — docs/design/mockups/solvent-canvas.dc.html,
-  righe 1702–2453 — non guardandolo;
-- dichiara se spezzi la delega: sono ~450 righe e tocca tre cose insieme, e la sua intestazione
-  chiede esplicitamente di dirlo prima di cominciare.
+- leggi la delega per intero, comprese Trappole note: la 2 e la 3 costano una mattina se non
+  le sai, e riguardano due punti diversi;
+- guarda che le misure siano ancora vere. La tabella dei pesi è del 2026-08-22 su quel commit:
+  se src/ si è mosso vanno rifatte, non ricopiate. Il rapporto invece non invecchia.
 
-Il ramo si chiami d033-il-bancomat-e-una-pagina e parta da main, che è aggiornato e allineato
-con origin/main.
+Otto punti, e l'ordine conviene questo: prima 1 (la notazione del denaro) perché è il solo
+difetto che ferma il gioco, poi 8 e 7 che sono codice, poi 2 e 3 che sono configurazione e
+vogliono verify:release guardato NELL'OUTPUT, infine 4, 5 e 6 che sono documenti.
 
-La spunta a occhio si paga via CDP nella finestra vera, con il metodo di
-docs/delega/PASSAGGIO-DI-CONSEGNE.md: gli script non sono nel repo e vanno riscritti.
+Due cose che la delega dichiara e che non vanno riaperte di iniziativa propria:
+- il punto sul confine di presentazione (gli importi grandi che perdono il centesimo a schermo)
+  è in Fuori scope perché l'utente l'ha rimandato. È rimandato, non dimenticato;
+- la decisione del router in fondo alla delega va posta all'utente quando arrivi al punto 6.
+  Non blocca gli altri sette.
+
+Il ramo si chiami d035-cio-che-non-si-dichiara-lo-sceglie-un-altro e parta da main.
+Verifica che main sia ancora allineato: git rev-list --count origin/main..main
+
+Ogni test nuovo va visto rosso di proposito una volta — la definizione di fatto lo chiede
+punto per punto, ed è il modo in cui questo progetto ha scoperto che una regola non funzionava.
 ```
 
 **Poi viene [D034](D034-le-serie-degli-strumenti.md)**, che invece **ha** una decisione aperta in
 fondo — due grafici a candele, oppure candele per i contanti e linea per la carta — e non si esegue
 prima di averla presa con l'utente.
 
-I prompt che consegnavano D027, D026 e D018 stanno nel `git log` di questo file: si recuperano da lì
-invece di tenerne quattro in vita, che è la stessa ragione per cui i numeri stanno in un posto solo.
+I prompt delle deleghe già consegnate stanno nel `git log` di questo file: si recuperano da lì
+invece di tenerli tutti in vita, che è la stessa ragione per cui i numeri stanno in un posto solo.
+Questa riga li elencava per nome, ed era un elenco che invecchiava a ogni delega consegnata.
 
 **E dopo le due, torna il lavoro di specie diversa: scrivere una delega, non eseguirne una.** Il
 materiale c'è tutto e non va inventato:
@@ -1029,8 +1193,12 @@ materiale c'è tutto e non va inventato:
 
 Una delega di questo progetto si riconosce dalla forma: dipendenze, ADR vincolanti, budget dichiarato
 per **ogni** ramo che le decisioni aperte producono, _Da produrre_, _Invarianti_, _Fuori scope_,
-_Definizione di fatto_ e _Trappole note_. Le ventisette che ci sono servono da modello; D027 è quella
-da leggere per capire come si scrive una delega che porta decisioni **non** ancora prese.
+_Definizione di fatto_ e _Trappole note_. Quelle già scritte servono da modello — quante siano lo
+dice [stato.md](../stato.md), e questa riga ne ha dichiarate ventisette per due deleghe di fila —
+e due sono da leggere per ragioni diverse: [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md)
+per come si scrive una delega che porta decisioni **non** ancora prese, e
+[D016](D016-correzioni-audit.md) per come si scrive una delega che raccoglie i reperti di un audit
+sotto le loro radici invece che in un elenco.
 
 **Una cosa che vale la pena sapere prima di scriverne una nuova**, ed è la lezione di D027: il budget
 va dichiarato per ramo, e i rami vanno **contati**. D027 ne dichiarava uno su quattro e prometteva

@@ -304,8 +304,9 @@ esegue le porta all'utente prima di toccare un file. Una delega che decide al po
 diventa la home sarebbe una delega che si scopre sbagliata a metà lavoro.
 
 **Ed è chiusa lo stesso giorno in cui è stata scritta**, con le tre decisioni prese: la home resta
-il bancomat (scelta dall'utente, l'ADR 0018 confermato invece che superato), ogni dominio ha la sua
-pagina salvo dichiarare `null`, e `components/` si divide in cinque cartelle per proprietario. Il
+il bancomat (scelta dall'utente, l'ADR 0018 confermato invece che superato — e **superato davvero**
+da [D033](D033-il-bancomat-e-una-pagina.md) due deleghe dopo), ogni dominio ha la sua pagina salvo
+dichiarare `null`, e `components/` si divide per proprietario, una cartella ciascuno. Il
 consuntivo è **sotto il budget più basso pur avendo scelto la strada più cara**, perché due terzi
 del lavoro sono `git mv` e un file spostato non produce righe. Le decisioni 2 e 3 sono state prese
 in autonomia su direttiva generale dell'utente, quindi sono contestabili: stanno nell'
