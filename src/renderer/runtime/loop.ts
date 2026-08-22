@@ -120,9 +120,24 @@ export const createLoop = ({ clock, cap, now, schedule, onStep }: LoopDeps): Loo
     // A finestra nascosta il browser non chiama il frame: al ritorno questo delta copre tutto il
     // tempo passato e il tetto lo limita. `Sospeso → Recupero` non ha un codice suo — è lo stesso
     // percorso, ed è la ragione per cui non esiste una formula offline da bilanciare a parte.
-    if (step.elapsed > 0) onStep(step)
-
+    // Il frame successivo si programma **prima** di `onStep`, e a imporlo sono due proprietà
+    // opposte fra loro (D035, punto 8).
+    //
+    // Se `onStep` **lancia**, l'eccezione esce di qui. Programmando dopo, non verrebbe programmato
+    // nessun frame nuovo, `cancel` resterebbe al valore vecchio — quindi `isRunning()` direbbe
+    // `true` — e `start()` rifiuterebbe di ripartire, perché comincia con `if (cancel !== null)`.
+    // La finestra vive, il saldo è fermo, e l'unica funzione che il progetto ha per chiedere «sta
+    // girando?» risponde di sì.
+    //
+    // Se `onStep` chiama `stop()`, l'annullamento deve poter mordere: qui `cancel` porta già il
+    // frame nuovo, quindi `stop()` lo annulla e il loop resta fermo. Un `try`/`finally` intorno a
+    // `onStep` chiude il primo caso e non il secondo — riprogrammerebbe **dopo** lo `stop()`,
+    // resuscitando un loop che qualcuno aveva appena fermato.
+    //
+    // In nessuno dei due casi l'errore viene preso: di qui esce come è entrato.
     cancel = schedule(frame)
+
+    if (step.elapsed > 0) onStep(step)
   }
 
   return {

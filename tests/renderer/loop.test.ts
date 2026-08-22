@@ -195,4 +195,70 @@ describe('il loop', () => {
 
     expect(steps.map((step) => step.elapsed)).toEqual([10])
   })
+
+  it('se onStep lancia, l’errore esce e il tempo riprende a passare', () => {
+    // Il difetto: `cancel = schedule(frame)` stava **dopo** `onStep`, quindi un lancio usciva da
+    // `frame()` prima della riassegnazione. Tre conseguenze in cascata: nessun frame nuovo veniva
+    // programmato, `cancel` conservava il valore vecchio — quindi `isRunning()` continuava a
+    // rispondere `true` — e `start()` rifiutava di ripartire, perché comincia con
+    // `if (cancel !== null) return`. La finestra vive, il saldo è fermo, e l'unica funzione che
+    // il progetto ha per chiedere «sta girando?» dice di sì.
+    const stage = createStage()
+    const steps: Step[] = []
+    let lancia = true
+    const loop = createLoop({
+      clock,
+      cap: CAP,
+      now: stage.host.now,
+      schedule: stage.host.schedule,
+      onStep: (step) => {
+        if (lancia) {
+          lancia = false
+          throw new Error('un handler ha lanciato')
+        }
+        steps.push(step)
+      }
+    })
+
+    loop.start()
+    stage.frame()
+    stage.advance(1000)
+
+    // L'errore continua a emergere, e deve: riprogrammare nel `finally` non lo inghiotte.
+    expect(() => stage.frame()).toThrow('un handler ha lanciato')
+
+    expect(loop.isRunning()).toBe(true)
+    stage.advance(1000)
+    expect(stage.frame()).toBe(true)
+    expect(steps.map((step) => step.elapsed)).toEqual([10])
+  })
+
+  it('un onStep che chiama stop ferma davvero il loop', () => {
+    // È la proprietà con cui D035 sceglie fra le due strade del punto 8, e va provata invece che
+    // ragionata: chi riprogramma il frame deve farlo in un punto in cui uno `stop()` dall'interno
+    // di `onStep` possa ancora annullarlo.
+    const stage = createStage()
+    const steps: Step[] = []
+    const loop = createLoop({
+      clock,
+      cap: CAP,
+      now: stage.host.now,
+      schedule: stage.host.schedule,
+      onStep: (step) => {
+        steps.push(step)
+        loop.stop()
+      }
+    })
+
+    loop.start()
+    stage.frame()
+    stage.advance(1000)
+    stage.frame()
+
+    expect(loop.isRunning()).toBe(false)
+    expect(stage.frame()).toBe(false)
+
+    stage.advance(1000)
+    expect(steps).toHaveLength(1)
+  })
 })
