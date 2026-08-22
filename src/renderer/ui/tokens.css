@@ -136,6 +136,13 @@
   --metal-ink: #231a07;
   --metal-back-edge: #2a2413;
   --metal-back-mid: #6d5620;
+  /*
+   * L'inchiostro del **retro**, e non è lo stesso del fronte. Il fronte è chiaro — l'oro lucido —
+   * e vuole una scritta scura; il retro è cupo, e la stessa scritta scura ci sparisce dentro.
+   * Misurato guardando la carta girata nella finestra vera (D033): le tre righe che il retro
+   * esiste per portare erano illeggibili.
+   */
+  --metal-back-ink: #f3e6c4;
   --metal-chip-light: #f5e2a0;
   --metal-chip-dark: #b8912f;
   --metal-chip-ink: #3a2f10;

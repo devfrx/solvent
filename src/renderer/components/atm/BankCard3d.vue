@@ -193,7 +193,13 @@ const release = (): void => {
   user-select: none;
 }
 
+/*
+ * `flex: 0 0 auto` non e' decorazione: `.stage` e' un flex, e un elemento flessibile **si stringe**
+ * anche quando ha una larghezza dichiarata. Senza questa riga la carta si schiacciava a 251px
+ * quando la colonna destra scendeva sotto i 330 — misurato nella finestra vera, non supposto.
+ */
 .card {
+  flex: 0 0 auto;
   width: 290px;
   height: 183px;
   position: relative;
@@ -248,7 +254,7 @@ const release = (): void => {
     var(--metal-back-mid) 50%,
     var(--metal-back-edge) 100%
   );
-  color: var(--metal-ink);
+  color: var(--metal-back-ink);
   transform: rotateY(180deg);
   overflow: hidden;
 }
@@ -358,7 +364,6 @@ const release = (): void => {
 
 .back .caption {
   margin: 0 0 6px;
-  color: var(--metal-chip-ink);
 }
 
 .details {

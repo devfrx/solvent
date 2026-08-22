@@ -82,6 +82,11 @@ const { text, money, rate } = useTranslator()
  *
  * Una `@media` sola, e non due: due soglie sono due punti in cui la pagina può contraddirsi, e a
  * questa larghezza non c'è una terza forma da descrivere.
+ *
+ * **La soglia è misurata, non scelta.** La carta è un oggetto di 290px che non si stringe (P5), e
+ * il riquadro che la contiene ne vuole 330 fra bordi e margini: sotto i 70rem di finestra la
+ * colonna destra scende sotto quella cifra. Una soglia più bassa non produrrebbe due colonne
+ * strette — produrrebbe una carta schiacciata, che è la cosa che questa pagina non può permettersi.
  */
 .columns {
   display: grid;
@@ -106,7 +111,7 @@ const { text, money, rate } = useTranslator()
   min-width: 0;
 }
 
-@media (width <= 62rem) {
+@media (width <= 70rem) {
   .doing,
   .watching {
     grid-column: 1 / -1;
