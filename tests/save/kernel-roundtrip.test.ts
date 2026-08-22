@@ -15,6 +15,7 @@ import { createRng } from '@core/kernel/Rng'
 
 import { createSaveFile, SAVE_FILE_NAME } from '../../src/main/save/SaveFile'
 import { createSaveStore, type SaveStore } from '../../src/main/save/SaveStore'
+import { parseEnvelope } from '../../src/main/save/schema'
 
 /**
  * Il giro completo che l'ADR 0004 chiama "la rete che impedisce a metà dei difetti di persistenza
@@ -152,6 +153,61 @@ describe('dal kernel al disco e ritorno', () => {
 
     expect(report).toEqual({ ok: true, value: { ignored: [] } })
     expect(state).toEqual({ level: 3, bought: ['desk', 'chair'] })
+  })
+})
+
+/**
+ * INV-24 — un saldo attraversa il confine di persistenza in forma decimale piena, a qualunque
+ * scala il gioco arrivi.
+ *
+ * Il difetto che questo test chiude non si incontra giocando — a 18,00 €/s servirebbero 5,5e19
+ * secondi — e resta il più grave dei sette, perché il modo in cui il gioco moriva è il peggiore:
+ * `error.save.invalid` manda la partita in `failed` con fase `saving`, e da lì la finestra non
+ * si chiude (correzione 13 di D011). Riprovare fallisce in modo deterministico; l'unica uscita è
+ * chiudere perdendo la partita.
+ *
+ * Sta in questo file e non fra i test dello schema perché è la stessa domanda che il file pone
+ * già — che lo schema accetti **ciò che il kernel produce davvero** — fatta a una scala che
+ * nessun payload scritto a mano raggiunge.
+ */
+describe('INV-24 · la scala non ferma il salvataggio', () => {
+  const savedWith = (amount: string): SavePayload => {
+    // Senza tetto, come `buildState`: qui la domanda è la forma della stringa, non la capienza.
+    const ledger = createLedger(createBus(), () => null)
+    ledger.transaction(income('card', fromString(amount)), { reason: 'reason.income.tick' })
+    return { ledger: ledger.save(), rng: createRng(0).save(), systems: {} }
+  }
+
+  const envelopeOf = (amount: string): unknown => ({
+    version: 1,
+    savedAt: SAVED_AT,
+    payload: savedWith(amount)
+  })
+
+  it('un saldo oltre la vecchia soglia esce dal Ledger in forma decimale piena', () => {
+    const { balances } = savedWith('1e21').ledger
+
+    expect(balances.card).toBe(`1${'0'.repeat(21)}`)
+    // Il contro-conto porta lo stesso importo col segno, ed è l'altra metà che il regex rifiutava.
+    expect(balances.world).toBe(`-1${'0'.repeat(21)}`)
+  })
+
+  it('e lo schema lo accetta, invece di fermarlo prima del disco', () => {
+    const envelope = envelopeOf('1e21')
+
+    expect(parseEnvelope(envelope)).toEqual({ ok: true, value: envelope })
+  })
+
+  it('regge il bersaglio di scala della visione, e il punto in cui il centesimo finisce', () => {
+    // ~1e30 è il bersaglio dichiarato; 1e37 è dove il centesimo smette di esistere (ADR 0026).
+    // Sopra non c'è più niente da salvare che questo progetto sappia contare: è l'altro confine,
+    // e lo sorveglia la precisione, non la notazione.
+    expect(parseEnvelope(envelopeOf('1e30')).ok).toBe(true)
+    expect(parseEnvelope(envelopeOf('1e37')).ok).toBe(true)
+  })
+
+  it('e il salvataggio vero arriva sul disco', async () => {
+    expect(await store.save(savedWith('1e30'))).toEqual({ ok: true, value: SAVED_AT })
   })
 })
 

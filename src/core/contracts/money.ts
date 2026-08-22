@@ -40,7 +40,36 @@ export type Money = Decimal
  */
 const SIGNIFICANT_DIGITS = 40
 
-Decimal.set({ precision: SIGNIFICANT_DIGITS })
+/**
+ * ADR 0041 — la **rappresentazione** del denaro è dichiarata come la sua precisione. È la seconda
+ * metà del commento qui sopra, e riguarda la stessa libreria.
+ *
+ * La precisione dice **quante cifre** ha un importo; la notazione dice **come si scrivono**. La
+ * seconda è quella che attraversa il disco: oltre il confine il denaro è ciò che `toString()`
+ * produce (INV-04), e lo schema di salvataggio accetta solo la forma decimale piena.
+ *
+ * Ereditata, decimal.js la fissa a `toExpPos = 21`: da 1e21 in su `toString()` restituisce
+ * `1e+21`, il regex di `main/save/schema.ts` lo rifiuta, e il salvataggio fallisce **prima** che
+ * il disco venga toccato. Da lì la partita va in `failed` con fase `saving`, e la finestra non si
+ * chiude (correzione 13 di D011): riprovare fallisce in modo deterministico, e l'unica uscita è
+ * chiudere perdendo la partita. Non è una deriva, è un arresto.
+ *
+ * **Derivata dalla precisione, non scelta a parte**, e non per simmetria: non ha senso scrivere in
+ * forma esponenziale un importo che il progetto sa ancora rappresentare per intero. Le due soglie
+ * coincidono per costruzione — a 1e40 `transfer()` smette di sommare a zero, ed è esattamente lì
+ * che la forma decimale piena finisce.
+ *
+ * **Il verso negativo si dichiara insieme all'altro** anche se oggi non morde: `toExpNeg = -7` è
+ * lo stesso default ereditato, e non morde solo perché tutto arrotonda ai centesimi — cioè per una
+ * proprietà che vale adesso, non per una regola.
+ */
+const NOTATION_EXPONENT = SIGNIFICANT_DIGITS
+
+Decimal.set({
+  precision: SIGNIFICANT_DIGITS,
+  toExpPos: NOTATION_EXPONENT,
+  toExpNeg: -NOTATION_EXPONENT
+})
 
 /** I centesimi: la moneta più piccola che questo gioco sa contare. */
 const CENTS = 2

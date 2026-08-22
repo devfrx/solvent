@@ -111,6 +111,39 @@ describe('la precisione', () => {
 })
 
 /**
+ * ADR 0041 — la **rappresentazione** del denaro è dichiarata come la sua precisione.
+ *
+ * La precisione dice quante cifre; la notazione dice **come si scrivono**, ed è la seconda ad
+ * attraversare il disco. Ereditata da decimal.js valeva `toExpPos = 21`: da lì in su
+ * `toString()` scrive `1e+21`, che il regex dello schema di salvataggio rifiuta — cioè il
+ * salvataggio fallisce prima ancora di toccarlo, il disco.
+ *
+ * I due versi si provano tutti e due. Il negativo non morde oggi, e non morde per una proprietà
+ * che vale adesso — tutto arrotonda ai centesimi — non per una regola.
+ */
+describe('la notazione', () => {
+  it('è dichiarata nei due versi, e non ereditata', () => {
+    expect(Decimal.toExpPos).toBe(40)
+    expect(Decimal.toExpNeg).toBe(-40)
+  })
+
+  it('la soglia coincide con la precisione, e non per combinazione', () => {
+    // Non due numeri che si somigliano: la notazione è **derivata** dalla precisione, perché non
+    // ha senso scrivere in forma esponenziale un importo che il progetto sa ancora rappresentare
+    // per intero. Il confronto con il test di sopra è la prova: 1e39 somma ancora a zero in
+    // `transfer()`, 1e40 no — ed è esattamente lì che la forma decimale piena finisce.
+    expect(Decimal.toExpPos).toBe(Decimal.precision)
+    expect(toString(fromString('1e39'))).toBe(`1${'0'.repeat(39)}`)
+    expect(toString(fromString('1e40'))).toBe('1e+40')
+  })
+
+  it('la vecchia soglia non morde più, e il segno la attraversa con l importo', () => {
+    expect(toString(fromString('1e21'))).toBe(`1${'0'.repeat(21)}`)
+    expect(toString(fromString('-1e21'))).toBe(`-1${'0'.repeat(21)}`)
+  })
+})
+
+/**
  * D032 — l'unico arrotondamento del progetto, nato con la commissione in percentuale.
  */
 describe('l arrotondamento ai centesimi', () => {
