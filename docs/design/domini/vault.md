@@ -48,6 +48,13 @@ scheda: vedi _Cosa questo studio ha trovato_.
 | 8   | **Pagamento**     | **entrambi**, a prezzi diversi. È il primo listino a due voci del gioco     |
 | 9   | **Requisito**     | **nessuno**. È il primo strumento del gioco                                 |
 
+**Le righe 1 e 2 adesso si guardano, e in un posto solo.** Da
+[D034](../../delega/D034-le-serie-degli-strumenti.md) i contanti hanno la loro serie di candele sul
+cruscotto, e quando il caveau è pieno le candele si appiattiscono **sempre allo stesso livello** e
+restano lì finché il giocatore non deposita. Non è una curva che si strozza: è un muro, che è
+esattamente la differenza per cui i livelli sono finiti — e adesso la si vede invece di doverla
+dedurre da `VAULT_CAPACITIES`.
+
 ### La legge della non dominanza regge
 
 Il confronto che conta è con il **deposito vincolato**, l'altro posto dove il denaro sta fermo

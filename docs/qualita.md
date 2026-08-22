@@ -188,6 +188,26 @@ dell'applicazione messo insieme.
 I cinque file di carattere pesano **103,63 kB** in tutto, misurati lo stesso giorno, e non stanno
 nel modulo: sono cinque `woff2` accanto a lui.
 
+**Il peso, rimisurato a [D034](delega/D034-le-serie-degli-strumenti.md), il 2026-08-23**, con lo
+stesso metodo e lo stesso `minify: 'oxc'` — due misure fatte con due metodi diversi non sono
+confrontabili, ed è la ragione per cui questa riga ripete come è stata presa.
+
+| Renderer minificato | JS          | CSS      |
+| ------------------- | ----------- | -------- |
+| a D035, il 22       | 1.198,01 kB | 20,85 kB |
+| a D034, il 23       | 1.202,15 kB | 21,78 kB |
+
+**Quattro chilobyte di JS e uno di CSS**, ed è tutto codice nostro: con `apexcharts` isolata nel
+suo chunk la libreria pesa **931,04 kB**, identica al chilobyte, e tutto il resto passa da 266,22 a
+**270,36 kB**. La differenza fra i due totali è la stessa cifra, quindi non c'è niente da cercare
+altrove.
+
+Vale la pena dire cosa ci sta dentro, perché è la misura che spende metà dell'[ADR 0034](adr/0034-il-grafico-e-una-libreria.md):
+due grafici a **candele** — quelli del blocco C, che quella decisione aveva messo nel piatto della
+bilancia — sono costati un componente, un accumulatore puro e due conversioni, e la libreria non è
+cresciuta di una riga perché sapeva già disegnarli. Il grilletto scritto lì sopra — «il giorno in
+cui i candlestick del blocco C **non** arrivano» — non scatterà più: sono arrivati.
+
 **Il motore, misurato invece che supposto.** L'[ADR 0032](adr/0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)
 poggia su due funzionalità del motore — il livello superiore e l'ancoraggio CSS — e la sua premessa è
 che il motore sia uno solo e recente. Chiesto a lui invece che al changelog:

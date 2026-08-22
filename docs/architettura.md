@@ -27,7 +27,7 @@ flowchart TD
     UI["ui/*<br/>tokens · roles · theme · i pezzi<br/>non sa che gioco è"]
     I18N["i18n/*"]
     ST["stores/*"]
-    RT["runtime/*<br/>createGame · loop · host · cheats"]
+    RT["runtime/*<br/>createGame · loop · host · cheats · candles"]
   end
 
   subgraph CORE["core — nessun Vue, Pinia o Electron"]
@@ -50,6 +50,7 @@ flowchart TD
   VIEWS --> I18N
   CMP --> ST
   CMP --> I18N
+  CMP --> RT
   APP --> UI
   VIEWS --> UI
   CMP --> UI
@@ -82,6 +83,14 @@ flowchart TD
 `APP --> CMP` nasce con [D024](delega/D024-il-telaio.md): il guscio monta la colonna e la testata,
 che sono due componenti di gioco. Prima montava solo le viste, e le linguette se le disegnava da sé —
 è esattamente ciò che quella delega ha tolto.
+
+`CMP --> RT` nasce con [D034](delega/D034-le-serie-degli-strumenti.md), ed è di **soli tipi**: il
+grafico a candele riceve dallo store delle `Candle`, e per convertirle deve nominarne la forma. La
+forma sta in `runtime/` e non accanto a chi disegna perché il suo produttore è lo **store**, e un
+`ST --> CMP` sarebbe la freccia al contrario — cioè un ciclo con `CMP --> ST`, che qui sopra esiste
+già. È lo stesso motivo per cui `sampleOf` vive in `runtime/loop.ts` invece che accanto allo store:
+R01 vieta a uno store di importare ciò che gli sta accanto, e `runtime/` è dove finisce ciò che il
+renderer calcola senza montare niente.
 
 `CMP --> CON` è di soli **dati**, e non contraddice R05: un componente che mostra i pool li deriva
 da `POOLS` invece di elencarli a mano, e uno che mostra i movimenti di una transazione ne nomina il

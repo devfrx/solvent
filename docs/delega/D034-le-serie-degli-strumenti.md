@@ -1,10 +1,10 @@
 # D034 — Le serie degli strumenti
 
-- **Stato:** **Aperta** — scritta il 2026-08-21, non eseguita. Il ramo si chiami
-  `d034-le-serie-degli-strumenti` e parta dal ramo di
-  [D033](D033-il-bancomat-e-una-pagina.md) se esiste ancora, altrimenti da `main`: dal 2026-08-21 i
-  rami di lavoro si fondono e si cancellano, quindi il punto di partenza è `main` appena la delega a
-  monte è chiusa
+- **Stato:** **Chiusa** — ramo `d034-le-serie-degli-strumenti`, che parte da `main`. Scritta il
+  2026-08-21, eseguita il 2026-08-23. La decisione aperta è stata posta all'utente, che ha risposto
+  con la **direttiva generale**: decisa in autonomia su tutte e due le metà, e marcata come
+  contestabile. Le correzioni rispetto a com'era scritta sono in fondo, e la prima sposta un file
+  di cartella
 - **Dipende da:** [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md), che ha portato la prima
   serie e la libreria; [D033](D033-il-bancomat-e-una-pagina.md), che porta la pagina dove questi
   grafici stanno
@@ -16,7 +16,8 @@
 - **Regole:** R05, R09, R11, INV-06 (la dimensione del salvataggio è la somma dei limiti dichiarati)
 - **Budget:** ~200 righe, di cui più della metà nell'accumulatore e nei suoi test. I grafici sono la
   parte corta: la libreria c'è già e sa fare le candele
-- **Ha una decisione aperta.** Vedi in fondo: non si esegue prima di averla presa
+- **Aveva una decisione aperta.** È stata presa prima di eseguire: vedi _La decisione aperta_, e
+  le due righe nuove in fondo a [PASSAGGIO-DI-CONSEGNE](PASSAGGIO-DI-CONSEGNE.md)
 
 ## Obiettivo
 
@@ -134,16 +135,25 @@ sembra un difetto. Lo dice il tooltip del grafico, che R17 impone comunque.
 
 ## Definizione di fatto
 
-- [ ] Ogni strumento ha la sua serie, e una candela porta i quattro numeri veri — non una
-      fotografia ripetuta quattro volte.
-- [ ] Un intervallo senza movimento produce una candela piatta, non un buco nella serie.
-- [ ] Il massimo e il minimo sono quelli **dentro** l'intervallo: provato con un saldo che sale,
-      scende e torna, tutto fra due chiusure.
-- [ ] Le costanti nuove sono due e stanno in `balance/`, separate da quelle del patrimonio.
-- [ ] Il grafico non disegna finché la prima candela non chiude, e il tooltip dice perché.
-- [ ] I due temi guardati **nella finestra vera** via CDP: la libreria disegna in SVG e prende i
-      colori dalle variabili, quindi un tema che non si aggiorna si vede solo lì.
-- [ ] `npm run verify` verde, `docs/stato.md` rigenerato.
+- [x] Ogni strumento ha la sua serie, e una candela porta i quattro numeri veri — non una
+      fotografia ripetuta quattro volte. `tests/renderer/candles`, e nella finestra vera una candela
+      dei contanti dice _Apre 11.080,00 € · Massimo 11.125,60 € · Minimo 0,00 € · Chiude 14,40 €_.
+- [x] Un intervallo senza movimento produce una candela piatta, non un buco nella serie. Provato
+      **nello store** e non nell'accumulatore: vedi la correzione 6.
+- [x] Il massimo e il minimo sono quelli **dentro** l'intervallo: provato con un saldo che sale,
+      scende e torna, tutto fra due chiusure, in tutti e due i livelli — `candles.test.ts` sulla
+      funzione pura, `store.test.ts` sul gioco vero, dove i quattro numeri escono tutti diversi.
+- [x] Le costanti nuove sono due e stanno in `balance/`, separate da quelle del patrimonio.
+      Portano lo **stesso** valore, e la coincidenza è voluta: vedi la correzione 7.
+- [x] Il grafico non disegna finché la prima candela non chiude, e il tooltip dice perché. Il ramo
+      «serie vuota» reso nella finestra vera con le opzioni del componente: nessuna eccezione,
+      nessuna candela, l'asse resta quello che la libreria sceglie da sé.
+- [x] I due temi guardati **nella finestra vera** via CDP. Gli attributi resi restano
+      `var(--color-gain)` e `var(--color-ink)`, e il browser li risolve in
+      `rgb(111, 190, 146)` / `rgb(241, 237, 226)` a tema scuro e `rgb(44, 110, 75)` /
+      `rgb(21, 20, 15)` a tema chiaro, **senza ridisegnare niente**. Due cose sono state trovate
+      guardando, e sono le correzioni 3 e 4.
+- [x] `npm run verify` verde, `docs/stato.md` rigenerato.
 
 ## La decisione aperta
 
@@ -171,3 +181,106 @@ lo disegna. L'utente ha chiesto «linea con area per l'andamento generale». Le 
 convivere sullo stesso grafico, e il canvas su questo non è l'autorità — il grafico è nato dopo di
 lui ([D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md)). Passare ad area è una riga di
 opzioni e nessun cambiamento alla serie.
+
+---
+
+## Come è stata presa, e cosa è uscito
+
+L'utente ha risposto con la **direttiva generale** — «seguo le tue raccomandazioni purché rispettino
+i principi di coerenza, zero debiti futuri, professionalità e stato dell'arte odierno, non pigrizia»
+— che è la stessa con cui erano state prese le due decisioni di
+[D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md). Quindi: decise, motivate con una misura
+invece che con un'opinione, e marcate come contestabili in fondo a
+[PASSAGGIO-DI-CONSEGNE](PASSAGGIO-DI-CONSEGNE.md).
+
+### 1 — due grafici a candele: **A**
+
+Un componente montato due volte, non due componenti. Il metro non è un'opinione sul gusto: nel
+cruscotto `StatTile` è già lo stesso pezzo montato **cinque** volte, e la duplicazione fra due
+componenti quasi uguali è quella che D033 ha appena tolto altrove. B costava un secondo file per
+disegnare la stessa cosa in un modo diverso.
+
+E la simmetria ha pagato guardando: i due grafici affiancati mostrano trenta candele ciascuno, e la
+differenza fra gli strumenti si legge senza spiegazioni. Contato nel documento sulla partita usata
+per guardare: **17 candele su 30** dei contanti sono alte meno di un pixel e mezzo — sono i tick di
+reddito, che salgono sempre, quindi verdi — mentre **23 su 30** della carta sono piatte davvero, e
+piatte prendono il colore dell'inchiostro. Le candele piatte non sono rumore: sono metà
+dell'informazione.
+
+### 2 — il patrimonio netto: **area**
+
+Costa due righe di opzioni, zero righe di serie e zero test toccati. La ragione non è il gusto ed è
+la stessa della decisione 1: adesso il patrimonio **non è più solo** sulla pagina, e tre serie di
+rettangoli affiancati direbbero che le tre cose sono la stessa. Un'area continua dice «questo è
+l'andamento generale», che è il lavoro che gli resta.
+
+La linea è **dritta e non morbida**: una curva interpolata disegnerebbe patrimoni fra un campione e
+il successivo, cioè numeri che nessuno ha mai avuto — la correzione 1 di
+[D015](D015-home-bancomat.md) con un altro vestito.
+
+## Trappole note — scritte dopo, perché la delega non ne aveva
+
+D034 è l'unica delega del progetto senza questa sezione, ed è la correzione 5. Quelle qui sotto non
+sono «cosa è andato storto nel progetto precedente»: sono **cosa è andato storto eseguendo questa**,
+che è l'informazione che il prossimo lettore può ancora usare.
+
+- **La libreria porta la propria lingua.** ApexCharts ha `["Open","High","","Low","Close"]` scritto
+  dentro il proprio sorgente per la bolla delle candele. Non è configurabile con un'opzione: o si
+  scrive `tooltip.custom`, o R12 la rompe una dipendenza al posto nostro. Vale la pena guardare nel
+  `dist` **prima** di scegliere una forma di grafico, non dopo.
+- **Un gradiente cuoce un colore.** Per costruire il primo stop ApexCharts risolve il colore e lo
+  scrive nell'SVG come letterale — `stop-color="rgba(21,20,15,0.28)"`, visto nella finestra vera. Un
+  valore cotto non cambia con il tema, e la sola ragione per cui questa libreria è entrata è che non
+  serva ridisegnare niente (ADR 0034). Il riempimento **pieno** invece resta un token, avvolto in
+  `color-mix`: è la forma già misurata a D027 per le barre.
+- **Un test su una candela piatta non prova niente.** Quando i quattro numeri coincidono, coincidono
+  per qualunque implementazione — anche per una che non chiude niente. Quel test è passato al primo
+  colpo contro un `nextCandle` che ritornava l'identità. Il posto dove discrimina è lo store, dove
+  la serie esiste e si può contare.
+- **Il colore di una candela lo decide `apertura < chiusura`, non `≤`.** È nel sorgente della
+  libreria (`A.o < A.c ? [upward] : [downward]`), e cambia tutto per questo gioco: una candela
+  piatta cade sul **secondo** colore. Se i due colori fossero verde e rosso, la carta ferma sarebbe
+  una fila di trattini rossi; con verde e inchiostro è una fila di trattini neutri, che è la verità.
+- **L'app di sviluppo si chiude anche da dentro.** `Page.reload` via CDP termina il processo
+  Electron, non ricarica la finestra. Per guardare uno stato iniziale bisogna riavviare, e la corsa
+  contro i cinque secondi della prima candela non si vince: il ramo «serie vuota» si è provato
+  rendendo un grafico vuoto **dentro** la pagina con le stesse opzioni del componente.
+
+## Correzioni rispetto a com'era scritta la delega
+
+1. **`candles.ts` non sta in `components/shell/`: sta in `runtime/`.** La delega lo metteva accanto
+   a `series.ts` per analogia — pura, provata senza montare niente — e l'analogia salta su chi lo
+   **usa**: `series.ts` la legge un componente, l'accumulatore lo guida lo **store**. Un
+   `ST --> CMP` sarebbe la freccia al contrario, cioè un ciclo con `CMP --> ST`, che esiste già. È
+   la ragione già scritta in `runtime/loop.ts` per `sampleOf`, e questa la segue. Di conseguenza il
+   test è `tests/renderer/candles.test.ts`, non `tests/renderer/shell/`.
+2. **Ne è nato un arco nuovo, `CMP --> RT`**, disegnato in [architettura.md](../architettura.md):
+   il grafico nomina il tipo `Candle` per convertirlo. È di **soli tipi** ed è in avanti, quindi non
+   chiude cicli. A trovarlo non è stata una review: `tests/rules/import-graph` è diventato rosso da
+   solo, che è esattamente il lavoro per cui D022 lo ha scritto.
+3. **La bolla del valore è scritta da noi, e la delega non la nominava.** Vedi la prima trappola.
+   Costa `tooltip.custom`, quattro chiavi i18n e due righe di CSS — ed è metà della ragione per cui
+   il componente è più lungo di quanto il budget diceva.
+4. **L'area del patrimonio non è un gradiente**, e il pallino dell'area nasce con `stroke: #fff`
+   dalla libreria — spento con `strokeWidth: 0`. Tutte e due trovate **nella finestra vera**, e nel
+   documento invece che nell'immagine: un'immagine non dice da dove viene un colore.
+5. **La delega non aveva _Trappole note_**, unica fra quelle scritte. È stata aggiunta qui sopra,
+   con quello che ha morso davvero e con l'etichetta che dice quando è stata scritta.
+6. **Il test sulla candela piatta è passato dallo store, non dall'accumulatore.** Vedi la terza
+   trappola: al livello della funzione pura era una tautologia, e l'ha dimostrato passando contro
+   un'implementazione sbagliata.
+7. **Le due costanti portano lo stesso valore di quelle del patrimonio, e la coincidenza è
+   dichiarata.** La delega diceva solo di tenerle separate; separate lo sono, ma il valore è lo
+   stesso apposta — i tre grafici stanno sulla stessa pagina, e se coprissero finestre diverse
+   confrontarli sarebbe confrontare due momenti.
+8. **`mirror()` riapre le candele in corso**, e non era nella delega. Dopo un caricamento e dopo il
+   recupero il saldo cambia **senza** una transazione: senza quella riga la prima candela di una
+   partita riaperta salirebbe da zero al patrimonio caricato, cioè disegnerebbe una salita mai
+   avvenuta — e per giunta quella che decide la scala dell'asse. C'è un test che la vede rossa.
+9. **Il budget aveva la forma invertita.** Diceva «~200 righe, di cui più della metà
+   nell'accumulatore e nei suoi test. I grafici sono la parte corta». L'accumulatore è **15** righe
+   più 42 di test; il componente ne è **145**. Il consuntivo è **244 di sorgente e 160 di test**,
+   contati con il metodo di `tests/helpers/projectState.ts`. Le tre voci che spiegano la differenza:
+   la bolla scritta a mano (correzione 3), il fatto che in un `.vue` si contano anche template e
+   CSS — `NetWorthChart.vue` ne ha 112 da solo, ed esisteva già — e settanta righe di test dello
+   store che la delega non aveva previsto affatto.

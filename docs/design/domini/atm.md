@@ -26,6 +26,12 @@
 | 8   | **Pagamento**     | **nessun listino**, ed è l'unica azione del gioco senza. Vedi _Cosa questa compilazione ha trovato_      |
 | 9   | **Requisito**     | **una carta**. Dichiarato nella visione, non ancora imposto dal codice: oggi nessun dominio si sblocca   |
 
+**La riga 2 adesso si guarda, e non solo si legge.** Da
+[D034](../../delega/D034-le-serie-degli-strumenti.md) il cruscotto porta una candela ogni cinque
+secondi per i contanti e una per la carta, e in quelle serie non c'è un movimento che non abbia una
+causa: o è un tick di reddito, o è un gesto al bancomat. Una voce dell'etichetta che finora si
+verificava aprendo `rules.ts` si verifica anche a occhio.
+
 ### 2 · Il ciclo
 
 Deposita contanti sul conto, preleva contanti dal conto. Ogni operazione trattiene una commissione:
