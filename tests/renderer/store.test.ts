@@ -8,6 +8,7 @@ import type { Pool } from '@core/contracts/pools'
 import type { LoadedSave, SavePayload, SaveResult } from '@core/contracts/save'
 
 import { BALANCE } from '@core/balance/constants'
+import { DEPOSIT, WITHDRAW } from '@core/domains/atm/commands'
 import { upgradePrices } from '@core/domains/income/rules'
 import { capacityFor, expansionPrices, MAX_LEVEL } from '@core/domains/vault/rules'
 import { clock, ticks } from '@core/kernel/Clock'
@@ -838,6 +839,22 @@ describe('i selettori del bancomat', () => {
 
     expect(toString(store.atmFeeRates.deposit)).toBe(toString(BALANCE.ATM_FEE_RATE_IN))
     expect(toString(store.atmFeeRates.withdraw)).toBe(toString(BALANCE.ATM_FEE_RATE_OUT))
+  })
+
+  it('i due strumenti per direzione vengono dal dominio, non da una tabella del componente', async () => {
+    const store = await start()
+
+    // Stessa forma del test qui sopra, stesso difetto: `AtmPanel.vue` teneva una costante `SIDES`
+    // che ridiceva questi quattro pool, e niente la legava a `DEPOSIT` e `WITHDRAW`. Il test
+    // passava **anche** con `SIDES` al suo posto, ed è la prova che non proteggeva nessuno: a non
+    // esistere era il selettore, non il controllo.
+    expect(store.atmSides.deposit).toEqual({ from: DEPOSIT.from, to: DEPOSIT.to })
+    expect(store.atmSides.withdraw).toEqual({ from: WITHDRAW.from, to: WITHDRAW.to })
+
+    // E le due direzioni sono l'una il contrario dell'altra: senza questo, un selettore derivato
+    // da una sola operazione passerebbe metà del test di sopra.
+    expect(store.atmSides.deposit.from).toBe(store.atmSides.withdraw.to)
+    expect(store.atmSides.deposit.to).toBe(store.atmSides.withdraw.from)
   })
 
   it('non espone piu una commissione, perche da D032 non e piu un numero', async () => {

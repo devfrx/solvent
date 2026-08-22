@@ -54,14 +54,6 @@ const CONFIRM: Readonly<Record<AtmOperationKind, MessageKey>> = {
   withdraw: 'atm.withdraw.confirm'
 }
 
-/** Da dove parte e dove arriva il denaro, per direzione. È la stessa tabella di `DEPOSIT`/`WITHDRAW`,
- * ridetta con le sole due cose che questo componente deve **mostrare**: due strumenti. Il resto —
- * la commissione, i movimenti, l'ordine dei conti — resta nel dominio (R05). */
-const SIDES: Readonly<Record<AtmOperationKind, { readonly from: Pool; readonly to: Pool }>> = {
-  deposit: { from: 'cash', to: 'card' },
-  withdraw: { from: 'card', to: 'cash' }
-}
-
 const store = useGameStore()
 const { atmAmounts, atmDefaultAmount, atmFeeFloor, atmMaximums, balances, vaultRoom } =
   storeToRefs(store)
@@ -72,6 +64,16 @@ const { text, money, plainMoney, failure } = useTranslator()
  * si paga con la carta (D010), quindi la prima cosa utile che si può fare qui è depositare.
  */
 const kind = shallowRef<AtmOperationKind>('deposit')
+
+/**
+ * I due strumenti del verso corrente, letti **dal dominio** attraverso lo store (D035, punto 7).
+ *
+ * Qui c'era una costante che ridiceva la tabella di `DEPOSIT`/`WITHDRAW`, e non per pigrizia:
+ * R05 vieta a un `.vue` di importare `domains/atm/commands` — nemmeno per un tipo — e il
+ * selettore non esisteva. Adesso esiste, e la stessa domanda ha una risposta sola: i due strumenti
+ * mostrati qui sopra e i movimenti mostrati là sotto vengono dalla stessa dichiarazione.
+ */
+const side = computed(() => store.atmSides[kind.value])
 
 /**
  * **Il campo tiene testo, non un `Decimal`.** Un `ref` su `Money` legato con `v-model` sarebbe la
@@ -138,9 +140,9 @@ const submit = (): void => {
     <div class="bridge">
       <InstrumentSide
         side="atm.from"
-        :pool="SIDES[kind].from"
-        :balance="money(balances[SIDES[kind].from])"
-        :note="noteFor(SIDES[kind].from)"
+        :pool="side.from"
+        :balance="money(balances[side.from])"
+        :note="noteFor(side.from)"
       />
       <div class="swap">
         <button type="button" class="turn" :aria-label="text('atm.swap')" @click="swap()">
@@ -149,9 +151,9 @@ const submit = (): void => {
       </div>
       <InstrumentSide
         side="atm.to"
-        :pool="SIDES[kind].to"
-        :balance="money(balances[SIDES[kind].to])"
-        :note="noteFor(SIDES[kind].to)"
+        :pool="side.to"
+        :balance="money(balances[side.to])"
+        :note="noteFor(side.to)"
       />
     </div>
 

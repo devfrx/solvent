@@ -412,6 +412,28 @@ export const useGameStore = defineStore('game', () => {
   })
 
   /**
+   * I due strumenti che ciascuna direzione muove: da dove parte il denaro e dove arriva.
+   *
+   * Derivato da `directions` esattamente come `feeRates` qui sopra, e nato dallo stesso difetto
+   * (D035, punto 7). La pagina del bancomat si era riscritta questa tabella in una costante sua,
+   * perché R05 le impedisce di importare `domains/atm/commands` — nemmeno per un tipo. Due
+   * dichiarazioni dello stesso fatto e **niente** che le legasse: divergendo, la pagina avrebbe
+   * mostrato due strumenti in alto e i movimenti di altri due sotto, nello stesso riquadro, con
+   * ogni test verde — INV-11 lega l'anteprima al comando, non l'anteprima a ciò che le sta sopra.
+   *
+   * La radice non era distrazione: era un'API di modulo incompleta. Mancava questo selettore, e
+   * il componente ha fatto l'unica cosa che poteva.
+   *
+   * **Non è uno `shallowRef`**, e la differenza dai vicini sta nella ragione, non nella forma:
+   * quelli avvolgono un `Money`, che Pinia proxerebbe alla lettura. Qui ci sono due stringhe, e
+   * un valore che non cambia per tutta la partita.
+   */
+  const sides: Readonly<Record<AtmOperationKind, { readonly from: Pool; readonly to: Pool }>> = {
+    deposit: { from: directions.deposit.operation.from, to: directions.deposit.operation.to },
+    withdraw: { from: directions.withdraw.operation.from, to: directions.withdraw.operation.to }
+  }
+
+  /**
    * Il più grande importo che **passa**, per direzione: è ciò che il pulsante `MAX` propone, e la
    * seconda metà della nota «minimo · massimo».
    *
@@ -766,6 +788,7 @@ export const useGameStore = defineStore('game', () => {
     upgradePrices: prices,
     canBuyUpgradeWith,
     atmFeeRates: feeRates,
+    atmSides: sides,
     atmAmounts: amounts,
     atmDefaultAmount: defaultAmount,
     atmFeeFloor: feeFloor,
