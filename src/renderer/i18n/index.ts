@@ -67,11 +67,13 @@ export type ScreenKey =
   // altre — e non si traduce: le due lingue dicono la stessa cosa, e `tests/rules/product-identity`
   // lo verifica insieme agli altri posti in cui il nome vive (C03, ADR 0008).
   | 'app.name'
-  // Le destinazioni (D024, D026). Ognuna ha il nome di ciò che ci si amministra: la home è la
-  // pagina del bancomat (ADR 0018), le altre portano il nome del loro dominio (ADR 0033).
-  | 'app.nav.home'
+  // Le destinazioni (D024, D026, D033). Ognuna ha il nome di ciò che ci si amministra, e da D033
+  // sono cinque: `home` faceva due lavori e adesso sono due pagine (ADR 0040). `board` è l'unica
+  // che non porta il nome di un dominio insieme a `stats` — il cruscotto non è di nessuno.
+  | 'app.nav.atm'
   | 'app.nav.income'
   | 'app.nav.vault'
+  | 'app.nav.board'
   | 'app.nav.stats'
   // I gruppi della colonna (D026). Due, e dicono il verbo: dove si **fa** qualcosa, e dove si
   // **guarda** ciò che è successo. È la distinzione dell'ADR 0018 portata un piano sopra.
@@ -138,49 +140,61 @@ export type ScreenKey =
   // La frase che apre una schermata (D024). Una per destinazione, e `SCREEN_WORDING` le pretende
   // tutte: una schermata nuova non compila finché non sa dire a cosa serve.
   | 'stats.description'
-  | 'home.description'
+  | 'atm.description'
+  | 'board.description'
   | 'income.description'
   | 'vault.description'
-  // La home (docs/design/mockups/home-atm.html). Le chiavi di questo blocco sono nate con D012,
-  // che ha scritto il dizionario intero in un tempo solo perché una lingua completata in due
-  // tempi è il difetto A13; D015 le ha usate, e dove il mockup si contraddiceva le ha corrette.
-  | 'home.zone.atm'
-  | 'home.zone.dashboard'
-  | 'home.tile.income'
-  | 'home.tile.net_worth'
-  | 'home.tile.earned'
-  | 'home.tile.spent'
-  | 'home.tile.fees'
-  | 'home.tile.income.explained'
-  | 'home.tile.net_worth.explained'
-  | 'home.tile.earned.explained'
-  | 'home.tile.spent.explained'
-  | 'home.tile.fees.explained'
+  // Il cruscotto (D012, D015, D033). Erano le chiavi `home.*`, e la rinomina non è cosmetica: il
+  // prefisso diceva su quale pagina stavano, e la pagina non esiste più. Una chiave `home.` viva
+  // dopo D033 sarebbe una parola senza schermata — a impedirlo è la parità (R13), che non vede una
+  // chiave dimenticata **in tutte e due** le lingue: quel controllo è un `grep`, non un gate.
+  | 'board.tile.income'
+  | 'board.tile.net_worth'
+  | 'board.tile.earned'
+  | 'board.tile.spent'
+  | 'board.tile.fees'
+  | 'board.tile.income.explained'
+  | 'board.tile.net_worth.explained'
+  | 'board.tile.earned.explained'
+  | 'board.tile.spent.explained'
+  | 'board.tile.fees.explained'
   // Il grafico del cruscotto (D027). Il canvas chiama il suo «Net worth · 30 days», e quella
   // seconda meta' non si puo' tradurre: i giorni di gioco non esistono finche' non nasce il
   // calendario dell'ADR 0023. Le chiavi qui sotto dicono cio' che il grafico e' davvero.
-  | 'home.chart.title'
-  | 'home.chart.explained'
-  | 'home.chart.how_to_read'
-  | 'home.chart.oldest'
-  | 'home.chart.newest'
-  | 'atm.account.title'
-  | 'atm.cash.title'
-  | 'atm.cash.capacity'
-  | 'atm.cash.capacity.explained'
-  | 'atm.deposit'
-  | 'atm.withdraw'
-  | 'atm.deposit.title'
-  | 'atm.withdraw.title'
+  | 'board.chart.title'
+  | 'board.chart.explained'
+  | 'board.chart.how_to_read'
+  | 'board.chart.oldest'
+  | 'board.chart.newest'
+  // La pagina del bancomat (D033, artboard `ATM` del canvas). Le frasi vengono dal disegno, che è
+  // in inglese: è la fonte del **contenuto**, non del testo — ognuna entra in tutte e due le
+  // lingue, perché la parità è un gate.
+  | 'atm.from'
+  | 'atm.to'
+  | 'atm.note.cash'
+  | 'atm.note.card'
+  | 'atm.swap'
+  | 'atm.amount'
+  | 'atm.max'
+  // Il minimo e il massimo si **derivano** — dal pavimento della commissione e da
+  // `largestThatFits` — invece di essere scritti: il «min €10» del canvas è un numero a mano, e
+  // copiarlo spegnerebbe la lezione degli importi rapidi.
+  | 'atm.limits'
   | 'atm.breakdown'
+  | 'atm.breakdown.aside'
   | 'atm.breakdown.explained'
+  | 'atm.refused'
+  | 'atm.confirm.note'
+  | 'atm.confirm.note.refused'
   | 'atm.fee'
   | 'atm.fee.per_operation'
   | 'atm.fee.rates'
   | 'atm.deposit.confirm'
   | 'atm.withdraw.confirm'
   | 'atm.recent.title'
-  | 'card.tier.gold'
+  | 'atm.card.title'
+  | 'atm.cash.note'
+  | 'card.back.title'
   | 'card.hint.drag'
 
 /**
@@ -223,6 +237,25 @@ const POOL_KEYS: Readonly<Record<Pool, MessageKey | null>> = {
 export const traceabilityKey = (pool: Pool): MessageKey =>
   POOLS[pool].traceable ? 'pool.traced' : 'pool.untraced'
 
+/**
+ * Il codice di un rifiuto, come lo stampa un terminale bancario: `ATM · FEE EXCEEDS AMOUNT`.
+ *
+ * Il canvas ne disegna quattro scritti a mano — `INVALID AMOUNT`, `CAPACITY EXCEEDED` — e questa
+ * funzione li **ricava** dal codice che l'errore porta già con sé, invece di aggiungere al
+ * dizionario una seconda etichetta per ogni codice: due nomi per lo stesso rifiuto sono due nomi
+ * che prima o poi non coincidono, ed è la forma del difetto A13.
+ *
+ * **Non si traduce, ed è una scelta**: R12 riguarda le frasi rivolte al giocatore, e la frase c'è
+ * — è quella sotto, che `failure` compone. Questo è l'identificativo, e un identificativo che
+ * cambia con la lingua non serve a niente a chi lo cerca.
+ */
+export const refusalCode = (error: GameError): string =>
+  error.code
+    .split('.')
+    .slice(1)
+    .map((part) => part.replace(/_/g, ' ').toUpperCase())
+    .join(' · ')
+
 /** Le due unità che servono a dire "3 ore e 12 minuti", e non hanno niente a che fare coi tick. */
 const SECONDS_PER_MINUTE = 60
 const MINUTES_PER_HOUR = 60
@@ -256,7 +289,21 @@ const NUMBERS = {
    * `0,015` come «1,5%», cioè due tassi accostati nella stessa riga con due forme diverse. È la
    * stessa ragione per cui `useGrouping` è `always` qui sopra.
    */
-  rate: { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }
+  rate: { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 },
+  /**
+   * Lo stesso importo **senza il simbolo**: è ciò che sta dentro un campo che si digita, dove il
+   * simbolo è già stampato accanto alla casella (D033).
+   *
+   * Le due cifre decimali sono fisse per la ragione di `rate`, e i separatori sono quelli della
+   * lingua accesa — quindi ciò che i pulsanti rapidi scrivono nel campo è esattamente ciò che il
+   * giocatore scriverebbe a mano, e `readAmount` lo rilegge in tutte e due le lingue.
+   */
+  plain: {
+    style: 'decimal',
+    useGrouping: 'always',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }
 } as const
 
 const TIMESTAMP = {
@@ -304,6 +351,8 @@ export interface Translator {
   readonly signedMoney: (amount: Money) => string
   /** Un tasso in percentuale. Attraversa lo stesso confine di `money`, e per la stessa ragione. */
   readonly rate: (value: Money) => string
+  /** L'importo senza il simbolo: quello che si digita, non quello che si legge. */
+  readonly plainMoney: (amount: Money) => string
   readonly instant: (at: number) => string
   readonly duration: (elapsed: Milliseconds) => string
   readonly poolName: (pool: Pool) => string
@@ -338,6 +387,8 @@ export const createTranslator = (wording: Wording): Translator => {
   const signedMoney = (amount: Money): string => wording.number(toDisplayNumber(amount), 'signed')
 
   const rate = (value: Money): string => wording.number(toDisplayNumber(value), 'rate')
+
+  const plainMoney = (amount: Money): string => wording.number(toDisplayNumber(amount), 'plain')
 
   const instant = (at: number): string => wording.date(new Date(at), 'short')
 
@@ -420,7 +471,18 @@ export const createTranslator = (wording: Wording): Translator => {
     }
   }
 
-  return { text, count, money, signedMoney, rate, instant, duration, poolName, failure }
+  return {
+    text,
+    count,
+    money,
+    signedMoney,
+    rate,
+    plainMoney,
+    instant,
+    duration,
+    poolName,
+    failure
+  }
 }
 
 /** Dentro un componente, le quattro funzioni le porta `useI18n()`. Fuori, le porta un test. */

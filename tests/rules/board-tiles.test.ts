@@ -3,16 +3,23 @@ import { describe, expect, it } from 'vitest'
 import { read, withoutComments } from '../helpers/sources'
 
 /**
- * INV-12 · ADR 0018 — il cruscotto della home non supera i **sei** riquadri.
+ * INV-12 · ADR 0018 · ADR 0040 — il cruscotto non supera i **sei** riquadri.
  *
- * Non è una linea guida: è la sola cosa che impedisce al cruscotto di mangiarsi il bancomat, che è
- * quello che succede sempre — le statistiche crescono e il bancomat no. Il settimo riquadro non si
- * aggiunge: **sostituisce** uno dei sei, oppure va nella schermata Statistiche, che esiste dal
- * primo giorno proprio per avere dove andare.
+ * **La ragione è cambiata, il numero no**, e vale la pena sapere perché il test non è stato
+ * cancellato. Fino a [D033](../../docs/delega/D033-il-bancomat-e-una-pagina.md) il tetto
+ * difendeva il **bancomat**: cruscotto e bancomat stavano sulla stessa pagina, e il cruscotto si
+ * mangia sempre il bancomat perché le statistiche crescono e il bancomat no. Adesso sono due
+ * pagine, il bancomat non ci sta più sopra, e quella difesa non difende più niente.
  *
- * Il test è scritto **prima** dei riquadri, e non per rito: il settimo non nasce da una decisione,
- * nasce da una riga in più in una review distratta. Una regola che arriva dopo i riquadri arriva
- * dopo il momento in cui serviva.
+ * Quello che il tetto difende adesso è **il cruscotto da se stesso**. Senza, torna a essere i
+ * dieci riquadri del progetto precedente: una parete di numeri in cui nessuno è più importante di
+ * un altro, cioè nessuno. Il settimo riquadro non si aggiunge — **sostituisce** uno dei sei,
+ * oppure va nella schermata Statistiche, che esiste dal primo giorno proprio per avere dove
+ * andare.
+ *
+ * Il test era scritto **prima** dei riquadri, e non per rito: il settimo non nasce da una
+ * decisione, nasce da una riga in più in una review distratta. Una regola che arriva dopo i
+ * riquadri arriva dopo il momento in cui serviva.
  *
  * **⚠️ Parziale, e lo dichiara** (docs/tracciabilita.md): conta i **tag** nel template, quindi un
  * `v-for` su un riquadro moltiplicherebbe sei in sedici lasciando il conto a uno. Quel caso è
@@ -21,7 +28,7 @@ import { read, withoutComments } from '../helpers/sources'
  * (docs/roadmap-fette.md).
  */
 
-const HOME = 'src/renderer/views/HomeView.vue'
+const BOARD = 'src/renderer/views/BoardView.vue'
 
 /** ADR 0018 — sei, deciso una volta e verificato qui. */
 const MAX_TILES = 6
@@ -86,18 +93,18 @@ describe('il rilevatore', () => {
   })
 })
 
-describe('il cruscotto della home', () => {
-  const home = read(HOME)
+describe('il cruscotto', () => {
+  const board = read(BOARD)
 
   it('ha dei riquadri da contare, altrimenti questo test non guarda niente', () => {
-    expect(tilesIn(home)).toBeGreaterThan(0)
+    expect(tilesIn(board)).toBeGreaterThan(0)
   })
 
   it('non ne ha più di sei', () => {
-    expect(tilesIn(home)).toBeLessThanOrEqual(MAX_TILES)
+    expect(tilesIn(board)).toBeLessThanOrEqual(MAX_TILES)
   })
 
   it('e non ne moltiplica uno con un v-for', () => {
-    expect(loopsATile(home)).toBe(false)
+    expect(loopsATile(board)).toBe(false)
   })
 })

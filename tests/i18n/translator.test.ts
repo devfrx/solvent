@@ -9,6 +9,7 @@ import {
   createTranslations,
   createTranslator,
   LOCALES,
+  refusalCode,
   traceabilityKey
 } from '../../src/renderer/i18n'
 import { it as italian } from '../../src/renderer/i18n/it'
@@ -222,6 +223,46 @@ describe('il rifiuto del bancomat', () => {
     expect(said).toContain('1,00 €')
     expect(said).toContain('2,50 €')
     expect(said).not.toContain('error.')
+  })
+})
+
+describe('il codice di un rifiuto', () => {
+  it('si ricava dal codice dell errore invece di essere una seconda etichetta', () => {
+    // Il canvas ne scrive quattro a mano — `INVALID AMOUNT`, `CAPACITY EXCEEDED`. Qui si ricavano,
+    // così un codice nuovo nasce già con il suo nome invece di aspettare che qualcuno lo scriva.
+    expect(refusalCode({ code: 'error.atm.amount_not_positive', amount: fromString('0') })).toBe(
+      'ATM · AMOUNT NOT POSITIVE'
+    )
+  })
+
+  it('e non cambia con la lingua, perché non è una frase', () => {
+    // R12 riguarda le frasi rivolte al giocatore, e la frase c'è: è quella che `failure` compone.
+    // Questo è l'identificativo, e un identificativo che cambia lingua non serve a chi lo cerca.
+    const refused = {
+      code: 'error.ledger.capacity_exceeded',
+      pool: 'cash',
+      capacity: fromString('1000'),
+      fits: fromString('0')
+    } as const
+
+    speaking('it')
+    const said = refusalCode(refused)
+    speaking('en')
+
+    expect(said).toBe('LEDGER · CAPACITY EXCEEDED')
+    expect(refusalCode(refused)).toBe(said)
+  })
+})
+
+describe('l importo che si digita', () => {
+  it('è lo stesso senza il simbolo, e i separatori sono quelli della lingua', () => {
+    // È ciò che i pulsanti rapidi scrivono nel campo: quello che compare è quello che il giocatore
+    // scriverebbe a mano, altrimenti il campo insegna una forma e ne accetta un'altra.
+    speaking('it')
+    expect(plain(words.plainMoney(fromString('5102.04')))).toBe('5.102,04')
+
+    speaking('en')
+    expect(plain(words.plainMoney(fromString('5102.04')))).toBe('5,102.04')
   })
 })
 

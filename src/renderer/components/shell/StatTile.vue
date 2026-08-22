@@ -6,7 +6,7 @@ import UiReadout from '@renderer/ui/UiReadout.vue'
 import UiTooltip from '@renderer/ui/UiTooltip.vue'
 
 /**
- * Un riquadro del cruscotto. È ciò che `tests/rules/home-tiles` conta, e il conto è il solo motivo
+ * Un riquadro del cruscotto. È ciò che `tests/rules/board-tiles` conta, e il conto è il solo motivo
  * per cui questo componente esiste come componente: sei riquadri scritti a mano nella vista si
  * contano guardando, sei riquadri che sono un tag si contano da un test (INV-12).
  *

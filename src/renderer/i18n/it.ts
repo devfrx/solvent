@@ -10,9 +10,10 @@ import type { Dictionary } from './index'
  */
 export const it: Dictionary = {
   'app.name': 'Solvent',
-  'app.nav.home': 'Bancomat',
+  'app.nav.atm': 'Bancomat',
   'app.nav.income': 'Reddito',
   'app.nav.vault': 'Caveau',
+  'app.nav.board': 'Cruscotto',
   'app.nav.stats': 'Statistiche',
 
   'app.nav.group.act': 'Dove si opera',
@@ -97,9 +98,11 @@ export const it: Dictionary = {
   'stats.description':
     'Il registro completo e l’ultimo salvataggio: cosa è successo, riga per riga.',
 
-  'home.description':
-    'Il bancomat e il cruscotto. Qui il denaro entra in contanti, si deposita pagando la ' +
-    'commissione, e si vede quanto costa spostarlo.',
+  'atm.description':
+    'Il ponte fra contanti e carta. Trattiene una commissione in tutte e due i versi — e il verso ' +
+    'che scegli è una scelta su quanto si vede.',
+  'board.description':
+    'Come sta andando la partita: quanto entra, quanto vale, quanto è costato spostarlo.',
   'income.description':
     'Lo stipendio arriva da solo: qui si comprano le cose che lo fanno arrivare più in fretta.',
 
@@ -107,52 +110,56 @@ export const it: Dictionary = {
     'Quanti contanti puoi tenere addosso, e quanto costa tenerne di più. Quando è pieno lo ' +
     'stipendio non entra: si deposita sul conto, oppure si amplia.',
 
-  'home.zone.atm': 'Bancomat',
-  'home.zone.dashboard': 'Cruscotto',
-  'home.tile.income': 'Reddito',
-  'home.tile.net_worth': 'Patrimonio netto',
-  'home.tile.earned': 'Guadagnato in totale',
-  'home.tile.spent': 'Speso in totale',
-  'home.tile.fees': 'Commissioni pagate',
-  'home.tile.income.explained': 'Quanto entra ogni secondo, con gli upgrade già contati.',
-  'home.tile.net_worth.explained':
+  'board.tile.income': 'Reddito',
+  'board.tile.net_worth': 'Patrimonio netto',
+  'board.tile.earned': 'Guadagnato in totale',
+  'board.tile.spent': 'Speso in totale',
+  'board.tile.fees': 'Commissioni pagate',
+  'board.tile.income.explained': 'Quanto entra ogni secondo, con gli upgrade già contati.',
+  'board.tile.net_worth.explained':
     'Contanti più carta. È guadagnato meno speso meno commissioni: sempre, per costruzione.',
-  'home.tile.earned.explained':
+  'board.tile.earned.explained':
     'Tutto ciò che è entrato da inizio partita, prima di qualunque spesa.',
-  'home.tile.spent.explained':
+  'board.tile.spent.explained':
     'Tutto ciò che è uscito per comprare qualcosa. Le commissioni si contano a parte.',
-  'home.tile.fees.explained':
+  'board.tile.fees.explained':
     'Quanto è costato spostare il denaro. È il prezzo di rendere tracciabile ciò che non lo era.',
 
-  'home.chart.title': 'Patrimonio netto nel tempo',
-  'home.chart.explained':
+  'board.chart.title': 'Patrimonio netto nel tempo',
+  'board.chart.explained':
     'Una barra ogni {seconds} secondi di gioco. L’altezza è la variazione dentro la finestra, non il totale: il campione più basso sta sul fondo, il più alto in cima. Dopo una pausa lunga una barra sola copre tutto il tempo passato.',
-  'home.chart.how_to_read': 'Come si legge',
-  'home.chart.oldest': 'Prima',
-  'home.chart.newest': 'Adesso',
+  'board.chart.how_to_read': 'Come si legge',
+  'board.chart.oldest': 'Prima',
+  'board.chart.newest': 'Adesso',
 
-  'atm.account.title': 'Sul conto',
-  'atm.cash.title': 'Contanti',
-  'atm.cash.capacity': 'Capienza del caveau',
-  'atm.cash.capacity.explained':
-    'Quanti contanti il caveau tiene adesso. Quando è pieno lo stipendio si ferma: si deposita, ' +
-    'oppure si amplia.',
-  'atm.deposit': 'Deposita',
-  'atm.withdraw': 'Preleva',
-  'atm.deposit.title': 'Deposita sul conto',
-  'atm.withdraw.title': 'Preleva dal conto',
-  'atm.breakdown': 'Cosa succede',
+  'atm.from': 'Da',
+  'atm.to': 'A',
+  'atm.note.cash': 'Nel caveau · {room} di spazio',
+  'atm.note.card': 'Tracciabile, senza tetto',
+  'atm.swap': 'Scambia il verso',
+  'atm.amount': 'Importo',
+  'atm.max': 'Massimo',
+  'atm.limits': 'Sotto {floor} la commissione se lo mangia · massimo {max}',
+  'atm.breakdown': 'Prima di confermare',
+  'atm.breakdown.aside': 'le righe, non il totale',
   'atm.breakdown.explained':
-    'I movimenti esatti che la conferma applicherà. La commissione è fissa e si paga a ogni ' +
-    'operazione, grande o piccola.',
+    'I movimenti esatti che la conferma applicherà. La commissione è il maggiore fra un ' +
+    'pavimento e una percentuale, quindi su un importo piccolo pesa di più.',
+  'atm.refused': 'Rifiutato',
+  'atm.confirm.note': 'Questo movimento comparirà nel registro con la sua ragione.',
+  'atm.confirm.note.refused': 'Il pulsante resta vivo. Premerlo ripete il motivo.',
   'atm.fee': 'Commissione',
-  'atm.fee.per_operation': 'Commissione per operazione',
+  'atm.fee.per_operation': 'Commissione',
   'atm.fee.rates': '{deposit} versando · {withdraw} prelevando',
-  'atm.deposit.confirm': 'Conferma deposito',
-  'atm.withdraw.confirm': 'Conferma prelievo',
+  'atm.deposit.confirm': 'Deposita {amount}',
+  'atm.withdraw.confirm': 'Preleva {amount}',
   'atm.recent.title': 'Ultime operazioni',
+  'atm.card.title': 'La carta, come oggetto',
+  'atm.cash.note':
+    'I contanti non hanno un oggetto e non hanno un retro: non lasciano traccia, hanno un tetto, ' +
+    'non rendono niente.',
 
-  'card.tier.gold': 'Gold',
+  'card.back.title': 'Cosa fa questo strumento',
   'card.hint.drag': 'Trascina per girare la carta',
 
   'reason.income.tick': 'Stipendio',

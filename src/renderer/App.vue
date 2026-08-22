@@ -14,7 +14,8 @@ import UiButton from './ui/UiButton.vue'
 import UiHeading from './ui/UiHeading.vue'
 import UiShell from './ui/UiShell.vue'
 import UiText from './ui/UiText.vue'
-import HomeView from './views/HomeView.vue'
+import AtmView from './views/AtmView.vue'
+import BoardView from './views/BoardView.vue'
 import IncomeView from './views/IncomeView.vue'
 import StatsView from './views/StatsView.vue'
 import VaultView from './views/VaultView.vue'
@@ -50,14 +51,15 @@ const PLAYABLE: readonly GameStatus[] = ['playing', 'suspended', 'recovering']
  *
  * Fino a D024 la scelta era un `v-if` con un `v-else`, e con due destinazioni funzionava. Con tre
  * avrebbe smesso di funzionare **in silenzio**: il terzo nome sarebbe comparso nella colonna e al
- * clic si sarebbe vista la seconda vista. D026 ne ha portate quattro, e la difesa ha retto senza
- * che nessuno la toccasse. È la difesa contro A17 messa dove il difetto entrerebbe —
+ * clic si sarebbe vista la seconda vista. D026 ne ha portate quattro, D033 cinque, e la difesa ha
+ * retto senza che nessuno la toccasse. È la difesa contro A17 messa dove il difetto entrerebbe —
  * non si può elencare un dominio che non esiste, perché non c'è niente da montare quando lo si preme.
  */
 const SCREEN_VIEWS: Readonly<Record<Screen, Component>> = {
-  home: HomeView,
+  atm: AtmView,
   income: IncomeView,
   vault: VaultView,
+  board: BoardView,
   stats: StatsView
 }
 
@@ -78,12 +80,17 @@ const { status, failure, failedDuring, awayFor } = storeToRefs(store)
 const { text, duration, failure: failureText } = useTranslator()
 
 /**
- * Dove siamo. È un `ref` e non un router: quattro destinazioni piatte, senza un indirizzo da
- * condividere, non giustificano una dipendenza (ADR 0015), e il giorno in cui ne servirà uno lo dirà una schermata
+ * Dove siamo, e si parte dal **bancomat**: è il gesto centrale del gioco, e una schermata che si
+ * apre sulle statistiche di una partita appena nata si apre su cinque zeri. L'ADR 0018 lo diceva
+ * come «la prima cosa che si vede all'apertura», e l'[ADR 0040](../../docs/adr/0040-il-bancomat-e-il-cruscotto-sono-due-pagine.md)
+ * lo tiene: separare le due pagine non cambia quale delle due viene per prima.
+ *
+ * È un `ref` e non un router: cinque destinazioni piatte, senza un indirizzo da condividere, non
+ * giustificano una dipendenza (ADR 0015), e il giorno in cui ne servirà uno lo dirà una schermata
  * che vuole essere raggiungibile da fuori. I nomi e le parole stanno in `components/shell/screens.ts`,
  * perché li legge anche la colonna.
  */
-const screen = ref<Screen>('home')
+const screen = ref<Screen>('atm')
 
 const retry = (): void => void store.retry()
 const startOver = (): void => void store.newGame()

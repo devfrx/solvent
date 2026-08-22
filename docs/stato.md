@@ -37,7 +37,7 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 
 ## Codice
 
-**85** file sotto `src/`, di cui **29** `.vue`.
+**86** file sotto `src/`, di cui **30** `.vue`.
 **78** file di test. I domini sono 3: `atm`, `income`, `vault`.
 
 Le righe sono **righe di codice**: commenti e righe vuote escluse, con lo stesso metodo per
@@ -51,6 +51,6 @@ confrontabili.
 | `src/core/balance/`           | 3    | 105   |
 | `src/core/domains/`           | 11   | 371   |
 | `src/main/` + `src/preload/`  | 8    | 246   |
-| `src/renderer/`               | 45   | 3.182 |
-| — di cui `src/renderer/i18n/` | 3    | 550   |
-| — di cui CSS dentro i `.vue`  | 29   | 766   |
+| `src/renderer/`               | 46   | 3.475 |
+| — di cui `src/renderer/i18n/` | 3    | 595   |
+| — di cui CSS dentro i `.vue`  | 30   | 938   |

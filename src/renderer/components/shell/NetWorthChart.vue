@@ -42,7 +42,8 @@ import { pointsOf, windowOf } from './series'
  *
  * **Il grafico non porta cifre in pianta stabile.** Il patrimonio netto ha già il suo riquadro qui
  * sopra, e un grafico con una cifra grande e un delta sarebbe il settimo riquadro con un vestito
- * che `tests/rules/home-tiles` non sa contare: il tetto dell'ADR 0018 si rispetta nello scopo. I
+ * che `tests/rules/board-tiles` non sa contare: il tetto si rispetta nello scopo, e da D033 difende
+ * il cruscotto da se stesso invece che il bancomat dal cruscotto (ADR 0040). I
  * numeri che ci sono — i due estremi dell'asse e il valore che compare toccando una barra — non
  * sono statistiche in più: sono ciò che rende leggibile un asse che non parte da zero.
  *
@@ -91,7 +92,7 @@ const optionsFor = (data: readonly number[]): ApexOptions => ({
   colors: ['var(--color-ink)'],
   dataLabels: { enabled: false },
   grid: { show: false, padding: { top: 0, right: 0, bottom: 0, left: 0 } },
-  series: [{ name: text('home.chart.title'), data: [...data] }],
+  series: [{ name: text('board.chart.title'), data: [...data] }],
   xaxis: {
     labels: { show: false },
     axisTicks: { show: false },
@@ -133,21 +134,21 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <UiPanel :title="text('home.chart.title')">
+  <UiPanel :title="text('board.chart.title')">
     <template #actions>
       <UiTooltip
-        :text="text('home.chart.explained', { seconds: store.netWorthSampleSeconds })"
+        :text="text('board.chart.explained', { seconds: store.netWorthSampleSeconds })"
         side="bottom"
       >
-        <UiLabel>{{ text('home.chart.how_to_read') }}</UiLabel>
+        <UiLabel>{{ text('board.chart.how_to_read') }}</UiLabel>
       </UiTooltip>
     </template>
 
     <div ref="frame" class="plot"></div>
 
     <p class="axis">
-      <UiLabel>{{ text('home.chart.oldest') }}</UiLabel>
-      <UiLabel>{{ text('home.chart.newest') }}</UiLabel>
+      <UiLabel>{{ text('board.chart.oldest') }}</UiLabel>
+      <UiLabel>{{ text('board.chart.newest') }}</UiLabel>
     </p>
   </UiPanel>
 </template>

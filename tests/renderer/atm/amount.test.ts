@@ -61,6 +61,18 @@ describe('un importo digitato', () => {
   })
 })
 
+describe('il giro completo', () => {
+  it('rilegge ciò che i pulsanti rapidi scrivono, in tutte e due le lingue', () => {
+    // È il patto fra `plainMoney` e questa funzione: premere `MAX` scrive nel campo un testo che
+    // il campo stesso deve saper rileggere. Se si rompesse, `MAX` proporrebbe un importo diverso
+    // da quello che ha appena calcolato — e nessun tipo se ne accorgerebbe.
+    expect(read('5.102,04')).toBe('5102.04')
+    expect(read('5,102.04')).toBe('5102.04')
+    expect(read('500,00')).toBe('500')
+    expect(read('500.00')).toBe('500')
+  })
+})
+
 describe('ciò che non è un importo', () => {
   it('è zero, che è un rifiuto che il gioco sa già spiegare', () => {
     expect(read('')).toBe('0')

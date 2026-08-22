@@ -9,9 +9,10 @@ import type { Dictionary } from './index'
  */
 export const en: Dictionary = {
   'app.name': 'Solvent',
-  'app.nav.home': 'ATM',
+  'app.nav.atm': 'ATM',
   'app.nav.income': 'Income',
   'app.nav.vault': 'Vault',
+  'app.nav.board': 'Board',
   'app.nav.stats': 'Stats',
 
   'app.nav.group.act': 'Where you act',
@@ -94,9 +95,11 @@ export const en: Dictionary = {
   'stats.operations.empty': 'Nothing to show yet.',
   'stats.description': 'The full ledger and the last save: what happened, line by line.',
 
-  'home.description':
-    'The ATM and the dashboard. Money arrives as cash, is deposited for a fee, and here you ' +
-    'see what moving it costs.',
+  'atm.description':
+    'The bridge between cash and card. It keeps a fee in both directions — and the direction you ' +
+    'choose is a choice about being visible.',
+  'board.description':
+    'How the game is going: what comes in, what it is worth, what moving it has cost.',
   'income.description':
     'The salary arrives on its own: here you buy the things that make it arrive faster.',
 
@@ -104,51 +107,55 @@ export const en: Dictionary = {
     'How much cash you can keep on you, and what it costs to keep more. When it is full the ' +
     'salary does not come in: deposit it into the account, or expand.',
 
-  'home.zone.atm': 'ATM',
-  'home.zone.dashboard': 'Dashboard',
-  'home.tile.income': 'Income',
-  'home.tile.net_worth': 'Net worth',
-  'home.tile.earned': 'Earned in total',
-  'home.tile.spent': 'Spent in total',
-  'home.tile.fees': 'Fees paid',
-  'home.tile.income.explained': 'What comes in each second, upgrades already counted.',
-  'home.tile.net_worth.explained':
+  'board.tile.income': 'Income',
+  'board.tile.net_worth': 'Net worth',
+  'board.tile.earned': 'Earned in total',
+  'board.tile.spent': 'Spent in total',
+  'board.tile.fees': 'Fees paid',
+  'board.tile.income.explained': 'What comes in each second, upgrades already counted.',
+  'board.tile.net_worth.explained':
     'Cash plus card. It is earned minus spent minus fees: always, by construction.',
-  'home.tile.earned.explained':
+  'board.tile.earned.explained':
     'Everything that came in since the game began, before any spending.',
-  'home.tile.spent.explained':
+  'board.tile.spent.explained':
     'Everything that went out to buy something. Fees are counted separately.',
-  'home.tile.fees.explained':
+  'board.tile.fees.explained':
     'What moving money has cost. It is the price of making traceable what was not.',
 
-  'home.chart.title': 'Net worth over time',
-  'home.chart.explained':
+  'board.chart.title': 'Net worth over time',
+  'board.chart.explained':
     'One bar every {seconds} seconds of play. The height is the change within the window, not the total: the lowest sample sits at the floor, the highest at the top. After a long pause a single bar covers all the time that passed.',
-  'home.chart.how_to_read': 'How to read it',
-  'home.chart.oldest': 'Earlier',
-  'home.chart.newest': 'Now',
+  'board.chart.how_to_read': 'How to read it',
+  'board.chart.oldest': 'Earlier',
+  'board.chart.newest': 'Now',
 
-  'atm.account.title': 'On the account',
-  'atm.cash.title': 'Cash',
-  'atm.cash.capacity': 'Vault capacity',
-  'atm.cash.capacity.explained':
-    'How much cash the vault holds right now. Once full, wages stop: deposit, or expand.',
-  'atm.deposit': 'Deposit',
-  'atm.withdraw': 'Withdraw',
-  'atm.deposit.title': 'Deposit into the account',
-  'atm.withdraw.title': 'Withdraw from the account',
-  'atm.breakdown': 'What happens',
+  'atm.from': 'From',
+  'atm.to': 'To',
+  'atm.note.cash': 'In the vault · {room} of room left',
+  'atm.note.card': 'Traceable, no ceiling',
+  'atm.swap': 'Swap the direction',
+  'atm.amount': 'Amount',
+  'atm.max': 'Max',
+  'atm.limits': 'Below {floor} the fee eats it · at most {max}',
+  'atm.breakdown': 'Before you confirm',
+  'atm.breakdown.aside': 'the breakdown, not the total',
   'atm.breakdown.explained':
-    'The exact postings the confirmation will apply. The fee is flat and charged on every ' +
-    'operation, large or small.',
+    'The exact postings the confirmation will apply. The fee is the greater of a floor and a ' +
+    'percentage, so on a small amount it weighs more.',
+  'atm.refused': 'Refused',
+  'atm.confirm.note': 'This movement will appear in the ledger with its reason.',
+  'atm.confirm.note.refused': 'The button stays live. Pressing it repeats the reason.',
   'atm.fee': 'Fee',
-  'atm.fee.per_operation': 'Fee per operation',
+  'atm.fee.per_operation': 'ATM fee',
   'atm.fee.rates': '{deposit} in · {withdraw} out',
-  'atm.deposit.confirm': 'Confirm deposit',
-  'atm.withdraw.confirm': 'Confirm withdrawal',
+  'atm.deposit.confirm': 'Deposit {amount}',
+  'atm.withdraw.confirm': 'Withdraw {amount}',
   'atm.recent.title': 'Recent operations',
+  'atm.card.title': 'The card, as an object',
+  'atm.cash.note':
+    'Cash has no object and no back: it leaves no trace, it has a ceiling, it earns nothing.',
 
-  'card.tier.gold': 'Gold',
+  'card.back.title': 'What this instrument does',
   'card.hint.drag': 'Drag to flip the card',
 
   'reason.income.tick': 'Salary',

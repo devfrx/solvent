@@ -100,14 +100,14 @@ describe('il rilevatore', () => {
   it('legge le voci di DOMAIN_SCREENS con il loro valore', () => {
     const source = [
       'export const DOMAIN_SCREENS: Readonly<Record<string, Screen | null>> = {',
-      "  atm: 'home',",
+      "  atm: 'atm',",
       '  calendar: null',
       '}',
       ''
     ].join('\n')
 
     expect(declaredScreens(source)).toEqual([
-      ['atm', "'home'"],
+      ['atm', "'atm'"],
       ['calendar', 'null']
     ])
   })
@@ -116,7 +116,7 @@ describe('il rilevatore', () => {
     const source = [
       '/** Qui vault: non è una voce. */',
       'export const DOMAIN_SCREENS: Readonly<Record<string, Screen | null>> = {',
-      "  atm: 'home'",
+      "  atm: 'atm'",
       '}',
       ''
     ].join('\n')

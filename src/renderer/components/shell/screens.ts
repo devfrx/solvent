@@ -12,13 +12,19 @@ import type { MessageKey } from '@renderer/i18n'
  * senza schermata non compila. La separazione non è formale, è ciò che permette a questo file di
  * non importare le viste, e alla colonna di leggerlo senza tirarsi dietro l'intera applicazione.
  *
- * Un `ref` e non un router: quattro destinazioni **piatte** senza un indirizzo da condividere non
+ * Un `ref` e non un router: cinque destinazioni **piatte** senza un indirizzo da condividere non
  * giustificano una dipendenza (ADR 0015), e il grilletto è scritto — la prima schermata che deve
  * essere raggiungibile da fuori, oppure la prima gerarchia. Un gruppo nella colonna non è una
  * gerarchia di indirizzi: è un titolo sopra delle voci che restano tutte allo stesso livello.
+ *
+ * D033 — `home` non c'è più, e al suo posto ci sono **due** destinazioni. La home faceva due
+ * lavori, il bancomat e il cruscotto, e l'[ADR 0018](../../../../docs/adr/0018-la-home-e-un-atm.md)
+ * li teneva insieme con un tetto di sei riquadri. Quel tetto difendeva il bancomat **dentro** una
+ * pagina condivisa; separarle rende la difesa inutile invece che più severa
+ * ([ADR 0040](../../../../docs/adr/0040-il-bancomat-e-il-cruscotto-sono-due-pagine.md)).
  */
 
-export const SCREENS = ['home', 'income', 'vault', 'stats'] as const
+export const SCREENS = ['atm', 'income', 'vault', 'board', 'stats'] as const
 
 export type Screen = (typeof SCREENS)[number]
 
@@ -35,8 +41,8 @@ export type Screen = (typeof SCREENS)[number]
  * sopra.
  */
 export const NAV_GROUPS = [
-  { title: 'app.nav.group.act', screens: ['home', 'income', 'vault'] },
-  { title: 'app.nav.group.look', screens: ['stats'] }
+  { title: 'app.nav.group.act', screens: ['atm', 'income', 'vault'] },
+  { title: 'app.nav.group.look', screens: ['board', 'stats'] }
 ] as const satisfies readonly { readonly title: MessageKey; readonly screens: readonly Screen[] }[]
 
 interface ScreenWording {
@@ -51,9 +57,10 @@ interface ScreenWording {
  * codice d'errore.
  */
 export const SCREEN_WORDING: Readonly<Record<Screen, ScreenWording>> = {
-  home: { title: 'app.nav.home', description: 'home.description' },
+  atm: { title: 'app.nav.atm', description: 'atm.description' },
   income: { title: 'app.nav.income', description: 'income.description' },
   vault: { title: 'app.nav.vault', description: 'vault.description' },
+  board: { title: 'app.nav.board', description: 'board.description' },
   stats: { title: 'app.nav.stats', description: 'stats.description' }
 }
 
@@ -69,11 +76,16 @@ export const SCREEN_WORDING: Readonly<Record<Screen, ScreenWording>> = {
  * dominio che non compare qui è rosso. Il tipo non basta da solo — non esiste un'unione `Domain`, e
  * inventarla vorrebbe dire far esportare a `@core` un elenco che nessuno gli chiede.
  *
- * `atm` sta su `home` e non su una destinazione sua: la home **è** la pagina del bancomat, con il
- * cruscotto sotto, e l'ADR 0018 resta in vigore.
+ * `atm` sta sulla **propria** destinazione da D033, e la frase che stava qui diceva il contrario:
+ * «la home *è* la pagina del bancomat, con il cruscotto sotto». Era vera e aveva una data. Adesso
+ * il bancomat ha una pagina che è solo sua, e il cruscotto ne ha un'altra.
+ *
+ * **`board` non è un dominio**, e questa mappa lo sopporta senza cambiare: va da cartella di
+ * dominio a destinazione, non il contrario. Una destinazione senza dominio è legittima — `stats`
+ * lo è dal primo giorno — mentre un dominio senza destinazione non compila.
  */
 export const DOMAIN_SCREENS: Readonly<Record<string, Screen | null>> = {
-  atm: 'home',
+  atm: 'atm',
   income: 'income',
   vault: 'vault'
 }

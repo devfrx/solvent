@@ -15,15 +15,24 @@ import { draggedTo, releasedOn, restingAt, transformOf } from './rotation'
  * `backface-visibility: hidden` sulle facce. Nessuna libreria: non passerebbe l'ADR 0015 per un
  * effetto che costa venti righe di CSS.
  *
- * **Zero logica.** Riceve quattro stringhe già formattate e non vede un solo `Decimal`: chi
- * formatta è il confine di presentazione (ADR 0006), chi decide quanto denaro si muove è il
- * dominio (R05). La matematica della rotazione — l'unica parte sbagliabile — sta in `rotation.ts`,
- * pura e provata a parte.
- */
+ * **Le due facce vengono dall'artboard `ATM` del canvas** ([D033](../../../../docs/delega/D033-il-bancomat-e-una-pagina.md)),
+ * il modo di girarle no. Il canvas inclina col puntatore e gira al clic; qui c'è il trascinamento
+ * vero, con la matematica in `rotation.ts`, pura e già provata. È **comportamento**, non disegno,
+ * ed è migliore di quello che il canvas mima con due `onMouseMove`.
+ *
+ * **Il saldo non sta più sul fronte.** Fino a D033 ci stava, e nella pagina nuova sarebbe lo
+ * stesso numero due volte nella stessa schermata: il saldo della carta è già il lato `A CARTA` del
+ * blocco `DA ⇄ A`. Il fronte porta solo decorazione, il retro solo fatti.
+ *
+ * **Il retro porta tre righe, e il canvas ne disegna cinque.** `INTEREST` e `RISK` restano fuori:
+ * gli interessi e il conto congelato non esistono come meccanica, e una carta che dichiara una
+ * meccanica assente è un numero finto con un'etichetta. Il retro è un elenco, ed è fatto per
+ * crescere di una riga il giorno in cui la meccanica nasce.
+ *
+ * **Zero logica.** Riceve tre stringhe già formattate e non vede un solo `Decimal`: chi formatta è
+ * il confine di presentazione (ADR 0006), chi decide quanto denaro si muove è il dominio (R05). */
 
 defineProps<{
-  /** Il saldo della carta, già formattato. */
-  readonly account: string
   /** Il tetto dello strumento, già in parole: oggi «Illimitata». */
   readonly capacity: string
   /**
@@ -35,6 +44,26 @@ defineProps<{
   /** Se i movimenti lasciano traccia, già in parole. È metà della dualità di P4. */
   readonly traceability: string
 }>()
+
+/**
+ * **Decorazione dichiarata.** Non sono numeri di gioco — non stanno in `balance/`, nessuna regola
+ * li legge, cambiarli non sposta niente — e non sono parole da tradurre: sono ciò che è stampato
+ * su una carta, uguale in ogni lingua. Stanno qui, con questo commento, perché altrimenti il primo
+ * che li legge va a cercare da dove vengono.
+ *
+ * Un numero ricavato dal seme della partita sarebbe bello e costerebbe poco (l'Rng ha già i suoi
+ * stream per dominio, ADR 0005): è **fuori scopo** per D033, e il grilletto è scritto — sarebbe la
+ * prima cosa nel gioco a distinguere una partita da un'altra a schermo.
+ */
+const ORNAMENT = {
+  kind: 'DEBIT',
+  number: '4913 2201 0067 5540',
+  holderLabel: 'CARDHOLDER',
+  holder: 'A. VOLPE',
+  expiryLabel: 'VALID THRU',
+  expiry: '08 / 31',
+  code: '441'
+} as const
 
 const { text } = useTranslator()
 
@@ -101,17 +130,39 @@ const release = (): void => {
     >
       <div class="face front">
         <header class="brand">
-          <span class="tier">{{ text('card.tier.gold') }}</span>
-          <span class="chip" aria-hidden="true"></span>
+          <span class="mark">{{ text('app.name') }}</span>
+          <span class="kind">{{ ORNAMENT.kind }}</span>
         </header>
-        <div>
-          <p class="caption engraved">{{ text('atm.account.title') }}</p>
-          <p class="amount balance">{{ account }}</p>
-        </div>
+
+        <span class="chip" aria-hidden="true">
+          <span class="contact"></span>
+          <span class="contact"></span>
+          <span class="contact"></span>
+        </span>
+
+        <p class="pan">{{ ORNAMENT.number }}</p>
+
+        <footer class="engraved">
+          <span class="stamp">
+            <span class="caption">{{ ORNAMENT.holderLabel }}</span>
+            <span class="value">{{ ORNAMENT.holder }}</span>
+          </span>
+          <span class="stamp end">
+            <span class="caption">{{ ORNAMENT.expiryLabel }}</span>
+            <span class="value">{{ ORNAMENT.expiry }}</span>
+          </span>
+        </footer>
       </div>
 
       <div class="face back">
         <span class="stripe" aria-hidden="true"></span>
+
+        <p class="signature">
+          <span class="strip" aria-hidden="true"></span>
+          <span class="value">{{ ORNAMENT.code }}</span>
+        </p>
+
+        <p class="caption">{{ text('card.back.title') }}</p>
         <dl class="details">
           <div class="detail">
             <dt>{{ text('pool.traceability') }}</dt>
@@ -123,7 +174,7 @@ const release = (): void => {
           </div>
           <div class="detail">
             <dt>{{ text('atm.fee.per_operation') }}</dt>
-            <dd class="amount">{{ fee }}</dd>
+            <dd>{{ fee }}</dd>
           </div>
         </dl>
       </div>
@@ -144,7 +195,7 @@ const release = (): void => {
 
 .card {
   width: 290px;
-  height: 180px;
+  height: 183px;
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
@@ -169,10 +220,9 @@ const release = (): void => {
   inset: 0;
   border-radius: 14px;
   backface-visibility: hidden;
-  padding: 16px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   box-shadow:
     0 18px 40px -18px var(--metal-shadow),
     0 0 0 1px var(--metal-sheen) inset;
@@ -200,52 +250,122 @@ const release = (): void => {
   );
   color: var(--metal-ink);
   transform: rotateY(180deg);
+  overflow: hidden;
 }
 
 .brand {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
+  gap: var(--space-4);
 }
 
-.tier {
-  font-size: 13px;
-  font-weight: 700;
+.mark {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--weight-bold);
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.kind {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.13em;
+  opacity: 0.6;
 }
 
 .chip {
   width: 38px;
   height: 28px;
+  margin-top: 12px;
   border-radius: 5px;
   background: linear-gradient(145deg, var(--metal-chip-light), var(--metal-chip-dark));
   box-shadow: inset 0 0 0 1px var(--metal-chip-inset);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 5px 6px;
+}
+
+/* I contatti del chip: tre righe, come su una carta vera. */
+.contact {
+  height: 1px;
+  background: var(--metal-chip-inset);
+}
+
+.pan {
+  margin: auto 0 0;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.09em;
+  line-height: 1.2;
 }
 
 .engraved {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-5);
+  margin-top: 12px;
   color: var(--metal-chip-ink);
 }
 
-.balance {
-  font-size: 24px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  margin: 3px 0 0;
+.stamp {
+  display: flex;
+  flex-direction: column;
+}
+
+.stamp.end {
+  margin-left: auto;
+  text-align: right;
+}
+
+.caption {
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
 }
 
 .stripe {
-  height: 36px;
+  height: 34px;
   background: var(--metal-stripe);
-  margin: -16px -16px 0;
-  border-radius: 14px 14px 0 0;
+  margin: 2px -16px 0;
+}
+
+.signature {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 10px 0 12px;
+}
+
+.strip {
+  flex: 1;
+  height: 14px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--metal-chip-light) 40%, transparent);
+}
+
+.back .caption {
+  margin: 0 0 6px;
+  color: var(--metal-chip-ink);
 }
 
 .details {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
 }
 
 .detail {
@@ -253,17 +373,20 @@ const release = (): void => {
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
-  font-size: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.02em;
 }
 
 dt {
-  opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  white-space: nowrap;
 }
 
 dd {
   margin: 0;
-  font-size: 11px;
-  font-weight: 600;
   text-align: right;
 }
 
