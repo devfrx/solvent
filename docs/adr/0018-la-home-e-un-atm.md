@@ -10,7 +10,7 @@
   zone in quest'ordine, la commissione si vede prima della conferma, e `tests/rules/home-tiles`
   conta i riquadri. Rivista il 2026-08-19 su decisione dell'utente
 - **Data:** 2026-08-19
-- **Origine:** preferenze [P3](../prodotto/preferenze.md#p3--la-home-è-cruscotto-e-bancomat) e [P5](../prodotto/preferenze.md#p5--la-carta-è-un-oggetto-3d-ruotabile)
+- **Origine:** preferenze [P3](../prodotto/preferenze.md#p3--prima-il-bancomat-poi-il-cruscotto) e [P5](../prodotto/preferenze.md#p5--la-carta-è-un-oggetto-3d-ruotabile)
 
 ## Contesto
 

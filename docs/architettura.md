@@ -237,7 +237,7 @@ solvent/
 │     │  │  └─ IncomePanel.vue    # l'upgrade: il listino letto prima di premere, un comando, un rifiuto
 │     │  └─ vault/
 │     │     ├─ VaultPanel.vue     # la barra, lo spazio, il listino a due voci, l'ampliamento
-│     │     └─ VaultAlarm.vue     # il caveau visto dalla home: solo il muro, e solo se e' stato toccato
+│     │     └─ VaultAlarm.vue     # il caveau sulla pagina del bancomat: solo il muro, e solo se e' stato toccato
 │     └─ i18n/
 │        ├─ index.ts              # chiavi tipizzate, Translator, GameError
 │        ├─ it.ts

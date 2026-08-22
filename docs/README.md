@@ -8,7 +8,7 @@ Mappa di tutto ciò che è scritto, a cosa serve, e quanto ci si può fidare che
 | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | --------------- |
 | [stato.md](stato.md)                                               | quanti sono gli ADR, le deleghe e i documenti, e in che stato — **generato**        | **generato**    |
 | [prodotto/visione.md](prodotto/visione.md)                         | cosa sarà Solvent finito: i domini, cosa li rende profondi, come si collegano       | **vivo**        |
-| [prodotto/preferenze.md](prodotto/preferenze.md)                   | le preferenze permanenti: nome, stile, home ATM, contanti/carta, carta 3D           | **vivo**        |
+| [prodotto/preferenze.md](prodotto/preferenze.md)                   | le preferenze permanenti: nome, stile, prima il bancomat, contanti/carta, carta 3D  | **vivo**        |
 | [architettura.md](architettura.md)                                 | com'è fatto il sistema, cosa può importare cosa                                     | **vivo**        |
 | [adr/README.md](adr/README.md)                                     | **compendio delle decisioni**: quali sono, il loro stato, cosa vincolano            | **vivo**        |
 | [adr/NNNN-*.md](adr/)                                              | _perché_ una singola decisione è stata presa così, e cosa è stato scartato          | append-only     |
@@ -96,7 +96,7 @@ carta trattenendo una commissione, e non ha stato — è un dominio di soli coma
 rispecchia il Bus senza calcolare, e la finestra salva prima di chiudersi. Con D012 il gioco **parla**: il guscio veste i sette stati
 del ciclo di vita, il saldo e l'upgrade hanno una schermata, e ogni parola passa da una chiave in
 due lingue — le chiavi del bancomat comprese, perché una lingua che si completa in due tempi è il
-difetto A13. Con D015 il gioco **si gioca**: la home è un bancomat con la carta che si gira, la
+difetto A13. Con D015 il gioco **si gioca**: il bancomat ha la carta che si gira, la
 commissione si vede prima della conferma, il cruscotto dice come sta andando e il giro si chiude —
 si guadagna in contanti, si deposita, si compra con la carta.
 

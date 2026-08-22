@@ -286,7 +286,8 @@ un posto dove si va spesso — e la pagina gli tocca lo stesso, perché c'è qua
 il livello si amplia, e con due strumenti a prezzi diversi.
 
 Quello che il giocatore incontra **senza andarci** è l'allarme — il reddito si è fermato — e infatti
-non vive sulla pagina: sta in `components/vault/VaultAlarm.vue`, e compare sulla home. È l'altra
+non vive sulla pagina: sta in `components/vault/VaultAlarm.vue`, e compare sulla pagina del
+bancomat. È l'altra
 metà della regola dell'[ADR 0033](../../adr/0033-un-dominio-ha-una-cartella-e-una-pagina.md): un
 pezzo di un dominio può comparire altrove, **ma esce dalla sua cartella** — ed è precisamente ciò che
 il caveau aveva violato finendo dentro il pannello dei contanti.

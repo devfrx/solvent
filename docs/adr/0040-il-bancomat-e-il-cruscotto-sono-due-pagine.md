@@ -6,7 +6,7 @@
 - **Data:** 2026-08-22
 - **Supera:** [ADR 0018](0018-la-home-e-un-atm.md), che resta in vigore per tutto il resto di ciò
   che diceva
-- **Origine:** preferenze [P3](../prodotto/preferenze.md#p3--la-home-è-cruscotto-e-bancomat) e
+- **Origine:** preferenze [P3](../prodotto/preferenze.md#p3--prima-il-bancomat-poi-il-cruscotto) e
   [P5](../prodotto/preferenze.md#p5--la-carta-è-un-oggetto-3d-ruotabile), e l'artboard `ATM` di
   [solvent-canvas.dc.html](../design/mockups/solvent-canvas.dc.html)
 

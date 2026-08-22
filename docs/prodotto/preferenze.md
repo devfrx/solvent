@@ -22,7 +22,8 @@ Ogni voce ha un **perché** — senza, fra sei mesi sembrerà arbitraria e qualc
 **Approvato il 2026-08-20** sulla base del canvas di Claude Design consegnato dall'utente, e
 **sostituisce** la versione approvata il 2026-08-19 sul
 [mockup della fetta 01](../design/mockups/fetta-01-primo-stipendio.html). Il mockup resta al suo
-posto: è il documento che ha fatto approvare la **forma** della home, e quella non cambia.
+posto: è il documento che ha fatto approvare la **forma** dell'applicazione, e quella non
+cambia.
 
 | Elemento      | Scelta                                                                                                                   |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -88,10 +89,11 @@ R15, non l'attenzione di chi rilegge.
 
 ---
 
-## P3 — La home è cruscotto **e** bancomat
+## P3 — Prima il bancomat, poi il cruscotto
 
-La schermata principale è tutte e due le cose, in quest'ordine: **prima il bancomat**, sotto il
-cruscotto. Si vede la carta, il contante, si deposita e si preleva; poi le statistiche vive.
+L'ordine è questo, e non cambia: si vede la carta, il contante, si deposita e si preleva; poi le
+statistiche vive. **Quante schermate servano a dirlo è cambiato** — vedi qui sotto — mentre la
+preferenza che l'utente ha approvato è l'ordine.
 
 **Perché:** in un idle game le statistiche _sono_ il contenuto — nasconderle dietro un clic toglie
 la ragione di riaprire il gioco. Ma il bancomat è il gesto che rende la dualità contanti/carta una
@@ -142,8 +144,8 @@ sbagliato è un errore tipizzato, non un pulsante disabilitato senza spiegazione
 La carta di credito è un oggetto vero: si vede in prospettiva, si può girare con il mouse, ha un
 fronte e un retro.
 
-**Perché:** è l'unico oggetto fisico del gioco che il giocatore possiede davvero, e la home gli
-ruota intorno. Renderla un rettangolo piatto sprecherebbe il gesto centrale dell'interfaccia. È
+**Perché:** è l'unico oggetto fisico del gioco che il giocatore possiede davvero, e la pagina del
+bancomat gli ruota intorno. Renderla un rettangolo piatto sprecherebbe il gesto centrale dell'interfaccia. È
 anche l'unico punto in cui il gioco può permettersi un vezzo visivo senza rallentare nulla.
 
 **Come si applica:**
