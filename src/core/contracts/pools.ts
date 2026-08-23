@@ -83,9 +83,9 @@ export const POOLS: Readonly<Record<Pool, PoolProps>> = {
  * no» alla stessa domanda, ed è ciò che permette al reddito di accreditare il parziale invece di
  * incassare un rifiuto intero.
  *
- * Senza di lui il recupero dopo un'assenza tornerebbe **zero**: `recover()` fa un solo `tickAll`
- * con tutti i tick arretrati, cioè una transazione sola da otto ore di reddito, e il Ledger la
- * rifiuta intera perché una transazione è atomica (ADR 0019). Non sarebbe un muro: sarebbe un
+ * Senza di lui il recupero dopo un'assenza tornerebbe **zero**: il recupero all'avvio è **un solo**
+ * `advance` con tutti i tick arretrati, cioè una transazione sola da otto ore di reddito, e il
+ * Ledger la rifiuta intera perché una transazione è atomica (ADR 0019). Non sarebbe un muro: sarebbe un
  * guasto travestito da regola.
  *
  * Mai negativo. Un saldo sopra il tetto non è impossibile — basta un ampliamento che un giorno

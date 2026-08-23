@@ -126,11 +126,15 @@ Verificato con i comandi, non ricordato.
   cronaca rompendo a turno l'iterazione della lista, l'iscrizione al Bus, `reopen` e la cadenza.
   Ogni file rotto è stato **copiato prima** e ripristinato con un `diff` che conferma l'identità: è
   la trappola che D036 aveva pagato con mezz'ora di lavoro.
-- **Tutto sta in un commit solo**, `6f245e0` sul ramo `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, e la forma non è
-  una scelta di comodo: la regola 1 di [docs/README.md](../README.md) vuole che un confine che si
-  sposta cambi il documento che lo descrive **nello stesso commit**, e qui i documenti vivi che si
-  spostano sono sei. Spezzare per tipo — `feat` e poi `docs` — avrebbe lasciato un commit in cui
-  `architettura.md` descrive un confine che il codice ha già cambiato.
+- **Il ramo è `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, e parte da `main`.** Il codice e
+  i documenti vivi viaggiano **insieme**, in `6f245e0`, e la forma non è una scelta di comodo: la
+  regola 1 di [docs/README.md](../README.md) vuole che un confine che si sposta cambi il documento
+  che lo descrive **nello stesso commit**, e qui i documenti vivi che si spostano sono sei. Spezzare
+  per tipo — `feat` e poi `docs` — avrebbe lasciato un commit in cui `architettura.md` descrive un
+  confine che il codice ha già cambiato. Quanti commit ci siano sopra **non si scrive qui**: lo dice
+  `git log main..HEAD`, e la riga che lo scrivesse sarebbe uno di loro — questa riga infatti diceva
+  «tutto sta in un commit solo» ed è nata dentro il secondo, che è il difetto di D021 alla terza
+  ricorrenza.
 - **Il ramo non è fuso in `main` e non è spinto.** Non è stato chiesto, e un `push` è visibile agli
   altri: resta una di quelle cose che si chiedono. Dove sia adesso lo dicono `git branch` e
   `git rev-list --count origin/main..main`.

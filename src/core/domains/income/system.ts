@@ -99,8 +99,8 @@ export const createIncome = (ledger: Ledger, modifiers: Modifiers, room: Room): 
        * esiste, e il reddito può non entrare.
        *
        * Il tick **non chiede e incassa il rifiuto**: sa quanto ci sta **prima** di chiedere, e
-       * accredita quello. La ragione è il recupero — `recover()` fa un solo `tickAll` con tutti i
-       * tick arretrati, cioè una transazione sola da otto ore di stipendio, e il Ledger la
+       * accredita quello. La ragione è il recupero, che è **un solo** `advance` con tutti i tick
+       * arretrati — cioè una transazione sola da otto ore di stipendio, e il Ledger la
        * rifiuterebbe intera perché una transazione è atomica (ADR 0019). Chi è stato via una notte
        * tornerebbe con **zero**, a caveau vuoto: non un muro, un guasto travestito da regola.
        *
