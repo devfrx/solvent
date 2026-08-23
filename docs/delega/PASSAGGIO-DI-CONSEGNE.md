@@ -45,7 +45,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23, chiudendo la quinta sessione, sono stati fusi i due rami incatenati che aspettavano: `d038-cio-che-si-preme-e-cio-che-scorre` discendeva da `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, quindi è bastato un `--ff-only` sul secondo per portarli tutti e due. `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sui rami, e i due rami sono stati cancellati con `git branch -d` — quello che si rifiuta se resta lavoro non fuso: **nessuno dei due si è rifiutato** |
 | `origin/main`            | **si verifica, non si dichiara.** Un allineamento scritto qui lo invalida il primo commit che arriva dopo — compreso quello che lo scrive — e l'elenco di cosa si è spinto invecchia a ogni delega consegnata. Lo dice `git rev-list --count origin/main..main`: se non fa `0`, c'è del lavoro solo su questa macchina. Quando si spinge, i gate girano prima **su `main` fuso** e non solo sui rami                                                                                                                                                                |
 | Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Prossimo passo           | **eseguire [D040](D040-il-recupero-avanza-a-blocchi.md)**, la prima della fetta 03: il recupero avanza a blocchi e il tetto si misura in tempo di gioco. È scritta, non eseguita, e porta **tre decisioni aperte** che si prendono con l'utente prima di toccare il codice — vedi _E dopo, la fetta 03_                                                                                                                                                                                                                                                             |
+| Prossimo passo           | **la seconda delega della fetta 03, il salvataggio a intervalli**, e va scritta: [D040](D040-il-recupero-avanza-a-blocchi.md) è chiusa e in `main`, e ha costruito il gancio che serve — qualcosa che succede ogni N tick sulla via unica. La fetta 03 è **in corso**, non conclusa                                                                                                                                                                                                                                                                                 |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -67,10 +67,126 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 > Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
 > agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
 
-## La **quinta** sessione del 2026-08-23: D038 e D039, il kit e lo strumento per guardarlo
+## La **sesta** sessione del 2026-08-23: `npm install` alla causa, e la fetta 03 comincia
 
 Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
 recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
+
+**Cosa è stato chiuso.**
+
+| Cosa                                         | Cos'era                                                                        |
+| -------------------------------------------- | ------------------------------------------------------------------------------ |
+| [D040](D040-il-recupero-avanza-a-blocchi.md) | il recupero era un `advance` solo, quindi le soglie erano invisibili           |
+| `npm install`                                | non funzionava da due mesi, e cinque deleghe lo scrivevano come una proprietà  |
+| Due divergenze di **questa** pagina          | mandava a eseguire una delega chiusa, e confondeva la fetta 03 con il blocco A |
+
+### Le sei cose che chi arriva adesso deve sapere
+
+**1. `npm install` funziona, senza flag, e se un giorno ne chiede uno è un segnale.** La causa era
+una versione sola: `vite` dichiarato alla 8 mentre `electron-vite@5` — l'ultima **stabile** — regge
+fino alla 7, ed era l'unico fra i pacchetti che dipendono da Vite a rifiutarla. Sceso alla 7,
+`npm ci` gira nudo. Il grilletto per risalire è una **stabile** di `electron-vite` che dichiari
+`vite ^8`, e sta nel [registro YAGNI](../roadmap-fette.md); il perché sta
+nell'[ADR 0048](../adr/0048-la-catena-di-build-si-muove-insieme.md), che esiste soprattutto perché
+nessuno alzi quel numero senza alzare l'altro.
+
+**2. Il flag aveva già lasciato due sintomi catalogati come requisiti.** `--legacy-peer-deps` non
+spegne un controllo: spegne la **risoluzione** dei peer. Da lì `@vue/devtools-api` e
+`vue-eslint-parser` erano finiti a mano nelle `devDependencies` con la motivazione «senza cui il
+build non compila». Nessuno dei due è importato da una riga del progetto — sono dipendenze di
+`pinia`, `vue-i18n` ed `eslint-plugin-vue` — e sono usciti. Vale come metodo: **quando un rimedio
+ne richiede altri, il primo non era un rimedio.**
+
+**3. `node node_modules/electron/install.js` è obsoleto**, e lo era da sette sessioni. Electron ha
+tolto il proprio `postinstall` alla versione **42** — la 41 ce l'aveva ancora, verificato sul
+registry — e `index.js` scarica il binario **al primo `require`**. Provato su una `node_modules`
+cancellata: `npm ci` non lo scarica, il primo avvio sì. Chi lo esegue a mano rifà un lavoro che il
+gioco farebbe da solo.
+
+**4. Il mondo avanza a blocchi, e il blocco è dell'operazione.** `Game.advance` cammina l'intervallo
+a blocchi di un giorno di gioco invece di consegnarlo in un colpo, quindi una soglia attraversata e
+rientrata mentre non guardavi adesso scatta. Il ciclo sta **dentro** `advance` e non in `recover()`:
+se fosse del chiamante, ogni chiamante nuovo potrebbe dimenticarsene e **R25 resterebbe verde mentre
+la sua ragione viene aggirata**. Ha il suo [ADR 0049](../adr/0049-il-mondo-avanza-a-blocchi.md)
+perché nessuno lo «semplifichi» spostandolo.
+
+**5. Il tetto di recupero adesso si misura in giorni di gioco, ed è un anno.** Erano otto **ore
+reali**, cioè trentanove anni di gioco: dormire rendeva tredici volte più che giocare. Con un anno —
+dodici minuti reali — un'ora di gioco attivo ne vale cinque, quindi giocare batte dormire di cinque
+volte e la strategia «chiudi la finestra» non esiste più. `SECONDS_PER_GAME_DAY` entra in `balance/`
+come **conversione**, e non è il calendario
+dell'[ADR 0023](../adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md), che resta `Proposta`:
+quello ha stato e fa scattare scadenze, questo è un cambio come `TICKS_PER_SECOND`.
+
+**6. Quattro test sono stati invertiti, e vanno guardati con più sospetto di tutto il resto.**
+Chiedevano **un** campione dopo un recupero, e avevano ragione: senza blocchi i valori intermedi non
+esistevano, e il commento di `sampleOf` lo diceva. Adesso ne chiedono trenta. Ognuno dei quattro
+porta scritto perché l'attesa vecchia era giusta allora e sbagliata adesso — **un test cambiato
+senza quella riga è indistinguibile da un test indebolito**, e chi rilegge non ha modo di
+distinguerli.
+
+### Cosa c'è nell'albero di lavoro alla chiusura
+
+Verificato con i comandi, non ricordato.
+
+- **`npm run verify` verde** (88 file di test) e **`npm run verify:release` verde**, girati su `main`
+  **fuso** e non solo sul ramo. Quanti siano i test lo dice [qualita.md](../qualita.md).
+- **`main` è l'unico ramo.** `d040-il-recupero-avanza-a-blocchi` è stato fuso con `--ff-only` e
+  cancellato con `git branch -d`, quello che si rifiuta se resta lavoro non fuso: **non si è
+  rifiutato**. Il push è stato chiesto e fatto.
+- **Niente residui di debug**, e nessun file temporaneo nel repo. Il test usa-e-getta che ha preso la
+  misura del recupero è stato rimosso: la misura vive in [qualita.md](../qualita.md), che è dove
+  serviva.
+- **Il ciclo dei blocchi è stato rotto di proposito**: un `for` che salta l'ultimo blocco parziale fa
+  cadere **sei** test. Il file è stato copiato prima e ripristinato con un `diff` che conferma
+  l'identità.
+- **La finestra vera è stata guardata** con `scripts/cdp.mjs`, che è la prima delega a usarlo dopo
+  D039.
+
+> **Il salvataggio del giocatore è stato toccato, ed è stato rimesso a posto.** Per vedere un
+> recupero vero serviva una partita vecchia: il `save.json` in `%APPDATA%/solvent/` è stato copiato,
+> retrodatato di un'ora, e **ripristinato identico** a fine prova — verificato, `savedAt`
+> `1787442416634`, contanti `59899.2`, caveau livello 4. L'app è stata **terminata** invece che
+> chiusa, perché chiuderla avrebbe salvato la partita di prova sopra quella dell'utente. Chi rifà
+> questa prova lo sappia prima, non dopo.
+
+### Cosa questa sessione ha lasciato indietro
+
+Censito, non nascosto.
+
+1. **Nessuna misura della catena a macchina scarica.** Aperta da otto sessioni.
+2. **`withheld` descrive l'ultimo blocco, non il recupero.** È la definizione del campo — un mirror
+   del presente, e `income/types.ts` lo dichiara — ma dopo una notte risponde a «i soldi entrano
+   adesso?» e non a «quanto ho perso». Se serve la seconda risposta è un campo nuovo con un nome
+   nuovo, non questo allargato.
+3. **Le tre decisioni di D040 sono contestabili**, e il conto che le ha decise sta in fondo alla
+   delega. Il tetto a un anno di gioco in particolare è bilanciamento: se giocandoci è troppo severo,
+   il numero si sposta in una riga, e la derivazione accanto dice cosa si sta cambiando.
+4. **`components/atm/BankCard3d.vue` ha due lettori**, e il secondo è `components/payment/`. Il
+   grilletto per spostarla sta nella decisione 6 di D036, ed è ancora fermo lì.
+5. **Le due candele degli strumenti sono due dichiarazioni e non un ciclo su `POOLS[pool].player`.**
+   Grilletto: il terzo strumento del giocatore.
+6. **`incomeThatFits` ha perso la ragione che lo rendeva indispensabile, e resta.** Con i blocchi la
+   transazione gigante non esiste più; il ramo serve ancora al tempo reale, quindi non si tocca.
+   Rimuoverlo è un'altra decisione, non un residuo da smaltire.
+
+### Due vicoli ciechi, per non ripercorrerli
+
+1. **`overrides` in `package.json` per tenere Vite 8 non è una soluzione**, ed è la prima cosa che
+   viene in mente. Non rimuove la contraddizione: la rende invisibile a npm. È `--legacy-peer-deps`
+   con un vestito più rispettabile, con l'aggravante che **sembra** una decisione presa. Anche
+   `electron-vite@6.0.0-beta.1` è stato valutato: accetta Vite 8 davvero, ma una beta come strumento
+   di build dell'intero progetto è una migrazione che si sa già di dover rifare.
+2. **Il velo del recupero non si fotografa.** Dura tre millisecondi, e il loop rimette `playing` al
+   frame dopo — è la riga `if (status.value === 'recovering') status.value = 'playing'` in
+   `stores/game.ts`. Forzare lo stato da fuori e poi scattare non funziona: al momento dello scatto è
+   già tornato. Si legge il DOM **dentro** la stessa `Runtime.evaluate` che forza lo stato, dopo un
+   `setTimeout(0)`, e allora la riga si vede.
+
+## La **quinta** sessione del 2026-08-23: D038 e D039, il kit e lo strumento per guardarlo
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. Descrive uno stato già
+superato, e si legge come storia.
 
 **Cosa è stato chiuso.**
 
@@ -1277,18 +1393,23 @@ Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: all
 
 ## Il prossimo passo, in concreto
 
-**È [D040](D040-il-recupero-avanza-a-blocchi.md)**, la prima delega della fetta 03, scritta il
-2026-08-23 e **non eseguita**. Il recupero avanza a blocchi, e il tetto smette di misurarsi in ore
-reali. Quante deleghe siano aperte lo dice [stato.md](../stato.md), che le conta.
+**È scrivere la seconda delega della fetta 03: il salvataggio a intervalli.**
+[D040](D040-il-recupero-avanza-a-blocchi.md) è chiusa e in `main`, e quante deleghe siano aperte lo
+dice [stato.md](../stato.md), che le conta.
 
-**Porta tre decisioni aperte, e non si esegue prima di averle prese con l'utente**: dove vive il
-ciclo dei blocchi — dentro `Game.advance` o nel chiamante, con il budget di entrambi i rami scritto
-in delega — quale sia il tetto in giorni di gioco, e quanto sia lungo un blocco. La prima cambia la
-forma di tutto il resto; la terza è l'unico vero compromesso, fra la grana delle soglie e il tempo
-di avvio, e si prende **misurando** invece che stimando.
+**Il gancio esiste già, ed è quello che D040 ha costruito.** Il
+[registro YAGNI](../roadmap-fette.md) dice che salvataggio a intervalli e progresso offline sono
+«lo stesso problema», ed è vero nel meccanismo: tutti e due vogliono che qualcosa succeda ogni N
+tick di gioco sulla **via unica**. Adesso quella via cammina a blocchi, quindi la cadenza ha già
+dove attaccarsi — e non serve un secondo ciclo, che sarebbe il difetto che
+l'[ADR 0049](../adr/0049-il-mondo-avanza-a-blocchi.md) esiste per impedire.
+
+**Sono rimasti fuori da D040 di proposito, e la ragione vale per chi scrive la seconda:** correttezza
+della simulazione e durabilità del dato sono due rischi diversi, e costruirli insieme darebbe un
+verde solo per due cose — senza poter dire quale ha funzionato.
 
 **Non è il blocco A, ed è un errore che questa pagina ha fatto fino al 2026-08-23.** Questa sezione
-mandava a eseguire [D034](D034-le-serie-degli-strumenti.md), che è chiusa; il prompt in fondo
+mandava a eseguire [D034](D034-le-serie-degli-strumenti.md), che era chiusa; il prompt in fondo
 mandava a scrivere «la prima delega della fetta 03» descrivendo però il black market e le aste di
 box — cioè il **blocco A**, che nel [registro delle fette](../roadmap-fette.md) non è una fetta ma
 un segnaposto **oltre la 06**, e quel registro lo dice a chiare lettere: «un blocco non è una
@@ -1862,14 +1983,14 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-**Non c'è piu' niente da fondere**, e il lavoro torna di specie diversa: si scrive una delega invece
-di eseguirne una. Quante deleghe restino lo dice [stato.md](../stato.md), che le conta.
+**Non c'è niente da fondere e niente da eseguire**, e il lavoro torna di specie diversa: si scrive
+una delega. Quante ne restino aperte lo dice [stato.md](../stato.md), che le conta.
 
 ```
-C'e' una delega da eseguire, ed e' D040: il recupero avanza a blocchi, e il
-tetto si misura in tempo di gioco. E' la prima della fetta 03. Prima pero' si
-controlla che il punto di partenza sia quello che questo documento dichiara,
-perche' un handoff si verifica invece di crederci — due comandi:
+Non c'e' una delega da eseguire: si scrive la SECONDA della fetta 03, il
+salvataggio a intervalli. Prima pero' si controlla che il punto di partenza sia
+quello che questo documento dichiara, perche' un handoff si verifica invece di
+crederci — due comandi:
 
   git branch                              # deve restare `main` e basta
   git rev-list --count origin/main..main  # deve fare 0
@@ -1877,46 +1998,37 @@ perche' un handoff si verifica invece di crederci — due comandi:
 Se non torna, siamo in una situazione che questo documento non descrive: vale la
 realta', non il documento.
 
-D040 porta TRE DECISIONI APERTE e non si esegue prima di averle prese con
-l'utente: dove vive il ciclo dei blocchi (dentro Game.advance oppure nel
-chiamante — la delega dichiara il budget di tutti e due i rami e consiglia il
-primo), quale sia il tetto in giorni di gioco, e quanto sia lungo un blocco.
-La terza si prende MISURANDO un recupero al tetto pieno, non stimandola: il
-costo non e' la durata dei blocchi ma il loro numero, perche' income.tick e'
-O(1) in elapsed ed emette una transazione per blocco.
+IL GANCIO C'E' GIA'. D040 ha fatto camminare Game.advance a blocchi di un giorno
+di gioco (ADR 0049), e il registro YAGNI dice che salvataggio a intervalli e
+progresso offline sono «lo stesso problema»: tutti e due vogliono che qualcosa
+succeda ogni N tick sulla VIA UNICA. Non serve un secondo ciclo — sarebbe
+esattamente il difetto che l'ADR 0049 esiste per impedire.
 
-La fetta 03 NON porta un dominio nuovo, quindi non comincia da una scheda di
-dominio compilata: il recupero esiste gia'. Il tetto e' RECOVERY_CAP in
-core/balance/constants.ts; la regola che decide quanti tick si recuperano e'
-stepOf in renderer/runtime/loop.ts, la stessa del tempo reale (ADR 0009); a
-chiamarla al caricamento e' recover() in renderer/stores/game.ts, che fa un
-advance solo. Il salvataggio a intervalli e' la SECONDA delega della fetta, non
-questa: D040 costruisce il gancio, quella lo usa.
+Le tre cose da leggere prima, e sono corte: l'ADR 0049 per capire di chi e' la
+responsabilita' di spezzare il tempo, la voce «Salvataggio automatico a
+intervalli» nel registro YAGNI, e recover() in renderer/stores/game.ts, che e'
+il chiamante da cui il salvataggio prendera' esempio senza copiarlo.
+
+Due trappole gia' pagate, per non ripagarle:
+- non mettere il ciclo nel chiamante. R25 resterebbe verde mentre la sua
+  ragione viene aggirata, ed e' successo abbastanza da avere un ADR
+- il velo del recupero dura tre millisecondi e non si fotografa: si legge il DOM
+  dentro la stessa Runtime.evaluate che forza lo stato, dopo un setTimeout(0)
+
+E tre regole che valgono per QUALUNQUE schermata nuova, da D038: un pulsante si
+scrive `<UiButton>` e non `<button>` (R26), un'area che scorre si scrive
+`<UiScroll>` (R27), e un'icona si aggiunge con una riga in ui/icons.ts piu'
+`npx vitest run tests/rules/icons -u` (R28). Sono rosse prima che qualcuno se ne
+accorga a occhio, quindi non c'e' niente da ricordare.
 
 Il blocco A (black market, aste di box) NON e' la fetta 03: e' un segnaposto
-oltre la fetta 06. Porta gli oggetti, cioe' il primo boundedList che entra
-davvero nel salvataggio, ed e' quello il grilletto dell'ADR 0010 — non questa
-fetta. Questo documento le ha confuse fino al 2026-08-23, ed e' il motivo per
-cui questo paragrafo esiste.
-
-Due cose che D036 ha messo a disposizione, e che una delega nuova puo' dare per
-scontate: ogni azione che si paga passa da PaymentDialog, e uno strumento
-dichiara con `bearer` se chiede una prova prima di pagare. Un dominio nuovo non
-disegna piu' nessun pulsante per strumento — R24 glielo impedisce — e se porta
-un pool nuovo, quel pool dichiara il proprio `bearer` e basta.
-
-E tre che ha messo D038, che valgono per QUALUNQUE schermata nuova: un pulsante
-si scrive `<UiButton>` e non `<button>` (R26), un'area che scorre si scrive
-`<UiScroll>` (R27), e un'icona si aggiunge con una riga in ui/icons.ts piu'
-`npx vitest run tests/rules/icons -u` (R28). Le tre regole sono rosse prima che
-qualcuno se ne accorga a occhio, quindi non c'e' niente da ricordare.
-
-La scheda di dominio non serve a questa fetta. Serve al prossimo dominio nuovo,
-che e' del blocco A: si compila PRIMA che il dominio esista, e la sua forma va
-rivista alla quarta compilata, che sara' quella.
+oltre la fetta 06. Questo documento le ha confuse fino al 2026-08-23, ed e' il
+motivo per cui questo paragrafo esiste.
 
 Per guardare la finestra vera c'e' scripts/cdp.mjs, da D039: non va piu'
 riscritto a ogni sessione, e come si usa lo dice il commento in testa al file.
+`npm ci` gira senza flag — se un giorno ne chiede uno, qualcuno ha alzato vite
+senza alzare electron-vite (ADR 0048).
 ```
 
 I prompt delle deleghe già consegnate stanno nel `git log` di questo file: si recuperano da lì
@@ -1960,13 +2072,16 @@ passo solo — stanno misurati sotto la riga della fetta nel [registro](../roadm
 usciti rileggendo il kernel **dopo** aver riscritto la visione. Dove sta oggi quel codice è scritto
 in _Il prossimo passo_, qui sopra.
 
-**La prima delega è scritta**, ed è [D040](D040-il-recupero-avanza-a-blocchi.md). Una cosa vale la
-pena saperla prima di aprirla, perché non è nel registro: il singolo `advance` ha **già** costretto
-un compenso nel codice: il `tick` del reddito non chiede al Ledger e incassa il rifiuto, ma calcola
-prima quanto ci sta — e il suo commento dice che la ragione è «il recupero, che è un solo `advance`
-con tutti i tick arretrati». Con i blocchi quella pressione si abbassa. La delega toglie il motivo
-che rendeva indispensabile quel compenso invece di stratificarci sopra, ed è la differenza fra una
-toppa e una modifica al centro.
+**La prima delega è chiusa**, ed è [D040](D040-il-recupero-avanza-a-blocchi.md): due dei tre
+problemi non ci sono più, e il terzo è cambiato di natura invece di essere risolto — con il tetto a
+un anno di gioco a mordere è il **tetto**, non più il caveau, che è ciò che un tetto deve fare.
+
+**Una cosa che il registro non dice, e che spiega perché non era una toppa:** il singolo `advance`
+aveva **già** costretto un compenso nel codice. Il `tick` del reddito non chiede al Ledger e incassa
+il rifiuto — calcola prima quanto ci sta — e il suo commento dice che la ragione è «il recupero, che
+è un solo `advance` con tutti i tick arretrati». Con i blocchi quella pressione si è abbassata, e il
+ramo **resta** perché serve al tempo reale: D040 ha tolto il motivo che lo rendeva indispensabile,
+non il meccanismo.
 
 **Il salvataggio a intervalli è la seconda delega della fetta.** Il registro dice che è «lo stesso
 problema» del progresso offline, ed è vero nel meccanismo — tutti e due vogliono che qualcosa
