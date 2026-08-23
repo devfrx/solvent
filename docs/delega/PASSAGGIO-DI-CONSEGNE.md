@@ -45,7 +45,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23, chiudendo la quinta sessione, sono stati fusi i due rami incatenati che aspettavano: `d038-cio-che-si-preme-e-cio-che-scorre` discendeva da `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, quindi è bastato un `--ff-only` sul secondo per portarli tutti e due. `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sui rami, e i due rami sono stati cancellati con `git branch -d` — quello che si rifiuta se resta lavoro non fuso: **nessuno dei due si è rifiutato** |
 | `origin/main`            | **si verifica, non si dichiara.** Un allineamento scritto qui lo invalida il primo commit che arriva dopo — compreso quello che lo scrive — e l'elenco di cosa si è spinto invecchia a ogni delega consegnata. Lo dice `git rev-list --count origin/main..main`: se non fa `0`, c'è del lavoro solo su questa macchina. Quando si spinge, i gate girano prima **su `main` fuso** e non solo sui rami                                                                                                                                                                |
 | Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Prossimo passo           | **la fetta 03 — il progresso offline**, e non c'è più niente da fondere prima. Non porta un dominio nuovo: il recupero esiste già, e la fetta ridiscute il suo tetto e la sua granularità — vedi _E dopo, la fetta 03_                                                                                                                                                                                                                                                                                                                                              |
+| Prossimo passo           | **eseguire [D040](D040-il-recupero-avanza-a-blocchi.md)**, la prima della fetta 03: il recupero avanza a blocchi e il tetto si misura in tempo di gioco. È scritta, non eseguita, e porta **tre decisioni aperte** che si prendono con l'utente prima di toccare il codice — vedi _E dopo, la fetta 03_                                                                                                                                                                                                                                                             |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -1277,9 +1277,15 @@ Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: all
 
 ## Il prossimo passo, in concreto
 
-**È la fetta 03 — il progresso offline**, e non c'è una delega da eseguire: va scritta. Quante ne
-siano chiuse lo dice [stato.md](../stato.md); aperte non ce n'è, ed è la ragione per cui il lavoro
-cambia di specie.
+**È [D040](D040-il-recupero-avanza-a-blocchi.md)**, la prima delega della fetta 03, scritta il
+2026-08-23 e **non eseguita**. Il recupero avanza a blocchi, e il tetto smette di misurarsi in ore
+reali. Quante deleghe siano aperte lo dice [stato.md](../stato.md), che le conta.
+
+**Porta tre decisioni aperte, e non si esegue prima di averle prese con l'utente**: dove vive il
+ciclo dei blocchi — dentro `Game.advance` o nel chiamante, con il budget di entrambi i rami scritto
+in delega — quale sia il tetto in giorni di gioco, e quanto sia lungo un blocco. La prima cambia la
+forma di tutto il resto; la terza è l'unico vero compromesso, fra la grana delle soglie e il tempo
+di avvio, e si prende **misurando** invece che stimando.
 
 **Non è il blocco A, ed è un errore che questa pagina ha fatto fino al 2026-08-23.** Questa sezione
 mandava a eseguire [D034](D034-le-serie-degli-strumenti.md), che è chiusa; il prompt in fondo
@@ -1860,10 +1866,10 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 di eseguirne una. Quante deleghe restino lo dice [stato.md](../stato.md), che le conta.
 
 ```
-Non c'e' una delega da eseguire: si scrive la prima della fetta 03, il progresso
-offline. Prima pero' si controlla che il punto di partenza sia quello che questo
-documento dichiara, perche' un handoff si verifica invece di crederci — due
-comandi:
+C'e' una delega da eseguire, ed e' D040: il recupero avanza a blocchi, e il
+tetto si misura in tempo di gioco. E' la prima della fetta 03. Prima pero' si
+controlla che il punto di partenza sia quello che questo documento dichiara,
+perche' un handoff si verifica invece di crederci — due comandi:
 
   git branch                              # deve restare `main` e basta
   git rev-list --count origin/main..main  # deve fare 0
@@ -1871,14 +1877,21 @@ comandi:
 Se non torna, siamo in una situazione che questo documento non descrive: vale la
 realta', non il documento.
 
+D040 porta TRE DECISIONI APERTE e non si esegue prima di averle prese con
+l'utente: dove vive il ciclo dei blocchi (dentro Game.advance oppure nel
+chiamante — la delega dichiara il budget di tutti e due i rami e consiglia il
+primo), quale sia il tetto in giorni di gioco, e quanto sia lungo un blocco.
+La terza si prende MISURANDO un recupero al tetto pieno, non stimandola: il
+costo non e' la durata dei blocchi ma il loro numero, perche' income.tick e'
+O(1) in elapsed ed emette una transazione per blocco.
+
 La fetta 03 NON porta un dominio nuovo, quindi non comincia da una scheda di
 dominio compilata: il recupero esiste gia'. Il tetto e' RECOVERY_CAP in
 core/balance/constants.ts; la regola che decide quanti tick si recuperano e'
 stepOf in renderer/runtime/loop.ts, la stessa del tempo reale (ADR 0009); a
 chiamarla al caricamento e' recover() in renderer/stores/game.ts, che fa un
-advance solo. I problemi da cui partire stanno gia' misurati sotto la riga della
-fetta in roadmap-fette.md, e nel registro YAGNI dello stesso file hanno questa
-fetta per grilletto il salvataggio a intervalli e i tick che il tetto scarta.
+advance solo. Il salvataggio a intervalli e' la SECONDA delega della fetta, non
+questa: D040 costruisce il gancio, quella lo usa.
 
 Il blocco A (black market, aste di box) NON e' la fetta 03: e' un segnaposto
 oltre la fetta 06. Porta gli oggetti, cioe' il primo boundedList che entra
@@ -1946,6 +1959,20 @@ stesso, le ore reali contro un giorno di gioco che dura due secondi, e il recupe
 passo solo — stanno misurati sotto la riga della fetta nel [registro](../roadmap-fette.md), e sono
 usciti rileggendo il kernel **dopo** aver riscritto la visione. Dove sta oggi quel codice è scritto
 in _Il prossimo passo_, qui sopra.
+
+**La prima delega è scritta**, ed è [D040](D040-il-recupero-avanza-a-blocchi.md). Una cosa vale la
+pena saperla prima di aprirla, perché non è nel registro: il singolo `advance` ha **già** costretto
+un compenso nel codice: il `tick` del reddito non chiede al Ledger e incassa il rifiuto, ma calcola
+prima quanto ci sta — e il suo commento dice che la ragione è «il recupero, che è un solo `advance`
+con tutti i tick arretrati». Con i blocchi quella pressione si abbassa. La delega toglie il motivo
+che rendeva indispensabile quel compenso invece di stratificarci sopra, ed è la differenza fra una
+toppa e una modifica al centro.
+
+**Il salvataggio a intervalli è la seconda delega della fetta.** Il registro dice che è «lo stesso
+problema» del progresso offline, ed è vero nel meccanismo — tutti e due vogliono che qualcosa
+succeda ogni N tick sulla via unica — ma sono due rischi diversi, la correttezza della simulazione e
+la durabilità del dato. Costruirli insieme darebbe un verde solo per due cose, e non si saprebbe
+quale ha funzionato.
 
 **Non porta un dominio nuovo, quindi non comincia da una scheda compilata.** La scheda resta il modo
 in cui comincia un **dominio**, ed è la differenza che [D018](D018-la-scheda-di-dominio.md) è
