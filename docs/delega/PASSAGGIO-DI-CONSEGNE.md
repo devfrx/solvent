@@ -30,22 +30,22 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                                                                                                                                                       |
-| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                                                                                                                                                              |
-| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                                                                                                                                                              |
-| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                                                                                                                                                   |
-| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                                                                                                                                                             |
-| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                                                                                                                                                                                                                 |
-| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                                                                                                                                                            |
-| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                                                                                                                                                              |
-| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                                                                                                                                                      |
-| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                                                                                                                                               |
-| `main`                   | **di nuovo l'unico ramo di lavoro fuso.** Il 2026-08-23 i tre rami che aspettavano sono stati fusi — `guscio-condiviso-dei-grafici` conteneva già per intero `d034-le-serie-degli-strumenti`, quindi il primo è stato un `--ff-only` e il secondo un commit di soli documenti. `verify` e `verify:release` verdi **su `main` fuso**, poi i tre rami cancellati con `git branch -d`, che si rifiuta se resta lavoro non fuso: nessuno si è rifiutato |
-| `origin/main`            | **indietro.** La fusione del 2026-08-23 non è stata spinta: spingere è una di quelle cose che si chiedono, e nessuno l'ha chiesto. Quanto indietro non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                                              |
-| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                            |
-| Prossimo passo           | **scrivere una delega invece di eseguirne una**: [D036](D036-il-pagamento-e-un-flusso-solo.md) e' chiusa, e la fetta 03 comincia da una scheda compilata — vedi _E dopo, la fetta 03_                                                                                                                                                                                                                                                               |
+|                          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                                                                                                                                                                                                                        |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                                                                                                                                                                                                                        |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                                                                                                                                                                                                             |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                                                                                                                                                                                                                                                                           |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                                                                                                                                                                                                                      |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                                                                                                                                                                                                         |
+| `main`                   | **non ha D036.** Il 2026-08-23 i tre rami che aspettavano sono stati fusi — `guscio-condiviso-dei-grafici` conteneva già per intero `d034-le-serie-degli-strumenti`, quindi il primo è stato un `--ff-only` e il secondo un commit di soli documenti — e su quel `main` fuso `verify` e `verify:release` sono verdi. Poi e' nato **un ramo nuovo**, `d036-il-pagamento-e-un-flusso-solo`, avanti di cinque commit e **non fuso**: `git branch` lo elenca, e finché è lì `main` non ha il flusso del pagamento |
+| `origin/main`            | **indietro.** La fusione del 2026-08-23 non è stata spinta: spingere è una di quelle cose che si chiedono, e nessuno l'ha chiesto. Quanto indietro non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                                                                                                        |
+| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Prossimo passo           | **fondere `d036-il-pagamento-e-un-flusso-solo`**, che si fonde con un `--ff-only`. Poi il lavoro cambia specie: si scrive una delega invece di eseguirne una, e la fetta 03 comincia da una scheda compilata — vedi _E dopo, la fetta 03_                                                                                                                                                                                                                                                                     |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -133,9 +133,11 @@ Verificato con i comandi, non ricordato.
   nuovo è stato visto rosso di proposito, e per R24 e R22 il rosso è stato costruito **rimettendo il
   difetto**: l'import di `PaymentOption` e il ciclo sul listino in `VaultPanel`, un `<dialog>` in
   `AtmPanel`. La guardia dello store è stata disattivata apposta, e tre test sono diventati rossi.
-- **`main` è fuso e non spinto.** I tre rami sono stati cancellati con `git branch -d`, che si
-  rifiuta se resta lavoro non fuso: nessuno si è rifiutato. Spingere è una di quelle cose che si
-  chiedono, e nessuno l'ha chiesto.
+- **`main` non ha D036, e non è spinto.** Il lavoro di questa delega sta su
+  `d036-il-pagamento-e-un-flusso-solo`, avanti di cinque commit, che si fonde con un `--ff-only`. I
+  **tre** rami di prima sono stati fusi e cancellati con `git branch -d`, che si rifiuta se resta
+  lavoro non fuso: nessuno si è rifiutato. Fondere e spingere sono due di quelle cose che si
+  chiedono, e nessuno le ha chieste.
 - **Niente fuori dai commit**, nessun residuo di debug: nessun `console.log`, nessun `TODO`.
 - **La finestra vera è stata guardata**, e cosa ha risposto sta in fondo alla _Definizione di fatto_
   di [D036](D036-il-pagamento-e-un-flusso-solo.md) invece che qui.
@@ -148,9 +150,12 @@ Censito, non nascosto.
    Era aperta da cinque sessioni, e questa delega la peggiorava aggiungendo R24: adesso arriva a
    R24, cinque righe.
 2. **Nessuna misura della catena a macchina scarica.** Aperta da cinque sessioni.
-3. **Gli script CDP vivono ancora nello scratchpad**, ed è la quinta riscrittura. Stavolta però il
-   punto 5 qui sopra annota la riga che apre la porta, che era la parte davvero costosa da
-   riscoprire. Metterli in `scripts/` resta una decisione che nessuno ha preso.
+3. **Gli script CDP non sopravvivono a questa sessione**, ed è la quinta riscrittura. Vivono nello
+   scratchpad, che è **della sessione**: chi arriva dopo non li trova, e li riscrive da zero come hanno
+   fatto le quattro sessioni prima. Stavolta però il punto 5 qui sopra annota la riga che apre la
+   porta di ispezione, che era la parte davvero costosa da riscoprire — il resto sono venti righe di
+   `WebSocket` e `Runtime.evaluate`. Metterli in `scripts/` resta una decisione che nessuno ha preso,
+   e adesso si sa quanto costa non prenderla: una riscrittura a sessione, cinque volte finora.
 4. **[ADR 0019](../adr/0019-transazioni-atomiche-nel-ledger.md) e
    [ADR 0020](../adr/0020-partita-doppia.md) illustrano ancora un prelievo che costa 2,50 €**,
    mentre dopo D032 ne costa 10,00. Non corretto di proposito: gli ADR sono record datati.
@@ -1603,17 +1608,31 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-**Non c'è più una delega da eseguire**, e quante ne restino lo dice [stato.md](../stato.md),
-che le conta. Il lavoro che viene adesso è di specie diversa: si scrive una delega.
+**Un ramo aspetta**, e viene prima di qualunque cosa nuova. Dopo di lui non c'è più una delega da
+eseguire — quante ne restino lo dice [stato.md](../stato.md), che le conta — e il lavoro cambia
+specie: si scrive una delega invece di eseguirne una.
 
 ```
-Non c'e' una delega da eseguire: si scrive la prima della fetta 03.
+Un ramo di lavoro aspetta, e non e' fuso.
 
-  git rev-list --count origin/main..main   # non e' zero: main non e' spinto
+  git branch                              # ne devono comparire due
+  git rev-list --count main..d036-il-pagamento-e-un-flusso-solo   # deve dire 5
+  git rev-list --count origin/main..main  # non e' zero: main non e' spinto
 
-Il materiale c'e' tutto e non va inventato — vedi "E dopo, la fetta 03" in
-PASSAGGIO-DI-CONSEGNE. Il blocco A (black market, aste di box) e' il primo che
-porta gli oggetti, cioe' il primo boundedList che entra nel salvataggio.
+d036-il-pagamento-e-un-flusso-solo porta D036 chiusa: il flusso unico del
+pagamento, l'affordance `bearer` dei pool, e la carta derivata dal seme.
+verify e verify:release verdi sul ramo — 83 file, 1.028 test — e la finestra
+vera e' stata guardata: cosa ha risposto sta in fondo alla Definizione di fatto
+della delega. Si fonde con un --ff-only, perche' parte da main fuso.
+
+Gira verify su main FUSO e non solo sul ramo, che e' la procedura che questa
+pagina prescrive prima di spingere. Poi cancella il ramo con git branch -d, che
+si rifiuta se resta lavoro non fuso.
+
+DOPO, il lavoro cambia specie: si scrive la prima delega della fetta 03. Il
+materiale c'e' tutto e non va inventato — vedi "E dopo, la fetta 03". Il blocco A
+(black market, aste di box) e' il primo che porta gli oggetti, cioe' il primo
+boundedList che entra davvero nel salvataggio.
 
 Due cose che D036 ha appena messo a disposizione, e che una delega nuova puo'
 dare per scontate: ogni azione che si paga passa da PaymentDialog, e uno
@@ -1621,8 +1640,9 @@ strumento dichiara con `bearer` se chiede una prova prima di pagare. Un dominio
 nuovo non disegna piu' nessun pulsante per strumento — R24 glielo impedisce — e
 se porta un pool nuovo, quel pool dichiara il proprio `bearer` e basta.
 
-Prima di scriverla: la scheda di dominio si compila PRIMA che il dominio esista,
-e la sua forma va rivista alla quarta compilata — la prossima e' quella.
+Prima di scrivere quella delega: la scheda di dominio si compila PRIMA che il
+dominio esista, e la sua forma va rivista alla quarta compilata — la prossima
+e' quella.
 ```
 
 I prompt delle deleghe già consegnate stanno nel `git log` di questo file: si recuperano da lì
