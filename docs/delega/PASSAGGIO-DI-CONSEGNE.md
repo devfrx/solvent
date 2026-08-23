@@ -1720,14 +1720,28 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-**Non c'è più una delega da eseguire**, e quante ne restino lo dice [stato.md](../stato.md), che le
-conta. Il lavoro che viene adesso è di specie diversa: si scrive una delega invece di eseguirne una.
+**Prima c'è un ramo da fondere**, poi il lavoro torna di specie diversa: si scrive una delega
+invece di eseguirne una. Quante deleghe restino lo dice [stato.md](../stato.md), che le conta.
 
 ```
-Non c'e' una delega da eseguire: si scrive la prima della fetta 03.
+Prima di tutto: D037 e' chiusa e verde, e aspetta su un ramo suo.
 
-  git branch                              # ne deve comparire uno solo
-  git rev-list --count origin/main..main  # deve dire 0
+  git branch                              # ce n'e' DUE: main e d037-...
+  git rev-list --count origin/main..main  # main non ha D037
+
+Fonderla e spingerla, con il metodo che questo progetto usa e che non e' una
+formalita': si gira `verify` su `main` FUSO, non solo sul ramo.
+
+  git checkout main
+  git merge --ff-only d037-il-tempo-che-avanza-e-un-operazione-del-gioco
+  npm run verify && npm run verify:release   # su main fuso
+  git push                                   # visibile agli altri: si chiede prima
+  git branch -d d037-il-tempo-che-avanza-e-un-operazione-del-gioco
+
+`git branch -d` si rifiuta di cancellare un ramo con lavoro non fuso: se non si
+rifiuta, e' la prova che non resta niente di unico da nessuna parte.
+
+Fatto questo, non c'e' una delega da eseguire: si scrive la prima della fetta 03.
 
 Il materiale c'e' tutto e non va inventato — vedi "E dopo, la fetta 03" qui in
 PASSAGGIO-DI-CONSEGNE. Il blocco A (black market, aste di box) e' il primo che
