@@ -45,7 +45,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `main`                   | **di nuovo l'unico ramo di lavoro fuso.** Il 2026-08-23 i tre rami che aspettavano sono stati fusi — `guscio-condiviso-dei-grafici` conteneva già per intero `d034-le-serie-degli-strumenti`, quindi il primo è stato un `--ff-only` e il secondo un commit di soli documenti. `verify` e `verify:release` verdi **su `main` fuso**, poi i tre rami cancellati con `git branch -d`, che si rifiuta se resta lavoro non fuso: nessuno si è rifiutato |
 | `origin/main`            | **indietro.** La fusione del 2026-08-23 non è stata spinta: spingere è una di quelle cose che si chiedono, e nessuno l'ha chiesto. Quanto indietro non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                                              |
 | Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                            |
-| Prossimo passo           | **eseguire [D036](D036-il-pagamento-e-un-flusso-solo.md)**, scritta il 2026-08-23 e senza decisioni aperte: il pagamento passa da un flusso solo, e uno strumento non al portatore chiede una prova. Dopo di lei la fetta 03, che comincia da una scheda compilata                                                                                                                                                                                  |
+| Prossimo passo           | **scrivere una delega invece di eseguirne una**: [D036](D036-il-pagamento-e-un-flusso-solo.md) e' chiusa, e la fetta 03 comincia da una scheda compilata — vedi _E dopo, la fetta 03_                                                                                                                                                                                                                                                               |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -66,6 +66,118 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 >
 > Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
 > agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
+
+## La **terza** sessione del 2026-08-23: i rami fusi, e D036 scritta ed eseguita
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
+recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
+
+**Cosa è stato chiuso.**
+
+| Delega                                        | Cos'era                                                                   |
+| --------------------------------------------- | ------------------------------------------------------------------------- |
+| [D036](D036-il-pagamento-e-un-flusso-solo.md) | «con cosa pago» si chiedeva in due posti, e la carta aveva dei dati finti |
+
+Più i **tre rami** che aspettavano, fusi. D036 è stata scritta **e** eseguita nella stessa sessione,
+il che è insolito per questo progetto: la richiesta è arrivata dall'utente come feature, ed è
+risultata essere un debito già dichiarato — vedi il punto 1.
+
+### Le sei cose che chi arriva adesso deve sapere
+
+**1. La richiesta dell'utente coincideva con una conseguenza scritta e mai costruita.**
+L'[ADR 0027](../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md) elencava fra le
+proprie conseguenze «la UI acquisisce un componente che non aveva: la scelta dello strumento, con il
+prezzo di ognuno», e per due deleghe al suo posto ogni pannello ha disegnato un pulsante per
+strumento. Vale come metodo: **prima di trattare una richiesta come feature nuova, si cerca se un
+ADR l'ha già promessa** — il controllo costa una lettura, e il guadagno è che la cosa nasce dove era
+già stata decisa invece che accanto.
+
+**2. I rami da fondere erano due, non tre.** `guscio-condiviso-dei-grafici` conteneva già per intero
+`d034-le-serie-degli-strumenti` — `git merge-base --is-ancestor` lo dice in un comando — quindi il
+primo è stato un `--ff-only` e il secondo un commit di soli documenti. Delle due sessioni parallele
+che il passaggio di consegne dichiarava, quella che rifaceva la scheda del bancomat **non ha
+lasciato un ramo**: non c'era niente da recuperare.
+
+**3. Il numero di carta che il gioco stampava non era un numero di carta.** `4913 2201 0067 5540`
+non passa il controllo di Luhn: la somma fa **53**. Adesso la carta è una funzione del seme e la
+cifra di controllo è calcolata — quella della partita usata per guardare è `4693 2605 9004 2390`,
+somma 70. È la prima cosa del gioco che distingua una partita da un'altra a schermo, ed era il
+grilletto scritto dentro `BankCard3d.vue` da D033.
+
+**4. Due difetti sono stati trovati guardando, e nessun test poteva vederli.** Il primo: nella
+finestra del pagamento la carta arriva senza i tre fatti del bancomat — sono suoi — e il titolo
+«Cosa fa questo strumento» restava stampato sopra un elenco **vuoto**. Il secondo: il pallino della
+scelta prendeva il blu di sistema, ed era l'unico blu dell'applicazione. Nessuno dei due è una
+regola che si possa scrivere; tutti e due si vedono in due secondi aprendo la finestra.
+
+**5. La porta di ispezione si apre, e finora nessuno aveva scritto come.** Quattro sessioni hanno
+riscritto gli script CDP senza mai annotare la riga che li rende possibili:
+
+```bash
+npx electron-vite dev -- --remote-debugging-port=9222
+```
+
+Gli argomenti dopo `--` arrivano a Electron. Poi `http://localhost:9222/json/list` elenca i
+bersagli, e si filtra su `localhost` e non sul numero di porta — 5173 può essere occupata e Vite
+passa alla 5174 in silenzio.
+
+**6. Il peso del renderer è cresciuto di quattro chilobyte e mezzo**, e i numeri con la data stanno
+in [qualita.md](../qualita.md). Non c'è niente da cercare altrove: è tutto codice nostro, e
+`apexcharts` non è stata toccata.
+
+### Cosa c'è nell'albero di lavoro alla chiusura
+
+Verificato con i comandi, non ricordato.
+
+- **`npm run verify` e `npm run verify:release` verdi**, e i test sono 1.028 su 83 file. Ogni test
+  nuovo è stato visto rosso di proposito, e per R24 e R22 il rosso è stato costruito **rimettendo il
+  difetto**: l'import di `PaymentOption` e il ciclo sul listino in `VaultPanel`, un `<dialog>` in
+  `AtmPanel`. La guardia dello store è stata disattivata apposta, e tre test sono diventati rossi.
+- **`main` è fuso e non spinto.** I tre rami sono stati cancellati con `git branch -d`, che si
+  rifiuta se resta lavoro non fuso: nessuno si è rifiutato. Spingere è una di quelle cose che si
+  chiedono, e nessuno l'ha chiesto.
+- **Niente fuori dai commit**, nessun residuo di debug: nessun `console.log`, nessun `TODO`.
+- **La finestra vera è stata guardata**, e cosa ha risposto sta in fondo alla _Definizione di fatto_
+  di [D036](D036-il-pagamento-e-un-flusso-solo.md) invece che qui.
+
+### Cosa questa sessione ha lasciato indietro
+
+Censito, non nascosto.
+
+1. ~~La tabella delle regole in [architettura.md](../architettura.md) si ferma a R19~~ — **chiusa**.
+   Era aperta da cinque sessioni, e questa delega la peggiorava aggiungendo R24: adesso arriva a
+   R24, cinque righe.
+2. **Nessuna misura della catena a macchina scarica.** Aperta da cinque sessioni.
+3. **Gli script CDP vivono ancora nello scratchpad**, ed è la quinta riscrittura. Stavolta però il
+   punto 5 qui sopra annota la riga che apre la porta, che era la parte davvero costosa da
+   riscoprire. Metterli in `scripts/` resta una decisione che nessuno ha preso.
+4. **[ADR 0019](../adr/0019-transazioni-atomiche-nel-ledger.md) e
+   [ADR 0020](../adr/0020-partita-doppia.md) illustrano ancora un prelievo che costa 2,50 €**,
+   mentre dopo D032 ne costa 10,00. Non corretto di proposito: gli ADR sono record datati.
+5. **`components/atm/BankCard3d.vue` ha due lettori**, e il secondo è `components/payment/`. Il
+   grilletto per spostarla è il **terzo**, e sta nella decisione 6 di D036.
+
+### Due vicoli ciechi, per non ripercorrerli
+
+1. **`git checkout -- <file>` su un lavoro non committato lo cancella, e non c'è ripiego.** È
+   successo qui, per rimettere a posto una guardia disattivata di proposito: il file non era
+   committato, e mezz'ora di modifiche allo store è tornata a `HEAD`. Il modo giusto è **copiare il
+   file prima**, oppure committare prima di rompere qualcosa apposta. Il costo è stato riscrivere le
+   stesse nove modifiche, e la lezione non è «fare attenzione»: è che rompere una cosa di proposito
+   — che questo progetto chiede a ogni test — va fatto su un albero **pulito**, così il ripristino è
+   gratis.
+
+2. **Modificare un `.vue` mentre una finestra modale è aperta manda in errore il ricaricamento a
+   caldo di Vite.** Vue prova a smontare un albero che non c'è più e lancia
+   `Cannot read properties of null`, e la pagina resta rotta finché non si riavvia. Non è un difetto
+   del componente — verificato riavviando e rifacendo lo stesso giro, che è passato intero. Per
+   guardare dopo una modifica conviene chiudere la finestra dal suo pulsante, o riavviare.
+
+**E una trappola dello strumento, la stessa di sempre con una faccia nuova:** i caratteri di escape
+scritti dentro un documento intermedio arrivano **dimezzati**, e una sequenza come quella del
+confine di parola diventa un carattere di controllo invisibile dentro un `/regex/`. Il rilevatore
+sembrava scritto bene e non trovava niente. Si vede solo con `od -c`, e si evita costruendo la
+stringa dal codice del carattere oppure scrivendo il file con uno strumento che non interpreta.
 
 ## La sessione del 2026-08-23: D034 eseguita, e due rami che aspettano
 
@@ -1491,33 +1603,26 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-**C'è di nuovo una delega da eseguire**, ed è [D036](D036-il-pagamento-e-un-flusso-solo.md).
-Quante ne restino aperte lo dice [stato.md](../stato.md), che le conta.
+**Non c'è più una delega da eseguire**, e quante ne restino lo dice [stato.md](../stato.md),
+che le conta. Il lavoro che viene adesso è di specie diversa: si scrive una delega.
 
 ```
-Esegui D036 — il pagamento e' un flusso solo.
+Non c'e' una delega da eseguire: si scrive la prima della fetta 03.
 
-  git rev-list --count origin/main..main   # non e' zero: la fusione non e' stata spinta
+  git rev-list --count origin/main..main   # non e' zero: main non e' spinto
 
-Non ha decisioni aperte: le sei prese scrivendola stanno in fondo alla delega e
-nella tabella Decisioni contestabili di PASSAGGIO-DI-CONSEGNE. Non vanno
-riaperte di iniziativa propria.
+Il materiale c'e' tutto e non va inventato — vedi "E dopo, la fetta 03" in
+PASSAGGIO-DI-CONSEGNE. Il blocco A (black market, aste di box) e' il primo che
+porta gli oggetti, cioe' il primo boundedList che entra nel salvataggio.
 
-Porta l'ADR 0042 da Proposta ad Accettata, e il commit che lo fa e' quello che
-introduce R24 con il suo rosso. R22 si allarga invece di essere affiancata da una
-regola nuova: due custodi in un test solo.
+Due cose che D036 ha appena messo a disposizione, e che una delega nuova puo'
+dare per scontate: ogni azione che si paga passa da PaymentDialog, e uno
+strumento dichiara con `bearer` se chiede una prova prima di pagare. Un dominio
+nuovo non disegna piu' nessun pulsante per strumento — R24 glielo impedisce — e
+se porta un pool nuovo, quel pool dichiara il proprio `bearer` e basta.
 
-Tre cose che la delega dice e che vale la pena sapere prima di aprirla:
-- la carta e' una funzione del SEME, non di uno stream dell'Rng: un'estrazione
-  avanza un cursore che finisce nel salvataggio, e cardOf chiamata due volte
-  darebbe due carte;
-- il codice si verifica nello STORE, non nel componente e non nel dominio: nel
-  dominio non si puo' (R19), nel componente sarebbe una speranza;
-- la carta va riletta in mirror(), o la partita nuova porta quella buttata via.
-
-Prima di chiudere: verify e verify:release verdi, ogni test nuovo visto rosso di
-proposito, le correzioni rispetto a com'era scritta in fondo alla delega, e
-stato.md rigenerato con npx vitest run tests/rules/project-state -u.
+Prima di scriverla: la scheda di dominio si compila PRIMA che il dominio esista,
+e la sua forma va rivista alla quarta compilata — la prossima e' quella.
 ```
 
 I prompt delle deleghe già consegnate stanno nel `git log` di questo file: si recuperano da lì

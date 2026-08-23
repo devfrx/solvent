@@ -23,9 +23,9 @@ dall'intestazione del suo ADR, ed è da lì che questo elenco arriva.
 
 ## Deleghe
 
-**36** deleghe: 35 `Chiusa`, 0 `In corso`, 1 `Aperta`.
+**36** deleghe: 36 `Chiusa`, 0 `In corso`, 0 `Aperta`.
 
-- `Aperta`: D036
+- `Aperta`: _nessuno_
 - `In corso`: _nessuno_
 
 L'ordine in cui si eseguono non è questo elenco: è il grafo in

@@ -260,7 +260,7 @@ configurato dopo che c'erano già 156 file.
 | [D033](D033-il-bancomat-e-una-pagina.md)                    | Il bancomat è una pagina, e il cruscotto è un'altra                                   | 700 codice + 317 test         | **Chiusa** |
 | [D034](D034-le-serie-degli-strumenti.md)                    | Le serie degli strumenti: una candela non si campiona, si accumula                    | 244 codice + 160 test         | **Chiusa** |
 | [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) | Ciò che non si dichiara lo sceglie un altro — le correzioni dell'audit del 2026-08-22 | 105 codice + 172 test         | **Chiusa** |
-| [D036](D036-il-pagamento-e-un-flusso-solo.md)               | Il pagamento è un flusso solo, e il permesso è dello strumento                        | ~260 codice + ~200 test       | **Aperta** |
+| [D036](D036-il-pagamento-e-un-flusso-solo.md)               | Il pagamento è un flusso solo, e il permesso è dello strumento                        | 335 codice + 270 test         | **Chiusa** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede

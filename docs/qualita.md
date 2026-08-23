@@ -196,6 +196,7 @@ confrontabili, ed è la ragione per cui questa riga ripete come è stata presa.
 | ------------------- | ----------- | -------- |
 | a D035, il 22       | 1.198,01 kB | 20,85 kB |
 | a D034, il 23       | 1.202,15 kB | 21,78 kB |
+| a D036, il 23       | 1.206,70 kB | 22,84 kB |
 
 **Quattro chilobyte di JS e uno di CSS**, ed è tutto codice nostro: con `apexcharts` isolata nel
 suo chunk la libreria pesa **931,04 kB**, identica al chilobyte, e tutto il resto passa da 266,22 a

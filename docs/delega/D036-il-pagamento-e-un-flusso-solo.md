@@ -1,7 +1,9 @@
 # D036 — Il pagamento è un flusso solo
 
-- **Stato:** **Aperta** — scritta il 2026-08-23, ramo `d036-il-pagamento-e-un-flusso-solo`, che
-  parte da `main` fuso (D034 e il guscio dei grafici compresi)
+- **Stato:** **Chiusa** — commit `f72bf9c`, ramo `d036-il-pagamento-e-un-flusso-solo`, che parte da
+  `main` fuso (D034 e il guscio dei grafici compresi). Scritta ed eseguita il 2026-08-23. Le
+  correzioni rispetto a com'era scritta sono in fondo, e due vengono dall'aver guardato la finestra
+  vera invece del codice
 - **Dipende da:** [D019](D019-il-pagamento.md), che ha portato il listino e il vocabolario;
   [D023](D023-il-design-system.md), che ha portato il kit e il grilletto dei due disegni;
   [D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md), che ha portato il livello superiore e R22
@@ -15,9 +17,11 @@
   [0030](../adr/0030-il-telaio-e-una-forma-non-un-contenitore.md) (un pezzo del kit è una forma),
   [0028](../adr/0028-il-kit-ui-non-sa-che-gioco-e.md) (R14 — il kit non conosce parole)
 - **Regole:** R04, R05, R12, R14, R17, R18, R21, **R22 allargata**, **R24 nuova**, INV-07, INV-21
-- **Budget:** ~260 righe di codice e ~200 di test. La metà del codice sta in due file —
-  `PaymentDialog.vue` e `UiDialog.vue` — e il resto è **saldo netto**: tre file crescono, tre
-  calano. `card.ts` è la sola aggiunta a `core/`, ed è sotto le cinquanta righe
+- **Budget:** dichiarato ~260 righe di codice e ~200 di test; **misurato 335 e 270**, cioè il 29%
+  e il 35% sopra. Lo sforamento ha un nome per ognuna delle tre voci, e stanno nelle correzioni 1, 4
+  e 7: il pezzo puro `instruments.ts` che la delega non aveva previsto, i tre selettori che R24
+  rende necessari, e il secondo rilevatore di R24 — che serve perché un template di Vue non è
+  tipizzato. `card.ts` è la sola aggiunta a `core/` ed è **sotto** il preventivo
 - **Nessuna decisione aperta.** Le sei prese scrivendola sono in fondo, sotto _Le decisioni prese
   scrivendola_, e stanno nella tabella _Decisioni contestabili_ di
   [PASSAGGIO-DI-CONSEGNE](PASSAGGIO-DI-CONSEGNE.md): l'utente ha delegato con la direttiva generale
@@ -260,28 +264,40 @@ quindi il mirror va riletto a mano». È chiamata sia da `start()` dopo un caric
 
 ## Definizione di fatto
 
-- [ ] `npm run verify` verde, e `npm run verify:release` verde.
-- [ ] **Ogni test nuovo è stato visto rosso di proposito**, e per R24 e R22 il rosso si costruisce
+- [x] `npm run verify` verde, e `npm run verify:release` verde.
+- [x] **Ogni test nuovo è stato visto rosso di proposito**, e per R24 e R22 il rosso si costruisce
       rimettendo il difetto: un `import type { PaymentOption }` in `VaultPanel.vue`, un `<dialog>`
       in un `.vue` fuori dal kit.
-- [ ] Nella finestra vera: dal caveau, una CTA sola apre la finestra con **due** voci, contanti e
+- [x] Nella finestra vera: dal caveau, una CTA sola apre la finestra con **due** voci, contanti e
       carta, con i due prezzi diversi; scegliendo i contanti si conferma e basta; scegliendo la
       carta compare la carta, e il codice sta sul retro.
-- [ ] Nella finestra vera: dal reddito, la finestra si apre con **una** voce e si legge «si paga
+- [x] Nella finestra vera: dal reddito, la finestra si apre con **una** voce e si legge «si paga
       solo con la carta» invece del nome dello strumento.
-- [ ] Un codice sbagliato produce una frase e **nessun movimento**: il saldo prima e dopo è lo
+- [x] Un codice sbagliato produce una frase e **nessun movimento**: il saldo prima e dopo è lo
       stesso, verificato nello store e non a occhio.
-- [ ] Due semi diversi danno due carte diverse, e lo stesso seme dà due volte la stessa carta.
-- [ ] Il numero della carta passa il controllo di Luhn, e il test lo ha visto rosso con una cifra
+- [x] Due semi diversi danno due carte diverse, e lo stesso seme dà due volte la stessa carta.
+- [x] Il numero della carta passa il controllo di Luhn, e il test lo ha visto rosso con una cifra
       forzata.
-- [ ] Dopo `newGame()` la carta è cambiata, e dopo un caricamento è quella della partita caricata.
-- [ ] `grep -r "instrumentOf" src` non trova più niente.
-- [ ] Nessun `.vue` fuori da `components/payment/` nomina `PriceList` o `PaymentOption`.
-- [ ] Le chiavi nuove esistono in tutte e due le lingue, e `tests/i18n/parity` è verde.
-- [ ] I documenti vivi che nominano ciò che è cambiato sono stati **riletti**, non solo quelli in
+- [x] Dopo `newGame()` la carta è cambiata, e dopo un caricamento è quella della partita caricata.
+- [x] `grep -r "instrumentOf" src` non trova più niente.
+- [x] Nessun `.vue` fuori da `components/payment/` nomina `PriceList` o `PaymentOption`.
+- [x] Le chiavi nuove esistono in tutte e due le lingue, e `tests/i18n/parity` è verde.
+- [x] I documenti vivi che nominano ciò che è cambiato sono stati **riletti**, non solo quelli in
       _Da produrre_: è la classe di difetto che questo progetto dichiara scoperta.
-- [ ] Le correzioni rispetto a com'era scritta questa delega sono scritte in fondo. Se non ce ne
+- [x] Le correzioni rispetto a com'era scritta questa delega sono scritte in fondo. Se non ce ne
       sono, o era perfetta o non è stata letta con attenzione.
+
+**Cosa ha risposto la finestra vera**, e non è dedotto. Dal caveau: una CTA sola, `Amplia`, apre una
+finestra che `:modal` dichiara aperta, con **due** voci — «Con Contanti 900,00 €» e «Con Carta
+898,00 €» — e la conferma che segue lo strumento, `Paga 900,00 €` oppure `Paga 898,00 €`. Con i
+contanti la carta non compare affatto; con la carta compaiono la carta e il campo. La carta di
+quella partita è `4693 2605 9004 2390`, scadenza `05 / 33`, codice `522` — nessuno dei tre è quello
+che `ORNAMENT` stampava, e il numero passa Luhn con somma 70 mentre quello di prima faceva 53. Il
+retro rende `backface-visibility: hidden`, quindi il codice si legge **girando**. Con `000` si legge
+«Il codice non corrisponde a questo strumento (Carta).», la finestra resta aperta e il caveau resta
+a `Caveau 1 di 5`; con `522` la finestra si chiude e il caveau dice `Caveau 2 di 5`. Dal reddito la
+finestra si apre con **una** voce, «Si paga solo con: Carta 800,00 €», e la carta compare subito. Lo
+sfondo del livello superiore risolve `var(--color-sunken)` dentro `::backdrop`.
 
 ## Trappole note
 
@@ -317,6 +333,61 @@ quindi il mirror va riletto a mano». È chiamata sia da `start()` dopo un caric
 8. **La parità i18n non vede una chiave che nessuno usa.** `payment.only_with` esiste già e
    cambierà casa: va verificato che non resti orfana in un pannello che non la nomina più, perché
    `parity` sarebbe verde lo stesso.
+
+## Correzioni rispetto a com'era scritta la delega
+
+1. **`components/payment/instruments.ts` non era in _Da produrre_.** `instrumentOf` doveva finire da
+   qualche parte, e un `.vue` non calcola (R05): sono due funzioni pure — se uno strumento chiede
+   una prova, e con quale chiave si etichetta una voce — provate senza montare niente, come
+   `postings.ts` accanto a `PostingRows.vue`. Sono la ragione per cui jsdom è rimasto fuori un'altra
+   volta.
+
+2. **`authorization.ts` nel renderer non è nato.** La delega lo nominava nella prosa; il confronto
+   vive in `core/domains/atm/card.ts` come `authorizes`, accanto a **chi produce il codice**. Un
+   secondo file avrebbe separato la domanda dalla sua sorgente, che è la forma di difetto che INV-19
+   esiste per impedire sui prezzi.
+
+3. **Il prezzo esce dalla CTA**, e `common.buy` e `vault.expand` perdono `{cost}`. È il rovescio
+   della correzione 8 di [D019](D019-il-pagamento.md) — «il prezzo resta sul pulsante» — e la
+   ragione non è un ripensamento: quella decisione valeva perché il pulsante **era** la scelta. Con
+   una CTA che apre un listino a due prezzi, un prezzo scritto su di lei è un prezzo che il
+   giocatore può non pagare.
+
+4. **Tre selettori nuovi nello store**, non dichiarati: `canAffordUpgrade`, `canAffordExpansion` e
+   `vaultAtMax`. Discendono da R24 — un pannello non può contare le voci di un listino per sapere se
+   qualcosa è alla portata o se il caveau è finito — e la domanda per strumento resta dov'era.
+
+5. **Il tipo `Card` si ri-esporta dallo store.** Un `.vue` che importasse `@core/domains/atm/card`
+   passerebbe il lint, perché R05 elenca `rules` e `commands`; la disciplina però è la stessa, ed è
+   la strada che `AtmOperationKind` aveva già aperto.
+
+6. **`BankCard3d` ha dovuto rinominare il proprio riferimento al DOM.** Si chiamava `card`, e `card`
+   adesso è il **dato**: due cose con lo stesso nome in un file solo sono la prima riga sbagliata
+   che qualcuno scrive. Adesso l'elemento che gira è `plastic`.
+
+7. **R24 ha due rilevatori, non uno.** La delega ne descriveva uno — il tipo importato — e non
+   basta: un template di Vue **non è tipizzato**, quindi la fila si ricostruisce con un `v-for` su
+   un selettore senza nominare niente. Il secondo rilevatore guarda il ciclo. Tutti e due visti
+   rossi rimettendo il difetto in `VaultPanel`.
+
+8. **`padStart(width, '0')` non si scrive dentro un dominio.**
+   `tests/rules/domains-no-money-literals` vede un numero fra apici e non può distinguere
+   un'imbottitura da un importo — giustamente. Le due cifre si stampano con `String(100 + n).slice(1)`.
+
+9. **Un `/regex/` letterale con un apice manda fuori fase `english-identifiers`**, ed è una trappola
+   che il passaggio di consegne dichiara già. È stata ripagata lo stesso: il rilevatore del ciclo
+   adesso non nomina gli apici, e `[^>]*` dice la stessa cosa dentro un tag.
+
+10. **I tre fatti del retro sono diventati facoltativi, e il titolo con loro.** Nel pagamento la
+    carta arriva senza — sono fatti del bancomat — e il titolo «Cosa fa questo strumento» restava
+    stampato sopra un elenco vuoto. **Trovato guardando la finestra**, non leggendo il codice.
+
+11. **Il pallino della scelta prendeva il blu di sistema**, ed era l'unico blu dell'applicazione.
+    Resta il `radio` del motore, con `accent-color` dal tema. Anche questo visto guardando.
+
+12. **Le azioni che si pagano sono cinque, non sei**, ed è stata corretta prima di eseguire:
+    `VAULT_PRICES_CASH` ha un elemento in meno di `VAULT_CAPACITIES`, quindi cinque livelli fanno
+    **quattro** ampliamenti.
 
 ## Le decisioni prese scrivendola
 
