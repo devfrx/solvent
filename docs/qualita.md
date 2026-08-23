@@ -209,13 +209,15 @@ cresciuta di una riga perché sapeva già disegnarli. Il grilletto scritto lì s
 cui i candlestick del blocco C **non** arrivano» — non scatterà più: sono arrivati.
 
 **Rimisurato di nuovo il 2026-08-23**, dopo l'estrazione del guscio condiviso dei due grafici
-(`ChartPanel.vue` e `apex.ts`) **e** la rifinitura che è seguita — griglia, riempimento più tenue,
-riquadro più alto, carta nera. Stesso metodo.
+(`ChartPanel.vue` e `apex.ts`) **e** tutto ciò che è seguito sullo stesso ramo — griglia,
+riempimento più tenue, riquadro più alto, carta nera, il margine dell'asse che non scende sotto
+zero. Stesso metodo. La riga dice «a fine ramo» e non cosa la muove, così non va rietichettata a
+ogni commit.
 
-| Renderer minificato             | JS          | CSS      |
-| ------------------------------- | ----------- | -------- |
-| a D034, il 23                   | 1.202,15 kB | 21,78 kB |
-| dopo guscio e rifinitura, il 23 | 1.202,06 kB | 21,31 kB |
+| Renderer minificato | JS          | CSS      |
+| ------------------- | ----------- | -------- |
+| a D034, il 23       | 1.202,15 kB | 21,78 kB |
+| a fine ramo, il 23  | 1.202,10 kB | 21,30 kB |
 
 **Mezzo chilobyte di CSS in meno**, ed è la sola metà che si muove davvero: il vestito `:deep()`
 esisteva in due copie e adesso in una — la rifinitura ne ha poi rimessi settanta byte, che è quanto

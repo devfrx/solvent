@@ -67,6 +67,16 @@ const FLAT_LEAST = 1
  *
  * Una serie vuota non ha finestra e nessuno gliela chiede: il componente non disegna niente finché
  * il primo campione non arriva.
+ *
+ * **Il margine è un respiro, non un importo**, e per una decina di sessioni ne ha inventato uno. Il
+ * grafico scrive i due estremi della finestra sull'asse, quindi un margine che scendeva sotto zero
+ * si leggeva come un saldo negativo: una carta appena nata portava `-1,00 €`, un patrimonio partito
+ * da zero portava `-8.885,89 €`. In questo gioco un saldo negativo **non esiste** — i pool non ci
+ * scendono e il patrimonio netto è la loro somma — quindi non era un'approssimazione: era un
+ * importo che il giocatore non ha mai avuto, scritto dove si leggono quelli che ha avuto.
+ *
+ * Nessun test lo vedeva, e non per distrazione: li chiedevano tutti che il margine ci **fosse**, e
+ * c'era. Adesso ce n'è uno che chiede anche che non menta.
  */
 export const windowOf = (points: readonly number[]): Window => {
   const lowest = Math.min(...points)
@@ -74,7 +84,25 @@ export const windowOf = (points: readonly number[]): Window => {
   const span = highest - lowest
   const pad = span > 0 ? span * PAD_SHARE : Math.max(Math.abs(highest) * FLAT_SHARE, FLAT_LEAST)
 
-  return { min: lowest - pad, max: highest + pad }
+  /**
+   * **La finestra non attraversa lo zero da una parte da cui la serie non ci è mai arrivata.**
+   *
+   * È una regola del **dato**, non del denaro, ed è la ragione per cui sta qui invece che nel
+   * componente che disegna: questo file non sa che quei numeri sono euro, e non deve saperlo. Una
+   * serie che sotto zero ci scende davvero — il giorno in cui un dominio porterà un debito — tiene
+   * il suo margine intero, e questa riga non va riletta.
+   *
+   * Sopra non c'è il gemello di questa riga, e non è una dimenticanza: il tetto non ha un difetto
+   * da correggere, perché una serie che sale non passa da un numero impossibile. Scriverlo per
+   * simmetria sarebbe una riga che nessuno può vedere sbagliata.
+   *
+   * Il caso in cui morde di più è anche il primo che si vede: una carta ferma a zero. Lì la
+   * finestra diventa `0 … 1`, e la riga piatta poggia **sul** fondo — che non si legge più come
+   * «zero» per sbaglio, perché adesso è zero davvero, e c'è scritto.
+   */
+  const below = lowest < 0 ? lowest - pad : Math.max(lowest - pad, 0)
+
+  return { min: below, max: highest + pad }
 }
 
 /**

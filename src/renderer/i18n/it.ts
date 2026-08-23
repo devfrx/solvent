@@ -127,7 +127,7 @@ export const it: Dictionary = {
 
   'board.chart.title': 'Patrimonio netto nel tempo',
   'board.chart.explained':
-    'Un campione ogni {seconds} secondi di gioco. L’altezza è la variazione dentro la finestra, non il totale: il campione più basso sta sul fondo, il più alto in cima. Dopo una pausa lunga un campione solo copre tutto il tempo passato.',
+    'Un campione ogni {seconds} secondi di gioco. L’altezza è la variazione dentro la finestra, non il totale: i due numeri sull’asse dicono dove la finestra comincia e dove finisce. Dopo una pausa lunga un campione solo copre tutto il tempo passato.',
   'board.chart.how_to_read': 'Come si legge',
   'board.chart.oldest': 'Prima',
   'board.chart.newest': 'Adesso',

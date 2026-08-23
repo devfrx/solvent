@@ -57,6 +57,50 @@ describe('la finestra si adatta alla serie', () => {
   })
 })
 
+/**
+ * **Il margine è un respiro, non un importo**, e finché nessuno l'ha guardato ne inventava uno.
+ *
+ * Il difetto si vedeva nella finestra vera: una carta ferma a zero portava scritto `-1,00 €` sotto
+ * l'asse, e un patrimonio partito da zero portava `-8.885,89 €`. In questo gioco un saldo negativo
+ * **non esiste** — i pool non ci scendono e il patrimonio netto è la loro somma — quindi quel
+ * numero non era un'approssimazione: era un importo che il giocatore non ha mai avuto, scritto
+ * dove si leggono gli importi che ha avuto.
+ *
+ * Nessuno dei test qui sopra poteva vederlo: chiedono tutti che il margine ci **sia**, e c'era.
+ *
+ * La regola è del dato e non del denaro, ed è la ragione per cui sta qui invece che nel componente:
+ * la finestra non attraversa lo zero da una parte da cui la serie non ci è mai arrivata. Una serie
+ * che scende davvero sotto zero — il giorno in cui un dominio porterà un debito — tiene il suo
+ * margine, e questo file non deve sapere niente di nuovo.
+ */
+describe('il margine non inventa un importo che non è mai esistito', () => {
+  it('una serie partita da zero non porta un asse negativo', () => {
+    expect(windowOf([0, 2500, 5000]).min).toBe(0)
+  })
+
+  it('e nemmeno una che sfiora lo zero senza toccarlo', () => {
+    // 500 sopra un'escursione di 4.500 vuol dire un margine di 675: più di quanto ci sia sotto.
+    expect(windowOf([500, 5000]).min).toBe(0)
+  })
+
+  it('una carta appena nata sta **sul** fondo, e il fondo è zero', () => {
+    const window = windowOf([0, 0])
+
+    expect(window.min).toBe(0)
+    expect(window.max).toBeGreaterThan(0)
+  })
+
+  it('ma una serie che sotto zero ci scende davvero tiene il suo respiro', () => {
+    // Non è un caso di oggi: è la prova che la regola guarda la serie invece di sapere che sono
+    // soldi. Il giorno in cui un debito porta un saldo negativo, questo file non cambia.
+    expect(windowOf([-100, 100]).min).toBeLessThan(-100)
+  })
+
+  it('e il margine sopra non lo tocca nessuno', () => {
+    expect(windowOf([0, 5000]).max).toBeCloseTo(5750, 6)
+  })
+})
+
 describe('quando niente si è mosso', () => {
   it('la finestra esiste lo stesso, e la serie ci sta in mezzo', () => {
     // Il caveau pieno blocca il reddito e il patrimonio si ferma: è un caso vero, non teorico. Un
@@ -137,5 +181,11 @@ describe('la finestra di un grafico a candele', () => {
     const window = candleWindowOf(candlePointsOf([candle('0', '0', '0', '0')]))
 
     expect(window.max).toBeGreaterThan(window.min)
+  })
+
+  it('e non la porta sotto zero: le candele passano dalla stessa regola', () => {
+    // È il caso della segnalazione, ed è quello che si vede per primo aprendo una partita nuova:
+    // la carta è a zero, e sotto l'asse compariva `-1,00 €`.
+    expect(candleWindowOf(candlePointsOf([candle('0', '0', '0', '0')])).min).toBe(0)
   })
 })
