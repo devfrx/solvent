@@ -252,7 +252,8 @@ quindi il mirror va riletto a mano». È chiamata sia da `start()` dopo un caric
 - **Ricordare la prova per la sessione**, o chiederla solo sopra una soglia. Sono due meccaniche che
   nessuno ha chiesto, e la seconda vuole un numero in `balance/` che nessuno sa scegliere. Il
   grilletto è il primo giocatore — noi compresi — che dica che digitare tre cifre stanca: oggi le
-  azioni che si pagano sono **sei** in una partita intera, l'upgrade più i cinque ampliamenti.
+  azioni che si pagano sono **cinque** in una partita intera, l'upgrade più i quattro ampliamenti —
+  `VAULT_PRICES_CASH` ha un elemento in meno di `VAULT_CAPACITIES`, e i livelli sono cinque.
 - **jsdom.** La parte sbagliabile esce pura, come per `rotation.ts` e `postings.ts`. Se non
   riuscisse, il costo sarebbe evidente invece che teorico — ed è la condizione scritta nel registro
   YAGNI.
