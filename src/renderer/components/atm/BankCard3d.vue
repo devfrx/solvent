@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, useTemplateRef } from 'vue'
+import { computed, shallowRef, useTemplateRef } from 'vue'
 
 import { useTranslator } from '@renderer/i18n'
 import type { Card } from '@renderer/stores/game'
@@ -39,7 +39,7 @@ import { draggedTo, releasedOn, restingAt, transformOf } from './rotation'
  * **Zero logica.** Riceve stringhe già formattate e non vede un solo `Decimal`: chi formatta è il
  * confine di presentazione (ADR 0006), chi decide quanto denaro si muove è il dominio (R05). */
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     /**
      * Numero, scadenza e codice di **questa** partita (ADR 0042). Fino a D036 erano una costante
@@ -59,6 +59,16 @@ withDefaults(
     readonly traceability?: string | undefined
   }>(),
   { capacity: undefined, fee: undefined, traceability: undefined }
+)
+
+/**
+ * Se il retro ha dei fatti da elencare. Visto guardando la finestra vera: senza questa domanda il
+ * titolo «Cosa fa questo strumento» restava stampato sopra un elenco **vuoto** nel pagamento, dove
+ * i tre fatti non arrivano. Un titolo senza contenuto è peggio di nessun titolo — promette una
+ * riga che non c'è.
+ */
+const hasFacts = computed<boolean>(
+  () => props.capacity !== undefined || props.fee !== undefined || props.traceability !== undefined
 )
 
 /**
@@ -183,8 +193,8 @@ const release = (): void => {
           <span class="value">{{ card.code }}</span>
         </p>
 
-        <p class="caption">{{ text('card.back.title') }}</p>
-        <dl class="details">
+        <p v-if="hasFacts" class="caption">{{ text('card.back.title') }}</p>
+        <dl v-if="hasFacts" class="details">
           <div v-if="traceability !== undefined" class="detail">
             <dt>{{ text('pool.traceability') }}</dt>
             <dd>{{ traceability }}</dd>

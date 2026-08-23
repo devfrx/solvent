@@ -51,6 +51,6 @@ confrontabili.
 | `src/core/balance/`           | 3    | 108   |
 | `src/core/domains/`           | 12   | 432   |
 | `src/main/` + `src/preload/`  | 8    | 246   |
-| `src/renderer/`               | 53   | 3.965 |
+| `src/renderer/`               | 53   | 3.971 |
 | — di cui `src/renderer/i18n/` | 3    | 639   |
-| — di cui CSS dentro i `.vue`  | 34   | 1.032 |
+| — di cui CSS dentro i `.vue`  | 34   | 1.035 |

@@ -177,6 +177,15 @@ const pay = (): void => {
   cursor: pointer;
 }
 
+/*
+ * Il pallino resta quello del motore — porta il gruppo, le frecce e ciò che un lettore di schermo
+ * deve sapere — ma prende il colore del tema invece del blu di sistema. Visto guardando: era
+ * l'unico blu di tutta l'applicazione.
+ */
+.option input {
+  accent-color: var(--color-accent);
+}
+
 .option.picked {
   border-color: var(--color-accent);
   background: color-mix(in srgb, var(--color-accent) 8%, transparent);
