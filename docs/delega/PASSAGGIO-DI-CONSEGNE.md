@@ -43,9 +43,9 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23, chiudendo la quinta sessione, sono stati fusi i due rami incatenati che aspettavano: `d038-cio-che-si-preme-e-cio-che-scorre` discendeva da `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, quindi è bastato un `--ff-only` sul secondo per portarli tutti e due. `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sui rami, e i due rami sono stati cancellati con `git branch -d` — quello che si rifiuta se resta lavoro non fuso: **nessuno dei due si è rifiutato** |
-| `origin/main`            | **allineato.** Il 2026-08-23 sono stati spinti D037 e D038 in un colpo, dopo i gate su `main` fuso. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                                                                                                                                                                                         |
+| `origin/main`            | **si verifica, non si dichiara.** Un allineamento scritto qui lo invalida il primo commit che arriva dopo — compreso quello che lo scrive — e l'elenco di cosa si è spinto invecchia a ogni delega consegnata. Lo dice `git rev-list --count origin/main..main`: se non fa `0`, c'è del lavoro solo su questa macchina. Quando si spinge, i gate girano prima **su `main` fuso** e non solo sui rami                                                                                                                                                                |
 | Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Prossimo passo           | **la fetta 03**, e non c'è più niente da fondere prima: D037 e D038 sono in `main` e spinte. La fetta comincia da una **scheda di dominio compilata**, non da una riga di codice — vedi _E dopo, la fetta 03_                                                                                                                                                                                                                                                                                                                                                       |
+| Prossimo passo           | **la fetta 03 — il progresso offline**, e non c'è più niente da fondere prima. Non porta un dominio nuovo: il recupero esiste già, e la fetta ridiscute il suo tetto e la sua granularità — vedi _E dopo, la fetta 03_                                                                                                                                                                                                                                                                                                                                              |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -1273,20 +1273,32 @@ Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: all
 
 ## Il prossimo passo, in concreto
 
-**È [D034](D034-le-serie-degli-strumenti.md)**, i grafici a candele di contanti e carta. Ha **una
-decisione aperta** scritta in fondo — due grafici a candele oppure candele e linea — e **non si
-esegue prima di averla presa con l'utente**: è l'unica cosa che la blocca.
+**È la fetta 03 — il progresso offline**, e non c'è una delega da eseguire: va scritta. Quante ne
+siano chiuse lo dice [stato.md](../stato.md); aperte non ce n'è, ed è la ragione per cui il lavoro
+cambia di specie.
 
-**[D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) è chiusa**, ed è la ragione per cui
-D034 adesso misura un numero che vuol dire qualcosa: il renderer si compila minificato, quindi il
-peso che D034 rimisurerà è quello vero invece del doppio. Le dieci correzioni rispetto a com'era
-scritta stanno in fondo alla delega, e due meritano di essere sapute prima di aprirla: il punto 8 si
-risolve **al contrario** di come la delega lo prescriveva, e le occorrenze di `home` nei documenti
-vivi erano dieci invece delle sette che l'audit aveva contato.
+**Non è il blocco A, ed è un errore che questa pagina ha fatto fino al 2026-08-23.** Questa sezione
+mandava a eseguire [D034](D034-le-serie-degli-strumenti.md), che è chiusa; il prompt in fondo
+mandava a scrivere «la prima delega della fetta 03» descrivendo però il black market e le aste di
+box — cioè il **blocco A**, che nel [registro delle fette](../roadmap-fette.md) non è una fetta ma
+un segnaposto **oltre la 06**, e quel registro lo dice a chiare lettere: «un blocco non è una
+fetta». Sono due lavori diversi, e la differenza si paga subito: la fetta 03 non porta nessun
+dominio nuovo, quindi **non comincia da una scheda di dominio compilata**. Ne discende che
+l'[ADR 0010](../adr/0010-liste-storiche-limitate-alla-definizione.md) non può cambiare stato con
+questa fetta — a farlo passare sono gli oggetti, e gli oggetti sono del blocco A.
 
-**E [D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md) non è più a monte di niente.** La sua
-intestazione diceva di sbloccare la rifinitura del bancomat; l'artboard `ATM`, letto nel sorgente,
-non ha una sola sovrapposizione. È chiusa comunque, ma quella freccia nel grafo non c'è mai stata.
+**Il codice del recupero esiste già, e la fetta lo ridiscute invece di scriverlo.** Il tetto è
+`RECOVERY_CAP` in [balance/constants.ts](../../src/core/balance/constants.ts); la regola che decide
+quanti tick si recuperano è `stepOf` in [runtime/loop.ts](../../src/renderer/runtime/loop.ts), ed è
+**la stessa** del tempo reale ([ADR 0009](../adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md));
+a chiamarla al caricamento è `recover()` in [stores/game.ts](../../src/renderer/stores/game.ts), che
+fa **un `advance` solo**. Chi apre la fetta parta leggendo quelle tre righe, non da zero.
+
+I problemi da cui partire sono già misurati, e stanno sotto la riga della fetta nel
+[registro](../roadmap-fette.md): il tetto è limitato dal caveau invece che da sé stesso, è tarato in
+ore reali su un gioco il cui giorno dura due secondi, e quel singolo `advance` rende invisibile ogni
+soglia attraversata e rientrata. La domanda della fetta non è «di quanto alziamo il tetto»: è
+**«cosa vuol dire offline quando il mondo va avanti anche contro di te»**.
 
 ### Come si guarda l'applicazione senza toccarla
 
@@ -1833,9 +1845,10 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 di eseguirne una. Quante deleghe restino lo dice [stato.md](../stato.md), che le conta.
 
 ```
-Non c'e' una delega da eseguire: si scrive la prima della fetta 03. Prima pero'
-si controlla che il punto di partenza sia quello che questo documento dichiara,
-perche' un handoff si verifica invece di crederci — due comandi:
+Non c'e' una delega da eseguire: si scrive la prima della fetta 03, il progresso
+offline. Prima pero' si controlla che il punto di partenza sia quello che questo
+documento dichiara, perche' un handoff si verifica invece di crederci — due
+comandi:
 
   git branch                              # deve restare `main` e basta
   git rev-list --count origin/main..main  # deve fare 0
@@ -1843,10 +1856,20 @@ perche' un handoff si verifica invece di crederci — due comandi:
 Se non torna, siamo in una situazione che questo documento non descrive: vale la
 realta', non il documento.
 
-Il materiale c'e' tutto e non va inventato — vedi "E dopo, la fetta 03" qui in
-PASSAGGIO-DI-CONSEGNE. Il blocco A (black market, aste di box) e' il primo che
-porta gli oggetti, cioe' il primo boundedList che entra davvero nel salvataggio,
-e l'unica cosa che puo' far passare l'ADR 0010 ad Accettata.
+La fetta 03 NON porta un dominio nuovo, quindi non comincia da una scheda di
+dominio compilata: il recupero esiste gia'. Il tetto e' RECOVERY_CAP in
+core/balance/constants.ts; la regola che decide quanti tick si recuperano e'
+stepOf in renderer/runtime/loop.ts, la stessa del tempo reale (ADR 0009); a
+chiamarla al caricamento e' recover() in renderer/stores/game.ts, che fa un
+advance solo. I problemi da cui partire stanno gia' misurati sotto la riga della
+fetta in roadmap-fette.md, e nel registro YAGNI dello stesso file hanno questa
+fetta per grilletto il salvataggio a intervalli e i tick che il tetto scarta.
+
+Il blocco A (black market, aste di box) NON e' la fetta 03: e' un segnaposto
+oltre la fetta 06. Porta gli oggetti, cioe' il primo boundedList che entra
+davvero nel salvataggio, ed e' quello il grilletto dell'ADR 0010 — non questa
+fetta. Questo documento le ha confuse fino al 2026-08-23, ed e' il motivo per
+cui questo paragrafo esiste.
 
 Due cose che D036 ha messo a disposizione, e che una delega nuova puo' dare per
 scontate: ogni azione che si paga passa da PaymentDialog, e uno strumento
@@ -1860,9 +1883,12 @@ si scrive `<UiButton>` e non `<button>` (R26), un'area che scorre si scrive
 `npx vitest run tests/rules/icons -u` (R28). Le tre regole sono rosse prima che
 qualcuno se ne accorga a occhio, quindi non c'e' niente da ricordare.
 
-Prima di scrivere quella delega: la scheda di dominio si compila PRIMA che il
-dominio esista, e la sua forma va rivista alla quarta compilata — la prossima
-e' quella.
+La scheda di dominio non serve a questa fetta. Serve al prossimo dominio nuovo,
+che e' del blocco A: si compila PRIMA che il dominio esista, e la sua forma va
+rivista alla quarta compilata, che sara' quella.
+
+Per guardare la finestra vera c'e' scripts/cdp.mjs, da D039: non va piu'
+riscritto a ogni sessione, e come si usa lo dice il commento in testa al file.
 ```
 
 I prompt delle deleghe già consegnate stanno nel `git log` di questo file: si recuperano da lì
@@ -1872,14 +1898,14 @@ Questa riga li elencava per nome, ed era un elenco che invecchiava a ogni delega
 **Torna il lavoro di specie diversa: scrivere una delega, non eseguirne una.** Il materiale c'è
 tutto e non va inventato:
 
-- il [registro delle fette](../roadmap-fette.md) dice cosa viene dopo e in che ordine, e il
-  **blocco A** — black market e aste di box — è il primo che porta gli **oggetti**, cioè il primo
-  `boundedList` che entra davvero nel salvataggio e l'unica cosa che può far passare l'ADR 0010 ad
-  `Accettata`;
-- la [scheda di dominio](../design/domini/README.md) si compila **prima** che il dominio esista, e
-  la sua forma va rivista alla **quarta** compilata — la prossima sarà quella;
-- il [registro YAGNI](../roadmap-fette.md) ha i grilletti già scritti: si guarda quali sono scattati
-  invece di decidere a sentimento cosa costruire.
+- il [registro delle fette](../roadmap-fette.md) dice cosa viene dopo e in che ordine: la **fetta
+  03** è il progresso offline, e sotto la sua riga stanno i problemi che la riga stessa non dice;
+- il [registro YAGNI](../roadmap-fette.md) ha i grilletti già scritti — due voci hanno proprio
+  questa fetta per grilletto, il salvataggio a intervalli e i tick che il tetto scarta — e si guarda
+  quali sono scattati invece di decidere a sentimento cosa costruire;
+- la [scheda di dominio](../design/domini/README.md) **non** serve qui, perché questa fetta non
+  porta un dominio nuovo: serve al blocco A, e la sua forma va rivista alla **quarta** compilata,
+  che sarà quella.
 
 Una delega di questo progetto si riconosce dalla forma: dipendenze, ADR vincolanti, budget dichiarato
 per **ogni** ramo che le decisioni aperte producono, _Da produrre_, _Invarianti_, _Fuori scope_,
@@ -1898,12 +1924,17 @@ un budget smette di servire.
 
 ### E dopo, la fetta 03
 
-La fetta 03 comincia da una **scheda compilata** invece che da una schermata immaginata, ed è la
-differenza che [D018](D018-la-scheda-di-dominio.md) è servita a fare: il modulo sta in
-[design/domini/README.md](../design/domini/README.md), e un dominio nuovo lo compila **prima** che
-qualcuno ne scriva una riga.
+La fetta 03 è il **progresso offline**, e la sua domanda non è quella che il nome suggerisce: non
+chiede «di quanto alziamo il tetto», chiede **«cosa vuol dire offline quando il mondo va avanti
+anche contro di te»**. I problemi che la portano lì — il tetto limitato dal caveau invece che da sé
+stesso, le ore reali contro un giorno di gioco che dura due secondi, e il recupero che avanza in un
+passo solo — stanno misurati sotto la riga della fetta nel [registro](../roadmap-fette.md), e sono
+usciti rileggendo il kernel **dopo** aver riscritto la visione. Dove sta oggi quel codice è scritto
+in _Il prossimo passo_, qui sopra.
 
-Le tre cose da avere in mente prima di scrivere quella riga stanno qui sopra, in fondo a _Il
-prossimo passo_. Una quarta è arrivata con D018 e va tenuta con le altre: **la forma va rivista alla
-quarta scheda compilata**, non prima — due sezioni oggi non discriminano, e con tre casi non si può
-sapere se sia un difetto della forma o il campione.
+**Non porta un dominio nuovo, quindi non comincia da una scheda compilata.** La scheda resta il modo
+in cui comincia un **dominio**, ed è la differenza che [D018](D018-la-scheda-di-dominio.md) è
+servita a fare: il modulo sta in [design/domini/README.md](../design/domini/README.md), un dominio
+nuovo lo compila **prima** che qualcuno ne scriva una riga, e la sua forma va rivista alla
+**quarta** compilata — che sarà quella del blocco A, non questa. Due sezioni oggi non discriminano,
+e con tre casi non si può sapere se sia un difetto della forma o il campione.
