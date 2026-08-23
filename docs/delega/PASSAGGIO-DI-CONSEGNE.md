@@ -30,22 +30,22 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                                                                                                                                                                   |
-| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                                                                                                                                                                          |
-| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                                                                                                                                                                          |
-| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                                                                                                                                                               |
-| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                                                                                                                                                                         |
-| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                                                                                                                                                                                                                             |
-| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                                                                                                                                                                        |
-| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                                                                                                                                                                          |
-| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                                                                                                                                                                  |
-| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                                                                                                                                                           |
-| `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23 sono stati fusi i tre rami che aspettavano — `guscio-condiviso-dei-grafici` conteneva già per intero `d034-le-serie-degli-strumenti`, quindi il primo è stato un `--ff-only` e il secondo un commit di soli documenti — e poi `d036-il-pagamento-e-un-flusso-solo`, anche lui con un `--ff-only`. Su ogni fusione `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sul ramo |
-| `origin/main`            | **allineato.** Il 2026-08-23 è stato spinto in un colpo tutto ciò che mancava: le due fusioni e D036. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                                                                                   |
-| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                        |
-| Prossimo passo           | **fondere D037 e spingere, poi la fetta 03.** D037 è chiusa e committata sul ramo `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, verde su tutti i gate; **non è in `main`** e non è stata spinta — una fusione e un `push` sono cose che si chiedono. La fetta 03 comincia da una scheda compilata — vedi _E dopo, la fetta 03_                                                                                                                          |
+|                          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                                                                                                                                                                                                                                |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                                                                                                                                                                                                                                |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                                                                                                                                                                                                                                                                                   |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                                                                                                                                                                                                                              |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23 sono stati fusi i tre rami che aspettavano — `guscio-condiviso-dei-grafici` conteneva già per intero `d034-le-serie-degli-strumenti`, quindi il primo è stato un `--ff-only` e il secondo un commit di soli documenti — e poi `d036-il-pagamento-e-un-flusso-solo`, anche lui con un `--ff-only`. Su ogni fusione `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sul ramo                                                       |
+| `origin/main`            | **allineato.** Il 2026-08-23 è stato spinto in un colpo tutto ciò che mancava: le due fusioni e D036. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                                                                                                                                         |
+| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Prossimo passo           | **fondere D037 e D038 e spingere, poi la fetta 03.** I rami sono **due e incatenati**: `d038-cio-che-si-preme-e-cio-che-scorre` discende da `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, che discende da `main`. Tutti e due chiusi, committati e verdi su tutti i gate; **nessuno dei due è in `main`** e nessuno è stato spinto — una fusione e un `push` sono cose che si chiedono, e fondere il secondo porta con sé il primo. La fetta 03 comincia da una scheda compilata — vedi _E dopo, la fetta 03_ |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -67,10 +67,107 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 > Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
 > agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
 
-## La **quarta** sessione del 2026-08-23: D037, il tempo che avanza ha un proprietario
+## La **quinta** sessione del 2026-08-23: D038, il kit possiede ciò che si preme e ciò che scorre
 
 Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
 recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
+
+**Cosa è stato chiuso.**
+
+| Delega                                            | Cos'era                                                                     |
+| ------------------------------------------------- | --------------------------------------------------------------------------- |
+| [D038](D038-cio-che-si-preme-e-cio-che-scorre.md) | i pulsanti erano sei, le aree che scorrevano sei, e le icone non esistevano |
+
+Scritta **e** eseguita nella stessa sessione, come D036 e D037 e per la stessa ragione: la richiesta
+è arrivata dall'utente come feature — «CTA unificati come componenti UI universali… idem per le
+scrollbar» — ed è risultata essere un difetto misurabile.
+
+### Le sei cose che chi arriva adesso deve sapere
+
+**1. La richiesta era una feature e ha trovato due difetti.** Il primo: **nessuno dei sei pulsanti
+del progetto aveva un anello di fuoco**, quindi chi girava con il tabulatore riceveva il contorno
+del motore, che dei due temi non sa niente. Il secondo, più insidioso: `AppNav` dichiarava
+`flex: 1` e `overflow-y: auto` sulla lista delle destinazioni **senza `min-height: 0`**, quindi
+quella lista non si restringeva — spingeva — e a scorrere finiva la colonna intera del telaio,
+marchio e interruttore del tema compresi. Vale come metodo: **prima di trattare una richiesta di
+unificazione come estetica, si conta quante copie ci sono e si guarda se hanno già divergiuto.**
+Due dei sei pulsanti avevano uno stato al puntatore e quattro no.
+
+**2. INV-21 era difeso su una cartella, non sull'applicazione.** Il controllo cercava `disabled` nei
+file di `ui/`; qualunque componente poteva scrivere `<button disabled>` e nessun gate lo avrebbe
+visto. Adesso R26 tiene i `<button>` a uno e il controllo guarda **tutti** i `.vue`. Non è un
+dettaglio di copertura: `UiButton` fa ricadere gli attributi del chiamante sul pulsante vero — serve
+a `popovertarget` — quindi senza quell'allargamento la ricaduta avrebbe portato a destinazione anche
+un `disabled`.
+
+**3. Il vestito della barra è due dichiarazioni, e le frecce restano quelle di Windows.**
+`scrollbar-width` e `scrollbar-color` sono standard ed **ereditate**; i pseudo-elementi
+`::-webkit-scrollbar` darebbero il controllo completo, ma il motore li **ignora** appena una
+proprietà standard è dichiarata — è un aut aut. Le frecce restano perché è la stessa scelta che D036
+ha già fatto per il pallino della scelta nel pagamento: **il congegno è del motore, il colore è del
+tema.**
+
+**4. `scrollbar-gutter: stable` è un vicolo cieco, e la misura lo dice.** Scritto, guardato nella
+finestra vera, tolto: riserva lo spazio della barra anche quando non c'è, e lascia
+**24 px a sinistra contro 34 a destra** nel contenuto e **21 px** invece di 8 nella colonna. Dieci
+pixel sono `--space-4`. Tolto quello, le due aree annidate della colonna non costano niente.
+
+**5. Le icone entrano generate, non importate.** `@iconify-json/lucide` è **1.844 icone in 554 kB**
+e il gioco ne disegna **due**: importarlo sarebbe il difetto A14 con un'altra estensione. Il
+pacchetto sta nelle `devDependencies` e non è mai importato da `src/`; a leggerlo è
+`tests/helpers/glyphs.ts`, che produce `src/renderer/ui/glyphs.json` con i soli tracciati nominati.
+È la forma di `docs/stato.md`, applicata a un sorgente: si rigenera con
+`npx vitest run tests/rules/icons -u`, e chi lo modifica a mano trova il gate rosso.
+
+**6. Un rilevatore di questo repo non vedeva i commenti di un template**, e nessuno lo sapeva.
+`withoutComments` e la costante `NOISE` di `english-identifiers` toglievano `/* */` e `//` e non
+`<!-- -->`: la prosa italiana dentro un `<template>` veniva letta come codice. `UiPopover.vue` ne ha
+uno da D031 e passava **per fortuna**, perché nessuna delle sue parole era in elenco. Corretto in
+tutti e due i posti. E una trappola gemella: `eslint-disable-next-line` dentro un template **non
+spegne niente** se il tag occupa più righe, perché la violazione viene segnalata dove sta
+l'attributo — serve la forma a blocco con `eslint-enable`.
+
+### Cosa c'è nell'albero di lavoro alla chiusura
+
+Verificato con i comandi, non ricordato.
+
+- **`npm run verify` verde** e **`npm run verify:release` verde**. Quanti siano i test non si scrive
+  qui: lo dice [stato.md](../stato.md), e la riga che lo scrivesse sarebbe il difetto di D021.
+- **Le tre regole nuove sono state rotte di proposito**, una per una, e ogni file rotto è stato
+  **copiato prima** e ripristinato con un `diff` che conferma l'identità: un `<button>` rimesso in
+  `AppNav`, un `:disabled` su un `<UiButton>` in `AtmPanel`, un `overflow-y: auto` e uno
+  `scrollbar-color` in `AppNav`, un tracciato modificato a mano in `glyphs.json`, un nome mai
+  disegnato e uno assente dall'insieme in `icons.ts`.
+- **Il ramo è `d038-cio-che-si-preme-e-cio-che-scorre`, e parte da `d037-…` e non da `main`**, perché
+  D037 non è ancora fusa. È lo stesso incatenamento che D030 → D032 → D031 hanno già avuto, e si
+  scioglie fondendo il secondo: porta con sé il primo.
+- **Niente residui di debug**: nessun `console.log`, nessun `TODO`.
+- **La finestra vera è stata guardata, nei due temi**, e l'anello di fuoco è stato provato con il
+  tabulatore vero: un `element.focus()` **non** fa scattare `:focus-visible`, quindi quella prova
+  vale solo passando da `Input.dispatchKeyEvent`.
+
+### Cosa questa sessione ha lasciato indietro
+
+Censito, non nascosto.
+
+1. **Nessuna misura della catena a macchina scarica.** Aperta da sette sessioni.
+2. **Gli script CDP non sopravvivono a questa sessione**, ed è la **settima** riscrittura. Stavolta
+   però il costo è noto e la raccomandazione è scritta: metterli in `scripts/` — un file, `cdp.mjs`,
+   e niente altro — costa meno di una riscrittura, e ne sono state fatte sette. La decisione non è
+   di questa delega perché `scripts/` è una cartella nuova alla radice, cioè una decisione
+   strutturale che si chiede.
+3. **`npm install` continua a non funzionare**, ed è la correzione 8 di D023 alla seconda ricorrenza:
+   aggiungere una dipendenza è passato solo con `--legacy-peer-deps`. La causa vera — `vite` alla 8
+   contro `electron-vite@5` che regge fino alla 7 — resta aperta.
+4. **`components/atm/BankCard3d.vue` ha due lettori**, e il secondo è `components/payment/`. Il
+   grilletto per spostarla sta nella decisione 6 di D036, ed è ancora fermo lì.
+5. **Le due candele degli strumenti sono due dichiarazioni e non un ciclo su `POOLS[pool].player`.**
+   Grilletto: il terzo strumento del giocatore.
+
+## La **quarta** sessione del 2026-08-23: D037, il tempo che avanza ha un proprietario
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. Descrive uno stato già
+superato, e si legge come storia — come tutte le sezioni sotto.
 
 **Cosa è stato chiuso.**
 

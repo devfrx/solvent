@@ -3,7 +3,7 @@ import { sep } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { COLOR_ROLES, SURFACES, TEXT_SIZES } from '../../src/renderer/ui/roles'
-import { importsOf, read, sourceFiles, withoutComments } from '../helpers/sources'
+import { importsOf, read, sourceFiles } from '../helpers/sources'
 
 /**
  * R14 · D023 · ADR 0028 — il kit UI non sa che gioco è.
@@ -54,10 +54,6 @@ export const forbiddenIn = (from: string, source: string): string[] =>
       FORBIDDEN.some((banned) => specifier.startsWith(banned)) || escapesKit(from, specifier)
   )
 
-/** `disabled` o `:disabled` come **attributo**, non la parola dentro un commento o una classe. */
-export const disablesIn = (source: string): string[] =>
-  (withoutComments(source).match(/(?<=[\s(]):?disabled(?=[\s=>])/g) ?? []).map((f) => f.trim())
-
 const kitFiles = sourceFiles(KIT).map(normalize)
 const tokens = read(TOKENS)
 
@@ -103,29 +99,15 @@ describe('il kit UI non sa che gioco è', () => {
   }
 })
 
-/**
- * INV-21 — il kit non sa spegnere un pulsante.
+/*
+ * INV-21 — il kit non sa spegnere un pulsante — **stava qui e adesso sta altrove**.
  *
- * Nella prima stesura questo era 🔒, imposto dal tipo: `UiButton` non aveva `disabled` fra le
- * proprietà. Non bastava, e a scoprirlo è stata la migrazione: il componente **scriveva**
- * `:disabled` sul pulsante quando arrivava una ragione, e nessun tipo lo vedeva. Una proprietà che
- * non esiste nell'API non impedisce all'attributo di esistere nel template — sono due cose, e solo
- * la seconda è quella che il giocatore vede.
+ * Guardava i file di `ui/`, e bastava finché un `<button>` poteva esistere in qualunque componente
+ * senza che nessuno lo sapesse. Da D038 ne esiste uno solo (R26), quindi il controllo può guardare
+ * tutti i componenti invece di una cartella — e deve, perché `UiButton` fa ricadere gli attributi
+ * del chiamante sul pulsante vero. Vive in `tests/rules/buttons-pass-through-the-kit`, insieme alla
+ * regola che lo rende possibile.
  */
-describe('nessun pulsante del kit si spegne', () => {
-  it('il rilevatore trova l’attributo, non la parola', () => {
-    expect(disablesIn('<button :disabled="refused">')).toEqual([':disabled'])
-    expect(disablesIn('<button disabled>')).toEqual(['disabled'])
-    expect(disablesIn('// un pulsante spento è un rifiuto senza motivo')).toEqual([])
-    expect(disablesIn('.muted { opacity: 0.5 }')).toEqual([])
-  })
-
-  for (const path of kitFiles) {
-    it(`${path} non spegne niente`, () => {
-      expect(disablesIn(read(path))).toEqual([])
-    })
-  }
-})
 
 describe('ogni ruolo dichiarato ha il suo token', () => {
   it('i colori', () => {

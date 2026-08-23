@@ -11,6 +11,7 @@ import { useGameStore } from '@renderer/stores/game'
 import UiButton from '@renderer/ui/UiButton.vue'
 import UiLabel from '@renderer/ui/UiLabel.vue'
 import UiPopover from '@renderer/ui/UiPopover.vue'
+import UiScroll from '@renderer/ui/UiScroll.vue'
 import UiText from '@renderer/ui/UiText.vue'
 
 /**
@@ -37,6 +38,14 @@ import UiText from '@renderer/ui/UiText.vue'
  * riquadro restava visibile anche chiuso, e per due stesure la colpa era stata data alla meccanica
  * di apertura. Adesso quella riga non è più sua: `UiPopover` possiede il `display`, e R22 impedisce
  * a questo file di avere di nuovo in mano un elemento con `popover`.
+ *
+ * **L'aggancio ha perso il suo tratteggio**, ed è l'unico cambiamento visibile di
+ * [D038](../../../../docs/delega/D038-cio-che-si-preme-e-cio-che-scorre.md). Era un pulsante scritto
+ * a mano, e diceva «questo non fa parte del gioco» con un bordo a trattini; adesso passa da
+ * `UiButton` (R26), che di varianti ne ha quattro e nessuna è tratteggiata. Una quinta l'avrebbe
+ * avuta **un** chiamante contro i due che il kit richiede (D023), cioè sarebbe stata una variante
+ * col nome del proprio unico committente. La frase la dice ancora il riquadro che si apre, che è
+ * tratteggiato e lo resta.
  *
  * **Non è una schermata.** Nessuna voce nella colonna, nessuna riga in `SCREENS`: le destinazioni
  * sono i posti dove il gioco si amministra (ADR 0033), e questo non è gioco. Vive sopra qualunque
@@ -65,12 +74,16 @@ const reasonFor = (cheat: Cheat): string | undefined =>
 <template>
   <UiPopover class="corner" side="top">
     <template #trigger="{ popovertarget, expanded }">
-      <button class="tab" type="button" :popovertarget="popovertarget" :aria-expanded="expanded">
-        {{ text('dev.title') }}
-      </button>
+      <UiButton
+        variant="quiet"
+        size="chip"
+        :label="text('dev.title')"
+        :popovertarget="popovertarget"
+        :aria-expanded="expanded"
+      />
     </template>
 
-    <div class="panel">
+    <UiScroll class="panel">
       <header class="head">
         <UiLabel>{{ text('dev.title') }}</UiLabel>
         <UiText tone="ink-3" size="xs">{{ text('dev.subtitle') }}</UiText>
@@ -100,7 +113,7 @@ const reasonFor = (cheat: Cheat): string | undefined =>
           />
         </li>
       </ul>
-    </div>
+    </UiScroll>
   </UiPopover>
 </template>
 
@@ -124,26 +137,6 @@ const reasonFor = (cheat: Cheat): string | undefined =>
 }
 
 /*
- * L'aggancio: piccolo, tratteggiato. Il tratteggio è deliberato — dice «questo non fa parte del
- * gioco» senza bisogno di una parola in più, ed è l'unico posto del progetto che lo usa.
- */
-.tab {
-  padding: var(--space-2) var(--space-3);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--track-label);
-  color: var(--color-ink-3);
-  background: var(--color-raised);
-  border: 1px dashed var(--color-line);
-  border-radius: var(--radius-sm);
-}
-
-.tab:hover {
-  color: var(--color-ink);
-  border-color: var(--color-ink-3);
-}
-
-/*
  * La pittura del pannello, e **solo** quella: dove si colloca, come sta nel livello superiore e
  * quando si vede sono di `UiPopover`.
  *
@@ -155,7 +148,6 @@ const reasonFor = (cheat: Cheat): string | undefined =>
 .panel {
   width: 300px;
   max-height: 72vh;
-  overflow-y: auto;
   padding: var(--space-4);
   display: flex;
   flex-direction: column;

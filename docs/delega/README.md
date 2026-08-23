@@ -129,6 +129,9 @@ flowchart TD
   D031 --> D036
   D011 --> D037["D037 · Il tempo che avanza è un'operazione del gioco"]
   D034 --> D037
+  D023 --> D038["D038 · Ciò che si preme e ciò che scorre passano dal kit"]
+  D024 --> D038
+  D031 --> D038
 ```
 
 **D017 e D018 non si toccano**, ed è il primo caso del progetto: una scrive codice, l'altra solo
@@ -264,6 +267,7 @@ configurato dopo che c'erano già 156 file.
 | [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md)   | Ciò che non si dichiara lo sceglie un altro — le correzioni dell'audit del 2026-08-22 | 105 codice + 172 test         | **Chiusa** |
 | [D036](D036-il-pagamento-e-un-flusso-solo.md)                 | Il pagamento è un flusso solo, e il permesso è dello strumento                        | 335 codice + 270 test         | **Chiusa** |
 | [D037](D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md) | Il tempo che avanza è un'operazione del gioco, non una sequenza del loop              | 153 codice + 281 test         | **Chiusa** |
+| [D038](D038-cio-che-si-preme-e-cio-che-scorre.md)             | Ciò che si preme e ciò che scorre passano dal kit, e le icone vengono da un insieme   | 566 codice + 517 test         | **Chiusa** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede

@@ -142,6 +142,14 @@ const ITALIAN_WORDS = new Set([
  * - prima le stringhe: un `l'href` dentro un commento apre una stringa che non esiste, e la
  *   parola dopo la finta chiusura diventa un identificatore che non è mai stato scritto.
  *
+ * Il **commento di un template** è arrivato con
+ * [D038](../../docs/delega/D038-cio-che-si-preme-e-cio-che-scorre.md), ed è il sesto caso:
+ * `<!-- … -->` non era in questa alternativa, quindi la prosa italiana dentro un `<template>` veniva
+ * letta come codice. Che finora nessuno se ne fosse accorto è fortuna e non progetto —
+ * `UiPopover.vue` ne ha uno da D031, e passava solo perché nessuna delle sue parole era in elenco.
+ * Una regola rispettata per caso non è una regola, ed è l'argomento che quel file porta scritto
+ * addosso.
+ *
  * Limiti dichiarati: sparisce anche ciò che sta dentro `${…}`, e un'espressione regolare che
  * contiene apici o `//` **manda fuori fase** la scansione — da lì in poi il file è disallineato e
  * le descrizioni dei test vengono lette come codice. Non è rumore: sono falsi positivi, e ne ha
@@ -152,7 +160,7 @@ const ITALIAN_WORDS = new Set([
  * come **stringa** e si passa a `new RegExp`, e allora la scansione la consuma correttamente.
  */
 const NOISE =
-  /\/\*[\s\S]*?\*\/|\/\/[^\n]*|`(?:\\.|\$\{[^}]*\}|[^\\`])*`|'(?:\\.|[^\\'])*'|"(?:\\.|[^\\"])*"/g
+  /<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|\/\/[^\n]*|`(?:\\.|\$\{[^}]*\}|[^\\`])*`|'(?:\\.|[^\\'])*'|"(?:\\.|[^\\"])*"/g
 
 const codeOnly = (source: string): string => source.replace(NOISE, ' ')
 
@@ -195,6 +203,7 @@ describe('il rilevatore', () => {
   it('non guarda i commenti', () => {
     expect(italianIn('// il saldo non si tocca\nconst balance = 1')).toEqual([])
     expect(italianIn('/** lo stato del sistema */\nconst state = 1')).toEqual([])
+    expect(italianIn('<!-- il valore di un elemento -->\nconst value = 1')).toEqual([])
   })
 
   it('non guarda le stringhe', () => {

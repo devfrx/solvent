@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useTemplateRef, watch } from 'vue'
 
+import UiScroll from './UiScroll.vue'
+
 /**
  * D036 · ADR 0042 · ADR 0032 — la finestra, e il **secondo** dei due pezzi che hanno in mano il
  * livello superiore. R22 non nomina più un attributo: dice che il livello superiore passa dal kit,
@@ -79,7 +81,7 @@ const onClick = (event: MouseEvent): void => {
 
 <template>
   <dialog ref="box" class="ui-dialog" :aria-label="label" @close="onClose" @click="onClick">
-    <div class="ui-dialog-content"><slot /></div>
+    <UiScroll class="ui-dialog-content"><slot /></UiScroll>
   </dialog>
 </template>
 
@@ -127,11 +129,14 @@ const onClick = (event: MouseEvent): void => {
  * contenuto è più alto dello schermo, ed è la stessa decisione di
  * [D030](../../../docs/delega/D030-il-contenuto-scorre-nel-telaio.md): scorre il contenuto, non il
  * telaio. Non dipinge: è il chiamante a farlo.
+ *
+ * Da [D038](../../../docs/delega/D038-cio-che-si-preme-e-cio-che-scorre.md) è un `UiScroll`, quindi
+ * `overflow` non è più scritto qui (R27). Il tetto di altezza sì: è ciò che impedisce a una finestra
+ * più alta dello schermo di uscirne, ed è della finestra — non di ciò che scorre.
  */
 .ui-dialog-content {
   display: flex;
   flex-direction: column;
   max-height: 88vh;
-  overflow: auto;
 }
 </style>

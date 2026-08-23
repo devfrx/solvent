@@ -222,13 +222,18 @@ solvent/
 │     ├─ ui/                      # il kit: non sa che gioco e' (ADR 0028)
 │     │  ├─ tokens.css            # i colori: l'unico posto dove un #hex e' ammesso (R15)
 │     │  ├─ fonts.css
-│     │  ├─ roles.ts              # ruoli di colore, misure, superfici — nessun Pool
+│     │  ├─ roles.ts              # ruoli di colore, misure, superfici, varianti — nessun Pool
+│     │  ├─ icons.ts              # l'insieme e i nomi: l'unica riga da cambiare (R28, ADR 0046)
+│     │  ├─ glyphs.json           # i tracciati: generato, non si scrive a mano (R28)
 │     │  ├─ theme.ts              # quale tema e' acceso, e l'interruttore (ADR 0031)
 │     │  ├─ UiShell.vue           # il telaio: una forma, non un contenitore (ADR 0030)
 │     │  ├─ UiPopover.vue         # il livello superiore: il riquadro ancorato (R22, ADR 0039)
 │     │  ├─ UiDialog.vue          # il livello superiore: la finestra modale (R22, ADR 0042)
 │     │  ├─ UiTooltip.vue         # l'unico modo di spiegare qualcosa (R17, ADR 0032)
-│     │  └─ Ui*.vue               # superficie, etichetta, cifra, targhetta, pulsante, prosa
+│     │  ├─ UiButton.vue          # l'unica cosa premibile: 4 forze, 4 scatole (R26, ADR 0044)
+│     │  ├─ UiScroll.vue          # l'unica area che scorre, e l'unica barra vestita (R27, ADR 0045)
+│     │  ├─ UiIcon.vue            # il glifo: alto 1em, del colore di chi lo ospita (R28)
+│     │  └─ Ui*.vue               # superficie, etichetta, cifra, targhetta, prosa
 │     ├─ components/              # una cartella per proprietario, zero file sciolti (R18, ADR 0033)
 │     │  ├─ shell/                # dell'applicazione, di nessun dominio
 │     │  │  ├─ AppNav.vue         # la colonna: i gruppi, le destinazioni, l'interruttore del tema
@@ -311,6 +316,9 @@ Legenda: **🔒 impossibile** = il tipo o la struttura non permettono di scriver
 | 23  | Il vestito dei grafici vive in un file solo    | `tests/rules/chart-dress`: nessuna classe di ApexCharts nominata fuori da `ChartPanel.vue`                                                                                                                                            |
 | 24  | La scelta di con cosa si paga è un pezzo solo  | `tests/rules/payment-flow`: fuori da `components/payment/` nessun `.vue` nomina un'opzione di pagamento né cicla su un listino                                                                                                        |
 | 25  | Il tempo di gioco avanza in un posto solo      | `tests/rules/one-way-to-advance`: fuori da `runtime/createGame.ts` nessun file del renderer nomina `tickAll`. `Game.advance` ticchetta i sistemi **e** alimenta la cronaca, così nessun chiamante può fare metà del lavoro (ADR 0043) |
+| 26  | Ciò che si preme passa dal kit                 | `tests/rules/buttons-pass-through-the-kit`: nessun `<button>` fuori da `UiButton.vue`, e **nessun `disabled`** in nessun `.vue` — è INV-21 spostato dalla cartella all'applicazione (ADR 0044)                                        |
+| 27  | Ciò che scorre passa dal kit                   | `tests/rules/scroll-passes-through-the-kit`: nessun `overflow` che scorre e nessuna proprietà `scrollbar-*` fuori da `UiScroll.vue`. `hidden` e `visible` passano: ritagliano, non fanno scorrere (ADR 0045)                          |
+| 28  | Un'icona viene da un insieme solo              | `tests/rules/icons`: `ui/glyphs.json` coincide con ciò che la derivazione produce da `ui/icons.ts`, ogni nome dichiarato è disegnato da qualcuno, e nessun corpo porta un colore suo (ADR 0046)                                       |
 
 **Quando entra ciascun meccanismo.** Alcune di queste regole sono già in vigore, altre nascono con
 la delega che le usa: la colonna _Delega_ di [tracciabilita.md](tracciabilita.md) dice quale, per

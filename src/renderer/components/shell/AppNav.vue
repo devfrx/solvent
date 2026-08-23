@@ -5,7 +5,9 @@ import type { MessageKey } from '@renderer/i18n'
 import { useTranslator } from '@renderer/i18n'
 import type { Theme } from '@renderer/ui/theme'
 import { useTheme } from '@renderer/ui/theme'
+import UiButton from '@renderer/ui/UiButton.vue'
 import UiLabel from '@renderer/ui/UiLabel.vue'
+import UiScroll from '@renderer/ui/UiScroll.vue'
 
 import type { Screen } from './screens'
 import { NAV_GROUPS, SCREEN_WORDING } from './screens'
@@ -59,29 +61,33 @@ const sigil = computed<string>(() => name.value.slice(0, 1))
     <span class="wordmark">{{ name }}</span>
   </div>
 
-  <nav class="destinations">
-    <div v-for="group of NAV_GROUPS" :key="group.title" class="group">
-      <p class="group-title">
-        <UiLabel>{{ text(group.title) }}</UiLabel>
-      </p>
-      <button
-        v-for="screen of group.screens"
-        :key="screen"
-        type="button"
-        class="destination"
-        :class="{ current: current === screen }"
-        @click="$emit('go', screen)"
-      >
-        {{ text(SCREEN_WORDING[screen].title) }}
-      </button>
-    </div>
-  </nav>
+  <UiScroll class="destinations">
+    <nav class="groups">
+      <div v-for="group of NAV_GROUPS" :key="group.title" class="group">
+        <p class="group-title">
+          <UiLabel>{{ text(group.title) }}</UiLabel>
+        </p>
+        <UiButton
+          v-for="screen of group.screens"
+          :key="screen"
+          variant="bare"
+          size="sm"
+          :selected="current === screen"
+          :label="text(SCREEN_WORDING[screen].title)"
+          @press="$emit('go', screen)"
+        />
+      </div>
+    </nav>
+  </UiScroll>
 
   <div class="foot">
-    <button type="button" class="theme" @click="toggle()">
-      <span class="dial" aria-hidden="true"></span>
-      <UiLabel>{{ text(THEME_KEYS[theme]) }}</UiLabel>
-    </button>
+    <UiButton
+      variant="bare"
+      size="sm"
+      icon="theme"
+      :label="text(THEME_KEYS[theme])"
+      @press="toggle()"
+    />
   </div>
 </template>
 
@@ -116,9 +122,19 @@ const sigil = computed<string>(() => name.value.slice(0, 1))
   text-transform: uppercase;
 }
 
+/*
+ * L'area che scorre è **la lista**, e non la colonna intera: il marchio in alto e l'interruttore
+ * in basso restano dove sono. Prima di [D038](../../../../docs/delega/D038-cio-che-si-preme-e-cio-che-scorre.md)
+ * non era così, e non per scelta — a questa riga mancava il `min-height: 0` senza cui un elemento
+ * flessibile non scende sotto la propria altezza naturale, quindi la lista spingeva e a scorrere
+ * finiva la colonna del telaio, marchio compreso. Adesso la riga la scrive `UiScroll`, e non c'è
+ * più un posto dove dimenticarla.
+ */
 .destinations {
   flex: 1;
-  overflow-y: auto;
+}
+
+.groups {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -136,58 +152,18 @@ const sigil = computed<string>(() => name.value.slice(0, 1))
   padding: 0 var(--space-4);
 }
 
-.destination {
-  text-align: left;
-  padding: var(--space-3) var(--space-4);
-  background: transparent;
-  color: var(--color-ink-3);
-  font-family: inherit;
-  font-size: var(--text-md);
-  font-weight: var(--weight-medium);
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
 /*
- * A dire quale voce è scelta è anche il **bordo**, non solo il fondo. È la correzione che D023 ha
- * trovato guardando: nel tema scuro `--color-raised` contro `--color-surface` sono due punti di
- * luminosità, e la differenza che nel chiaro si vede da sola lì sparisce.
+ * Le voci e l'interruttore non hanno più uno stile qui, e sono **quaranta righe in meno**: la
+ * forma di una riga premibile — il fondo, il bordo che compare al puntatore, quello che dice qual
+ * è quella accesa, l'anello del fuoco che non c'era — è di `UiButton` (R26). Questo file dice
+ * quali voci ci sono e dove stanno, che è quello che sa.
+ *
+ * Il mezzo cerchio disegnato con un gradiente non c'è più: al suo posto c'è l'icona `theme`, che
+ * viene dall'insieme dichiarato in `ui/icons.ts` (R28). Portava scritto «non costa un file di
+ * icone», ed era vero finché il file di icone non c'era.
  */
-.destination.current {
-  background: var(--color-raised);
-  color: var(--color-ink);
-  border-color: var(--color-line);
-}
-
 .foot {
   border-top: 1px solid var(--color-line-soft);
   padding: var(--space-4) var(--space-3);
-}
-
-.theme {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  padding: var(--space-2) var(--space-4);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
-.theme:hover {
-  border-color: var(--color-line);
-}
-
-/* Mezzo cerchio pieno: il segno consueto del tema, e non costa un file di icone. */
-.dial {
-  flex: 0 0 auto;
-  width: var(--space-4);
-  height: var(--space-4);
-  border: 1px solid var(--color-ink-3);
-  border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, var(--color-ink-3) 50%, transparent 50%);
 }
 </style>

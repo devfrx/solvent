@@ -155,6 +155,9 @@ Il grilletto resta quello che il registro YAGNI ha scritto: il primo dominio che
 | [0041](0041-la-rappresentazione-del-denaro-e-dichiarata.md)                    | La rappresentazione del denaro è dichiarata come la sua precisione | **Accettata** | come un importo si scrive quando attraversa il disco, e a quale scala smette di scriversi | —               |
 | [0042](0042-il-pagamento-e-un-flusso-solo.md)                                  | Il pagamento è un flusso solo                                      | **Accettata** | dove si sceglie con cosa si paga, e cosa uno strumento chiede prima di pagare             | —               |
 | [0043](0043-il-tempo-che-avanza-e-un-operazione-del-gioco.md)                  | Il tempo che avanza è un'operazione del gioco                      | **Accettata** | chi può far avanzare il tempo di gioco, e cosa succede a ogni passo                       | A01             |
+| [0044](0044-cio-che-si-preme-passa-dal-kit.md)                                 | Ciò che si preme passa dal kit                                     | **Accettata** | chi può disegnare un pulsante, con quali forze e quali scatole                            | A14             |
+| [0045](0045-cio-che-scorre-passa-dal-kit.md)                                   | Ciò che scorre passa dal kit                                       | **Accettata** | chi può far scorrere un'area, e chi veste la barra                                        | A14             |
+| [0046](0046-le-icone-vengono-da-un-insieme-e-il-disegno-e-generato.md)         | Le icone vengono da un insieme, e il disegno è generato            | **Accettata** | da dove viene un simbolo, e come si cambia insieme                                        | A14             |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è

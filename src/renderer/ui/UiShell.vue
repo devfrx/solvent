@@ -20,15 +20,24 @@
  * cioè il primo numero di una scala che nessuno saprà più spiegare (ADR 0032). La risposta vera è
  * che in un'applicazione da scrivania il telaio non è ciò che scorre: un contenuto che scorre
  * dentro la propria area **non può** raggiungere la testata, perché il bordo lo taglia prima.
+ *
+ * **Da [D038](../../../docs/delega/D038-cio-che-si-preme-e-cio-che-scorre.md) non possiede più lo
+ * scorrimento**, e non è un dettaglio di forma: `overflow`, il `min-height: 0` che lo rende
+ * possibile e il vestito della barra sono di `UiScroll`, che li tiene in un posto solo (R27). Qui
+ * resta la geometria delle tre regioni, che è ciò per cui questo file esiste.
  */
+
+import UiScroll from './UiScroll.vue'
 </script>
 
 <template>
   <div class="ui-shell">
-    <aside class="nav"><slot name="nav" /></aside>
+    <aside class="nav">
+      <UiScroll class="nav-scroll"><slot name="nav" /></UiScroll>
+    </aside>
     <main class="main">
       <header class="head"><slot name="head" /></header>
-      <div class="content"><slot /></div>
+      <UiScroll class="content"><slot /></UiScroll>
     </main>
   </div>
 </template>
@@ -47,19 +56,26 @@
 }
 
 /*
- * `overflow-y: auto` e non `hidden`: le destinazioni sono quattro e ci stanno, ma il giorno in cui
- * fossero venti la colonna le taglierebbe **in silenzio** — ed è la forma di difetto che nasce
- * funzionante e si rompe mesi dopo, senza che nessuno l'abbia toccata.
+ * La colonna **scorre**, e non è la stessa cosa che tagliare: le destinazioni sono quattro e ci
+ * stanno, ma il giorno in cui fossero venti la colonna le taglierebbe **in silenzio** — ed è la
+ * forma di difetto che nasce funzionante e si rompe mesi dopo, senza che nessuno l'abbia toccata.
+ *
+ * A scorrere è `.nav-scroll`, e questa resta il posto: larghezza, fondo e bordo sono suoi, perché
+ * sono ciò che divide la colonna dal resto e non ciò che ci sta dentro.
  */
 .nav {
   flex: 0 0 var(--nav-width);
   width: var(--nav-width);
   height: 100%;
-  overflow-y: auto;
   display: flex;
-  flex-direction: column;
   background: var(--color-surface);
   border-right: 1px solid var(--color-line);
+}
+
+.nav-scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* `min-width: 0` o una riga lunga dentro il contenuto allarga la colonna invece di andare a capo. */
@@ -79,19 +95,20 @@
 }
 
 /*
- * L'area che scorre, ed è l'unica del telaio.
+ * L'area del contenuto: quella che porta le pagine, e la sola delle tre che può diventare più alta
+ * della finestra.
  *
- * `min-height: 0` è la riga che sembra superflua e non lo è: un elemento flessibile non scende
- * sotto la propria dimensione naturale se non gliela si toglie, quindi senza di lei un contenuto
- * lungo **spinge** invece di scorrere, e `overflow-y` non ha mai occasione di intervenire.
+ * `min-height: 0` non è più qui, ed è la riga che questa delega ha spostato invece di cancellare:
+ * un elemento flessibile non scende sotto la propria dimensione naturale se non gliela si toglie,
+ * quindi senza di lei un contenuto lungo **spinge** invece di scorrere. Adesso la scrive `UiScroll`
+ * per chiunque, ed è la ragione per cui esiste — `AppNav` non la sapeva, e la sua colonna scorreva
+ * tutta invece di scorrere la lista.
  *
  * Il fondo è più largo degli altri tre: è l'aria sotto l'ultimo pannello, quella che dice che la
  * pagina è finita. Nel canvas sono sessanta pixel, cioè due passi e mezzo del settimo.
  */
 .content {
   flex: 1;
-  min-height: 0;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-6);

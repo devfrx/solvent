@@ -145,9 +145,13 @@ const submit = (): void => {
         :note="noteFor(side.from)"
       />
       <div class="swap">
-        <button type="button" class="turn" :aria-label="text('atm.swap')" @click="swap()">
-          <span aria-hidden="true">⇄</span>
-        </button>
+        <UiButton
+          variant="raised"
+          size="icon"
+          icon="swap"
+          :label="text('atm.swap')"
+          @press="swap()"
+        />
       </div>
       <InstrumentSide
         side="atm.to"
@@ -165,18 +169,15 @@ const submit = (): void => {
       </p>
 
       <div class="quick">
-        <button
+        <UiButton
           v-for="(option, index) of atmAmounts"
           :key="index"
-          type="button"
-          class="chipbutton"
-          @click="write(option)"
-        >
-          {{ money(option) }}
-        </button>
-        <button type="button" class="chipbutton" @click="write(maximum)">
-          {{ text('atm.max') }}
-        </button>
+          variant="raised"
+          size="chip"
+          :label="money(option)"
+          @press="write(option)"
+        />
+        <UiButton variant="raised" size="chip" :label="text('atm.max')" @press="write(maximum)" />
         <span class="limits">
           {{ text('atm.limits', { floor: money(atmFeeFloor), max: money(maximum) }) }}
         </span>
@@ -238,18 +239,6 @@ const submit = (): void => {
   border-inline: 1px solid var(--color-line-soft);
 }
 
-.turn {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-line);
-  background: var(--color-raised);
-  color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: var(--text-md);
-  cursor: pointer;
-}
-
 .amount {
   margin-top: var(--space-6);
 }
@@ -301,20 +290,6 @@ const submit = (): void => {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
-}
-
-/* La forma della targhetta, ma premibile: sono scorciatoie, non l'azione della schermata. */
-.chipbutton {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-pill);
-  background: var(--color-raised);
-  color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--track-wide);
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
 }
 
 .limits {

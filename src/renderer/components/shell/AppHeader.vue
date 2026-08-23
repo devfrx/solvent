@@ -9,6 +9,7 @@ import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
 import type { ColorRole } from '@renderer/ui/roles'
 import UiReadout from '@renderer/ui/UiReadout.vue'
+import UiScroll from '@renderer/ui/UiScroll.vue'
 import UiTooltip from '@renderer/ui/UiTooltip.vue'
 
 import type { Screen } from './screens'
@@ -75,7 +76,7 @@ const INSTRUMENTS: readonly Instrument[] = POOL_IDS.flatMap((pool) => {
     <span class="here">{{ text(SCREEN_WORDING[current].title) }}</span>
   </div>
 
-  <div class="strip">
+  <UiScroll class="strip">
     <div v-for="instrument of INSTRUMENTS" :key="instrument.pool" class="cell">
       <UiTooltip :text="text(instrument.hint)" side="bottom">
         <UiReadout
@@ -85,7 +86,7 @@ const INSTRUMENTS: readonly Instrument[] = POOL_IDS.flatMap((pool) => {
         />
       </UiTooltip>
     </div>
-  </div>
+  </UiScroll>
 </template>
 
 <style scoped>
@@ -110,12 +111,15 @@ const INSTRUMENTS: readonly Instrument[] = POOL_IDS.flatMap((pool) => {
   font-weight: var(--weight-semibold);
 }
 
+/*
+ * La striscia scorre di lato quando gli strumenti non ci stanno, e da D038 a farlo è `UiScroll`
+ * (R27): qui restano il respiro ai lati e la riga che la stacca dalle briciole.
+ */
 .strip {
   display: flex;
   align-items: stretch;
   padding: 0 var(--space-7);
   border-top: 1px solid var(--color-line-soft);
-  overflow-x: auto;
 }
 
 .cell {

@@ -242,6 +242,26 @@ la differenza minificata è meno di un chilobyte. Il CSS non si muove perché ne
 stato toccato — i tre grafici non si sono accorti di niente, ed è la prova che il confine era nel
 posto giusto e la sorgente no.
 
+**Rimisurato a [D038](delega/D038-cio-che-si-preme-e-cio-che-scorre.md), il 2026-08-23.** Stesso
+metodo.
+
+| Renderer minificato | JS          | CSS      |
+| ------------------- | ----------- | -------- |
+| a D037, il 23       | 1.207,33 kB | 22,84 kB |
+| a D038, il 23       | 1.208,70 kB | 23,15 kB |
+
+**Un chilobyte e mezzo di JS, trecento byte di CSS**, per tre componenti nuovi del kit, due icone e
+tre regole. È poco perché quasi tutto è **spostamento e non aggiunta**: `UiButton` guadagna le
+quattro forze e le quattro scatole che i cinque pulsanti scritti a mano scrivevano ognuno per conto
+suo, e `UiScroll` guadagna l'`overflow` che sei file dichiaravano. La misura è la risposta alla
+domanda che la delega si è posta prima di cominciare — se unificare costasse peso, sarebbe una
+scelta e non una correzione.
+
+**Le due icone pesano quanto i loro tracciati**, e non quanto l'insieme: `@iconify-json/lucide` è
+1.844 icone in 554 kB di JSON e sta nelle `devDependencies`, mentre nel pacchetto entra
+`ui/glyphs.json`, che porta i due `<path>` nominati e nient'altro
+([ADR 0046](adr/0046-le-icone-vengono-da-un-insieme-e-il-disegno-e-generato.md)).
+
 **Il motore, misurato invece che supposto.** L'[ADR 0032](adr/0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)
 poggia su due funzionalità del motore — il livello superiore e l'ancoraggio CSS — e la sua premessa è
 che il motore sia uno solo e recente. Chiesto a lui invece che al changelog:
