@@ -35,16 +35,10 @@ export interface Window {
 }
 
 /**
- * Quanto respiro lasciare sopra e sotto la serie, in frazione della sua escursione. Senza, il
- * campione più basso poggia esattamente sul fondo dell'asse e il più alto tocca il bordo: due barre
- * che si leggono come «zero» e «massimo» invece che come i due estremi di ciò che è successo.
- */
-const PAD_SHARE = 0.15
-
-/**
- * Il respiro quando la serie è **piatta**, in frazione del livello. Serve perché con escursione
- * zero non c'è niente da cui ricavare un margine, e un asse che comincia e finisce sullo stesso
- * numero non è un asse.
+ * Il respiro quando la serie è **piatta**, in frazione del livello, e l'unico posto in cui questo
+ * file aggiunge ancora un numero a un altro. Serve perché una serie piatta non ha escursione, e un
+ * asse che comincia e finisce sullo stesso numero non è un asse: è una divisione per zero dentro
+ * la libreria.
  *
  * Il minimo assoluto esiste per l'unico caso in cui anche quella frazione è zero: una partita
  * appena nata, con il patrimonio ancora a zero.
@@ -53,6 +47,23 @@ const FLAT_SHARE = 0.05
 const FLAT_LEAST = 1
 
 /**
+ * **La finestra è la serie, e nient'altro.** I due numeri che finiscono sull'asse sono il campione
+ * più basso e il più alto: non ci si aggiunge niente, quindi non c'è niente che possa non essere
+ * mai esistito.
+ *
+ * **Il respiro adesso è di pixel**, e sta nelle opzioni di chi disegna (`grid.padding`) invece che
+ * qui. La differenza non è dove vive una costante: è che un margine espresso in **denaro** entra
+ * nei numeri che il giocatore legge, e uno espresso in **pixel** no. Per una decina di sessioni
+ * questo file ha aggiunto il 15% dell'escursione sopra e sotto, e il grafico scriveva quei due
+ * bordi sull'asse — una carta appena nata portava `-1,00 €`, un patrimonio partito da zero
+ * `-8.885,89 €`, e anche quando il segno era giusto il numero non era di nessun campione. Il
+ * primo passaggio aveva messo un pavimento a zero, che toglieva l'assurdo e lasciava la bugia.
+ *
+ * Ciò che il margine difendeva resta difeso, per un'altra strada. La ragione scritta era che «il
+ * campione più basso poggia sul fondo e si legge come zero»: adesso su quel fondo passa una riga
+ * di griglia **con il suo numero accanto**, quindi non si legge come zero — si legge per quello
+ * che è.
+ *
  * **La finestra si adatta alla serie, e non parte da zero.** È la decisione che guardare
  * l'applicazione ha ribaltato, ed è stata misurata invece che immaginata: con un asse ancorato a
  * zero, trenta campioni di crescita normale muovono l'intera altezza in una partita nuova, un
@@ -60,49 +71,31 @@ const FLAT_LEAST = 1
  * 250.000,00 €, quindi il cruscotto porterebbe un rettangolo pieno per la maggior parte della
  * partita — vero e inutile.
  *
- * Il prezzo è che l'altezza di una barra non è più «quanti soldi»: è **dove sei nell'intervallo
- * osservato**. A dirlo al giocatore ci sono due cose che senza libreria non avevamo — l'asse con i
- * suoi numeri e il valore che compare toccando una barra — ed è metà della ragione per cui la
- * libreria è entrata.
+ * Il prezzo è che l'altezza non è più «quanti soldi»: è **dove sei nell'intervallo osservato**. A
+ * dirlo al giocatore ci sono due cose che senza libreria non avevamo — l'asse con i suoi numeri e
+ * il valore che compare toccando la linea — ed è metà della ragione per cui la libreria è entrata.
  *
  * Una serie vuota non ha finestra e nessuno gliela chiede: il componente non disegna niente finché
  * il primo campione non arriva.
- *
- * **Il margine è un respiro, non un importo**, e per una decina di sessioni ne ha inventato uno. Il
- * grafico scrive i due estremi della finestra sull'asse, quindi un margine che scendeva sotto zero
- * si leggeva come un saldo negativo: una carta appena nata portava `-1,00 €`, un patrimonio partito
- * da zero portava `-8.885,89 €`. In questo gioco un saldo negativo **non esiste** — i pool non ci
- * scendono e il patrimonio netto è la loro somma — quindi non era un'approssimazione: era un
- * importo che il giocatore non ha mai avuto, scritto dove si leggono quelli che ha avuto.
- *
- * Nessun test lo vedeva, e non per distrazione: li chiedevano tutti che il margine ci **fosse**, e
- * c'era. Adesso ce n'è uno che chiede anche che non menta.
  */
 export const windowOf = (points: readonly number[]): Window => {
   const lowest = Math.min(...points)
   const highest = Math.max(...points)
-  const span = highest - lowest
-  const pad = span > 0 ? span * PAD_SHARE : Math.max(Math.abs(highest) * FLAT_SHARE, FLAT_LEAST)
+
+  if (highest > lowest) return { min: lowest, max: highest }
 
   /**
-   * **La finestra non attraversa lo zero da una parte da cui la serie non ci è mai arrivata.**
+   * La serie è piatta, e un'altezza bisogna dargliela. Si allunga **in su**, non attorno: così il
+   * valore vero resta su una riga di griglia, con il suo numero accanto, e la riga piatta ci
+   * poggia sopra invece di galleggiare fra due numeri che non sono di nessuno. Quello in alto è
+   * l'unico numero inventato che resta in questo file, e serve solo a dare un'altezza all'asse.
    *
-   * È una regola del **dato**, non del denaro, ed è la ragione per cui sta qui invece che nel
-   * componente che disegna: questo file non sa che quei numeri sono euro, e non deve saperlo. Una
-   * serie che sotto zero ci scende davvero — il giorno in cui un dominio porterà un debito — tiene
-   * il suo margine intero, e questa riga non va riletta.
-   *
-   * Sopra non c'è il gemello di questa riga, e non è una dimenticanza: il tetto non ha un difetto
-   * da correggere, perché una serie che sale non passa da un numero impossibile. Scriverlo per
-   * simmetria sarebbe una riga che nessuno può vedere sbagliata.
-   *
-   * Il caso in cui morde di più è anche il primo che si vede: una carta ferma a zero. Lì la
-   * finestra diventa `0 … 1`, e la riga piatta poggia **sul** fondo — che non si legge più come
-   * «zero» per sbaglio, perché adesso è zero davvero, e c'è scritto.
+   * In su e non in giù anche per una seconda ragione: verso il basso c'è lo zero, e sotto lo zero
+   * non c'è nessun saldo di questo gioco.
    */
-  const below = lowest < 0 ? lowest - pad : Math.max(lowest - pad, 0)
+  const spread = Math.max(Math.abs(highest) * FLAT_SHARE, FLAT_LEAST)
 
-  return { min: below, max: highest + pad }
+  return { min: lowest, max: highest + spread }
 }
 
 /**

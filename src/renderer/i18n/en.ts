@@ -124,7 +124,7 @@ export const en: Dictionary = {
 
   'board.chart.title': 'Net worth over time',
   'board.chart.explained':
-    'One sample every {seconds} seconds of play. The height is the change within the window, not the total: the two numbers on the axis say where the window starts and where it ends. After a long pause a single sample covers all the time that passed.',
+    'One sample every {seconds} seconds of play. The height is the change within the window, not the total: the two numbers on the axis are the lowest and highest samples, and the two lines run through them. After a long pause a single sample covers all the time that passed.',
   'board.chart.how_to_read': 'How to read it',
   'board.chart.oldest': 'Earlier',
   'board.chart.newest': 'Now',

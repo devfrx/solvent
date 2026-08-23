@@ -118,16 +118,26 @@ const optionsFor = (data: readonly number[]): ApexOptions => ({
   colors: ['var(--color-ink)'],
   dataLabels: { enabled: false },
   /**
-   * **Le due righe orizzontali sono accese, quelle verticali no.** Le orizzontali passano per i due
-   * estremi dell'asse e sono ciò che li tiene su: senza, i due numeri galleggiavano accanto a un
-   * disegno che non li toccava, e una serie piatta lasciava mezzo riquadro vuoto. Le verticali
-   * segnerebbero i campioni, e i campioni **non hanno un quando** — è la stessa ragione per cui
-   * l'asse orizzontale non si disegna (ADR 0023). Il colore lo dà il CSS di `ChartPanel.vue`.
+   * **Le due righe orizzontali sono accese, quelle verticali no.** Le orizzontali passano
+   * **esattamente** per il campione più basso e per il più alto, e portano il loro numero accanto:
+   * sono ciò che rende leggibile un asse che non parte da zero. Le verticali segnerebbero i
+   * campioni, e i campioni **non hanno un quando** — è la stessa ragione per cui l'asse orizzontale
+   * non si disegna (ADR 0023). Il colore lo dà il CSS di `ChartPanel.vue`.
+   *
+   * **E qui c'è il respiro del grafico, in pixel.** Stava in `series.ts` come frazione
+   * dell'escursione, e da lì entrava nei numeri che il giocatore legge: un margine espresso in
+   * denaro **è** un importo, e l'asse lo scriveva come tale. Diciotto pixel fanno lo stesso lavoro
+   * — tenere la serie staccata dai bordi — senza poter diventare una cifra.
+   *
+   * I due valori non sono uguali perché la libreria non è simmetrica: si tiene **trenta** pixel
+   * sopra e **quindici** sotto, misurati nella finestra vera. Questi due li portano tutti e due a
+   * diciotto. Se un aggiornamento della libreria cambia quelle riserve, si vede subito — il
+   * riquadro pende.
    */
   grid: {
     show: true,
     xaxis: { lines: { show: false } },
-    padding: { top: -14, right: 0, bottom: 0, left: 0 }
+    padding: { top: -12, right: 0, bottom: 3, left: 0 }
   },
   series: [{ name: text('board.chart.title'), data: [...data] }],
   xaxis: {
