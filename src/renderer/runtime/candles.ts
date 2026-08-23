@@ -50,9 +50,9 @@ export const openCandle = (at: Money): Candle => ({ open: at, high: at, low: at,
  * L'apertura non si tocca mai: è il saldo di quando l'intervallo è cominciato, e riscriverla
  * trasformerebbe la candela nella fotografia che non vogliamo.
  *
- * Ritorna una candela nuova e non tocca quella che riceve, come `pushBounded`: lo store la tiene in
- * una variabile che sostituisce, e una mutazione sul posto renderebbe indistinguibili la candela in
- * corso e quelle già accodate.
+ * Ritorna una candela nuova e non tocca quella che riceve, come `pushBounded`: la cronaca la tiene
+ * in una variabile che sostituisce, e una mutazione sul posto renderebbe indistinguibili la candela
+ * in corso e quelle già accodate.
  */
 export const updateCandle = (candle: Candle, at: Money): Candle => ({
   open: candle.open,

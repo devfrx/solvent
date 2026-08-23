@@ -11,8 +11,10 @@ stesso commit.
 Decisioni rilevanti: [ADR 0009](../adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md) (passo
 fisso), [ADR 0002](../adr/0002-registry-unica-lista-di-sistemi.md) (chi itera),
 [ADR 0016](../adr/0016-il-bus-e-sincrono-e-fire-and-forget.md) (il Bus è sincrono),
-[ADR 0019](../adr/0019-transazioni-atomiche-nel-ledger.md) (la primitiva è la transazione) e
-[ADR 0020](../adr/0020-partita-doppia.md) (ogni transazione somma a zero).
+[ADR 0019](../adr/0019-transazioni-atomiche-nel-ledger.md) (la primitiva è la transazione),
+[ADR 0020](../adr/0020-partita-doppia.md) (ogni transazione somma a zero) e
+[ADR 0043](../adr/0043-il-tempo-che-avanza-e-un-operazione-del-gioco.md) (il tempo avanza in un
+posto solo).
 
 ## Dal frame al tick
 
@@ -27,15 +29,47 @@ flowchart TD
   Q -- sì --> N["n = quanti tick interi ci stanno<br/>accumulatore -= n × durata"]
   N --> CAP{"n oltre il<br/>tetto di recupero?"}
   CAP -- sì --> CLAMP["n = tetto<br/>il resto è scartato"]
-  CAP -- no --> TICK
-  CLAMP --> TICK["registry.tickAll(ctx, n)"]
-  TICK --> RENDER["la UI legge i selettori"]
+  CAP -- no --> ADV
+  CLAMP --> ADV["game.advance(n)"]
+  BOOT["il recupero all'avvio<br/>stessa stepOf, stesso tetto"] --> ADV
+  ADV --> TICK["registry.tickAll(ctx, n)"]
+  TICK --> CHR["chronicle.advance(n)<br/>chiude gli intervalli scaduti"]
+  CHR --> RENDER["la UI legge i selettori"]
   WAIT --> RENDER
   RENDER --> RAF
 ```
 
 Il tetto di recupero serve a un caso solo ma importante: riaprire il gioco dopo giorni non deve
 bloccare l'avvio per minuti. Il tetto è un dato in `balance/constants.ts`, non un numero nel loop.
+
+**Le due frecce che entrano in `advance` sono il punto del disegno.** Il passo del frame e il
+recupero all'avvio sono lo stesso fatto — _è passato del tempo mentre non guardavamo_ — e da
+[D037](../delega/D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md) passano dalla stessa
+funzione. Fino ad allora erano due sequenze scritte a mano, e una delle due si era già dimenticata
+la metà che registra: chi chiudeva il gioco e lo riapriva dopo una notte incassava lo stipendio
+arretrato e ritrovava i grafici vuoti. **R25** (`tests/rules/one-way-to-advance`) tiene la freccia
+una sola.
+
+## La cronaca
+
+Ciò che il tempo lascia dietro di sé. Non è un sistema e non entra nel salvataggio: è una lista di
+**registrazioni** — cosa osservare, ogni quanti tick, quante tenerne — dichiarate nel bootstrap
+accanto ai sistemi.
+
+```mermaid
+flowchart LR
+  ADV["chronicle.advance(n)"] --> L["l'unica lista<br/>nessuna operazione guarda chi tratta"]
+  POST["money.posted<br/>un saldo si è mosso fuori dal tick"] --> L
+  L --> S["campione<br/>una fotografia per intervallo"]
+  L --> C["candela<br/>apertura · massimo · minimo · chiusura"]
+  S --> ST["lo store rispecchia, come fa con i saldi"]
+  C --> ST
+```
+
+Le due forme si distinguono per **chiusura** e non per un `if`: un campione ignora ciò che succede
+in mezzo, una candela ci tiene l'escursione. È la forma del Registry applicata a ciò che si
+registra invece che a ciò che ticchetta, e il primo `if` sul tipo di registrazione è il difetto A01
+che torna con un altro nome.
 
 ## Dentro `tickAll`
 
@@ -44,7 +78,7 @@ attraverso il Ledger e il Bus.
 
 ```mermaid
 sequenceDiagram
-    participant L as loop
+    participant L as game.advance
     participant R as Registry
     participant S as income (system)
     participant P as income/rules (puro)

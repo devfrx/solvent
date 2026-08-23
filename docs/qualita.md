@@ -228,6 +228,20 @@ condivisa, ed è ciò che ci si aspetta quando si toglie una copia e non del lav
 la ragione dell'estrazione**, e questa riga sta qui perché il numero fosse misurato invece che
 supposto.
 
+**Rimisurato a [D037](delega/D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md), il
+2026-08-23.** Stesso metodo.
+
+| Renderer minificato | JS          | CSS      |
+| ------------------- | ----------- | -------- |
+| a D036, il 23       | 1.206,70 kB | 22,84 kB |
+| a D037, il 23       | 1.207,33 kB | 22,84 kB |
+
+**Seicento byte di JS, e il CSS fermo al byte.** È ciò che ci si aspetta da una delega che sposta
+codice invece di aggiungerne: la cronaca ne guadagna novanta righe, lo store ne perde cinquanta, e
+la differenza minificata è meno di un chilobyte. Il CSS non si muove perché nessun componente è
+stato toccato — i tre grafici non si sono accorti di niente, ed è la prova che il confine era nel
+posto giusto e la sorgente no.
+
 **Il motore, misurato invece che supposto.** L'[ADR 0032](adr/0032-le-sovrapposizioni-stanno-nel-livello-superiore.md)
 poggia su due funzionalità del motore — il livello superiore e l'ancoraggio CSS — e la sua premessa è
 che il motore sia uno solo e recente. Chiesto a lui invece che al changelog:

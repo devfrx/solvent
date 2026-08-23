@@ -45,7 +45,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23 sono stati fusi i tre rami che aspettavano — `guscio-condiviso-dei-grafici` conteneva già per intero `d034-le-serie-degli-strumenti`, quindi il primo è stato un `--ff-only` e il secondo un commit di soli documenti — e poi `d036-il-pagamento-e-un-flusso-solo`, anche lui con un `--ff-only`. Su ogni fusione `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sul ramo |
 | `origin/main`            | **allineato.** Il 2026-08-23 è stato spinto in un colpo tutto ciò che mancava: le due fusioni e D036. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                                                                                   |
 | Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                        |
-| Prossimo passo           | **scrivere una delega invece di eseguirne una**: [D036](D036-il-pagamento-e-un-flusso-solo.md) è chiusa e fusa, e la fetta 03 comincia da una scheda compilata — vedi _E dopo, la fetta 03_                                                                                                                                                                                                                                                                     |
+| Prossimo passo           | **committare D037, e poi la fetta 03.** Il lavoro di D037 è nell'albero ed è verde su tutti i gate, ma **non è committato**: nessun ramo, nessun commit — non è stato chiesto. La fetta 03 comincia da una scheda compilata — vedi _E dopo, la fetta 03_                                                                                                                                                                                                        |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -67,10 +67,99 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 > Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
 > agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
 
-## La **terza** sessione del 2026-08-23: i rami fusi, e D036 scritta ed eseguita
+## La **quarta** sessione del 2026-08-23: D037, il tempo che avanza ha un proprietario
 
 Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
 recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
+
+**Cosa è stato chiuso.**
+
+| Delega                                                        | Cos'era                                                        |
+| ------------------------------------------------------------- | -------------------------------------------------------------- |
+| [D037](D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md) | il tempo di gioco avanzava da due punti, e solo uno registrava |
+
+Scritta **e** eseguita nella stessa sessione, come D036 e per la stessa ragione: la richiesta è
+arrivata dall'utente come feature — «i grafici usano un metodo di aggiornamento a sé stante, che
+ignora i tick del kernel» — ed è risultata essere un difetto misurabile.
+
+### Le cinque cose che chi arriva adesso deve sapere
+
+**1. Il difetto era vero, e più preciso di come era descritto.** La cadenza delle serie era già in
+tick: nessun cronometro parallelo. Ma `registry.tickAll` aveva **due** chiamanti nello store — il
+passo del loop e `recover()` — e solo il primo campionava. Chi chiudeva il gioco e lo riapriva dopo
+una notte incassava fino a otto ore di stipendio arretrato e ritrovava i grafici vuoti. Nascondere
+la finestra invece funzionava, perché quella strada passa dal loop: **due situazioni che il progetto
+descrive come «la stessa cosa» avevano copertura diversa**, ed è il posto dove cercare quando un
+difetto sembra impossibile.
+
+**2. Il commento diceva il contrario del codice, e nessun gate poteva vederlo.** `sampleOf` in
+`loop.ts` prometteva «il tetto del recupero produce un campione solo… tornare dopo otto ore arriva
+qui come un `elapsed` enorme», e a quel codice il recupero non arrivava mai. Vale come metodo: **un
+commento che descrive un percorso è una cosa da verificare, non da credere** — soprattutto quando
+descrive un chiamante che non è quello sotto gli occhi.
+
+**3. La radice non era il campionamento.** `Game` aveva `save`, `load` e `reset` — le tre operazioni
+che riguardano tutta la partita — e non aveva la quarta, quella che succede dieci volte al secondo.
+Senza un proprietario, «il tempo è passato» è stato scritto due volte e in modo diverso. Adesso c'è
+`Game.advance`, e **R25** (`tests/rules/one-way-to-advance`) tiene i chiamanti a uno.
+
+**4. La correzione si è vista nella finestra vera, con dei numeri.** Riaperto il gioco su un
+salvataggio vecchio di **dieci ore e mezza**, il grafico dei contanti porta una candela che apre a
+**59.899,20 €** — il saldo salvato — e chiude a **250.000,00 €**, il tetto del caveau: è la notte
+intera, disegnata. Prima di D037 quel grafico sarebbe partito piatto a 250.000,00 €, perché
+`mirror()` riapriva l'escursione **dopo** il recupero e ne cancellava il salto. Le altre due serie
+sono piatte, e lo dicono onestamente: il caveau è pieno, quindi il reddito non entra più.
+
+**5. Il pezzo nuovo non sa cosa sia un grafico.** `runtime/chronicle.ts` è una lista di
+**registrazioni** — cosa osservare, ogni quanti tick, quante tenerne — con due forme, fotografia ed
+escursione, che si distinguono per chiusura e non per un `if`. Registrare «le commissioni nel tempo»
+o «il livello del caveau» è una riga nel bootstrap, non una modifica alla cronaca. Se domani i
+grafici sparissero, `advance` e la cronaca resterebbero sensati.
+
+### Cosa c'è nell'albero di lavoro alla chiusura
+
+Verificato con i comandi, non ricordato.
+
+- **`npm run verify` verde**, e i test sono 1.111 su 85 file. **`npm run build` verde.** Ogni test
+  nuovo è stato visto rosso di proposito: per i quattro della riapertura il rosso è stato costruito
+  **rimettendo il difetto** — `registry.tickAll` dentro `recover()` — e per i quattordici della
+  cronaca rompendo a turno l'iterazione della lista, l'iscrizione al Bus, `reopen` e la cadenza.
+  Ogni file rotto è stato **copiato prima** e ripristinato con un `diff` che conferma l'identità: è
+  la trappola che D036 aveva pagato con mezz'ora di lavoro.
+- **Niente è committato.** Nessun ramo `d037-*`, nessun commit: la sessione non ha ricevuto quella
+  richiesta, e un commit non chiesto è una di quelle cose che si chiedono. Cosa c'è nell'albero lo
+  dice `git status`.
+- **Niente residui di debug**: nessun `console.log`, nessun `TODO`.
+
+### Cosa questa sessione ha lasciato indietro
+
+Censito, non nascosto.
+
+1. **Nessuna misura della catena a macchina scarica.** Aperta da sei sessioni.
+2. **Gli script CDP non sopravvivono a questa sessione**, ed è la sesta riscrittura. Vivono nello
+   scratchpad, che è **della sessione**. Stavolta è costato poco, perché il punto 5 della sessione
+   precedente aveva annotato la riga che apre la porta di ispezione; resta però una cosa in più da
+   sapere, che il progetto adesso conosce: **`ws` non è installato e non serve**, perché Node 24 ha
+   `WebSocket` fra i globali. Metterli in `scripts/` resta una decisione che nessuno ha preso, e
+   adesso si sa quanto costa non prenderla: una riscrittura a sessione, sei volte finora.
+3. **`components/atm/BankCard3d.vue` ha due lettori**, e il secondo è `components/payment/`. Il
+   grilletto per spostarla sta nella decisione 6 di D036, ed è ancora fermo lì.
+4. **Le due candele degli strumenti sono due dichiarazioni e non un ciclo su `POOLS[pool].player`.**
+   Il ciclo sarebbe la regola vera, e pretende una chiave i18n costruita a runtime contro un'unione
+   tipizzata (R12). Grilletto: il terzo strumento del giocatore.
+
+### Un vicolo cieco, per non ripercorrerlo
+
+**`nextCandle(open)` e `openCandle(observe())` sono indistinguibili da un test.** Alla chiusura di un
+intervallo il valore osservato **è** la chiusura, quindi le due scritture danno lo stesso risultato in
+ogni caso raggiungibile dal gioco. Provato scambiandole: nessun test è diventato rosso. Non è un buco
+nella copertura — è che la differenza non esiste. Resta `nextCandle`, che è la semantica dichiarata
+in `candles.ts` e non chiede una seconda osservazione.
+
+## La **terza** sessione del 2026-08-23: i rami fusi, e D036 scritta ed eseguita
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. Descrive uno stato
+già superato, e si legge come storia — come tutte le sezioni sotto.
 
 **Cosa è stato chiuso.**
 
@@ -1544,6 +1633,11 @@ interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto co
 | Il numero della carta passa il controllo di **Luhn**                                                 | [D036](D036-il-pagamento-e-un-flusso-solo.md) — decisione 4                                                               | sedici cifre estratte e basta: costa otto righe in meno e lascia «il numero è vero» senza niente che lo sostenga. Quello di oggi non lo passa, e la somma fa 53                                                                                                |
 | Il bancomat **non** chiede il codice della carta                                                     | [D036](D036-il-pagamento-e-un-flusso-solo.md) — decisione 5                                                               | chiederlo anche lì, che è più uniforme: prelevare non ha una scelta di strumento, ha già la sua cerimonia, ed è l'unico gesto ripetuto del gioco                                                                                                               |
 | `BankCard3d` **resta** in `components/atm/`, e `payment/` la importa                                 | [D036](D036-il-pagamento-e-un-flusso-solo.md) — decisione 6                                                               | spostarla, o duplicarne una versione ridotta dentro la finestra: la prima è un `git mv` per una purezza che nessuna regola esprime, la seconda è la duplicazione che questa delega esiste per togliere                                                         |
+| La cronaca vive in `runtime/` e non in `core/kernel/` né come sistema registrato                     | [D037](D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md) — decisione 1                                               | un sistema registrato: la forma più pura secondo l'ADR 0002, e costa una terza forma di sistema nel Registry — ticchetta e si azzera ma non si salva, che oggi il tipo esclude                                                                                 |
+| `Game.advance` compone a mano, invece di far ticchettare la cronaca dentro `tickAll`                 | [D037](D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md) — decisione 2                                               | il Registry che itera anche le registrazioni: una lista sola davvero, e il kernel imparerebbe cosa sia una serie                                                                                                                                               |
+| `netWorthOf` entra in `contracts/ledger.ts` invece di restare una somma dello store                  | [D037](D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md) — decisione 3                                               | lasciare due somme: quella dello store e quella della registrazione, che oggi rispondono uguale e un giorno no                                                                                                                                                 |
+| La cronaca si iscrive **da sé** al Bus, invece di farsi svegliare da chi la possiede                 | [D037](D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md) — decisione 4                                               | una riga nell'handler dello store: più visibile, e di nuovo una cosa da ricordarsi — cioè il difetto che la delega chiude                                                                                                                                      |
+| `Chronicle.reset()` non riceve lo `scope`, perché `soft` e `hard` farebbero la stessa cosa           | [D037](D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md) — decisione 5                                               | accettarlo e ignorarlo, cioè una differenza dichiarata e non mantenuta                                                                                                                                                                                         |
 
 La ventiduesima è di **D013** e costa una riga di un test: è anche l'unica riga non di test che
 quella delega abbia toccato.
@@ -1599,6 +1693,14 @@ La seconda — il permesso come affordance del pool — è quella che decide se 
 pagamento resta un flusso solo o torna a essere un `if`, ed è l'unica delle sei che tocchi
 `contracts/`. La quarta ha un numero dietro invece di un'opinione: il numero stampato oggi sulla
 carta non passa il controllo di Luhn, e la somma fa 53 — misurata, non dedotta.
+
+**Le cinque righe di [D037](D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md)** sono le quarte
+prese su una **direttiva generale**, dopo quelle di D027, D035 e D036, e sono le prime prese su una
+domanda che l'utente ha **rilanciato** invece di rimandare: «questa cosa è specifica solo per i
+grafici o riutilizzabile?». La risposta ha cambiato il disegno — la cronaca è diventata dichiarativa
+invece di avere tre campi cablati — ed è la ragione per cui la prima riga è quella da guardare per
+prima. Costano `runtime/chronicle.ts`, `Game.advance` e i loro test; contestarne una vuol dire
+spostare un file e cambiare due firme, non disfare del comportamento.
 
 Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
 recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE_FLOOR` scelti

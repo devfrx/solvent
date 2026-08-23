@@ -27,7 +27,7 @@ flowchart TD
     UI["ui/*<br/>tokens · roles · theme · i pezzi<br/>non sa che gioco è"]
     I18N["i18n/*"]
     ST["stores/*"]
-    RT["runtime/*<br/>createGame · loop · host · cheats · candles"]
+    RT["runtime/*<br/>createGame · loop · host · cheats · candles · chronicle"]
   end
 
   subgraph CORE["core — nessun Vue, Pinia o Electron"]
@@ -86,9 +86,10 @@ che sono due componenti di gioco. Prima montava solo le viste, e le linguette se
 
 `CMP --> RT` nasce con [D034](delega/D034-le-serie-degli-strumenti.md), ed è di **soli tipi**: il
 grafico a candele riceve dallo store delle `Candle`, e per convertirle deve nominarne la forma. La
-forma sta in `runtime/` e non accanto a chi disegna perché il suo produttore è lo **store**, e un
-`ST --> CMP` sarebbe la freccia al contrario — cioè un ciclo con `CMP --> ST`, che qui sopra esiste
-già. È lo stesso motivo per cui `sampleOf` vive in `runtime/loop.ts` invece che accanto allo store:
+forma sta in `runtime/` e non accanto a chi disegna perché il suo produttore è la **cronaca**, che
+da [D037](delega/D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md) abita lì insieme al `Game`
+che la fa avanzare — prima era lo store. Un `ST --> CMP` sarebbe la freccia al contrario, cioè un
+ciclo con `CMP --> ST`, che qui sopra esiste già. È lo stesso motivo per cui `sampleOf` vive in `runtime/loop.ts` invece che accanto allo store:
 R01 vieta a uno store di importare ciò che gli sta accanto, e `runtime/` è dove finisce ciò che il
 renderer calcola senza montare niente.
 
@@ -206,7 +207,8 @@ solvent/
 │     ├─ main.ts
 │     ├─ App.vue                  # il guscio: i 7 stati, la navigazione, i token e le primitive
 │     ├─ runtime/
-│     │  ├─ createGame.ts         # registra i sistemi, monta il contesto
+│     │  ├─ createGame.ts         # registra i sistemi, monta il contesto, fa avanzare il tempo
+│     │  ├─ chronicle.ts          # le serie che il tempo alimenta: una lista, due forme (R25)
 │     │  ├─ host.ts               # l'unico file che tocca il browser
 │     │  └─ loop.ts               # rAF + accumulatore -> tick a passo fisso
 │     ├─ stores/
@@ -308,6 +310,7 @@ Legenda: **🔒 impossibile** = il tipo o la struttura non permettono di scriver
 | 22  | Il livello superiore passa dal kit             | `tests/rules/overlays-pass-through-the-kit`: `popover` vive in `UiPopover` e `<dialog>` in `UiDialog`, e in nessun altro `.vue`                                                                                                       |
 | 23  | Il vestito dei grafici vive in un file solo    | `tests/rules/chart-dress`: nessuna classe di ApexCharts nominata fuori da `ChartPanel.vue`                                                                                                                                            |
 | 24  | La scelta di con cosa si paga è un pezzo solo  | `tests/rules/payment-flow`: fuori da `components/payment/` nessun `.vue` nomina un'opzione di pagamento né cicla su un listino                                                                                                        |
+| 25  | Il tempo di gioco avanza in un posto solo      | `tests/rules/one-way-to-advance`: fuori da `runtime/createGame.ts` nessun file del renderer nomina `tickAll`. `Game.advance` ticchetta i sistemi **e** alimenta la cronaca, così nessun chiamante può fare metà del lavoro (ADR 0043) |
 
 **Quando entra ciascun meccanismo.** Alcune di queste regole sono già in vigore, altre nascono con
 la delega che le usa: la colonna _Delega_ di [tracciabilita.md](tracciabilita.md) dice quale, per

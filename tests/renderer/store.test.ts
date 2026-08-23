@@ -5,6 +5,7 @@ import { toRaw } from 'vue'
 import type { Balances } from '@core/contracts/ledger'
 import { fromString, toString } from '@core/contracts/money'
 import type { Pool } from '@core/contracts/pools'
+import { CASH_START_CAPACITY } from '@core/contracts/pools'
 import type { LoadedSave, SavePayload, SaveResult } from '@core/contracts/save'
 
 import { BALANCE } from '@core/balance/constants'
@@ -44,6 +45,12 @@ let stage: Stage
  * rende la differenza visibile leggendo il test (ADR 0042).
  */
 const NO_PROOF = ''
+
+/** I quattro numeri di una candela. Una candela che non c'è ritorna niente, e il confronto lo dice. */
+const numbersOf = (candle: Candle | undefined): readonly string[] =>
+  candle === undefined
+    ? []
+    : [candle.open, candle.high, candle.low, candle.close].map((value) => toString(value))
 
 const start = async (options: StageOptions = {}): Promise<ReturnType<typeof useGameStore>> => {
   stage = createStage(options)
@@ -297,12 +304,6 @@ describe('le serie degli strumenti', () => {
     stage.frame()
   }
 
-  /** I quattro numeri di una candela. Una candela che non c'è ritorna niente, e il confronto lo dice. */
-  const numbersOf = (candle: Candle | undefined): readonly string[] =>
-    candle === undefined
-      ? []
-      : [candle.open, candle.high, candle.low, candle.close].map((value) => toString(value))
-
   it('non chiudono niente prima della cadenza, e la prima candela arriva a cadenza scaduta', async () => {
     const store = await start()
     stage.frame()
@@ -385,6 +386,62 @@ describe('le serie degli strumenti', () => {
 
     expect(store.cashCandles.items).toEqual([])
     expect(store.cardCandles.items).toEqual([])
+  })
+})
+
+describe('riaprire il gioco dopo una notte', () => {
+  /** Il tetto del recupero, in millisecondi: la notte più lunga che il gioco riconosce. */
+  const A_NIGHT = clock.ticksToMilliseconds(BALANCE.RECOVERY_CAP)
+
+  /**
+   * D037 — il difetto che questa delega chiude, e l'unica strada che lo mostrava.
+   *
+   * A finestra **nascosta** il recupero passa dal loop, e le serie lo vedevano già: è il test qui
+   * sopra, «una notte a finestra nascosta vale un campione». A gioco **chiuso e riaperto** passa da
+   * `recover()`, che chiamava `registry.tickAll` per conto suo — quindi otto ore di gioco
+   * arrivavano ai domini e non alle serie, e i tre grafici ripartivano vuoti come se non fosse
+   * successo niente. Le due strade sono lo stesso fatto — *è passato del tempo mentre non
+   * guardavamo* — e adesso sono la stessa funzione.
+   */
+  const reopened = async (): Promise<ReturnType<typeof useGameStore>> =>
+    start({ load: found(freshPayload(), SAVED_AT), wallClock: SAVED_AT + A_NIGHT })
+
+  it('lascia un campione e una candela per strumento, non zero', async () => {
+    const store = await reopened()
+
+    expect(store.netWorthSeries.items).toHaveLength(1)
+    expect(store.cashCandles.items).toHaveLength(1)
+    expect(store.cardCandles.items).toHaveLength(1)
+  })
+
+  it('e il campione porta il patrimonio che il recupero ha appena prodotto', async () => {
+    // Otto ore di stipendio contro il caveau di partenza: entra quello che ci sta, e il campione
+    // porta quello. È lo stesso numero che il riquadro del cruscotto mostra, perché a sommarlo è
+    // la stessa funzione.
+    const store = await reopened()
+
+    expect(toString(store.netWorthSeries.items[0] ?? fromString('0'))).toBe(
+      toString(CASH_START_CAPACITY)
+    )
+  })
+
+  it('e la candela dei contanti dice da dove sono saliti, invece di aprire sul salto', async () => {
+    // Apertura sul saldo caricato — zero — e chiusura sul caveau pieno: è **una** candela per otto
+    // ore, non millecinquecento, perché il reddito arretrato entra in una transazione sola.
+    const store = await reopened()
+
+    expect(numbersOf(store.cashCandles.items[0])).toEqual([
+      '0',
+      toString(CASH_START_CAPACITY),
+      '0',
+      toString(CASH_START_CAPACITY)
+    ])
+  })
+
+  it('e la carta, che nessuno ha toccato, porta una candela piatta', async () => {
+    const store = await reopened()
+
+    expect(numbersOf(store.cardCandles.items[0])).toEqual(['0', '0', '0', '0'])
   })
 })
 

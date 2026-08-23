@@ -4,6 +4,7 @@ import { fromString, toString } from '@core/contracts/money'
 import { POOL_IDS } from '@core/contracts/pools'
 import type { SavePayload } from '@core/contracts/save'
 
+import { BALANCE } from '@core/balance/constants'
 import { ticks } from '@core/kernel/Clock'
 import { income } from '@core/kernel/Ledger'
 
@@ -92,6 +93,42 @@ describe('una partita è un’istanza sola di ciascuna cosa', () => {
   })
 })
 
+describe('il tempo che avanza', () => {
+  /** Un intervallo di serie, in tick: quanto basta perché una registrazione chiuda. */
+  const AN_INTERVAL = BALANCE.INSTRUMENT_CANDLE_EVERY
+
+  it('ticchetta i sistemi e registra, in un gesto solo', () => {
+    // D037 · ADR 0043 — è ciò che rende impossibile un secondo percorso che ticchetti senza
+    // registrare. Fino a D037 i due gesti erano scritti a mano in due punti, e uno dei due si era
+    // già dimenticato la metà che registra.
+    game.advance(AN_INTERVAL)
+
+    expect(game.ctx.ledger.balance('cash').isPositive()).toBe(true)
+    expect(game.series.netWorth.list().items).toHaveLength(1)
+    expect(game.series.cash.list().items).toHaveLength(1)
+    expect(game.series.card.list().items).toHaveLength(1)
+  })
+
+  it('e la cronaca vede i saldi che il tick ha appena prodotto, non quelli di prima', () => {
+    // L'ordine dentro `advance` non è indifferente: prima i sistemi, poi la cronaca. Al contrario,
+    // ogni campione porterebbe il gioco di un passo fa.
+    game.advance(AN_INTERVAL)
+
+    const sampled = game.series.netWorth.list().items[0]
+
+    expect(sampled).toBeDefined()
+    expect(toString(sampled ?? fromString('-1'))).toBe(toString(game.ctx.ledger.balance('cash')))
+  })
+
+  it('un passo che non chiude niente non lascia niente, e la lista resta la stessa', () => {
+    const before = game.series.netWorth.list()
+
+    game.advance(ticks(1))
+
+    expect(game.series.netWorth.list()).toBe(before)
+  })
+})
+
 describe('il salvataggio', () => {
   it('save → load riproduce saldi, seme e stato dei domini', () => {
     game.ctx.ledger.transaction(income('card', fromString('900')), {
@@ -173,5 +210,42 @@ describe('il reset', () => {
     game.reset('soft')
 
     expect(game.save().rng.seed).toBe(SEED)
+  })
+
+  it('azzera anche le serie, in tutti e due gli scopi: sono di questa partita', () => {
+    // D037 — prima erano sei righe scritte a mano nello store, cioè sei righe da ricordarsi.
+    // Tenerle farebbe cominciare i grafici della partita nuova con il patrimonio di quella buttata
+    // via, cioè con la sua scala.
+    game.advance(BALANCE.INSTRUMENT_CANDLE_EVERY)
+    expect(game.series.cash.list().items).toHaveLength(1)
+
+    game.reset('soft')
+    expect(game.series.cash.list().items).toEqual([])
+
+    game.advance(BALANCE.INSTRUMENT_CANDLE_EVERY)
+    game.reset('hard')
+    expect(game.series.cash.list().items).toEqual([])
+  })
+})
+
+describe('caricare non è un movimento economico', () => {
+  it('e le escursioni ripartono dai saldi caricati, non da zero', () => {
+    // Senza, la prima candela di una partita riaperta salirebbe da zero al patrimonio caricato:
+    // una salita mai avvenuta, e per giunta quella che decide la scala dell'asse. Nessun evento lo
+    // annuncia — caricare non posta — quindi a dirlo è `Game.load`.
+    game.ctx.ledger.transaction(income('card', fromString('340')), {
+      reason: 'reason.income.tick'
+    })
+    const saved: SavePayload = game.save()
+
+    const reopened = createGame(SEED + 1)
+    expect(reopened.load(saved).ok).toBe(true)
+    reopened.advance(BALANCE.INSTRUMENT_CANDLE_EVERY)
+
+    const candle = reopened.series.card.list().items[0]
+
+    expect(candle).toBeDefined()
+    expect(toString(candle?.open ?? fromString('-1'))).toBe('340')
+    expect(toString(candle?.low ?? fromString('-1'))).toBe('340')
   })
 })

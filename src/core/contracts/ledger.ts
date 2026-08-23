@@ -1,5 +1,7 @@
 import type { Money } from './money'
+import { ZERO } from './money'
 import type { Pool } from './pools'
+import { POOL_IDS, POOLS } from './pools'
 
 /**
  * Il vocabolario del denaro. Il Ledger che lo usa è D007: qui ci sono solo i tipi.
@@ -61,6 +63,32 @@ export interface TransactionMeta {
 
 /** I saldi di tutti i conti, giocatore e non. La somma è sempre zero (ADR 0020). */
 export type Balances = Readonly<Record<Pool, Money>>
+
+/**
+ * Le pozze che sono del giocatore, derivate da `POOLS` invece che elencate. I quattro conti
+ * dell'ADR 0020 non compaiono mai nella UI, e il giorno in cui nascesse un terzo strumento questa
+ * riga non cambierebbe.
+ */
+const PLAYER_POOLS = POOL_IDS.filter((pool) => POOLS[pool].player)
+
+/**
+ * Il **patrimonio netto**: la somma delle pozze che sono del giocatore.
+ *
+ * Sta qui e non in due punti perché due somme dello stesso patrimonio sono due patrimoni — la
+ * stessa trappola già chiusa per la commissione del bancomat (INV-11) e per la capienza del caveau
+ * (INV-18), qui applicata al numero più visibile del gioco. Lo leggono il riquadro del cruscotto,
+ * la serie che ne registra l'andamento, e chiunque altro arriverà: **la stessa funzione**, non due
+ * che oggi rispondono uguale.
+ *
+ * Vive in `contracts/ledger.ts` e non in `pools.ts` perché il suo argomento è `Balances`, e la
+ * freccia fra i due file va in quel verso: `ledger` importa `pools`, quindi il contrario sarebbe
+ * un ciclo.
+ *
+ * Il rovescio dell'identità INV-08 vista dal giocatore: `earned - spent - feesPaid` è **sempre**
+ * questo numero, perché la somma di tutti i conti fa zero.
+ */
+export const netWorthOf = (balances: Balances): Money =>
+  PLAYER_POOLS.reduce((total, pool) => total.plus(balances[pool]), ZERO)
 
 /**
  * ADR 0007 — ogni errore ha un `code` (chiave i18n) e un contesto tipizzato, così la UI può

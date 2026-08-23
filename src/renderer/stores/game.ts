@@ -6,11 +6,12 @@ import { boundedList, pushBounded } from '@core/contracts/bounded'
 import type { Cheat, CheatId, CheatResult } from '@core/contracts/cheats'
 import type { CommandHandler } from '@core/contracts/commands'
 import type { Balances, Posting, Transaction } from '@core/contracts/ledger'
+import { netWorthOf } from '@core/contracts/ledger'
 import type { Money } from '@core/contracts/money'
 import { ZERO } from '@core/contracts/money'
 import type { PaymentError, PriceList } from '@core/contracts/payment'
 import type { Pool } from '@core/contracts/pools'
-import { POOL_IDS, POOLS, roomIn } from '@core/contracts/pools'
+import { POOLS, roomIn } from '@core/contracts/pools'
 import type { Result } from '@core/contracts/result'
 import type { SaveError } from '@core/contracts/save'
 
@@ -38,14 +39,13 @@ import {
 import type { VaultError } from '@core/domains/vault/system'
 import type { VaultState } from '@core/domains/vault/types'
 import type { Cheats } from '@core/kernel/Cheats'
-import type { Milliseconds, Ticks } from '@core/kernel/Clock'
-import { clock, milliseconds, ticks } from '@core/kernel/Clock'
+import type { Milliseconds } from '@core/kernel/Clock'
+import { clock, milliseconds } from '@core/kernel/Clock'
 
 import type { Candle } from '@renderer/runtime/candles'
-import { nextCandle, openCandle, updateCandle } from '@renderer/runtime/candles'
 import type { Game, GameLoadError } from '@renderer/runtime/createGame'
 import type { Host } from '@renderer/runtime/host'
-import { createLoop, sampleOf, stepOf } from '@renderer/runtime/loop'
+import { createLoop, stepOf } from '@renderer/runtime/loop'
 
 /**
  * L'unico store della fetta, e un **lettore**: riceve dal Bus e rispecchia. Non calcola niente.
@@ -65,10 +65,11 @@ import { createLoop, sampleOf, stepOf } from '@renderer/runtime/loop'
  * non gioco: un `.vue` non può sommare (R05), e il registro YAGNI diceva che quel selettore sarebbe
  * nato col pannello che lo consuma. È questo.
  *
- * Da D027 tiene anche la **serie** del patrimonio netto, ed è la prima lista di questo file che non
- * è un mirror: `history` rispecchia ciò che il Bus ha appena detto, `netWorthSeries` decide **ogni
- * quanto** guardare. La regola che lo decide è pura e sta in `runtime/loop.ts`, accanto a quella
- * che trasforma i frame in tick — è lo stesso accumulatore un piano più su.
+ * Da D027 mostra anche le **serie**, e per due deleghe le ha anche tenute: erano l'unica cosa qui
+ * dentro che non fosse un mirror — `history` rispecchia ciò che il Bus ha appena detto, mentre una
+ * serie decideva **ogni quanto** guardare, cioè calcolava. Da D037 non più: a tenerle è la cronaca
+ * della partita, che il tempo alimenta dentro `Game.advance` (ADR 0043), e qui restano tre
+ * `shallowRef` che la rispecchiano come i saldi.
  */
 
 /**
@@ -193,72 +194,39 @@ export const useGameStore = defineStore('game', () => {
   const savedAt = ref<number | null>(null)
 
   /**
-   * D027 — la serie del patrimonio netto, cioè **lo stesso numero** che il riquadro del cruscotto
-   * mostra, preso a intervalli regolari.
+   * D037 — le tre serie del cruscotto, **rispecchiate**. A tenerle è la cronaca della partita, che
+   * il tempo di gioco alimenta dentro `Game.advance` (`runtime/chronicle.ts`).
    *
-   * Un campione è un `Money` e non l'intero `Balances`, ed è la conseguenza di una decisione di
-   * disegno: il grafico ha una scala che si adatta alla finestra, e su una scala che taglia il
-   * fondo una barra impilata direbbe una bugia sulla composizione (`components/shell/series.ts`).
-   * Tenere qui i sei saldi per disegnarne uno solo sarebbe conservare per un grafico che non
-   * esiste.
+   * Fino a D037 le costruiva questo file, con i propri accumulatori: cioè **calcolava**, che è
+   * esattamente ciò che la prima riga qui sopra dichiara di non fare. Il prezzo di quella riga
+   * scritta e non mantenuta era misurabile — `registry.tickAll` aveva due chiamanti qui dentro e
+   * solo uno campionava, quindi riaprire il gioco dopo una notte faceva passare fino a otto ore di
+   * gioco senza lasciare un campione né una candela.
    *
-   * A sommare è `netWorth`, la **stessa** `computed` che il riquadro legge: due somme del
-   * patrimonio in due punti sono due patrimoni, ed è la trappola che questo progetto ha già chiuso
-   * per la commissione del bancomat e per la capienza del caveau.
+   * **Non entrano nel salvataggio**, come `history`, e per una ragione in più: senza il calendario
+   * dell'ADR 0023 un campione non sa **quando** è stato preso, quindi due punti affiancati
+   * potrebbero distare un tick o otto ore e il grafico li disegnerebbe uguali. Una serie che
+   * riparte a ogni avvio dice meno ed è vera; una salvata direbbe di più e mentirebbe. INV-06 non
+   * si muove.
    *
-   * **Non entra nel salvataggio**, come `history`, e per una ragione in più: senza il calendario
-   * dell'ADR 0023 un campione non sa **quando** è stato preso, quindi due barre affiancate
-   * potrebbero distare un tick o otto ore e il grafico le disegnerebbe uguali. Una serie che
-   * riparte a ogni avvio dice meno ed è vera; una salvata direbbe di più e mentirebbe. Il giorno in
-   * cui il calendario esiste, questa riga è il primo posto da rileggere — e allora l'ADR 0010 avrà
-   * il suo meccanismo intero.
+   * Sono `shallowRef` come i saldi e per la stessa ragione, che qui vale doppio: `pushBounded`
+   * ritorna una lista nuova a ogni chiusura e **la stessa** in mezzo, quindi rileggerle a ogni
+   * passo del loop costa un confronto e non sveglia nessuno finché non è successo niente.
    */
-  const netWorthSeries = shallowRef<BoundedList<Money>>(
-    boundedList<Money>(BALANCE.NET_WORTH_SAMPLES)
-  )
+  const netWorthSeries = shallowRef<BoundedList<Money>>(game.series.netWorth.list())
+  const cashCandles = shallowRef<BoundedList<Candle>>(game.series.cash.list())
+  const cardCandles = shallowRef<BoundedList<Candle>>(game.series.card.list())
 
   /**
-   * D034 — una serie di candele per ogni **strumento**, cioè per le due pozze che sono del
-   * giocatore (`POOLS[pool].player`). Il patrimonio netto dice come è andato il totale, e il totale
-   * è la cosa meno interessante di questo gioco: la tensione è fra due strumenti che si comportano
-   * in modo opposto — i contanti salgono da soli e sbattono contro un tetto, la carta non si muove
-   * finché non decidi tu — e una somma che sale liscia nasconde esattamente quella differenza.
-   *
-   * Sono due `boundedList` come `netWorthSeries`, con lo stesso limite dichiarato al punto di
-   * definizione (R09), e **non entrano nel salvataggio** per le stesse due ragioni: sono di questa
-   * partita, e senza il calendario dell'ADR 0023 una candela non sa quando è stata chiusa. INV-06
-   * non si muove.
+   * Il mirror delle serie. Va riletto dove il tempo è passato e dove la partita è cambiata sotto —
+   * cioè dopo `advance` e dentro `mirror` — e non a ogni transazione: una serie cambia quando un
+   * intervallo si chiude, e a chiudere un intervallo è il tempo.
    */
-  const cashCandles = shallowRef<BoundedList<Candle>>(
-    boundedList<Candle>(BALANCE.INSTRUMENT_CANDLES)
-  )
-  const cardCandles = shallowRef<BoundedList<Candle>>(
-    boundedList<Candle>(BALANCE.INSTRUMENT_CANDLES)
-  )
-
-  /**
-   * Le due candele **in corso**, quelle che l'intervallo non ha ancora chiuso. Vivono qui come
-   * `sinceSample`: nessuna schermata le guarda — il grafico disegna solo ciò che è chiuso — quindi
-   * non hanno ragione di essere reattive.
-   *
-   * Si aggiornano a ogni transazione e non a ogni tick: il saldo cambia **solo** quando il Ledger
-   * posta, e lo store è già lì per il mirror. Un secondo giro sul Bus non servirebbe a niente.
-   */
-  let openCash: Candle = openCandle(balances.value.cash)
-  let openCard: Candle = openCandle(balances.value.card)
-
-  /**
-   * Quanti tick sono passati dall'ultimo campione. È l'accumulatore di `sampleOf`, e vive qui come
-   * `hiddenAt`: un valore che nessuna schermata guarda non ha ragione di essere reattivo.
-   */
-  let sinceSample: Ticks = ticks(0)
-
-  /**
-   * Lo stesso accumulatore per le candele, e **non** è `sinceSample` riusato: un intervallo di
-   * candela e una cadenza di campionamento sono due decisioni diverse, e i due numeri che le
-   * governano sono già due in `balance/constants.ts`.
-   */
-  let sinceCandle: Ticks = ticks(0)
+  const readSeries = (): void => {
+    netWorthSeries.value = game.series.netWorth.list()
+    cashCandles.value = game.series.cash.list()
+    cardCandles.value = game.series.card.list()
+  }
 
   /**
    * I numeri del reddito che la UI mostra e non può calcolare: un `.vue` non importa
@@ -606,12 +574,11 @@ export const useGameStore = defineStore('game', () => {
    * I tre reggono un'identità che vale la pena conoscere: `earned - spent - feesPaid` è
    * `netWorth`, sempre, ed è INV-08 vista dal cruscotto.
    */
-  const netWorth = computed<Money>(() =>
-    POOL_IDS.filter((pool) => POOLS[pool].player).reduce(
-      (total, pool) => total.plus(balances.value[pool]),
-      ZERO
-    )
-  )
+  // A sommare è `netWorthOf`, che vive nel contratto del Ledger: da D037 la **stessa** funzione
+  // risponde a questo riquadro e alla serie che ne registra l'andamento. Due somme dello stesso
+  // patrimonio sono due patrimoni, ed è la trappola già chiusa per la commissione del bancomat e
+  // per la capienza del caveau.
+  const netWorth = computed<Money>(() => netWorthOf(balances.value))
   // `ZERO.minus(...)` e non `.neg()`: l'opposto di zero, in decimal.js come in JavaScript, è
   // **meno zero** — e una partita appena nata mostrerebbe «-0,00 €» sul primo riquadro.
   const earned = computed<Money>(() => ZERO.minus(balances.value.world))
@@ -635,23 +602,10 @@ export const useGameStore = defineStore('game', () => {
   game.ctx.bus.on('money.posted', (posted) => {
     balances.value = posted.balances
     history.value = pushBounded(history.value, posted.transaction)
-    // Le candele in corso guardano **qui**, che è l'unico punto in cui un saldo cambia. Fra due
-    // chiusure possono passare decine di transazioni, e ciascuna può spostare il massimo o il
-    // minimo: è l'informazione che una fotografia presa a intervalli non avrebbe mai.
-    openCash = updateCandle(openCash, posted.balances.cash)
-    openCard = updateCandle(openCard, posted.balances.card)
+    // Le escursioni in corso non si aggiornano qui: da D037 è la cronaca a iscriversi a questo
+    // evento, dentro `runtime/chronicle.ts`. Una serie alimentata da una riga scritta qui sarebbe
+    // di nuovo una cosa da ricordarsi, e questo store ne ha già dimenticata una.
   })
-
-  /**
-   * Le candele in corso ripartono dai saldi che ci sono adesso. Serve dove un saldo cambia **senza**
-   * una transazione — cioè dopo un caricamento e dopo il recupero — e senza, la prima candela di una
-   * partita riaperta salirebbe da zero al patrimonio caricato: una salita mai avvenuta, e per giunta
-   * quella che decide la scala dell'asse.
-   */
-  const reopen = (): void => {
-    openCash = openCandle(balances.value.cash)
-    openCard = openCandle(balances.value.card)
-  }
 
   /** Caricare non è un movimento economico, quindi non emette: il mirror va riletto a mano. */
   const mirror = (): void => {
@@ -659,7 +613,7 @@ export const useGameStore = defineStore('game', () => {
     card.value = cardOf(game.ctx.rng.save().seed)
     readIncome()
     readVault()
-    reopen()
+    readSeries()
   }
 
   const fail = (cause: GameFailure, phase: FailurePhase): void => {
@@ -674,31 +628,16 @@ export const useGameStore = defineStore('game', () => {
     now: host.now,
     schedule: host.schedule,
     onStep: (step) => {
-      game.registry.tickAll(game.ctx, step.elapsed)
+      // Il tempo di gioco avanza **qui e nel recupero**, e da D037 le due strade sono la stessa
+      // funzione: `advance` ticchetta i sistemi e poi fa passare lo stesso `elapsed` sulla cronaca
+      // (ADR 0043). Finché erano due sequenze scritte a mano, una delle due registrava e l'altra no.
+      game.advance(step.elapsed)
+
       // Un tick che non incassa **non emette niente**, quindi nessun evento porta questa notizia:
       // è l'unico mirror che va riletto a ogni passo. Con il caveau che ha spazio è `ZERO` contro
       // `ZERO`, cioè lo stesso oggetto, e il `ref` non sveglia nessuno.
       withheld.value = game.income.withheld()
-
-      // Il campione si prende **dopo** il tick, quindi porta i saldi che il tick ha appena
-      // prodotto: l'evento del Ledger è già passato di qui sopra, perché il Bus è sincrono
-      // (ADR 0016). Prenderlo prima disegnerebbe sempre il gioco di un passo fa.
-      const sampling = sampleOf(sinceSample, step.elapsed, BALANCE.NET_WORTH_SAMPLE_EVERY)
-      sinceSample = sampling.pending
-      if (sampling.due) netWorthSeries.value = pushBounded(netWorthSeries.value, netWorth.value)
-
-      // A chiudere una candela è il **tempo**, non una transazione, ed è la ragione per cui questa
-      // riga sta qui e non nel mirror: un intervallo in cui nessuno ha mosso niente produce una
-      // candela piatta, che dice «questo strumento è fermo». Aspettare una transazione lascerebbe
-      // un buco nella serie della carta ogni volta che il giocatore non tocca il bancomat.
-      const candling = sampleOf(sinceCandle, step.elapsed, BALANCE.INSTRUMENT_CANDLE_EVERY)
-      sinceCandle = candling.pending
-      if (candling.due) {
-        cashCandles.value = pushBounded(cashCandles.value, openCash)
-        cardCandles.value = pushBounded(cardCandles.value, openCard)
-        openCash = nextCandle(openCash)
-        openCard = nextCandle(openCard)
-      }
+      readSeries()
 
       // Il primo frame dopo il ritorno dal nascondimento porta con sé tutto il tempo passato: è
       // quello che chiude `Recupero`, e non c'è un secondo percorso che lo faccia.
@@ -712,16 +651,22 @@ export const useGameStore = defineStore('game', () => {
   }
 
   /**
-   * `Caricamento → Recupero`: i tick arretrati sono `tickAll` con un `n` grande, limitato dal
+   * `Caricamento → Recupero`: i tick arretrati sono un `advance` con un `n` grande, limitato dal
    * tetto. La regola che decide `n` è **la stessa** del loop (`stepOf`), non una formula offline
    * scritta a parte — che è la fonte classica di exploit negli idle game (ADR 0009).
+   *
+   * E da D037 anche **ciò che fa quel passo** è lo stesso: fino ad allora questa riga chiamava
+   * `registry.tickAll` per conto proprio, quindi una notte intera passava senza lasciare un
+   * campione né una candela. Adesso ne lascia esattamente uno per serie, che è ciò che `sampleOf`
+   * prometteva già in `loop.ts`: di saldi intermedi non ce n'è nessuno da disegnare, perché il
+   * reddito arretrato entra in una transazione sola.
    */
   const recover = (since: number): void => {
     status.value = 'recovering'
     const away = milliseconds(Math.max(0, host.wallClock() - since))
     awayFor.value = away
     const step = stepOf(away, BALANCE.RECOVERY_CAP, game.ctx.clock)
-    if (step.elapsed > 0) game.registry.tickAll(game.ctx, step.elapsed)
+    if (step.elapsed > 0) game.advance(step.elapsed)
     mirror()
   }
 
@@ -762,17 +707,12 @@ export const useGameStore = defineStore('game', () => {
    */
   const newGame = async (): Promise<void> => {
     status.value = 'loading'
+    // Le serie sono di **questa** partita, e ad azzerarle è `game.reset` insieme a tutto il resto
+    // (`chronicle.ts`): tenerle farebbe cominciare i grafici della partita nuova con il patrimonio
+    // di quella buttata via, cioè con la sua scala. Sei righe scritte qui erano sei righe da
+    // ricordarsi, che è la forma esatta del difetto A01 — le liste parallele mantenute a mano.
     game.reset('hard')
     history.value = boundedList<Transaction>(HISTORY_MAX)
-    // La serie è di **questa** partita: tenerla farebbe cominciare il grafico della partita nuova
-    // con il patrimonio di quella buttata via, cioè con la sua scala.
-    netWorthSeries.value = boundedList<Money>(BALANCE.NET_WORTH_SAMPLES)
-    sinceSample = ticks(0)
-    // E le candele con lei, per la stessa ragione: una candela della partita buttata via aprirebbe
-    // la prima della partita nuova sul suo saldo.
-    cashCandles.value = boundedList<Candle>(BALANCE.INSTRUMENT_CANDLES)
-    cardCandles.value = boundedList<Candle>(BALANCE.INSTRUMENT_CANDLES)
-    sinceCandle = ticks(0)
     savedAt.value = null
     failure.value = null
     failedDuring.value = null
