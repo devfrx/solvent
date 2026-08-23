@@ -13,7 +13,7 @@ affidate a un occhio, e stanno in [qualita.md](qualita.md) con la data accanto.
 
 ## Decisioni
 
-**47** ADR: 43 `Accettata`, 3 `Proposta`, 1 `Superata`.
+**48** ADR: 44 `Accettata`, 3 `Proposta`, 1 `Superata`.
 
 - `Proposta`: 0010, 0022, 0023
 - `Superata`: 0018
@@ -33,7 +33,7 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 
 ## Documenti
 
-**110** markdown: 109 sotto `docs/`, più il `README.md` della radice.
+**111** markdown: 110 sotto `docs/`, più il `README.md` della radice.
 
 ## Codice
 

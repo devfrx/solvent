@@ -41,9 +41,11 @@ export default defineConfig({
     // rivolta al file sbagliato: si guardava l'output invece delle opzioni con cui era prodotto.
     // Senza questa riga il pacchetto porta i commenti del sorgente, e pesa il doppio.
     //
-    // `'oxc'` e non `true`: dice **chi** minifica, invece di lasciarlo scegliere al default — che è
-    // il difetto che questa riga esiste per chiudere. E non `'esbuild'`, misurato: Vite 8 non lo
-    // porta più con sé, e chiederlo fa fallire `build` con «Cannot find package 'esbuild'».
-    build: { minify: 'oxc' }
+    // `'esbuild'` e non `true`: dice **chi** minifica, invece di lasciarlo scegliere al default —
+    // che è il difetto che questa riga esiste per chiudere. Il nome dipende dalla Vite, ed è
+    // l'unica parte di questa riga che è cambiata: D035 aveva scritto `'oxc'` perché Vite 8 non
+    // porta più esbuild con sé e chiederlo faceva fallire `build`. Su Vite 7 esbuild è una
+    // dipendenza diretta di Vite, e `'oxc'` non è nemmeno un valore ammesso dal tipo.
+    build: { minify: 'esbuild' }
   }
 })

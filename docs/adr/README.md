@@ -159,6 +159,7 @@ Il grilletto resta quello che il registro YAGNI ha scritto: il primo dominio che
 | [0045](0045-cio-che-scorre-passa-dal-kit.md)                                   | Ciò che scorre passa dal kit                                       | **Accettata** | chi può far scorrere un'area, e chi veste la barra                                        | A14             |
 | [0046](0046-le-icone-vengono-da-un-insieme-e-il-disegno-e-generato.md)         | Le icone vengono da un insieme, e il disegno è generato            | **Accettata** | da dove viene un simbolo, e come si cambia insieme                                        | A14             |
 | [0047](0047-uno-strumento-che-non-e-il-prodotto-vive-in-scripts.md)            | Uno strumento che non è il prodotto vive in `scripts/`             | **Accettata** | dove sta ciò che serve a guardare il gioco, e cosa non ci sta                             | —               |
+| [0048](0048-la-catena-di-build-si-muove-insieme.md)                            | La catena di build si muove insieme                                | **Accettata** | a quale versione sta Vite, e perché non alla più recente                                  | —               |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è

@@ -5,8 +5,8 @@ attorno a una tensione sola — **contanti contro carta**, anonimi ma limitati c
 illimitati. Si guadagna in contanti, si deposita al bancomat pagando la commissione, si compra con
 la carta.
 
-    npm install
-    npm run dev      # se dice "Electron uninstall": node node_modules/electron/install.js
+    npm ci           # senza flag: la catena di build è consistente (ADR 0048)
+    npm run dev      # al primo avvio Electron scarica il proprio binario da sé
     npm run verify   # typecheck, lint, format:check, test — se è rosso, non è finito
 
 ## Aggiungere un sistema

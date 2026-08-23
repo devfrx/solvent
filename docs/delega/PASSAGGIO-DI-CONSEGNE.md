@@ -168,9 +168,13 @@ Censito, non nascosto.
    l'[ADR 0047](../adr/0047-uno-strumento-che-non-e-il-prodotto-vive-in-scripts.md) che dice cosa può
    viverci dentro. Le quattro cose imparate a caro prezzo stanno scritte in testa a quel file, dove
    chi lo apre le legge comunque.
-3. **`npm install` continua a non funzionare**, ed è la correzione 8 di D023 alla seconda ricorrenza:
-   aggiungere una dipendenza è passato solo con `--legacy-peer-deps`. La causa vera — `vite` alla 8
-   contro `electron-vite@5` che regge fino alla 7 — resta aperta.
+3. ~~`npm install` continua a non funzionare~~ — **chiusa alla causa**, ed era la correzione 8 di
+   D023 alla seconda ricorrenza. `vite` è sceso alla 7, che è la versione più alta che
+   `electron-vite@5` — l'ultima stabile — dichiara di reggere: `npm ci` gira senza flag, provato su
+   una `node_modules` cancellata. Sono usciti anche `@vue/devtools-api` e `vue-eslint-parser`, che
+   nessun file del progetto importa ed erano lì solo perché il flag impediva a npm di risolverli.
+   Il perché e il grilletto per risalire alla 8 stanno
+   nell'[ADR 0048](../adr/0048-la-catena-di-build-si-muove-insieme.md).
 4. **`components/atm/BankCard3d.vue` ha due lettori**, e il secondo è `components/payment/`. Il
    grilletto per spostarla sta nella decisione 6 di D036, ed è ancora fermo lì.
 5. **Le due candele degli strumenti sono due dichiarazioni e non un ciclo su `POOLS[pool].player`.**
@@ -1466,11 +1470,12 @@ Le quattro cose che chi arriva adesso deve sapere:
 3. **Un pulsante non si spegne, e adesso non può.** `UiButton` non sa scrivere `disabled`
    (**INV-21**). La regola c'era già da D019, in prosa; la prima stesura del componente la stava
    disfacendo senza che nessun gate lo vedesse.
-4. **`npm install` non funziona in questa repo**, e non per colpa di D023: `electron-vite@5` regge
-   `vite` fino alla 7 e il progetto è sulla 8. L'unico comando che installa è
-   `npm ci --legacy-peer-deps`, che però **ignora i peer** — per questo `@vue/devtools-api` e
-   `vue-eslint-parser` sono adesso dichiarati a mano. La causa vera è aperta, ed è la correzione 8
-   di [D023](D023-il-design-system.md).
+4. **`npm install` non funzionava in questa repo**, e non per colpa di D023: `electron-vite@5` regge
+   `vite` fino alla 7 e il progetto era sulla 8. Per due mesi l'unico comando che installava è stato
+   `npm ci --legacy-peer-deps`, che però **ignora i peer** — da lì `@vue/devtools-api` e
+   `vue-eslint-parser` dichiarati a mano. **Chiusa il 2026-08-23** scendendo alla 7
+   ([ADR 0048](../adr/0048-la-catena-di-build-si-muove-insieme.md)); la riga resta perché la lezione
+   non è la versione, è che un difetto documentato quattro volte non diventa una scelta.
 
 **[D017 — Il caveau](D017-il-caveau.md) è chiusa, e con lei la fetta 02.** Il primo muro del gioco è
 acceso: i contanti hanno una capienza, la capienza si sposta, e quando è piena il reddito **non
@@ -1627,19 +1632,29 @@ togliere un gate.
 
 ## Come tornare operativi, da zero
 
-Quattro righe, e la prima è quella che sorprende chi arriva: **`npm install` non funziona in questa
-repo.** `electron-vite@5` regge `vite` fino alla 7 e il progetto è sulla 8; l'unico comando che
-installa è quello qui sotto, che però ignora i peer — per questo `@vue/devtools-api` e
-`vue-eslint-parser` sono dichiarati a mano. La causa vera è aperta ed è la correzione 8 di
-[D023](D023-il-design-system.md).
+Una riga, e nessuna avvertenza:
 
 ```bash
-npm ci --legacy-peer-deps
+npm ci
 ```
 
-Se poi `npm run dev` dice _Electron uninstall_, il binario non è stato scaricato e si completa con
-`node node_modules/electron/install.js`. Per guardare l'applicazione senza portarla in primo piano,
-vedi _Come si guarda l'applicazione senza toccarla_.
+**Se hai in mente `--legacy-peer-deps`, quella pagina è cambiata sotto di te.** Per due mesi era
+l'unico comando che installava, ed è stato scritto in cinque deleghe come se fosse una proprietà del
+progetto. Era un difetto con una causa sola: `vite` dichiarato alla 8 mentre `electron-vite@5` —
+l'ultima stabile — regge fino alla 7. Il 2026-08-23 `vite` è sceso alla 7, il flag è sparito, e con
+lui i due pacchetti che erano stati dichiarati a mano solo perché il flag impediva a npm di
+risolverli. Il perché, e il grilletto per risalire alla 8, stanno
+nell'[ADR 0048](../adr/0048-la-catena-di-build-si-muove-insieme.md): **non alzare `vite` senza alzare
+`electron-vite`**, o il flag torna.
+
+**E se hai in mente `node node_modules/electron/install.js`, è obsoleto.** Electron ha tolto il
+proprio `postinstall` alla versione 42 — la 41 ce l'aveva ancora — e al suo posto `index.js` scarica
+il binario **al primo `require`**. Provato su una `node_modules` cancellata: `npm ci` non lo scarica,
+il primo avvio sì, e stampa `Downloading Electron binary...` mentre lo fa. Non c'è niente da
+completare a mano.
+
+Per guardare l'applicazione senza portarla in primo piano, vedi _Come si guarda l'applicazione senza
+toccarla_ — lo strumento è `scripts/cdp.mjs`, da D039.
 
 ## Come verificare di non aver rotto niente
 

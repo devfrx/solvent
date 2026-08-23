@@ -192,11 +192,19 @@ nel modulo: sono cinque `woff2` accanto a lui.
 stesso metodo e lo stesso `minify: 'oxc'` — due misure fatte con due metodi diversi non sono
 confrontabili, ed è la ragione per cui questa riga ripete come è stata presa.
 
-| Renderer minificato | JS          | CSS      |
-| ------------------- | ----------- | -------- |
-| a D035, il 22       | 1.198,01 kB | 20,85 kB |
-| a D034, il 23       | 1.202,15 kB | 21,78 kB |
-| a D036, il 23       | 1.206,70 kB | 22,84 kB |
+| Renderer minificato                 | JS          | CSS      |
+| ----------------------------------- | ----------- | -------- |
+| a D035, il 22 — Vite 8, `oxc`       | 1.198,01 kB | 20,85 kB |
+| a D034, il 23 — Vite 8, `oxc`       | 1.202,15 kB | 21,78 kB |
+| a D036, il 23 — Vite 8, `oxc`       | 1.206,70 kB | 22,84 kB |
+| ADR 0048, il 23 — Vite 7, `esbuild` | 1.190,84 kB | 23,32 kB |
+
+**L'ultima riga non si sottrae dalle altre**, ed è il caso limite che questa pagina descrive da
+sempre: con l'[ADR 0048](adr/0048-la-catena-di-build-si-muove-insieme.md) sono cambiati **tutti e
+due** i pezzi che producono quel numero — il bundler, perché Vite 8 usa rolldown e la 7 rollup, e il
+minificatore, perché su Vite 7 esbuild c'è e `'oxc'` non esiste. I 16 kB di JS in meno e il
+chilobyte di CSS in più non dicono niente su cosa è entrato o uscito dal gioco: dicono che sono due
+catene diverse. La prossima misura confrontabile è la prossima presa **da qui in avanti**.
 
 **Quattro chilobyte di JS e uno di CSS**, ed è tutto codice nostro: con `apexcharts` isolata nel
 suo chunk la libreria pesa **931,04 kB**, identica al chilobyte, e tutto il resto passa da 266,22 a
