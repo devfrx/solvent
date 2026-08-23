@@ -46,8 +46,14 @@ const SCREENS = 'src/renderer/components/shell/screens.ts'
  * regola: contiene interfaccia che **non è gioco**, quindi non ha un dominio a cui appartenere né
  * una destinazione in cui vivere. Il giorno in cui ci finisse dentro un pannello che mostra un
  * numero del gioco, quel pannello sarebbe nel posto sbagliato.
+ *
+ * `payment` è la quarta, da [D036](../../docs/delega/D036-il-pagamento-e-un-flusso-solo.md), e sta
+ * accanto a `ledger` per la stessa ragione: è un concetto **trasversale** con il proprio vocabolario
+ * in `contracts/` — `PaymentOption` e `PriceList` — che non è di nessun dominio e non ha una
+ * destinazione. Ogni azione che si paga lo attraversa, e R24 impedisce che qualcuna se lo ridisegni
+ * in casa. Il giorno in cui ci finisse dentro il pannello di un dominio, sarebbe nel posto sbagliato.
  */
-const NOT_DOMAINS: readonly string[] = ['shell', 'ledger', 'dev']
+const NOT_DOMAINS: readonly string[] = ['shell', 'ledger', 'dev', 'payment']
 
 const normalize = (path: string): string => path.split(sep).join('/')
 

@@ -41,7 +41,7 @@ export const en: Dictionary = {
   'app.duration.and': '{first} and {second}',
   'app.duration.under_a_minute': 'less than a minute',
 
-  'common.buy': 'Buy — {cost}',
+  'common.buy': 'Buy',
   'common.level': 'lv. {level}',
 
   'pool.cash': 'Cash',
@@ -81,10 +81,15 @@ export const en: Dictionary = {
 
   'payment.only_with': 'Paid with {pool} only',
   'payment.with': 'With {pool}',
+  'payment.title': 'How you pay',
+  'payment.confirm': 'Pay {cost}',
+  'payment.cancel': 'Never mind',
+  'payment.code.title': 'Security code',
+  'payment.code.hint': 'The three digits are on the back: flip the card.',
 
   'vault.level': 'Vault {level} of {total}',
   'vault.room': 'Free space',
-  'vault.expand': 'Expand — {cost}',
+  'vault.expand': 'Expand',
   'vault.at_max': 'Last level: this is where cash ends.',
   'vault.full': 'The vault is full: your salary no longer fits. Deposit it into the account.',
   'vault.withholding': 'The vault cannot hold it all: {amount} of salary did not come in.',
@@ -177,6 +182,7 @@ export const en: Dictionary = {
   'error.ledger.capacity_exceeded': '{pool} holds no more than {capacity}: {fits} still fits.',
   'error.ledger.pool_not_accepted': 'You cannot pay with {pool}. Accepted: {accepted}.',
   'error.ledger.invalid_amount': 'That amount cannot be used on {pool}: {amount}.',
+  'error.payment.unauthorized': 'The code does not match this instrument ({pool}).',
   'error.income.already_upgraded': 'Overtime has already been bought.',
   'error.vault.max_level': 'The vault is already at its last level: it does not get any bigger.',
   'error.atm.amount_not_positive': 'The amount must be greater than zero, not {amount}.',

@@ -87,6 +87,19 @@ avrà un dominio che si apre davvero.
 Va scritto invece che lasciato intendere, perché è la differenza fra «non serve» e «non è ancora
 stato costruito».
 
+**Da [D036](../../delega/D036-il-pagamento-e-un-flusso-solo.md) la carta ha però dei dati veri**, e
+uno di essi ha uno scopo. Numero, scadenza e codice non sono più una costante dentro `BankCard3d`:
+li deriva `cardOf(seed)` dal seme della partita, quindi **la carta è diversa in ogni partita** — ed
+è la prima cosa del gioco a distinguerne una da un'altra guardando lo schermo. Il numero passa il
+controllo di Luhn; quello di prima non lo passava.
+
+Il **codice di tre cifre** è la prova che la carta chiede prima di pagarci
+([ADR 0042](../../adr/0042-il-pagamento-e-un-flusso-solo.md)): la carta non è uno strumento al
+portatore, e chi paga con lei la gira e legge il retro. **Non vale qui**: prelevare non è pagare,
+non c'è una scelta di strumento da fare, e la cerimonia di questo dominio è già l'anteprima dei
+movimenti. Il grilletto per estenderla è il primo strumento non al portatore che si prelevi senza
+passare da un'anteprima.
+
 ### 6 · A quali due domini si collega, e come
 
 | Dominio     | Come si collegano                                                                                                                    |

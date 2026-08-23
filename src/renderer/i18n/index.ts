@@ -4,6 +4,7 @@ import type { CheatId } from '@core/contracts/cheats'
 import type { Reason } from '@core/contracts/ledger'
 import type { Money } from '@core/contracts/money'
 import { toDisplayNumber } from '@core/contracts/money'
+import type { PaymentError } from '@core/contracts/payment'
 import type { Pool } from '@core/contracts/pools'
 import { POOLS } from '@core/contracts/pools'
 import type { SaveError } from '@core/contracts/save'
@@ -53,7 +54,8 @@ export const DEFAULT_LOCALE: Locale = 'it'
  * È l'unione che rende INV-07 un errore di **compilazione**: `messageOf` la percorre tutta con uno
  * `switch`, e un codice nato in un dominio nuovo non compila finché non ha la sua frase.
  */
-export type GameError = SaveError | GameLoadError | IncomeError | AtmError | VaultError
+export type GameError =
+  SaveError | GameLoadError | IncomeError | AtmError | VaultError | PaymentError
 
 export type ErrorCode = GameError['code']
 
@@ -125,6 +127,14 @@ export type ScreenKey =
   // adesso i due prezzi sono diversi e la differenza è la scelta.
   | 'payment.only_with'
   | 'payment.with'
+  // Il flusso del pagamento (D036, ADR 0042). Il titolo della finestra, la conferma con il prezzo
+  // — che da qui in poi sta **qui** invece che sul pulsante che apre, perché prima di scegliere
+  // uno strumento un prezzo solo non esiste — e le due parole della prova.
+  | 'payment.title'
+  | 'payment.confirm'
+  | 'payment.cancel'
+  | 'payment.code.title'
+  | 'payment.code.hint'
   // Il caveau (D017). La capienza vera, quanti livelli restano, e — la più importante — che il
   // reddito si è fermato: un idle in cui i soldi smettono di arrivare senza dirlo è un idle rotto.
   | 'vault.level'
@@ -450,6 +460,8 @@ export const createTranslator = (wording: Wording): Translator => {
         })
       case 'error.ledger.invalid_amount':
         return text(error.code, { pool: poolName(error.pool), amount: money(error.amount) })
+      case 'error.payment.unauthorized':
+        return text(error.code, { pool: poolName(error.pool) })
       case 'error.income.already_upgraded':
       case 'error.vault.max_level':
         return text(error.code)

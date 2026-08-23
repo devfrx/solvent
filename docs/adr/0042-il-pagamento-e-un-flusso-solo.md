@@ -1,8 +1,9 @@
 # ADR 0042 — Il pagamento è un flusso solo
 
-- **Stato:** **Proposta** — il meccanismo non esiste ancora. Diventa _Accettata_ con
-  [D036](../delega/D036-il-pagamento-e-un-flusso-solo.md), nel commit che porta **R24** e il rosso
-  che lo dimostra
+- **Stato:** **Accettata** — [D036](../delega/D036-il-pagamento-e-un-flusso-solo.md), con i due
+  rossi che l'hanno dimostrata: **R24** in `tests/rules/payment-flow`, vista rossa rimettendo in
+  `VaultPanel` l'import di `PaymentOption` **e** il ciclo sul listino; e **R22 allargata** in
+  `tests/rules/overlays-pass-through-the-kit`, vista rossa con un `<dialog>` in `AtmPanel`
 - **Data:** 2026-08-23
 - **Estende:** [ADR 0027](0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md), di cui
   costruisce la conseguenza rimasta scritta e non fatta
@@ -57,13 +58,16 @@ per il livello superiore ([ADR 0032](0032-le-sovrapposizioni-stanno-nel-livello-
 il vestito dei grafici ([ADR 0034](0034-il-grafico-e-una-libreria.md)): non si controlla che due
 disegni coincidano, si fa in modo che ce ne sia **uno**.
 
-**R24** — `PaymentOption` e `PriceList` non compaiono in nessun `.vue` fuori da
-`components/payment/`. Un componente che non può **nominare** un'opzione di pagamento non può
-disegnarne una fila, e il terzo dominio non ricostruisce i due pulsanti in buona fede.
+**R24** — fuori da `components/payment/` nessun `.vue` nomina `PaymentOption` o `PriceList`, e
+nessuno **cicla** su un listino. Sono due rilevatori e non uno, perché la fila si può ricostruire in
+due modi: con il tipo, e senza — un template di Vue non è tipizzato. Un componente che non può né
+nominare un'opzione né iterarne una lista non ne disegna una fila, e il terzo dominio non
+ricostruisce i due pulsanti in buona fede.
 
-La regola guarda l'import nel sorgente, che è la forma con cui il difetto nasce davvero. ⚠️ **Non
-vede** un listino letto da un selettore dello store senza mai nominarne il tipo: il limite si
-dichiara in [tracciabilita.md](../tracciabilita.md), come per R22 e R23.
+**Consegnare il listino resta legittimo, ed è il punto**: un pannello scrive
+`:prices="expansionPrices"` e non disegna niente. ⚠️ Il secondo rilevatore riconosce un listino dal
+**nome** della sorgente del ciclo, quindi un selettore chiamato in un altro modo gli sfugge: il
+limite si dichiara in [tracciabilita.md](../tracciabilita.md), come per R22 e R23.
 
 ### 2. Il permesso è un'affordance dello strumento, non una proprietà dell'azione
 

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { shallowRef } from 'vue'
+import { ref, shallowRef } from 'vue'
 
-import type { PaymentOption } from '@core/contracts/payment'
 import type { Pool } from '@core/contracts/pools'
 
+import PaymentDialog from '@renderer/components/payment/PaymentDialog.vue'
 import type { GameError } from '@renderer/i18n'
 import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
@@ -29,15 +29,22 @@ import UiText from '@renderer/ui/UiText.vue'
  * «Caveau», e ripeterlo a cento pixel di distanza è la stessa parola due volte. Il titolo torna il
  * giorno in cui questa pagina ha **due** riquadri e serve dire quale è quale.
  *
- * Il pulsante «amplia» non si spegne e non **può** spegnersi (INV-21): quando i fondi non bastano
- * si smorza, e a spiegare è il rifiuto del Ledger con le due cifre. Con due strumenti a prezzi
- * diversi la riga sopra il pulsante porta il **nome** dello strumento invece della ragione: la
- * scelta c'è, e il prezzo è diverso per ciascuno.
+ * Il pulsante «amplia» non si spegne e non **può** spegnersi (INV-21): quando nessuno dei due
+ * strumenti basta si smorza, e a spiegare è il rifiuto del Ledger con le due cifre.
+ *
+ * **Da [D036](../../../../docs/delega/D036-il-pagamento-e-un-flusso-solo.md) la scelta non è più
+ * qui.** C'erano due pulsanti, uno per strumento, disegnati da un ciclo sul listino, e una
+ * `instrumentOf` scritta anche in `IncomePanel` — con il commento che lo dichiarava. Adesso c'è una
+ * CTA sola, e i due prezzi si vedono dove si sceglie: `PaymentDialog`
+ * ([ADR 0042](../../../../docs/adr/0042-il-pagamento-e-un-flusso-solo.md)).
  */
 
 const store = useGameStore()
 const { cashCapacity, vaultProgress, vaultRoom, vaultFill, vaultIsFull } = storeToRefs(store)
-const { text, money, poolName, failure } = useTranslator()
+const { expansionPrices, canAffordExpansion, vaultAtMax, card } = storeToRefs(store)
+const { text, money, failure } = useTranslator()
+
+const paying = ref(false)
 
 /**
  * `shallowRef` come nello store: l'errore porta dei `Decimal`, e un `ref` li avvolgerebbe in un
@@ -45,19 +52,16 @@ const { text, money, poolName, failure } = useTranslator()
  */
 const refusal = shallowRef<GameError | null>(null)
 
-/**
- * Cosa si legge sopra il pulsante di un'opzione. Con due voci non c'è più una ragione da dare —
- * il giocatore può scegliere davvero — quindi si etichetta lo strumento. È la stessa funzione di
- * `IncomePanel`, con l'altro ramo acceso.
- */
-const instrumentOf = (option: PaymentOption): string =>
-  text(store.expansionPrices.length === 1 ? 'payment.only_with' : 'payment.with', {
-    pool: poolName(option.pool)
-  })
+/** Aprire azzera il rifiuto di prima: una frase su un tentativo già chiuso è peggio di nessuna. */
+const open = (): void => {
+  refusal.value = null
+  paying.value = true
+}
 
-const expand = (pool: Pool): void => {
-  const expanded = store.expandVault(pool)
+const expand = (pool: Pool, code: string): void => {
+  const expanded = store.expandVault(pool, code)
   refusal.value = expanded.ok ? null : expanded.error
+  if (expanded.ok) paying.value = false
 }
 </script>
 
@@ -80,17 +84,20 @@ const expand = (pool: Pool): void => {
       </div>
     </dl>
 
-    <UiText v-if="store.expansionPrices.length === 0" tone="ink-3" size="xs" class="alarm">
+    <UiText v-if="vaultAtMax" tone="ink-3" size="xs" class="alarm">
       {{ text('vault.at_max') }}
     </UiText>
     <template v-else>
-      <div v-for="option of store.expansionPrices" :key="option.pool" class="option">
-        <UiText tone="ink-3" size="xs" class="instrument">{{ instrumentOf(option) }}</UiText>
-        <UiButton
-          :label="text('vault.expand', { cost: money(option.price) })"
-          :muted="!store.canExpandWith(option.pool)"
-          :reason="refusal === null ? undefined : failure(refusal)"
-          @press="expand(option.pool)"
+      <div class="option">
+        <UiButton :label="text('vault.expand')" :muted="!canAffordExpansion" @press="open" />
+        <PaymentDialog
+          :open="paying"
+          :prices="expansionPrices"
+          :affords="store.canExpandWith"
+          :card="card"
+          :refusal="refusal === null ? undefined : failure(refusal)"
+          @close="paying = false"
+          @confirm="expand"
         />
       </div>
     </template>
@@ -163,9 +170,5 @@ dd {
 
 .option {
   margin-top: var(--space-5);
-}
-
-.instrument {
-  margin: 0 0 var(--space-3);
 }
 </style>

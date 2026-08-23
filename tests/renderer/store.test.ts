@@ -14,6 +14,7 @@ import { capacityFor, expansionPrices, MAX_LEVEL } from '@core/domains/vault/rul
 import { clock, ticks } from '@core/kernel/Clock'
 import { income } from '@core/kernel/Ledger'
 
+import { cardOf } from '../../src/core/domains/atm/card'
 import type { Candle } from '../../src/renderer/runtime/candles'
 import { createGame, type Game } from '../../src/renderer/runtime/createGame'
 import { ATM_KINDS, provideRuntime, useGameStore } from '../../src/renderer/stores/game'
@@ -36,6 +37,13 @@ const FIVE_SECONDS = 5
 
 let game: Game
 let stage: Stage
+
+/**
+ * Ciò che si consegna quando lo strumento è **al portatore**: niente. I contanti non chiedono una
+ * prova (`POOLS.cash.bearer`), e scriverlo qui invece di passare il codice della carta è ciò che
+ * rende la differenza visibile leggendo il test (ADR 0042).
+ */
+const NO_PROOF = ''
 
 const start = async (options: StageOptions = {}): Promise<ReturnType<typeof useGameStore>> => {
   stage = createStage(options)
@@ -636,7 +644,7 @@ describe('il massimo del bancomat', () => {
     const before = toString(store.atmMaximums.withdraw)
 
     // L'ampliamento si paga con la carta, che qui è larga: quello che cambia è il **tetto**.
-    expect(store.expandVault('card').ok).toBe(true)
+    expect(store.expandVault('card', store.card.code).ok).toBe(true)
 
     expect(toString(store.atmMaximums.withdraw)).not.toBe(before)
     expect(store.confirm('withdraw', store.atmMaximums.withdraw).ok).toBe(true)
@@ -696,7 +704,7 @@ describe('i selettori del reddito', () => {
       reason: 'reason.income.tick'
     })
 
-    const bought = store.buyUpgrade('cash')
+    const bought = store.buyUpgrade('cash', NO_PROOF)
 
     expect(bought.ok).toBe(false)
     if (bought.ok) return
@@ -720,7 +728,7 @@ describe('i selettori del reddito', () => {
     const store = await start()
     fundCard('800')
 
-    expect(store.buyUpgrade('card').ok).toBe(true)
+    expect(store.buyUpgrade('card', store.card.code).ok).toBe(true)
 
     const boosted = BALANCE.INCOME_BASE_PER_SECOND.mul(BALANCE.UPGRADE_MULTIPLIER)
     expect(toString(store.incomePerSecond)).toBe(toString(boosted))
@@ -744,7 +752,7 @@ describe('i selettori del reddito', () => {
   it('una partita nuova riporta indietro anche il reddito', async () => {
     const store = await start()
     fundCard('800')
-    store.buyUpgrade('card')
+    store.buyUpgrade('card', store.card.code)
 
     await store.newGame()
 
@@ -763,7 +771,7 @@ describe('l’anteprima e il comando dicono la stessa cosa', () => {
   /** Quando i due divergono si spegne un pulsante che avrebbe funzionato, o viceversa. */
   const agreeOn = (store: ReturnType<typeof useGameStore>): boolean => {
     const foreseen = store.canBuyUpgradeWith('card')
-    const actual = store.buyUpgrade('card')
+    const actual = store.buyUpgrade('card', store.card.code)
     expect(actual.ok).toBe(foreseen)
     return foreseen
   }
@@ -1038,7 +1046,7 @@ describe('i selettori del caveau', () => {
     const store = await start()
     fund('cash', toString(capacityFor(0)))
 
-    expect(store.expandVault('cash').ok).toBe(true)
+    expect(store.expandVault('cash', NO_PROOF).ok).toBe(true)
 
     expect(store.vaultProgress.level).toBe(2)
     expect(store.cashCapacity).toBe(capacityFor(1))
@@ -1056,7 +1064,7 @@ describe('i selettori del caveau', () => {
 
     expect(store.canExpandWith('cash')).toBe(false)
     expect(store.canExpandWith('card')).toBe(true)
-    expect(store.expandVault('card').ok).toBe(true)
+    expect(store.expandVault('card', store.card.code).ok).toBe(true)
   })
 
   it('uno strumento fuori listino non è comprabile, e non è un errore diverso', async () => {
@@ -1196,7 +1204,7 @@ describe('il cruscotto', () => {
     fund('cash', '900')
     fund('card', '1000')
 
-    expect(store.buyUpgrade('card').ok).toBe(true)
+    expect(store.buyUpgrade('card', store.card.code).ok).toBe(true)
     expect(store.confirm('withdraw', fromString('100')).ok).toBe(true)
 
     expect(toString(store.earned)).toBe('1900')
@@ -1209,7 +1217,7 @@ describe('il cruscotto', () => {
     const store = await start()
     fund('cash', '900')
     fund('card', '1000')
-    store.buyUpgrade('card')
+    store.buyUpgrade('card', store.card.code)
     store.confirm('withdraw', fromString('100'))
 
     const held = store.earned.minus(store.spent).minus(store.feesPaid)
@@ -1237,5 +1245,112 @@ describe('le ultime operazioni', () => {
     expect(store.operations).toHaveLength(10)
     expect(store.recentOperations.length).toBeLessThan(store.operations.length)
     expect(store.recentOperations[0]).toBe(store.operations[0])
+  })
+})
+
+/**
+ * D036 · ADR 0042 — la prova che uno strumento non al portatore chiede prima di pagare, e il posto
+ * in cui si verifica. Lo store è l'unico: dentro un dominio non si può — il codice viene dalla
+ * carta, la carta sta in `atm`, e un dominio non ne importa un altro (R19) — e nel componente
+ * sarebbe «si è ricordato di controllare» invece di una proprietà.
+ */
+describe('la prova del pagamento', () => {
+  const fundCard = (amount: string): void => {
+    game.ctx.ledger.transaction(income('card', fromString(amount)), {
+      reason: 'reason.income.tick'
+    })
+  }
+
+  const balanceOf = (store: ReturnType<typeof useGameStore>, pool: Pool): string =>
+    toString(store.balances[pool])
+
+  it('la carta chiede il codice, e con quello sbagliato non si compra', async () => {
+    const store = await start()
+    fundCard('800')
+    const before = balanceOf(store, 'card')
+
+    const bought = store.buyUpgrade('card', '000')
+
+    expect(bought.ok).toBe(false)
+    if (bought.ok) return
+    expect(bought.error.code).toBe('error.payment.unauthorized')
+    expect(store.upgraded).toBe(false)
+    // Il rifiuto arriva **prima** del Ledger: non c'è nessuna transazione da annullare.
+    expect(balanceOf(store, 'card')).toBe(before)
+  })
+
+  it('e con quello giusto si compra: senza questo, il caso qui sopra passerebbe da solo', async () => {
+    // La lezione della candela piatta di D034: «il saldo non è cambiato» è vero anche per un
+    // comando che non è mai stato chiamato. A discriminare è avere accanto il caso verde.
+    const store = await start()
+    fundCard('800')
+    const before = balanceOf(store, 'card')
+
+    expect(store.buyUpgrade('card', store.card.code).ok).toBe(true)
+
+    expect(store.upgraded).toBe(true)
+    expect(balanceOf(store, 'card')).not.toBe(before)
+  })
+
+  it('un codice vuoto è un codice sbagliato, non un permesso', async () => {
+    const store = await start()
+    fundCard('800')
+
+    expect(store.buyUpgrade('card', NO_PROOF).ok).toBe(false)
+  })
+
+  it('i contanti non chiedono niente: sono al portatore', async () => {
+    // `POOLS.cash.bearer` è `true`, quindi il codice non viene nemmeno guardato. Se la prova
+    // dipendesse dal nome del pool invece che dall'affordance, questa riga sarebbe l'unica a
+    // dirlo.
+    const store = await start()
+    // Novecentocinquanta e non duemila: al livello zero il caveau tiene mille euro, e una
+    // transazione che sfonda il tetto la rifiuta il Ledger prima che questo test cominci.
+    fund('cash', '950')
+    const before = balanceOf(store, 'cash')
+
+    expect(store.expandVault('cash', NO_PROOF).ok).toBe(true)
+
+    expect(balanceOf(store, 'cash')).not.toBe(before)
+  })
+
+  it('l’ampliamento con la carta chiede il codice come l’upgrade: la regola è dello strumento', async () => {
+    const store = await start()
+    fundCard('2000')
+
+    expect(store.expandVault('card', '000').ok).toBe(false)
+    expect(store.expandVault('card', store.card.code).ok).toBe(true)
+  })
+})
+
+/**
+ * D036 · ADR 0042 — la carta è una funzione del **seme**, quindi cambia quando cambia la partita.
+ * Nessuno lo annuncia sul Bus: a rileggerla è `mirror()`, e senza quella riga la partita nuova
+ * porterebbe la carta di quella buttata via.
+ */
+describe('la carta di questa partita', () => {
+  it('è quella del seme, e non cambia guardandola due volte', async () => {
+    const store = await start()
+
+    expect(store.card).toEqual(cardOf(SEED))
+    expect(store.card).toEqual(store.card)
+  })
+
+  it('cambia quando la partita ricomincia', async () => {
+    const store = await start()
+    const first = store.card
+
+    await store.newGame()
+
+    // `reset('hard')` ridà il seme all'Rng: se `mirror()` non rileggesse, questa resterebbe uguale.
+    expect(store.card).not.toEqual(first)
+  })
+
+  it('e un caricamento porta quella della partita caricata', async () => {
+    const other = createGame(SEED + 1).save()
+
+    const store = await start({ load: found(other, SAVED_AT), wallClock: SAVED_AT })
+
+    expect(store.card).toEqual(cardOf(SEED + 1))
   })
 })

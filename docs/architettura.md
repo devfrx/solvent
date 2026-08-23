@@ -23,7 +23,7 @@ flowchart TD
     BOOT["main.ts<br/>il bootstrap"]
     APP["App.vue<br/>il guscio: i sette stati"]
     VIEWS["views/*.vue<br/>AtmView · BoardView · StatsView"]
-    CMP["components/*<br/>shell · ledger · dev · una cartella per dominio (ADR 0033)<br/>rotation · postings · screens"]
+    CMP["components/*<br/>shell · ledger · dev · payment · una cartella per dominio (ADR 0033)<br/>rotation · postings · screens · instruments"]
     UI["ui/*<br/>tokens · roles · theme · i pezzi<br/>non sa che gioco è"]
     I18N["i18n/*"]
     ST["stores/*"]
@@ -179,9 +179,9 @@ solvent/
 │  │  ├─ contracts/
 │  │  │  ├─ result.ts             # Result<T, E>
 │  │  │  ├─ money.ts              # Money = Decimal + le uniche conversioni
-│  │  │  ├─ pools.ts              # Pool · PoolProps · POOLS come dati · la capienza di partenza
+│  │  │  ├─ pools.ts              # Pool · PoolProps · POOLS come dati · capienza e portatore
 │  │  │  ├─ ledger.ts             # Posting · Transaction · TransactionMeta · Balances · LedgerError
-│  │  │  ├─ payment.ts            # PaymentOption · PriceList — il listino di un'azione (ADR 0027)
+│  │  │  ├─ payment.ts            # PaymentOption · PriceList · PaymentError (ADR 0027, ADR 0042)
 │  │  │  ├─ lifecycle.ts          # ResetScope — la parola che Registry e Ledger si scambiano
 │  │  │  ├─ bounded.ts            # boundedList<T>(max) — regola 9
 │  │  │  ├─ events.ts             # interface GameEvents — unico file
@@ -195,6 +195,7 @@ solvent/
 │  │     │  └─ system.ts          # createIncome(ledger, modifiers, room) - ADR 0024
 │  │     ├─ atm/                  # senza system.ts: non ha stato e non ticchetta (D014)
 │  │     │  ├─ rules.ts           # commissione, importo valido, fitsIn
+│  │     │  ├─ card.ts            # la carta come funzione del seme, e la prova (ADR 0042)
 │  │     │  └─ commands.ts        # previewOf + i due comandi, ritornano Result
 │  │     └─ vault/                # il caveau: ha stato, non ticchetta (D017)
 │  │        ├─ types.ts
@@ -222,7 +223,8 @@ solvent/
 │     │  ├─ roles.ts              # ruoli di colore, misure, superfici — nessun Pool
 │     │  ├─ theme.ts              # quale tema e' acceso, e l'interruttore (ADR 0031)
 │     │  ├─ UiShell.vue           # il telaio: una forma, non un contenitore (ADR 0030)
-│     │  ├─ UiPopover.vue         # il livello superiore, e nessun altro lo tocca (R22, ADR 0039)
+│     │  ├─ UiPopover.vue         # il livello superiore: il riquadro ancorato (R22, ADR 0039)
+│     │  ├─ UiDialog.vue          # il livello superiore: la finestra modale (R22, ADR 0042)
 │     │  ├─ UiTooltip.vue         # l'unico modo di spiegare qualcosa (R17, ADR 0032)
 │     │  └─ Ui*.vue               # superficie, etichetta, cifra, targhetta, pulsante, prosa
 │     ├─ components/              # una cartella per proprietario, zero file sciolti (R18, ADR 0033)
@@ -233,17 +235,19 @@ solvent/
 │     │  │  ├─ StatTile.vue       # il riquadro del cruscotto: e' cio' che il test conta
 │     │  │  ├─ series.ts          # i due estremi dell'asse del grafico - pura
 │     │  │  └─ NetWorthChart.vue  # il grafico: ApexCharts montata a mano (ADR 0034)
+│     │  ├─ payment/              # del pagamento: trasversale, come ledger (R24, ADR 0042)
+│     │  │  ├─ PaymentDialog.vue  # l'unico posto in cui si sceglie con cosa si paga
+│     │  │  └─ instruments.ts     # se uno strumento chiede una prova, e come si etichetta - pura
 │     │  ├─ ledger/               # del registro
 │     │  │  ├─ PostingRows.vue    # i movimenti di una transazione, riga per riga
 │     │  │  ├─ postings.ts        # quali movimenti il giocatore vede - pura
 │     │  │  └─ OperationList.vue  # l'estratto conto: le due viste ne mostrano quantita' diverse
 │     │  ├─ atm/
 │     │  │  ├─ AtmPanel.vue       # importo, importi rapidi, anteprima, conferma
-│     │  │  ├─ BankCard3d.vue     # la carta: CSS 3D puro, zero logica
-│     │  │  ├─ CashPanel.vue      # il pool contanti: quanto, quanto ce ne sta, che traccia lascia
+│     │  │  ├─ BankCard3d.vue     # la carta: CSS 3D puro, zero logica, i dati per proprieta'
 │     │  │  └─ rotation.ts        # la matematica della rotazione, pura e provata a parte
 │     │  ├─ income/
-│     │  │  └─ IncomePanel.vue    # l'upgrade: il listino letto prima di premere, un comando, un rifiuto
+│     │  │  └─ IncomePanel.vue    # l'upgrade: una CTA che apre il flusso, un comando, un rifiuto
 │     │  └─ vault/
 │     │     ├─ VaultPanel.vue     # la barra, lo spazio, il listino a due voci, l'ampliamento
 │     │     └─ VaultAlarm.vue     # il caveau sulla pagina del bancomat: solo il muro, e solo se e' stato toccato

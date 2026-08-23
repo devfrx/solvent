@@ -42,7 +42,7 @@ export const it: Dictionary = {
   'app.duration.and': '{first} e {second}',
   'app.duration.under_a_minute': 'meno di un minuto',
 
-  'common.buy': 'Compra — {cost}',
+  'common.buy': 'Compra',
   'common.level': 'liv. {level}',
 
   'pool.cash': 'Contanti',
@@ -83,10 +83,15 @@ export const it: Dictionary = {
 
   'payment.only_with': 'Si paga solo con: {pool}',
   'payment.with': 'Con {pool}',
+  'payment.title': 'Come paghi',
+  'payment.confirm': 'Paga {cost}',
+  'payment.cancel': 'Lascia stare',
+  'payment.code.title': 'Codice di sicurezza',
+  'payment.code.hint': 'Le tre cifre stanno sul retro: gira la carta.',
 
   'vault.level': 'Caveau {level} di {total}',
   'vault.room': 'Spazio libero',
-  'vault.expand': 'Amplia — {cost}',
+  'vault.expand': 'Amplia',
   'vault.at_max': 'Ultimo livello: i contanti finiscono qui.',
   'vault.full': 'Il caveau è pieno: lo stipendio non entra più. Deposita sul conto.',
   'vault.withholding': 'Il caveau non tiene tutto: {amount} di stipendio non è entrato.',
@@ -181,6 +186,7 @@ export const it: Dictionary = {
   'error.ledger.capacity_exceeded': '{pool} non tiene più di {capacity}: ci stanno ancora {fits}.',
   'error.ledger.pool_not_accepted': 'Non si paga con {pool}. Si accetta: {accepted}.',
   'error.ledger.invalid_amount': 'Importo non utilizzabile su {pool}: {amount}.',
+  'error.payment.unauthorized': 'Il codice non corrisponde a questo strumento ({pool}).',
   'error.income.already_upgraded': 'Gli straordinari sono già stati comprati.',
   'error.vault.max_level': 'Il caveau è già all’ultimo livello: più grande di così non si fa.',
   'error.atm.amount_not_positive': 'Serve un importo maggiore di zero, non {amount}.',

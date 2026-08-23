@@ -19,6 +19,19 @@ describe('POOLS', () => {
     expect(POOLS.card.traceable).toBe(true)
   })
 
+  it('i contanti sono al portatore, la carta no', () => {
+    // ADR 0042 — chi tiene i contanti può spenderli; la carta chiede prima di chi è. È
+    // l'affordance da cui il flusso di pagamento sa se serve una prova, senza un `if` sul nome.
+    expect(POOLS.cash.bearer).toBe(true)
+    expect(POOLS.card.bearer).toBe(false)
+  })
+
+  it('i conti non-giocatore non sono strumenti, quindi non sono al portatore', () => {
+    // Nessuno li guarda — un listino contiene solo pool del giocatore — ma `POOLS` è totale, e un
+    // conto interno che si dichiarasse al portatore direbbe una cosa che non vuol dire niente.
+    for (const id of POOL_IDS) if (!POOLS[id].player) expect(POOLS[id].bearer).toBe(false)
+  })
+
   it('i pool del giocatore per la fetta 01 sono contanti e carta', () => {
     const playerPools = POOL_IDS.filter((id) => POOLS[id].player)
     expect(playerPools).toEqual(['cash', 'card'])

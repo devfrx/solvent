@@ -13,9 +13,9 @@ affidate a un occhio, e stanno in [qualita.md](qualita.md) con la data accanto.
 
 ## Decisioni
 
-**42** ADR: 37 `Accettata`, 4 `Proposta`, 1 `Superata`.
+**42** ADR: 38 `Accettata`, 3 `Proposta`, 1 `Superata`.
 
-- `Proposta`: 0010, 0022, 0023, 0042
+- `Proposta`: 0010, 0022, 0023
 - `Superata`: 0018
 
 Il perché di ciascuna sta nel [compendio](adr/README.md); uno stato si legge
@@ -37,8 +37,8 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 
 ## Codice
 
-**90** file sotto `src/`, di cui **32** `.vue`.
-**80** file di test. I domini sono 3: `atm`, `income`, `vault`.
+**94** file sotto `src/`, di cui **34** `.vue`.
+**83** file di test. I domini sono 3: `atm`, `income`, `vault`.
 
 Le righe sono **righe di codice**: commenti e righe vuote escluse, con lo stesso metodo per
 tutti — ed è `codeLines` in `tests/helpers/projectState.ts` a definirlo, così due misure restano
@@ -46,11 +46,11 @@ confrontabili.
 
 | Cartella                      | File | Righe |
 | ----------------------------- | ---- | ----- |
-| `src/core/contracts/`         | 11   | 191   |
+| `src/core/contracts/`         | 11   | 202   |
 | `src/core/kernel/`            | 7    | 549   |
 | `src/core/balance/`           | 3    | 108   |
-| `src/core/domains/`           | 11   | 371   |
+| `src/core/domains/`           | 12   | 432   |
 | `src/main/` + `src/preload/`  | 8    | 246   |
-| `src/renderer/`               | 50   | 3.708 |
-| — di cui `src/renderer/i18n/` | 3    | 618   |
-| — di cui CSS dentro i `.vue`  | 32   | 960   |
+| `src/renderer/`               | 53   | 3.965 |
+| — di cui `src/renderer/i18n/` | 3    | 639   |
+| — di cui CSS dentro i `.vue`  | 34   | 1.032 |

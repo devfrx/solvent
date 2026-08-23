@@ -34,7 +34,7 @@ Non si dice mai "frame" per intendere "tick": il frame è la UI, il tick è la s
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | **Money**                                    | `Decimal`. Mai `number`, in nessun punto di nessuna catena economica                                                      |
 | **Pool**                                     | un contenitore di denaro con un saldo e le proprie **affordance**. Non è un'etichetta della UI                            |
-| **Affordance**                               | cosa un pool permette e a che prezzo: tracciabilità, capienza, interessi, dove è accettato                                |
+| **Affordance**                               | cosa un pool permette e a che prezzo: tracciabilità, capienza, interessi, se è al portatore, dove è accettato             |
 | **Saldo** _(`balance`)_                      | il valore corrente di un pool. Si legge dal Ledger, non si assegna mai                                                    |
 | **Movimento** _(`posting`)_                  | una riga: pool, importo (negativo = uscita), categoria                                                                    |
 | **Transazione**                              | un insieme di movimenti applicato **tutto o niente**, che somma a zero. Porta **una** ragione: è un evento economico solo |
@@ -43,6 +43,8 @@ Non si dice mai "frame" per intendere "tick": il frame è la UI, il tick è la s
 | **Categoria**                                | il raggruppamento per la telemetria economica di **un movimento**: `income`, `purchase`, `transfer`, `fee`                |
 | **Opzione di pagamento** _(`PaymentOption`)_ | uno strumento e quanto costa un'azione con quello: `{ pool, price }`                                                      |
 | **Listino** _(`PriceList`)_                  | le opzioni di pagamento di **una** azione. Vive nel dominio che la dichiara, e genera l'`accepts` che il Ledger fa valere |
+| **Al portatore** _(`bearer`)_                | uno strumento che chi tiene può spendere. I contanti sì, la carta no: e ciò che non lo è chiede una **prova**             |
+| **Prova**                                    | ciò che uno strumento non al portatore chiede prima di pagare. Per la carta è il codice di tre cifre del retro            |
 
 **Attenzione a «listino».** La [visione](prodotto/visione.md) usa la stessa parola, in prosa, per
 la tabella dei rendimenti attesi dei domini — «un listino per scegliere», cioè dove metti un euro e

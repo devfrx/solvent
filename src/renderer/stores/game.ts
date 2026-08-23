@@ -8,13 +8,15 @@ import type { CommandHandler } from '@core/contracts/commands'
 import type { Balances, Posting, Transaction } from '@core/contracts/ledger'
 import type { Money } from '@core/contracts/money'
 import { ZERO } from '@core/contracts/money'
-import type { PriceList } from '@core/contracts/payment'
+import type { PaymentError, PriceList } from '@core/contracts/payment'
 import type { Pool } from '@core/contracts/pools'
 import { POOL_IDS, POOLS, roomIn } from '@core/contracts/pools'
 import type { Result } from '@core/contracts/result'
 import type { SaveError } from '@core/contracts/save'
 
 import { BALANCE } from '@core/balance/constants'
+import type { Card } from '@core/domains/atm/card'
+import { authorizes, cardOf } from '@core/domains/atm/card'
 import type { AtmError, AtmOperation } from '@core/domains/atm/commands'
 import { DEPOSIT, previewOf, WITHDRAW } from '@core/domains/atm/commands'
 import { largestThatFits } from '@core/domains/atm/rules'
@@ -101,6 +103,13 @@ export type FailurePhase = 'loading' | 'saving'
  * pulsanti itera **questo**, e una terza direzione comparirebbe a schermo senza che nessuno se ne
  * ricordi.
  */
+/**
+ * La carta, ri-esportata perché un `.vue` la riceva senza importare un dominio: R05 vieta a un
+ * componente le regole e i comandi di un dominio, e la disciplina che ci sta dietro vale anche per
+ * gli altri file di quella cartella. È la stessa strada di `AtmOperationKind`, qui sotto.
+ */
+export type { Card } from '@core/domains/atm/card'
+
 export const ATM_KINDS = ['deposit', 'withdraw'] as const
 
 export type AtmOperationKind = (typeof ATM_KINDS)[number]
@@ -307,6 +316,18 @@ export const useGameStore = defineStore('game', () => {
     return option !== null && canBuyUpgrade(upgrade.value, option, balances.value[pool])
   }
 
+  /**
+   * Se **almeno uno** degli strumenti del listino basta. È ciò che smorza il pulsante che apre il
+   * flusso del pagamento (D036): la domanda per strumento resta `canBuyUpgradeWith`, e la fa la
+   * finestra voce per voce.
+   *
+   * Sta qui e non nel pannello perché un `.vue` non calcola (R05) — e perché contare le voci di un
+   * listino dentro un componente è precisamente la forma che R24 vieta.
+   */
+  const canAffordUpgrade = computed<boolean>(() =>
+    prices.value.some((each) => canBuyUpgradeWith(each.pool))
+  )
+
   /** Se l'upgrade è già stato comprato. Alla UI serve il fatto, non lo stato del sistema. */
   const owned = computed<boolean>(() => upgrade.value.upgraded)
 
@@ -334,6 +355,40 @@ export const useGameStore = defineStore('game', () => {
    * per cui non si copia.
    */
   const feeFloor = shallowRef<Money>(BALANCE.ATM_FEE_FLOOR)
+
+  /**
+   * ADR 0042 — la carta di **questa** partita: numero, scadenza e codice, derivati dal seme.
+   *
+   * È un mirror come gli altri e per la stessa ragione: il seme cambia quando si carica una partita
+   * e quando se ne comincia una nuova, e nessuno dei due lo annuncia sul Bus. A rileggerlo è
+   * `mirror()`, che entrambi chiamano già — senza, la partita nuova porterebbe la carta di quella
+   * buttata via.
+   *
+   * `shallowRef` come tutto il resto qui dentro: un oggetto nudo esposto da uno store Pinia non
+   * esce da `storeToRefs`, e la finestra del pagamento si aprirebbe senza carta — senza un errore
+   * e senza un avviso (D029).
+   */
+  const card = shallowRef<Card>(cardOf(game.ctx.rng.save().seed))
+
+  /**
+   * La prova, e l'**unico** posto in cui si verifica: uno strumento non al portatore chiede di
+   * dimostrare di averlo in mano prima di pagarci (ADR 0042).
+   *
+   * Sta qui e non nella finestra perché lì la garanzia sarebbe «si è ricordata di controllare»
+   * invece di una proprietà, e chiunque chiamasse il comando la scavalcherebbe — è la decisione 3
+   * dell'ADR 0027 applicata alla prova invece che al prezzo. E non sta dentro un dominio perché il
+   * codice viene dalla carta, la carta sta in `atm`, e un dominio non ne importa un altro (R19):
+   * lo store è il punto che ha entrambi i capi sotto mano (ADR 0024).
+   *
+   * **È una sola**, chiamata da tutti e due i comandi che spendono: due copie della stessa domanda
+   * prima o poi divergono, ed è la ragione per cui `atmFee` è una funzione e non un numero (D014).
+   *
+   * Il `null` è il sì. Torna **prima** del Ledger, quindi non c'è nessuna transazione da annullare.
+   */
+  const unauthorized = (pool: Pool, code: string): PaymentError | null =>
+    POOLS[pool].bearer || authorizes(card.value, code)
+      ? null
+      : { code: 'error.payment.unauthorized', pool }
 
   /**
    * INV-18 — il tetto dei due strumenti, letto dalla **stessa** funzione che il Ledger fa
@@ -423,7 +478,21 @@ export const useGameStore = defineStore('game', () => {
     return option !== null && canExpand(vault.value, option, balances.value[pool])
   }
 
-  const expandVault = (pool: Pool): Result<VaultState, VaultError> => {
+  /** Come `canAffordUpgrade`, per l'ampliamento: almeno uno dei due strumenti ci arriva. */
+  const canAffordExpansion = computed<boolean>(() =>
+    expansionOptions.value.some((each) => canExpandWith(each.pool))
+  )
+
+  /**
+   * Se il caveau è arrivato in fondo, detto come booleano. Il listino vuoto **è** la risposta
+   * (`expansionPrices`), e chi disegna non deve contarne le voci per scoprirlo.
+   */
+  const atMax = computed<boolean>(() => expansionOptions.value.length === 0)
+
+  const expandVault = (pool: Pool, code: string): Result<VaultState, VaultError | PaymentError> => {
+    const refused = unauthorized(pool, code)
+    if (refused !== null) return { ok: false, error: refused }
+
     const expanded = game.vault.expand(pool)
     // I saldi li rispecchia l'evento del Ledger; la capienza no, perché ampliare non è un
     // movimento economico e nessuno lo annuncia. È la stessa trappola dei modificatori (D011).
@@ -587,6 +656,7 @@ export const useGameStore = defineStore('game', () => {
   /** Caricare non è un movimento economico, quindi non emette: il mirror va riletto a mano. */
   const mirror = (): void => {
     balances.value = game.ctx.ledger.balances()
+    card.value = cardOf(game.ctx.rng.save().seed)
     readIncome()
     readVault()
     reopen()
@@ -807,7 +877,13 @@ export const useGameStore = defineStore('game', () => {
     void close()
   })
 
-  const buyUpgrade = (pool: Pool): Result<IncomeState, IncomeError> => {
+  const buyUpgrade = (
+    pool: Pool,
+    code: string
+  ): Result<IncomeState, IncomeError | PaymentError> => {
+    const refused = unauthorized(pool, code)
+    if (refused !== null) return { ok: false, error: refused }
+
     const bought = game.income.buyUpgrade(pool)
     // I saldi li rispecchia l'evento del Ledger; i modificatori no, perché registrarne uno non
     // è un movimento economico e nessuno lo annuncia.
@@ -861,11 +937,13 @@ export const useGameStore = defineStore('game', () => {
     incomePerSecond: rate,
     upgradePrices: prices,
     canBuyUpgradeWith,
+    canAffordUpgrade,
     atmFeeRates: feeRates,
     atmSides: sides,
     atmAmounts: amounts,
     atmDefaultAmount: defaultAmount,
     atmFeeFloor: feeFloor,
+    card,
     atmMaximums: maximums,
     cashCapacity,
     cardCapacity,
@@ -875,6 +953,8 @@ export const useGameStore = defineStore('game', () => {
     vaultIsFull: isFull,
     expansionPrices: expansionOptions,
     canExpandWith,
+    canAffordExpansion,
+    vaultAtMax: atMax,
     expandVault,
     incomeWithheld: withheld,
     preview,

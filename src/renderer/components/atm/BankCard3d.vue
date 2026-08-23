@@ -2,6 +2,7 @@
 import { shallowRef, useTemplateRef } from 'vue'
 
 import { useTranslator } from '@renderer/i18n'
+import type { Card } from '@renderer/stores/game'
 
 import type { Face, Rotation } from './rotation'
 import { draggedTo, releasedOn, restingAt, transformOf } from './rotation'
@@ -29,45 +30,65 @@ import { draggedTo, releasedOn, restingAt, transformOf } from './rotation'
  * meccanica assente è un numero finto con un'etichetta. Il retro è un elenco, ed è fatto per
  * crescere di una riga il giorno in cui la meccanica nasce.
  *
- * **Zero logica.** Riceve tre stringhe già formattate e non vede un solo `Decimal`: chi formatta è
- * il confine di presentazione (ADR 0006), chi decide quanto denaro si muove è il dominio (R05). */
+ * **Da [D036](../../../../docs/delega/D036-il-pagamento-e-un-flusso-solo.md) i tre fatti del retro
+ * sono facoltativi**, e il codice non è più decorazione. La carta si disegna in due posti — la
+ * pagina del bancomat e la finestra del pagamento — e i fatti sono del **bancomat**: là dentro si
+ * decide se spostare denaro con questo strumento, qui si sta solo dimostrando di averlo in mano.
+ * Il retro resta un elenco, e un elenco di zero voci è un elenco.
+ *
+ * **Zero logica.** Riceve stringhe già formattate e non vede un solo `Decimal`: chi formatta è il
+ * confine di presentazione (ADR 0006), chi decide quanto denaro si muove è il dominio (R05). */
 
-defineProps<{
-  /** Il tetto dello strumento, già in parole: oggi «Illimitata». */
-  readonly capacity: string
-  /**
-   * Cosa costa usare questo strumento, già in parole: da D032 sono i **due tassi**, uno per verso,
-   * e non più un importo. Quanto costi la singola operazione non lo sa più nessuno in anticipo —
-   * lo dice l'anteprima, che è l'operazione stessa (INV-11).
-   */
-  readonly fee: string
-  /** Se i movimenti lasciano traccia, già in parole. È metà della dualità di P4. */
-  readonly traceability: string
-}>()
+withDefaults(
+  defineProps<{
+    /**
+     * Numero, scadenza e codice di **questa** partita (ADR 0042). Fino a D036 erano una costante
+     * qui dentro, con accanto il grilletto che questa proprietà ha fatto scattare: adesso li deriva
+     * dal seme `cardOf`, e il codice è la prova che la carta chiede prima di pagare.
+     */
+    readonly card: Card
+    /** Il tetto dello strumento, già in parole: oggi «Illimitata». */
+    readonly capacity?: string | undefined
+    /**
+     * Cosa costa usare questo strumento, già in parole: da D032 sono i **due tassi**, uno per
+     * verso, e non più un importo. Quanto costi la singola operazione non lo sa più nessuno in
+     * anticipo — lo dice l'anteprima, che è l'operazione stessa (INV-11).
+     */
+    readonly fee?: string | undefined
+    /** Se i movimenti lasciano traccia, già in parole. È metà della dualità di P4. */
+    readonly traceability?: string | undefined
+  }>(),
+  { capacity: undefined, fee: undefined, traceability: undefined }
+)
 
 /**
- * **Decorazione dichiarata.** Non sono numeri di gioco — non stanno in `balance/`, nessuna regola
- * li legge, cambiarli non sposta niente — e non sono parole da tradurre: sono ciò che è stampato
- * su una carta, uguale in ogni lingua. Stanno qui, con questo commento, perché altrimenti il primo
- * che li legge va a cercare da dove vengono.
+ * **Ciò che è stampato su ogni carta uguale**, e solo quello: il circuito, le due didascalie e
+ * l'intestatario. Non sono numeri di gioco — non stanno in `balance/`, nessuna regola li legge — e
+ * non sono parole da tradurre: sono inchiostro, identico in ogni lingua e in ogni partita.
  *
- * Un numero ricavato dal seme della partita sarebbe bello e costerebbe poco (l'Rng ha già i suoi
- * stream per dominio, ADR 0005): è **fuori scopo** per D033, e il grilletto è scritto — sarebbe la
- * prima cosa nel gioco a distinguere una partita da un'altra a schermo.
+ * **Il grilletto che stava scritto qui è scattato.** Diceva che un numero ricavato dal seme sarebbe
+ * stato la prima cosa a distinguere una partita da un'altra a schermo: da D036 numero, scadenza e
+ * codice arrivano da `cardOf` e non sono più qui.
+ *
+ * L'intestatario è rimasto, ed è una decisione: quei tre si ricavano da cifre, un nome vorrebbe un
+ * elenco di nomi — dati nuovi che nessuna regola legge, per una riga stampata. Il grilletto è il
+ * primo posto in cui il gioco chieda al giocatore come si chiama.
  */
 const ORNAMENT = {
   kind: 'DEBIT',
-  number: '4913 2201 0067 5540',
   holderLabel: 'CARDHOLDER',
   holder: 'A. VOLPE',
-  expiryLabel: 'VALID THRU',
-  expiry: '08 / 31',
-  code: '441'
+  expiryLabel: 'VALID THRU'
 } as const
 
 const { text } = useTranslator()
 
-const card = useTemplateRef<HTMLElement>('card')
+/**
+ * L'elemento che gira. Si chiama così e non `card` perché `card` adesso è il **dato**: da D036 la
+ * carta arriva per proprietà, e due cose con lo stesso nome in un file solo sono la prima riga
+ * sbagliata che qualcuno scrive.
+ */
+const plastic = useTemplateRef<HTMLElement>('plastic')
 
 const face = shallowRef<Face>('front')
 const rotation = shallowRef<Rotation>(restingAt('front'))
@@ -92,7 +113,7 @@ const grab = (event: PointerEvent): void => {
   travelled = 0
   grabbedAt = { across: event.clientX, down: event.clientY }
   grabbedFrom = rotation.value
-  card.value?.setPointerCapture(event.pointerId)
+  plastic.value?.setPointerCapture(event.pointerId)
 }
 
 const drag = (event: PointerEvent): void => {
@@ -114,7 +135,7 @@ const release = (): void => {
 <template>
   <div class="stage">
     <div
-      ref="card"
+      ref="plastic"
       class="card"
       :class="{ dragging }"
       :style="{ transform: transformOf(rotation) }"
@@ -140,7 +161,7 @@ const release = (): void => {
           <span class="contact"></span>
         </span>
 
-        <p class="pan">{{ ORNAMENT.number }}</p>
+        <p class="pan">{{ card.number }}</p>
 
         <footer class="engraved">
           <span class="stamp">
@@ -149,7 +170,7 @@ const release = (): void => {
           </span>
           <span class="stamp end">
             <span class="caption">{{ ORNAMENT.expiryLabel }}</span>
-            <span class="value">{{ ORNAMENT.expiry }}</span>
+            <span class="value">{{ card.expiry }}</span>
           </span>
         </footer>
       </div>
@@ -159,20 +180,20 @@ const release = (): void => {
 
         <p class="signature">
           <span class="strip" aria-hidden="true"></span>
-          <span class="value">{{ ORNAMENT.code }}</span>
+          <span class="value">{{ card.code }}</span>
         </p>
 
         <p class="caption">{{ text('card.back.title') }}</p>
         <dl class="details">
-          <div class="detail">
+          <div v-if="traceability !== undefined" class="detail">
             <dt>{{ text('pool.traceability') }}</dt>
             <dd>{{ traceability }}</dd>
           </div>
-          <div class="detail">
+          <div v-if="capacity !== undefined" class="detail">
             <dt>{{ text('pool.capacity') }}</dt>
             <dd>{{ capacity }}</dd>
           </div>
-          <div class="detail">
+          <div v-if="fee !== undefined" class="detail">
             <dt>{{ text('atm.fee.per_operation') }}</dt>
             <dd>{{ fee }}</dd>
           </div>

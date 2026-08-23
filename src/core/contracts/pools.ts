@@ -31,6 +31,21 @@ export interface PoolProps {
   readonly yields: boolean
   /** Se il pool è del giocatore. I conti dell'ADR 0020 non compaiono mai nella UI. */
   readonly player: boolean
+  /**
+   * Se chi lo tiene può spenderlo. I contanti sì; la carta chiede prima di chi è (ADR 0042).
+   *
+   * È l'affordance da cui il flusso di pagamento sa se deve chiedere una prova, e sta qui per la
+   * stessa ragione di `traceable`: un `if (pool === 'card')` dentro il flusso centralizzerebbe il
+   * disegno e spargerebbe la regola, che è ciò che l'ADR 0017 esiste per non avere.
+   *
+   * Il kernel non la legge — il Ledger valida movimenti, non autorizzazioni — ed è ancora come
+   * `traceable`, che ha un lettore solo ed è la presentazione.
+   *
+   * **Per i quattro conti non-giocatore non vuol dire niente**, ed è dichiarato `false` invece di
+   * essere lasciato a caso: un listino contiene solo pool del giocatore, quindi nessuno li
+   * interroga, e un conto interno che si dichiarasse al portatore direbbe una cosa senza senso.
+   */
+  readonly bearer: boolean
 }
 
 /**
@@ -45,15 +60,22 @@ export interface PoolProps {
 export const CASH_START_CAPACITY: Money = fromString('1000')
 
 export const POOLS: Readonly<Record<Pool, PoolProps>> = {
-  cash: { traceable: false, capacity: CASH_START_CAPACITY, yields: false, player: true },
-  card: { traceable: true, capacity: null, yields: false, player: true },
+  cash: {
+    traceable: false,
+    capacity: CASH_START_CAPACITY,
+    yields: false,
+    player: true,
+    bearer: true
+  },
+  card: { traceable: true, capacity: null, yields: false, player: true, bearer: false },
 
   // Conti non-giocatore (ADR 0020): contabilità interna. Tutto ciò che li attraversa è
   // registrato, nessuno ha un tetto e nessuno matura interessi. `world` è normalmente negativo.
-  world: { traceable: true, capacity: null, yields: false, player: false },
-  sink: { traceable: true, capacity: null, yields: false, player: false },
-  fees: { traceable: true, capacity: null, yields: false, player: false },
-  house: { traceable: true, capacity: null, yields: false, player: false }
+  // Nessuno è al portatore: non sono strumenti, e nessun listino li offre.
+  world: { traceable: true, capacity: null, yields: false, player: false, bearer: false },
+  sink: { traceable: true, capacity: null, yields: false, player: false, bearer: false },
+  fees: { traceable: true, capacity: null, yields: false, player: false, bearer: false },
+  house: { traceable: true, capacity: null, yields: false, player: false, bearer: false }
 }
 
 /**

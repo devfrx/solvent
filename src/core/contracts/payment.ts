@@ -41,3 +41,25 @@ export interface PaymentOption {
  * una ragione da spiegare.
  */
 export type PriceList = readonly PaymentOption[]
+
+/**
+ * ADR 0042 — il pagamento rifiutato **prima** del Ledger, perché la prova non è stata data.
+ *
+ * Uno strumento non al portatore (`POOLS[pool].bearer === false`) chiede di dimostrare di averlo
+ * in mano prima di pagarci. A confrontare è lo store, che ha sotto mano sia la carta sia il pool
+ * scelto: nel componente sarebbe «si è ricordato di controllare» invece di una proprietà, e dentro
+ * un dominio non si può — il codice viene dalla carta, la carta sta in `atm`, e un dominio non ne
+ * importa un altro (R19).
+ *
+ * **Il rifiuto arriva prima del Ledger e non lo scavalca**: non c'è nessuna transazione da
+ * annullare, che è la stessa forma di `notInPriceList` in `income/commands.ts`.
+ *
+ * Un codice nuovo e non uno del Ledger, all'inverso di quella scelta: lì il fatto era lo stesso —
+ * «con questo strumento non si paga» — mentre qui è un fatto che il Ledger non conosce, e che non
+ * ha nessun `accepted` da mettere accanto. Porta il pool perché la frase deve dire **quale**
+ * strumento ha chiesto una prova.
+ */
+export interface PaymentError {
+  readonly code: 'error.payment.unauthorized'
+  readonly pool: Pool
+}

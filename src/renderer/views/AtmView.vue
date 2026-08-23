@@ -36,7 +36,7 @@ import UiText from '@renderer/ui/UiText.vue'
  * `recentOperations` e non `operations`: il registro intero è della schermata Statistiche, e
  * quante righe siano «poche» lo decide un selettore dello store, non questa pagina (R05).
  */
-const { cardCapacity, atmFeeRates, recentOperations } = storeToRefs(useGameStore())
+const { card, cardCapacity, atmFeeRates, recentOperations } = storeToRefs(useGameStore())
 const { text, money, rate } = useTranslator()
 </script>
 
@@ -50,6 +50,7 @@ const { text, money, rate } = useTranslator()
     <section class="watching">
       <UiPanel :title="text('atm.card.title')">
         <BankCard3d
+          :card="card"
           :capacity="cardCapacity === null ? text('pool.unlimited') : money(cardCapacity)"
           :fee="
             text('atm.fee.rates', {
