@@ -45,7 +45,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23 sono stati fusi i tre rami che aspettavano — `guscio-condiviso-dei-grafici` conteneva già per intero `d034-le-serie-degli-strumenti`, quindi il primo è stato un `--ff-only` e il secondo un commit di soli documenti — e poi `d036-il-pagamento-e-un-flusso-solo`, anche lui con un `--ff-only`. Su ogni fusione `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sul ramo |
 | `origin/main`            | **allineato.** Il 2026-08-23 è stato spinto in un colpo tutto ciò che mancava: le due fusioni e D036. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                                                                                   |
 | Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                        |
-| Prossimo passo           | **committare D037, e poi la fetta 03.** Il lavoro di D037 è nell'albero ed è verde su tutti i gate, ma **non è committato**: nessun ramo, nessun commit — non è stato chiesto. La fetta 03 comincia da una scheda compilata — vedi _E dopo, la fetta 03_                                                                                                                                                                                                        |
+| Prossimo passo           | **fondere D037 e spingere, poi la fetta 03.** D037 è chiusa e committata sul ramo `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, verde su tutti i gate; **non è in `main`** e non è stata spinta — una fusione e un `push` sono cose che si chiedono. La fetta 03 comincia da una scheda compilata — vedi _E dopo, la fetta 03_                                                                                                                          |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -126,9 +126,14 @@ Verificato con i comandi, non ricordato.
   cronaca rompendo a turno l'iterazione della lista, l'iscrizione al Bus, `reopen` e la cadenza.
   Ogni file rotto è stato **copiato prima** e ripristinato con un `diff` che conferma l'identità: è
   la trappola che D036 aveva pagato con mezz'ora di lavoro.
-- **Niente è committato.** Nessun ramo `d037-*`, nessun commit: la sessione non ha ricevuto quella
-  richiesta, e un commit non chiesto è una di quelle cose che si chiedono. Cosa c'è nell'albero lo
-  dice `git status`.
+- **Tutto sta in un commit solo**, `6f245e0` sul ramo `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, e la forma non è
+  una scelta di comodo: la regola 1 di [docs/README.md](../README.md) vuole che un confine che si
+  sposta cambi il documento che lo descrive **nello stesso commit**, e qui i documenti vivi che si
+  spostano sono sei. Spezzare per tipo — `feat` e poi `docs` — avrebbe lasciato un commit in cui
+  `architettura.md` descrive un confine che il codice ha già cambiato.
+- **Il ramo non è fuso in `main` e non è spinto.** Non è stato chiesto, e un `push` è visibile agli
+  altri: resta una di quelle cose che si chiedono. Dove sia adesso lo dicono `git branch` e
+  `git rev-list --count origin/main..main`.
 - **Niente residui di debug**: nessun `console.log`, nessun `TODO`.
 
 ### Cosa questa sessione ha lasciato indietro

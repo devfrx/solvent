@@ -1,6 +1,6 @@
 # D037 — Il tempo che avanza è un'operazione del gioco
 
-- **Stato:** **Chiusa** — scritta ed eseguita il 2026-08-23, nella stessa sessione. È la seconda
+- **Stato:** **Chiusa** — commit `6f245e0`, ramo `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, che parte da `main`. Scritta ed eseguita il 2026-08-23, nella stessa sessione. È la seconda
   volta che succede in questo progetto, e per la stessa ragione di
   [D036](D036-il-pagamento-e-un-flusso-solo.md): la richiesta è arrivata dall'utente come feature, ed
   è risultata essere un difetto misurabile. La decisione aperta — dove vive la cronaca — è stata
