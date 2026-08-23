@@ -153,6 +153,7 @@ Il grilletto resta quello che il registro YAGNI ha scritto: il primo dominio che
 | [0039](0039-una-sovrapposizione-passa-dal-kit.md)                              | Una sovrapposizione passa dal kit                                  | **Accettata** | chi possiede il livello superiore, e perché una riga di CSS lo disfaceva                  | —               |
 | [0040](0040-il-bancomat-e-il-cruscotto-sono-due-pagine.md)                     | Il bancomat e il cruscotto sono due pagine                         | **Accettata** | quante destinazioni ci sono, e cosa difende il tetto dei riquadri                         | —               |
 | [0041](0041-la-rappresentazione-del-denaro-e-dichiarata.md)                    | La rappresentazione del denaro è dichiarata come la sua precisione | **Accettata** | come un importo si scrive quando attraversa il disco, e a quale scala smette di scriversi | —               |
+| [0042](0042-il-pagamento-e-un-flusso-solo.md)                                  | Il pagamento è un flusso solo                                      | **Proposta**  | dove si sceglie con cosa si paga, e cosa uno strumento chiede prima di pagare             | —               |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è

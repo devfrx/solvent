@@ -30,22 +30,22 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                                                                                                                                                                                                            |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                              |
-| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                                     |
-| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                                     |
-| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                          |
-| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                                    |
-| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                                                                                        |
-| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                                   |
-| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                                     |
-| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                             |
-| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                      |
-| `main`                   | **fermo al 2026-08-22, e non è più l'unico ramo.** La sessione del 2026-08-23 ha lasciato **due** rami non fusi — vedi la sezione qui sotto. `git branch` li elenca, e finché sono lì `main` non ha D034                                                                                                                   |
-| `origin/main`            | **allineato.** Il 2026-08-21 sono stati spinti in un colpo i cinquantotto commit che mancavano dal 2026-08-20. Che sia ancora vero non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                                     |
-| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`. La sessione del 2026-08-23 si è chiusa **pulita** — niente fuori dai commit, nessuno `stash`, nessun file non tracciato — ma con due rami **non fusi**, che è una cosa diversa. Da allora ne è nato un **terzo**, `guscio-condiviso-dei-grafici` |
-| Prossimo passo           | **fondere i tre rami**, poi scrivere una delega nuova invece di eseguirne una: [D034](D034-le-serie-degli-strumenti.md) e [D035](D035-cio-che-non-si-dichiara-lo-sceglie-un-altro.md) sono chiuse, e la fetta 03 comincia da una scheda compilata                                                                          |
+|                          |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                                                                                                                                                       |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                                                                                                                                                              |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                                                                                                                                                              |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                                                                                                                                                   |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                                                                                                                                                             |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                                                                                                                                                                                                                 |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                                                                                                                                                            |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                                                                                                                                                              |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                                                                                                                                                      |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                                                                                                                                               |
+| `main`                   | **di nuovo l'unico ramo di lavoro fuso.** Il 2026-08-23 i tre rami che aspettavano sono stati fusi — `guscio-condiviso-dei-grafici` conteneva già per intero `d034-le-serie-degli-strumenti`, quindi il primo è stato un `--ff-only` e il secondo un commit di soli documenti. `verify` e `verify:release` verdi **su `main` fuso**, poi i tre rami cancellati con `git branch -d`, che si rifiuta se resta lavoro non fuso: nessuno si è rifiutato |
+| `origin/main`            | **indietro.** La fusione del 2026-08-23 non è stata spinta: spingere è una di quelle cose che si chiedono, e nessuno l'ha chiesto. Quanto indietro non si scrive qui: lo dice `git rev-list --count origin/main..main`                                                                                                                                                                                                                              |
+| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                            |
+| Prossimo passo           | **eseguire [D036](D036-il-pagamento-e-un-flusso-solo.md)**, scritta il 2026-08-23 e senza decisioni aperte: il pagamento passa da un flusso solo, e uno strumento non al portatore chiede una prova. Dopo di lei la fetta 03, che comincia da una scheda compilata                                                                                                                                                                                  |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -69,8 +69,15 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## La sessione del 2026-08-23: D034 eseguita, e due rami che aspettano
 
-Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
-recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. Tutte le sezioni
+sotto descrivono stati già superati, e si leggono come storia.
+
+> **I tre rami sono stati fusi**, in una sessione successiva dello stesso giorno, e il blocco qui
+> sotto è quindi storia: si legge per il metodo, non per lo stato. Ciò che ha reso la fusione più
+> corta di come è descritta è che `guscio-condiviso-dei-grafici` conteneva già per intero
+> `d034-le-serie-degli-strumenti` — quindi i rami da fondere erano **due**, non tre, e il primo era
+> un `--ff-only`. Delle due sessioni parallele, quella che rifaceva la correzione della scheda del
+> bancomat non ha lasciato un ramo: `git branch` ne mostrava quattro, e nessuno è andato perso.
 
 > **La prima cosa, perché se si perde fa danno.** Questa sessione **non ha fuso niente**, e non per
 > dimenticanza: fondere è una di quelle cose che si chiedono. `main` è ancora al 2026-08-22 e non ha
@@ -1413,6 +1420,12 @@ interfaccia. La quarta torna sul tavolo a ogni componente nuovo, ed è giusto co
 | Il ciclo di vita esce in una **funzione** (`apex.ts`), non in un componente che riceve `ApexOptions` | il guscio condiviso dei due grafici — 2026-08-23                                                                          | un `<ChartPanel :options>`: dentro quell'oggetto c'è `height`, quindi sarebbe un contenitore per il criterio dell'ADR 0030 — e sarebbe `vue3-apexcharts` riscritto in casa                                                                                     |
 | La bolla a candele porta una **classe nostra**, e da lì R23 è esatta invece che parziale             | il guscio condiviso dei due grafici — 2026-08-23                                                                          | lasciarle i selettori della libreria e accettare un gate ⚠️ parziale: è cambiare l'HTML reso per rendere verificabile una regola, ed è lecito chiedersi se valga                                                                                               |
 | Il respiro dell'asse è in **pixel** e non in denaro: la finestra è la serie e basta                  | l'asse sotto zero — 2026-08-23                                                                                            | il pavimento a zero, che è stato scritto per primo e poi tolto: toglie l'assurdo e lascia la bugia, perché i due numeri restano i bordi di un margine invece che due campioni. Oppure ancorare l'asse a zero, che l'ADR di D027 ha già scartato con una misura |
+| Il flusso del pagamento è una **finestra modale**, non un menù contestuale                           | [D036](D036-il-pagamento-e-un-flusso-solo.md) — decisione 1                                                               | `UiPopover` con `on="press"`, che esiste già e costerebbe zero: non è modale — il gioco resta cliccabile dietro — e non regge un listino, una carta da girare e un campo                                                                                       |
+| Il permesso di pagare è un'affordance del **pool** (`bearer`), non dell'azione                       | [D036](D036-il-pagamento-e-un-flusso-solo.md) — decisione 2                                                               | una proprietà del listino, o un `if (pool === 'card')` dentro il flusso: centralizza il disegno e sparge la regola, che è ciò che l'ADR 0017 vieta                                                                                                             |
+| Il flusso si apre **anche** con un listino di una voce sola                                          | [D036](D036-il-pagamento-e-un-flusso-solo.md) — decisione 3                                                               | saltarlo e confermare al volo: risparmia un clic e rimette il caso speciale che l'ADR 0027 ha già tolto, più il posto dove stanno la ragione e la prova                                                                                                        |
+| Il numero della carta passa il controllo di **Luhn**                                                 | [D036](D036-il-pagamento-e-un-flusso-solo.md) — decisione 4                                                               | sedici cifre estratte e basta: costa otto righe in meno e lascia «il numero è vero» senza niente che lo sostenga. Quello di oggi non lo passa, e la somma fa 53                                                                                                |
+| Il bancomat **non** chiede il codice della carta                                                     | [D036](D036-il-pagamento-e-un-flusso-solo.md) — decisione 5                                                               | chiederlo anche lì, che è più uniforme: prelevare non ha una scelta di strumento, ha già la sua cerimonia, ed è l'unico gesto ripetuto del gioco                                                                                                               |
+| `BankCard3d` **resta** in `components/atm/`, e `payment/` la importa                                 | [D036](D036-il-pagamento-e-un-flusso-solo.md) — decisione 6                                                               | spostarla, o duplicarne una versione ridotta dentro la finestra: la prima è un `git mv` per una purezza che nessuna regola esprime, la seconda è la duplicazione che questa delega esiste per togliere                                                         |
 
 La ventiduesima è di **D013** e costa una riga di un test: è anche l'unica riga non di test che
 quella delega abbia toccato.
@@ -1460,6 +1473,15 @@ che la conteneva** — la ragione sta nella correzione 1 di D035, ed è una misu
 un'opinione: c'è un test che vede rosso lo `stop()` chiamato da dentro `onStep`, sia con il codice
 di prima sia con il `finally` che la delega prescriveva.
 
+**Le sei righe di [D036](D036-il-pagamento-e-un-flusso-solo.md)** sono le terze prese su una
+**direttiva generale**, dopo quelle di D027 e di D035, e sono le prime prese **scrivendo** una
+delega invece che eseguendola: oggi non costano una riga di codice, e contestarle vuol dire
+riscrivere una delega aperta invece di disfare qualcosa. Due meritano di essere guardate per prime.
+La seconda — il permesso come affordance del pool — è quella che decide se fra tre domini il
+pagamento resta un flusso solo o torna a essere un `if`, ed è l'unica delle sei che tocchi
+`contracts/`. La quarta ha un numero dietro invece di un'opinione: il numero stampato oggi sulla
+carta non passa il controllo di Luhn, e la somma fa 53 — misurata, non dedotta.
+
 Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
 recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE_FLOOR` scelti
 da D014, e i quattro importi rapidi del bancomat — 1 · 10 · 100 · 500 — scelti da D015. Sono di
@@ -1469,44 +1491,40 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-**Non c'è più una delega da eseguire**, e quante ne restino lo dice [stato.md](../stato.md), che le
-conta. Ci sono invece **tre** rami da fondere, e vengono prima di qualunque cosa nuova.
+**C'è di nuovo una delega da eseguire**, ed è [D036](D036-il-pagamento-e-un-flusso-solo.md).
+Quante ne restino aperte lo dice [stato.md](../stato.md), che le conta.
 
 ```
-Tre rami di lavoro aspettano una decisione, e nessuno e' fuso.
+Esegui D036 — il pagamento e' un flusso solo.
 
-  git branch                              # ne devono comparire quattro
-  git rev-list --count origin/main..main  # deve dire 0
+  git rev-list --count origin/main..main   # non e' zero: la fusione non e' stata spinta
 
-d034-le-serie-degli-strumenti porta D034 chiusa (verify verde: 79 file, 878 test).
-correzione-scheda-bancomat porta due punti invecchiati della scheda del bancomat,
-corretti (verify verde: 78, 857). Si fondono puliti, ed e' verificato:
+Non ha decisioni aperte: le sei prese scrivendola stanno in fondo alla delega e
+nella tabella Decisioni contestabili di PASSAGGIO-DI-CONSEGNE. Non vanno
+riaperte di iniziativa propria.
 
-  git merge-tree --write-tree d034-le-serie-degli-strumenti correzione-scheda-bancomat
+Porta l'ADR 0042 da Proposta ad Accettata, e il commit che lo fa e' quello che
+introduce R24 con il suo rosso. R22 si allarga invece di essere affiancata da una
+regola nuova: due custodi in un test solo.
 
-guscio-condiviso-dei-grafici parte DA d034 e non da main: e' il guscio condiviso
-dei due grafici, eseguito (verify verde: 80 file, 976 test). Va fuso dopo d034,
-o si porta dietro D034 senza dirlo.
+Tre cose che la delega dice e che vale la pena sapere prima di aprirla:
+- la carta e' una funzione del SEME, non di uno stream dell'Rng: un'estrazione
+  avanza un cursore che finisce nel salvataggio, e cardOf chiamata due volte
+  darebbe due carte;
+- il codice si verifica nello STORE, non nel componente e non nel dominio: nel
+  dominio non si puo' (R19), nel componente sarebbe una speranza;
+- la carta va riletta in mirror(), o la partita nuova porta quella buttata via.
 
-PRIMA DI FONDERE: il 2026-08-23 sono state avviate due sessioni parallele sugli
-stessi file — una valutava il guscio condiviso dei due grafici, e il terzo ramo
-e' il suo esito; l'altra rifa' la correzione della scheda del bancomat che il
-secondo ramo ha gia' fatto. Guarda cosa hanno prodotto, o si sovrascrivono.
-
-Gira verify su main FUSO e non solo sui rami, che e' la procedura che
-PASSAGGIO-DI-CONSEGNE prescrive, e verify:release che nessuno ha girato dal
-2026-08-22. Poi cancella i rami con git branch -d, che si rifiuta se resta
-lavoro non fuso.
-
-DOPO, il lavoro cambia specie: si scrive una delega, non se ne esegue una.
-Il materiale c'e' tutto e non va inventato — vedi "E dopo, la fetta 03".
+Prima di chiudere: verify e verify:release verdi, ogni test nuovo visto rosso di
+proposito, le correzioni rispetto a com'era scritta in fondo alla delega, e
+stato.md rigenerato con npx vitest run tests/rules/project-state -u.
 ```
 
 I prompt delle deleghe già consegnate stanno nel `git log` di questo file: si recuperano da lì
 invece di tenerli tutti in vita, che è la stessa ragione per cui i numeri stanno in un posto solo.
 Questa riga li elencava per nome, ed era un elenco che invecchiava a ogni delega consegnata.
 
-**E dopo le due, torna il lavoro di specie diversa: scrivere una delega, non eseguirne una.** Il
+**E dopo D036, torna il lavoro di specie diversa: scrivere una delega, non eseguirne una.** Il
 materiale c'è tutto e non va inventato:
 
 - il [registro delle fette](../roadmap-fette.md) dice cosa viene dopo e in che ordine, e il
