@@ -67,22 +67,25 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 > Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
 > agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
 
-## La **quinta** sessione del 2026-08-23: D038, il kit possiede ciò che si preme e ciò che scorre
+## La **quinta** sessione del 2026-08-23: D038 e D039, il kit e lo strumento per guardarlo
 
 Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
 recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
 
 **Cosa è stato chiuso.**
 
-| Delega                                            | Cos'era                                                                     |
-| ------------------------------------------------- | --------------------------------------------------------------------------- |
-| [D038](D038-cio-che-si-preme-e-cio-che-scorre.md) | i pulsanti erano sei, le aree che scorrevano sei, e le icone non esistevano |
+| Delega                                                  | Cos'era                                                                     |
+| ------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [D038](D038-cio-che-si-preme-e-cio-che-scorre.md)       | i pulsanti erano sei, le aree che scorrevano sei, e le icone non esistevano |
+| [D039](D039-lo-strumento-per-guardare-vive-nel-repo.md) | lo strumento per guardare la finestra vera moriva con la sessione           |
 
-Scritta **e** eseguita nella stessa sessione, come D036 e D037 e per la stessa ragione: la richiesta
-è arrivata dall'utente come feature — «CTA unificati come componenti UI universali… idem per le
-scrollbar» — ed è risultata essere un difetto misurabile.
+Tutte e due scritte **ed eseguite** nella stessa sessione, come D036 e D037 e per la stessa ragione:
+la richiesta è arrivata dall'utente come feature — «CTA unificati come componenti UI universali…
+idem per le scrollbar» — ed è risultata essere un difetto misurabile. D039 è venuta dopo, ed è la
+decisione che sette passaggi di consegne avevano rimandato: l'utente l'ha presa quando gliel'è stata
+posta con il suo prezzo accanto.
 
-### Le sei cose che chi arriva adesso deve sapere
+### Le sette cose che chi arriva adesso deve sapere
 
 **1. La richiesta era una feature e ha trovato due difetti.** Il primo: **nessuno dei sei pulsanti
 del progetto aveva un anello di fuoco**, quindi chi girava con il tabulatore riceveva il contorno
@@ -127,6 +130,13 @@ tutti e due i posti. E una trappola gemella: `eslint-disable-next-line` dentro u
 spegne niente** se il tag occupa più righe, perché la violazione viene segnalata dove sta
 l'attributo — serve la forma a blocco con `eslint-enable`.
 
+**7. `scripts/` è il quinto confine alla radice, e non è esente da niente.** Ci vive un solo file,
+`cdp.mjs`, che apre la finestra vera dalla porta di ispezione. Non entra nel pacchetto — la lista di
+`electron-builder.yml` è di **esclusioni**, quindi una cartella nuova ci finirebbe dentro per
+difetto — e le quattro regole che dicevano «nel codice» adesso guardano anche lì: P01, C06, C08,
+C09. Una cartella esente sarebbe il posto dove le regole si aggirano, cioè la ragione per non
+crearla.
+
 ### Cosa c'è nell'albero di lavoro alla chiusura
 
 Verificato con i comandi, non ricordato.
@@ -152,11 +162,12 @@ Verificato con i comandi, non ricordato.
 Censito, non nascosto.
 
 1. **Nessuna misura della catena a macchina scarica.** Aperta da sette sessioni.
-2. **Gli script CDP non sopravvivono a questa sessione**, ed è la **settima** riscrittura. Stavolta
-   però il costo è noto e la raccomandazione è scritta: metterli in `scripts/` — un file, `cdp.mjs`,
-   e niente altro — costa meno di una riscrittura, e ne sono state fatte sette. La decisione non è
-   di questa delega perché `scripts/` è una cartella nuova alla radice, cioè una decisione
-   strutturale che si chiede.
+2. ~~Gli script CDP non sopravvivono a questa sessione~~ — **chiusa**, ed era aperta da sette
+   sessioni. La decisione è stata posta all'utente con il suo prezzo accanto — una riscrittura a
+   sessione, sette volte — ed è stata presa: `scripts/cdp.mjs` esiste, e con lui
+   l'[ADR 0047](../adr/0047-uno-strumento-che-non-e-il-prodotto-vive-in-scripts.md) che dice cosa può
+   viverci dentro. Le quattro cose imparate a caro prezzo stanno scritte in testa a quel file, dove
+   chi lo apre le legge comunque.
 3. **`npm install` continua a non funzionare**, ed è la correzione 8 di D023 alla seconda ricorrenza:
    aggiungere una dipendenza è passato solo con `--legacy-peer-deps`. La causa vera — `vite` alla 8
    contro `electron-vite@5` che regge fino alla 7 — resta aperta.

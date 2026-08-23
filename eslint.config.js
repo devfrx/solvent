@@ -271,6 +271,24 @@ export default ts.config(
   // Cio' che a ESLint sfugge sono i percorsi relativi che escono dalla cartella: per lui sono
   // percorsi, non pacchetti. A prenderli e' `tests/rules/ui-kit-is-standalone`, che risolve il
   // percorso prima di giudicarlo (ADR 0028).
+  // ------------------------------------------------------------------ gli strumenti, non il gioco
+  //
+  // D039 — `scripts/` gira con `node` e non passa da TypeScript, quindi `no-undef` e' acceso e non
+  // sa cosa siano i globali della piattaforma. Sono dichiarati a mano invece di tirare dentro il
+  // pacchetto `globals`: sono quattro, li usa un file solo, e una lista corta e vera costa meno di
+  // una dipendenza (ADR 0015).
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        Buffer: 'readonly',
+        WebSocket: 'readonly'
+      }
+    }
+  },
+
   {
     files: ['src/renderer/ui/**/*.{ts,vue}'],
     rules: {

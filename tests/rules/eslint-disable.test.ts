@@ -17,7 +17,8 @@ const REASON = / -- \S/
 const linesWithoutReason = (source: string): string[] =>
   source.split('\n').filter((line) => DISABLE.test(line) && !REASON.test(line))
 
-const sources = sourceFiles('src')
+// D039 — anche `scripts/`: una regola spenta in silenzio lo e' ovunque, non solo in `src/`.
+const sources = [...sourceFiles('src'), ...sourceFiles('scripts', ['.mjs'])]
 
 describe('ogni eslint-disable porta la sua motivazione', () => {
   it('il rilevatore distingue la forma ammessa da quella muta', () => {

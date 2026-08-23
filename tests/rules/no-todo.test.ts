@@ -11,7 +11,8 @@ import { read, sourceFiles } from '../helpers/sources'
 
 const MARKER = /\b(TODO|FIXME|XXX|HACK)\b/
 
-const sources = sourceFiles('src')
+// D039 — anche `scripts/`: P01 dice «nessun `TODO` nel codice», e uno strumento e' codice.
+const sources = [...sourceFiles('src'), ...sourceFiles('scripts', ['.mjs'])]
 
 describe('nessun marcatore di lavoro non finito', () => {
   it('il rilevatore funziona', () => {

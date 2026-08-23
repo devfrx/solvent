@@ -73,7 +73,8 @@ const normalize = (path: string): string => path.split(sep).join('/')
 /** Ogni segmento del percorso: le cartelle contano quanto i file. */
 const segmentsOf = (path: string): string[] => normalize(path).split('/')
 
-const paths = sourceFiles('src').map(normalize)
+// D039 — anche `scripts/`: C09 parla di nomi di file e cartelle, e quella cartella ne ha.
+const paths = [...sourceFiles('src'), ...sourceFiles('scripts', ['.mjs'])].map(normalize)
 
 describe('il rilevatore', () => {
   it('spezza un nome nelle sue parole, in qualunque forma sia scritto', () => {

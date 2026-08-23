@@ -11,6 +11,10 @@ files:
   - '!docs/**'
   - '!tests/**'
   - '!src/**'
+  # D039 — `scripts/` e' uno strumento di sviluppo, non il gioco. Questo elenco e' una lista di
+  # esclusioni: una cartella nuova ci finisce dentro **per difetto**, e questa riga e' la ragione
+  # per cui la cartella non e' entrata nel pacchetto senza che nessuno se ne accorgesse.
+  - '!scripts/**'
   - '!**/*.tsbuildinfo'
   - '!electron.vite.config.ts'
   - '!vitest.config.ts'

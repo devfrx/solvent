@@ -282,7 +282,19 @@ solvent/
                        stateful-systems-reject-garbage · ui-kit-is-standalone
                        no-color-literals · ui-kit-has-no-geometry · no-native-tooltips
                        domain-ui · domains-are-independent
+                       buttons-pass-through-the-kit · scroll-passes-through-the-kit · icons
+                       one-way-to-advance · chart-dress · payment-flow · overlays · no-z-index
+└─ scripts/            # strumenti di sviluppo, non il gioco (ADR 0047)
+   └─ cdp.mjs          # guarda la finestra vera dalla porta di ispezione: nessuno lo importa
 ```
+
+**`scripts/` è il quinto confine alla radice, ed è il più facile da riempire di scuse.** Ci sta uno
+strumento che si esegue **a mano** per capire come sta il gioco; non ci sta niente da cui il gioco
+dipenda, e `electron-builder.yml` la esclude dal pacchetto — quella lista è di **esclusioni**, quindi
+una cartella nuova ci finirebbe dentro per difetto. Le regole del codice valgono identiche: niente
+`TODO` (P01), nessun `eslint-disable` muto (C06), identificatori in inglese (C08), nessuna parola
+vietata nei nomi (C09). Una cartella esente sarebbe il posto dove le regole si aggirano, cioè la
+ragione per non crearla ([ADR 0047](adr/0047-uno-strumento-che-non-e-il-prodotto-vive-in-scripts.md)).
 
 ## Le regole e chi le fa rispettare
 

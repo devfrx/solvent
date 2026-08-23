@@ -189,7 +189,12 @@ const normalize = (path: string): string => path.split(sep).join('/')
 
 const HERE = 'tests/rules/english-identifiers.test.ts'
 
-const sources = [...sourceFiles('src'), ...sourceFiles('tests')]
+// D039 — anche `scripts/`: C08 dice «il codice si scrive in inglese», senza qualificare quale.
+const sources = [
+  ...sourceFiles('src'),
+  ...sourceFiles('tests'),
+  ...sourceFiles('scripts', ['.mjs'])
+]
   .map(normalize)
   .filter((path) => path !== HERE)
 
