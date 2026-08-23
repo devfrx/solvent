@@ -184,6 +184,23 @@ export const useGameStore = defineStore('game', () => {
   /** Quanto tempo è passato mentre non guardavamo. Lo mostra la schermata di recupero. */
   const awayFor = ref<Milliseconds>(milliseconds(0))
   /**
+   * Quanto di quel tempo il **tetto** ha buttato via (D040).
+   *
+   * È il numero che `stepOf` calcola da sempre in `Step.dropped`, provato dal loop di D011 e **mai
+   * letto da nessuno** fino a qui. Il grilletto era la fetta 03, cioè la prima in cui il tetto
+   * morde davvero: con otto ore reali non lo raggiungeva quasi nessuno, con un anno di gioco lo
+   * raggiunge chiunque chiuda per una notte.
+   *
+   * **In millisecondi come `awayFor`, e non in tick**, benché `Step.dropped` sia in tick: i due
+   * numeri stanno nella stessa frase della schermata di recupero — «sei stato via X, di cui Y
+   * perso» — e due unità diverse costringerebbero il `.vue` a convertirne una, cioè a calcolare
+   * (R05). La conversione è del Clock, e sta qui.
+   *
+   * Zero quando il recupero è stato integrale, ed è il caso normale: la schermata lo mostra solo
+   * quando c'è qualcosa da dire.
+   */
+  const droppedFor = ref<Milliseconds>(milliseconds(0))
+  /**
    * `shallowRef` e non `ref`, e non è un'ottimizzazione: `ref` avvolge in un proxy anche il
    * contenuto, cioè i `Decimal`. Questi due valori vengono **sostituiti interi** a ogni evento e
    * non vengono mai modificati sul posto, quindi la reattività profonda non serve — e in cambio
@@ -657,15 +674,24 @@ export const useGameStore = defineStore('game', () => {
    *
    * E da D037 anche **ciò che fa quel passo** è lo stesso: fino ad allora questa riga chiamava
    * `registry.tickAll` per conto proprio, quindi una notte intera passava senza lasciare un
-   * campione né una candela. Adesso ne lascia esattamente uno per serie, che è ciò che `sampleOf`
-   * prometteva già in `loop.ts`: di saldi intermedi non ce n'è nessuno da disegnare, perché il
-   * reddito arretrato entra in una transazione sola.
+   * campione né una candela.
+   *
+   * **D040 — questa riga non è cambiata, ed è il punto.** Il recupero adesso avanza a blocchi di
+   * un giorno di gioco, quindi le soglie attraversate e rientrate si vedono; ma a spezzare è
+   * `Game.advance`, non chi lo chiama. Se il ciclo stesse qui, il prossimo che fa passare del
+   * tempo — il calendario dell'ADR 0023, un cheat che salta un'ora — dovrebbe ricordarsi di
+   * riscriverlo, e nessun gate se ne accorgerebbe.
+   *
+   * `step.dropped` è il tempo che il tetto ha **buttato via**: fino a D040 lo store lo riceveva e
+   * lo ignorava, ed è la prima volta che «quanto hai perso» è un'informazione di gioco invece di
+   * un campo provato e mai letto.
    */
   const recover = (since: number): void => {
     status.value = 'recovering'
     const away = milliseconds(Math.max(0, host.wallClock() - since))
     awayFor.value = away
     const step = stepOf(away, BALANCE.RECOVERY_CAP, game.ctx.clock)
+    droppedFor.value = game.ctx.clock.ticksToMilliseconds(step.dropped)
     if (step.elapsed > 0) game.advance(step.elapsed)
     mirror()
   }
@@ -717,6 +743,7 @@ export const useGameStore = defineStore('game', () => {
     failure.value = null
     failedDuring.value = null
     awayFor.value = milliseconds(0)
+    droppedFor.value = milliseconds(0)
     mirror()
 
     const cleared = await host.saveApi.reset()
@@ -870,6 +897,7 @@ export const useGameStore = defineStore('game', () => {
     failure,
     failedDuring,
     awayFor,
+    droppedFor,
     balances,
     history,
     savedAt,

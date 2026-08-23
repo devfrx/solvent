@@ -43,9 +43,16 @@ stateDiagram-v2
 **Durante `Caricamento` il loop non gira.** Nessun tick parte prima che `loadAll` sia finito: un
 tick su uno stato mezzo caricato produce numeri sbagliati che poi vengono salvati come veri.
 
-**`Recupero` usa lo stesso codice di `InGioco`.** Non è una modalità: è `tickAll` chiamato con un
-`n` grande, limitato dal tetto (ADR 0009). Non esiste una "formula offline" da bilanciare a parte
+**`Recupero` usa lo stesso codice di `InGioco`.** Non è una modalità: è `Game.advance` chiamato con
+un `n` grande, limitato dal tetto (ADR 0009). Non esiste una "formula offline" da bilanciare a parte
 — che è la fonte classica di exploit negli idle game.
+
+**E da [D040](../delega/D040-il-recupero-avanza-a-blocchi.md) quell'`n` grande viene camminato a
+blocchi di un giorno di gioco**, il che rafforza la riga qui sopra invece di indebolirla: è lo
+stesso codice eseguito più volte, non un codice diverso. La differenza si vede in cosa il giocatore
+ritrova — una soglia attraversata e rientrata mentre non guardava adesso scatta, e i grafici
+disegnano la salita invece del salto. Il tetto è dichiarato in **giorni di gioco**: quanto tempo di
+gioco al massimo il mondo può avanzare senza di te.
 
 **`Sospeso` non fa avanzare nulla.** Quando la finestra torna visibile si passa da `Recupero`, che
 è esattamente lo stesso percorso della riapertura del gioco. Un solo meccanismo per due situazioni

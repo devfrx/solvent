@@ -88,6 +88,7 @@ export type ScreenKey =
   | 'app.loading.title'
   | 'app.loading.catchup'
   | 'app.loading.away_for'
+  | 'app.loading.dropped'
   | 'app.closing.saving'
   | 'app.error.retry'
   | 'app.error.new_game'

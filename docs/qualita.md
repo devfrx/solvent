@@ -284,6 +284,28 @@ Il livello superiore è disponibile da Chromium 114, l'ancoraggio da 125, `posit
 `verify:release` non se ne accorgerebbe — a dirlo sarebbe la spunta a occhio della definizione di
 fatto, che è il motivo per cui esiste.
 
+**Il recupero al tetto pieno, misurato il 2026-08-23** a
+[D040](delega/D040-il-recupero-avanza-a-blocchi.md), su Windows e sulla stessa macchina degli altri
+numeri di questa pagina. È il numero che giustifica `ADVANCE_BLOCK`: sceglierlo senza misurarlo
+sarebbe stato deciderlo a sentimento.
+
+| Cosa                                     | Valore             |
+| ---------------------------------------- | ------------------ |
+| Tetto di recupero                        | 7.300 tick         |
+| Blocco (`ADVANCE_BLOCK`)                 | 20 tick            |
+| Blocchi eseguiti in un recupero al tetto | 365                |
+| Tempo, tre esecuzioni                    | 2,7 · 1,8 · 0,9 ms |
+
+**Il margine è di tre ordini di grandezza**, e questa è la riga che conta. Il tetto esiste perché
+_«riaprire il gioco dopo giorni non deve bloccare l'avvio per minuti»_ (`runtime/loop.ts`), e a
+grana di un giorno di gioco il recupero intero costa meno di tre millisecondi: la correttezza delle
+soglie non si paga con l'attesa all'avvio. Il costo cresce con il **numero** dei blocchi e non con
+la loro durata — `income.tick` è O(1) in `elapsed` ed emette una transazione — quindi un blocco
+dieci volte più corto costerebbe dieci volte tanto, e resterebbe sotto i trenta millisecondi.
+
+Va rimisurato quando il numero dei sistemi cambia: oggi i domini sono tre, e a ticchettare a ogni
+blocco sono loro.
+
 ## Cosa copre ciascun livello di test
 
 | Livello                | Dove             | Cosa dimostra                                                                                                                                                                                                                                                       | Cosa **non** dimostra                                           |

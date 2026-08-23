@@ -76,7 +76,7 @@ const DevPanel = import.meta.env.DEV
   : null
 
 const store = useGameStore()
-const { status, failure, failedDuring, awayFor } = storeToRefs(store)
+const { status, failure, failedDuring, awayFor, droppedFor } = storeToRefs(store)
 const { text, duration, failure: failureText } = useTranslator()
 
 /**
@@ -139,6 +139,13 @@ const startOver = (): void => void store.newGame()
         <p class="headline">{{ text('app.loading.catchup') }}</p>
         <UiText v-if="awayFor > 0" class="detail">
           {{ text('app.loading.away_for', { duration: duration(awayFor) }) }}
+        </UiText>
+        <!--
+          D040 — il tempo che il tetto ha buttato via. Si mostra solo quando c'è: un recupero
+          integrale non ha niente da dire, e una riga che annuncia zero è rumore.
+        -->
+        <UiText v-if="droppedFor > 0" class="detail">
+          {{ text('app.loading.dropped', { duration: duration(droppedFor) }) }}
         </UiText>
       </div>
     </template>

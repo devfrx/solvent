@@ -24,6 +24,7 @@ export const en: Dictionary = {
   'app.loading.title': 'Loading…',
   'app.loading.catchup': 'Catching up on the time that passed…',
   'app.loading.away_for': 'You were away for {duration}.',
+  'app.loading.dropped': 'The recovery cap discarded {duration} of it.',
   'app.closing.saving': 'Saving…',
 
   'app.error.retry': 'Try again',

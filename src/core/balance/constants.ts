@@ -15,8 +15,41 @@ import { clock, seconds } from '@core/kernel/Clock'
  * lungo la catena (ADR 0006), e la partita doppia lo scoprirebbe come una somma che non fa zero.
  */
 
-const RECOVERY_HOURS = 8
-const SECONDS_PER_HOUR = 3600
+/**
+ * Quanto dura un giorno di gioco, in secondi reali (D040).
+ *
+ * Fino a D040 questo numero viveva **solo** nella prosa della
+ * [visione](../../../docs/prodotto/visione.md) — _«il tempo: un giorno dura due secondi»_ — e
+ * nessuna riga di codice lo conosceva. Il tetto di recupero si scriveva in ore reali, cioè
+ * nell'unità sbagliata, e nessuno poteva accorgersene contando.
+ *
+ * **Non è il calendario dell'ADR 0023**, e la distinzione va tenuta: quello è un dominio con
+ * stato, che sa che giorno è e fa scattare scadenze. Questo è un **cambio**, senza stato e senza
+ * eventi, della stessa specie di `TICKS_PER_SECOND`.
+ */
+const SECONDS_PER_GAME_DAY = 2
+
+/**
+ * Il tetto di recupero, in **giorni di gioco** (D040). Un anno di gioco.
+ *
+ * **Da dove viene.** La legge della visione è che il progresso offline non batta mai il gioco
+ * attivo, e il criterio che ne discende è che ciò che si recupera valga meno di quello che una
+ * sessione di gioco vera produce. Un anno di gioco sono dodici minuti reali — è il cambio che la
+ * visione dichiara — quindi un'ora di gioco attivo ne vale **cinque**: giocare batte dormire di
+ * cinque volte, in qualunque momento, e la strategia «chiudi la finestra» non esiste più.
+ *
+ * **Cosa sostituisce, e perché era rotto.** Erano otto **ore reali**, cioè 14.400 giorni di gioco,
+ * cioè trentanove anni: con un rendimento annuo dell'8% una notte moltiplicava il portafoglio per
+ * venti, mentre un'ora di gioco attivo lo moltiplicava per uno e mezzo. Dormire rendeva tredici
+ * volte più che giocare — il numero non era sbagliato quando è stato scelto, era stato scelto per
+ * un gioco senza mercati.
+ *
+ * **Un anno e non un mese o un decennio.** L'anno è l'unità in cui la visione ragiona di
+ * rendimenti, quindi è l'unica scala su cui si può dire se un recupero è tanto o poco. Sotto,
+ * chiudere la finestra per un caffè non lascerebbe niente; sopra, si torna a poter dormire per
+ * guadagnare.
+ */
+const RECOVERY_GAME_DAYS = 365
 
 /**
  * Ogni quanto la serie del patrimonio netto prende un campione, in secondi di gioco.
@@ -197,10 +230,31 @@ export const BALANCE = {
    * l'avvio per minuti, e il recupero usa lo **stesso** codice del tempo reale: non esiste una
    * formula offline separata da bilanciare a parte, che è la fonte classica di exploit negli idle.
    *
-   * Il tetto è qui e non nel loop, e si scrive in ore convertite dal Clock: `288000` scritto a
-   * mano sarebbe il difetto A04 con un altro nome.
+   * Il tetto è qui e non nel loop, e si deriva dal Clock invece di essere scritto: `7300` a mano
+   * sarebbe il difetto A04 con un altro nome. **L'unità è il giorno di gioco** e non l'ora reale
+   * (D040): il perché sta su `RECOVERY_GAME_DAYS`, che è dove il numero si discute.
    */
-  RECOVERY_CAP: clock.secondsToTicks(seconds(RECOVERY_HOURS * SECONDS_PER_HOUR)),
+  RECOVERY_CAP: clock.secondsToTicks(seconds(RECOVERY_GAME_DAYS * SECONDS_PER_GAME_DAY)),
+
+  /**
+   * Di quanto al massimo il mondo avanza in un colpo solo, in tick (D040).
+   *
+   * **Un giorno di gioco.** `Game.advance` cammina l'intervallo che riceve in blocchi di questa
+   * lunghezza, e ne discende che una soglia attraversata e rientrata **dentro** un blocco resta
+   * invisibile: il blocco è la grana con cui il mondo può cambiare idea. Il giorno è la soglia più
+   * stretta che questo gioco nomina — un affitto, una scadenza, un interesse maturano per giorni,
+   * mai per frazioni di giorno — quindi è la risoluzione giusta, e non serve pagarne una più fine.
+   *
+   * **Cosa si paga.** Il costo non è la durata di un blocco ma il loro **numero**: `income.tick` è
+   * O(1) in `elapsed` — calcola tasso × elapsed ed emette **una** transazione — quindi N blocchi
+   * sono N transazioni invece di una. Al tetto pieno sono 365 blocchi, cioè meno di quanti il
+   * gioco ne esegue in un minuto di partita normale a dieci tick al secondo.
+   *
+   * **Non tocca il tempo reale.** Un frame porta uno o due tick, molto sotto i venti di un blocco:
+   * il ciclo gira una volta e il percorso di gioco è identico a prima. È voluto — questa costante
+   * cambia il recupero, non la partita.
+   */
+  ADVANCE_BLOCK: clock.secondsToTicks(seconds(SECONDS_PER_GAME_DAY)),
 
   /**
    * Quanti campioni tiene la serie del patrimonio netto (D027). È il tetto della lista limitata,

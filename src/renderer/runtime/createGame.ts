@@ -14,7 +14,7 @@ import { createIncome, type Income } from '@core/domains/income/system'
 import { VAULT_POOL } from '@core/domains/vault/rules'
 import { createVault, type Vault } from '@core/domains/vault/system'
 import { createBus } from '@core/kernel/Bus'
-import { clock } from '@core/kernel/Clock'
+import { clock, ticks } from '@core/kernel/Clock'
 import type { Ticks } from '@core/kernel/Clock'
 import type { Capacities } from '@core/kernel/Ledger'
 import { createLedger, poolCapacity } from '@core/kernel/Ledger'
@@ -187,10 +187,31 @@ export const createGame = (seed: number = randomSeed()): Game => {
      * prima del tick porterebbe sempre il gioco di un passo fa. Il Bus è sincrono (ADR 0016),
      * quindi quando `tickAll` ritorna le transazioni del tick sono già state annunciate e le
      * escursioni in corso le hanno già viste.
+     *
+     * **D040 — l'intervallo si cammina a blocchi, e il blocco è di `advance`, non di chi chiama.**
+     * Fino a D040 il recupero passava di qui con tutti i tick arretrati in una volta: il saldo
+     * finale era giusto e la storia non esisteva, quindi una soglia attraversata e rientrata —
+     * una margin call che scatta alla seconda ora e si risana alla sesta — non scattava mai. Il
+     * ciclo sta **qui** e non in `recover()` per la ragione per cui questa operazione esiste
+     * (ADR 0043, R25): se spezzare fosse compito del chiamante, ogni chiamante nuovo potrebbe
+     * dimenticarsene in silenzio, e nessun gate lo vedrebbe. Così invece il calendario
+     * dell'ADR 0023, un cheat che salta un'ora e il salvataggio a cadenza nascono già con le
+     * soglie visibili.
+     *
+     * **Il resto non si perde**, ed è il difetto che `stepOf` documenta un piano più giù: l'ultimo
+     * blocco è parziale e viene eseguito comunque. Buttarlo costerebbe fino a un giorno di gioco
+     * di reddito a ogni recupero, che è precisamente il genere di ammanco che nessuno nota senza
+     * contare i tick.
+     *
+     * Nel tempo reale non cambia niente: un frame porta uno o due tick contro i venti di un
+     * blocco, quindi il ciclo gira una volta e la sequenza è quella di prima.
      */
     advance: (elapsed) => {
-      registry.tickAll(ctx, elapsed)
-      chronicle.advance(elapsed)
+      for (let done = 0; done < elapsed; done += BALANCE.ADVANCE_BLOCK) {
+        const block = ticks(Math.min(BALANCE.ADVANCE_BLOCK, elapsed - done))
+        registry.tickAll(ctx, block)
+        chronicle.advance(block)
+      }
     },
 
     save: () => ({ ledger: ledger.save(), rng: rng.save(), systems: registry.saveAll() }),

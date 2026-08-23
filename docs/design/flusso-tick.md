@@ -32,15 +32,28 @@ flowchart TD
   CAP -- no --> ADV
   CLAMP --> ADV["game.advance(n)"]
   BOOT["il recupero all'avvio<br/>stessa stepOf, stesso tetto"] --> ADV
-  ADV --> TICK["registry.tickAll(ctx, n)"]
-  TICK --> CHR["chronicle.advance(n)<br/>chiude gli intervalli scaduti"]
-  CHR --> RENDER["la UI legge i selettori"]
+  ADV --> BLK{"n oltre<br/>un blocco?"}
+  BLK -- sì --> SPLIT["il ciclo ripete<br/>a blocchi di un giorno di gioco"]
+  BLK -- no --> TICK
+  SPLIT --> TICK["registry.tickAll(ctx, blocco)"]
+  TICK --> CHR["chronicle.advance(blocco)<br/>chiude gli intervalli scaduti"]
+  CHR --> MORE{"resta<br/>del tempo?"}
+  MORE -- sì --> TICK
+  MORE -- no --> RENDER["la UI legge i selettori"]
   WAIT --> RENDER
   RENDER --> RAF
 ```
 
 Il tetto di recupero serve a un caso solo ma importante: riaprire il gioco dopo giorni non deve
-bloccare l'avvio per minuti. Il tetto è un dato in `balance/constants.ts`, non un numero nel loop.
+bloccare l'avvio per minuti. Il tetto è un dato in `balance/constants.ts`, non un numero nel loop, e
+da [D040](../delega/D040-il-recupero-avanza-a-blocchi.md) si misura in **giorni di gioco**: le ore
+reali erano l'unità sbagliata per un mondo il cui giorno dura due secondi.
+
+**Il ciclo dentro `advance` è la seconda cosa che D040 ha aggiunto, e sta lì di proposito.** Un
+intervallo lungo non arriva ai sistemi in un colpo: viene camminato a blocchi di un giorno di gioco,
+perché una soglia attraversata e rientrata dentro un salto unico non scatta mai. A spezzare è
+`advance` e non chi lo chiama — se fosse del chiamante, ogni chiamante nuovo potrebbe dimenticarsene
+in silenzio, e R25 resterebbe verde mentre la sua ragione viene aggirata.
 
 **Le due frecce che entrano in `advance` sono il punto del disegno.** Il passo del frame e il
 recupero all'avvio sono lo stesso fatto — _è passato del tempo mentre non guardavamo_ — e da
@@ -122,9 +135,11 @@ Cinque punti che il diagramma rende visibili meglio di qualsiasi paragrafo:
 4. **Lo store è un lettore, non una fonte.** Riceve dal Bus, non calcola. Se lo store calcolasse,
    il gioco non sarebbe simulabile senza Vue — e cadrebbe l'ADR 0001.
 5. **Il reddito sa quanto ci sta prima di chiedere**, ed è il ramo che
-   [D017](../delega/D017-il-caveau.md) ha aggiunto. Non chiede e incassa il rifiuto: il recupero
-   dopo un'assenza è **una sola** transazione da otto ore di stipendio, e una transazione è atomica
-   (ADR 0019) — chi torna dopo una notte tornerebbe con zero anche a caveau vuoto. Lo spazio arriva
+   [D017](../delega/D017-il-caveau.md) ha aggiunto. Non chiede e incassa il rifiuto: una
+   transazione è atomica (ADR 0019), quindi una da tutto lo stipendio arretrato verrebbe rifiutata
+   intera e chi torna dopo una notte tornerebbe con zero a caveau pieno. **D040 ha abbassato la
+   pressione che l'ha prodotto** — con i blocchi la transazione gigante non esiste più, e il caveau
+   si riempie un giorno di gioco alla volta — ma il ramo resta corretto e serve al tempo reale. Lo spazio arriva
    per costruzione, non da un import: `income` non nomina il caveau, e a collegarli è il bootstrap
    (ADR 0024). Quello che resta fuori non sparisce in silenzio — il sistema lo espone, e la
    schermata dei contanti lo dice.

@@ -1,6 +1,8 @@
 # D040 — Il recupero avanza a blocchi, e il tetto si misura in tempo di gioco
 
-- **Stato:** **Aperta** — è la prima delega della fetta 03
+- **Stato:** **Chiusa** — ramo `d040-il-recupero-avanza-a-blocchi`, che parte da `main`. Scritta ed
+  eseguita il 2026-08-23, in due sessioni diverse. Le tre decisioni aperte sono state prese in
+  autonomia su direttiva generale dell'utente, e sono **contestabili**: vedi _Le correzioni_
 - **Dipende da:** [D037](D037-il-tempo-che-avanza-e-un-operazione-del-gioco.md), che ha reso
   `Game.advance` l'unica via per far passare il tempo — senza quella, questa delega dovrebbe
   scrivere due volte lo stesso ciclo. E da [D017](D017-il-caveau.md), che ha dato al tetto un
@@ -253,3 +255,68 @@ che hai cambiato_, non solo quelli che la delega elencava.
    l'avvio più di quanto blocchi oggi in modo percepibile, `ADVANCE_BLOCK` è sbagliato — non è il
    prezzo della correttezza. Il tetto esiste proprio per quello, e questa delega non ha il permesso
    di spenderlo.
+
+## Le correzioni rispetto a com'era scritta
+
+Nove, e le prime tre sono le decisioni che la delega lasciava aperte. Sono state prese **in
+autonomia** su direttiva generale dell'utente — «coerenza, zero debiti futuri, professionalità,
+stato dell'arte, non pigrizia» — e per la regola di _Come si lavora_ sono **contestabili**: chi
+vuole ridiscuterle trova qui il conto che le ha decise.
+
+1. **Decisione 1 — ramo 1A, il blocco dentro `Game.advance`.** È quello che la delega consigliava, e
+   non è stato scelto per obbedienza: il ramo 1B lasciava R25 verde mentre la sua ragione veniva
+   aggirata, che è la forma peggiore di debito — una regola che passa mentre il difetto che
+   impedisce è tornato. La decisione ha il suo
+   [ADR 0049](../adr/0049-il-mondo-avanza-a-blocchi.md), perché senza qualcuno la «semplificherà»
+   spostando il ciclo nel chiamante.
+2. **Decisione 2 — il tetto è un anno di gioco**, cioè dodici minuti reali, `RECOVERY_GAME_DAYS =
+365`. Derivato dal criterio della visione invece che scelto: un'ora di gioco attivo vale cinque
+   anni, quindi giocare batte dormire di **cinque volte** in qualunque momento, e la strategia
+   «chiudi la finestra» smette di esistere. Erano otto ore reali, cioè trentanove anni, cioè dormire
+   che rendeva tredici volte più che giocare. L'anno e non il mese o il decennio perché è l'unità in
+   cui la visione ragiona di rendimenti.
+3. **Decisione 3 — il blocco è un giorno di gioco**, venti tick. Il giorno è la soglia più stretta
+   che il gioco nomina: niente matura per frazioni di giorno. **Misurato e non stimato**, come la
+   delega pretendeva: 365 blocchi in 2,7 · 1,8 · 0,9 ms, in [qualita.md](../qualita.md) con la data.
+   Il margine sul vincolo — «non bloccare l'avvio per minuti» — è di tre ordini di grandezza.
+4. **Il primo dei tre problemi non è stato risolto: è cambiato di natura**, e la delega non lo
+   prevedeva. Con il tetto a un anno di gioco il recupero matura 8.760,00 € al reddito base, meno
+   del caveau di partenza: a mordere adesso è il **tetto**, a ogni livello del caveau. Il registro
+   diceva «il tetto non morde, morde il caveau», e adesso è il contrario — che è ciò che un tetto
+   deve fare.
+5. **`Step.dropped` è uscito in millisecondi, non in tick.** La delega diceva «va esposto dallo store
+   accanto ad `awayFor`», e accanto vuol dire nella stessa frase: due unità diverse avrebbero
+   costretto il `.vue` a convertirne una, cioè a calcolare (R05). La conversione è del Clock e sta
+   nello store; il campo si chiama `droppedFor` per assonanza con `awayFor`.
+6. **Quattro test sono stati invertiti, non cancellati**, ed è la parte che va guardata con più
+   sospetto di tutte. Chiedevano **un** campione dopo un recupero, e avevano ragione: senza blocchi
+   i valori intermedi non esistevano. Adesso chiedono trenta, e ognuno dei quattro porta scritto
+   perché l'attesa vecchia era giusta allora e sbagliata adesso — un test cambiato senza quella riga
+   è indistinguibile da un test indebolito.
+7. **Il test che giustifica la delega non c'era nella definizione di fatto nella forma in cui è
+   finito.** Chiedeva «una soglia in mezzo che a passo unico dà un risultato diverso», ma con tre
+   domini e nessuna soglia che si attraversa e si rientra i **totali** coincidono: a differire è la
+   **forma**. Il test scritto prova quello — un recupero corto disegna dieci candele crescenti e
+   tutte distinte, dove prima ce ne sarebbe stata una — ed è una prova più onesta di quella promessa.
+8. **La misura del tempo di avvio ha reso la decisione 3 quasi indolore, e va detto.** La delega la
+   presentava come «l'unico vero compromesso». Misurata, non lo è: a tre millisecondi il compromesso
+   non morde, e sarebbe stato possibile scegliere un blocco molto più fine. Non è stato fatto perché
+   nessuna soglia del gioco matura sotto il giorno — la ragione è il dominio, non la prestazione.
+9. **Il ramo è stato provato rompendolo**, e il conto sta qui: un ciclo che salta l'ultimo blocco
+   parziale fa cadere **sei** test, fra cui i due che contano il resto. Il file è stato copiato
+   prima e ripristinato con un `diff` che conferma l'identità.
+
+### Cosa è stato guardato nella finestra vera
+
+Con `scripts/cdp.mjs`, che è la prima delega a usarlo dopo D039. Il recupero dura tre millisecondi,
+quindi non si fotografa: si è retrodatato il salvataggio di un'ora e riaperto il gioco.
+
+- **Trenta campioni e trenta candele al caricamento**, tutte distinte e crescenti, da 67.219,20 € a
+  68.959,20 €. Prima di D040 sarebbe stato **uno**.
+- **Il grafico del patrimonio disegna una curva continua** da 70.978,70 € a 72.706,70 €, e l'immagine
+  è stata guardata: è la differenza fra sapere il totale e vedere cosa è successo.
+- **La riga del tempo scartato è stata letta forzando lo stato dal di dentro**, perché il velo del
+  recupero vive tre millisecondi e il loop rimette `playing` al frame dopo: «Sei stato via 1 ora. Il
+  tetto di recupero ne ha scartati 47 minuti.»
+- **Il salvataggio dell'utente è stato copiato prima e ripristinato identico dopo**, e l'app è stata
+  **terminata** invece che chiusa: chiudendola avrebbe salvato la partita di prova sopra la sua.

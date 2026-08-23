@@ -127,6 +127,57 @@ describe('il tempo che avanza', () => {
 
     expect(game.series.netWorth.list()).toBe(before)
   })
+
+  /**
+   * D040 — l'intervallo si cammina a blocchi, e i due modi in cui un ciclo può sbagliare.
+   *
+   * Il primo è perdere il resto: un `for` che avanza di `ADVANCE_BLOCK` e si ferma prima
+   * dell'ultimo blocco parziale sottrae fino a un giorno di gioco di reddito a ogni recupero, ed è
+   * il difetto che `stepOf` documenta un piano più giù — «nessuno lo noterebbe se non contando i
+   * tick». Il secondo è contare due volte lo stesso blocco.
+   *
+   * Tutti e due si prendono nello stesso modo: il denaro prodotto da `advance(n)` dipende **solo**
+   * da `n`, e non da come `n` si spezza.
+   */
+  describe('a blocchi', () => {
+    const earnedOver = (elapsed: number): string => {
+      const fresh = createGame(SEED)
+      fresh.advance(ticks(elapsed))
+      return toString(fresh.ctx.ledger.balance('cash'))
+    }
+
+    it('non perde il resto: un intervallo che non è multiplo del blocco vale per intero', () => {
+      const odd = BALANCE.ADVANCE_BLOCK * 2 + 7
+      const expected = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(odd)
+
+      expect(earnedOver(odd)).toBe(toString(expected))
+    })
+
+    it('e un intervallo più corto di un blocco intero vale sé stesso, non un blocco', () => {
+      const short = 7
+      const expected = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(short)
+
+      expect(earnedOver(short)).toBe(toString(expected))
+    })
+
+    it('spezzare non crea né distrugge denaro: il totale dipende da quanto, non da come', () => {
+      const whole = BALANCE.ADVANCE_BLOCK * 5
+
+      const split = createGame(SEED)
+      split.advance(ticks(BALANCE.ADVANCE_BLOCK * 2))
+      split.advance(ticks(BALANCE.ADVANCE_BLOCK * 3))
+
+      expect(toString(split.ctx.ledger.balance('cash'))).toBe(earnedOver(whole))
+    })
+
+    it('e ogni blocco somma a zero, non solo il recupero intero', () => {
+      // N blocchi sono N transazioni invece di una, quindi N occasioni di sbagliare. La partita
+      // doppia è l'invariante più profondo del progetto e vale a ogni passo, non a fine giornata.
+      game.advance(ticks(BALANCE.ADVANCE_BLOCK * 3 + 1))
+
+      expect(total()).toBe('0')
+    })
+  })
 })
 
 describe('il salvataggio', () => {

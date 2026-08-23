@@ -159,13 +159,24 @@ describe('il recupero all’avvio', () => {
       wallClock: SAVED_AT + hundredHours
     })
 
-    const matured = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(BALANCE.RECOVERY_CAP)
     const wall = capacityFor(0)
 
     expect(store.status).toBe('playing')
     expect(toString(game.ctx.ledger.balance('cash'))).not.toBe('0')
     expect(toString(game.ctx.ledger.balance('cash'))).toBe(toString(wall))
-    expect(toString(store.incomeWithheld)).toBe(toString(matured.minus(wall)))
+
+    // **D040 — `incomeWithheld` è il trattenuto dell'**ultimo blocco**, non di tutta la notte.**
+    // Prima di D040 il recupero era un `advance` solo, quindi «l'ultimo tick» e «tutto il
+    // recupero» erano la stessa cosa e questa riga poteva chiedere `matured.minus(wall)`. Adesso
+    // il mondo avanza a blocchi di un giorno di gioco: il caveau si riempie durante il
+    // quarantaduesimo — 1.000,00 € a 1,20 €/tick sono 833 tick — e i blocchi che restano
+    // trattengono ognuno il proprio stipendio intero.
+    //
+    // Non è una perdita di informazione, è la sua definizione: `withheld` risponde a «i soldi
+    // stanno entrando **adesso**?», e lo dichiara in `income/types.ts` — «descrive l'ultimo tick,
+    // non la partita». Un totale della notte sarebbe un'altra domanda, e avrebbe un altro nome.
+    const lastBlock = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(BALANCE.ADVANCE_BLOCK)
+    expect(toString(store.incomeWithheld)).toBe(toString(lastBlock))
   })
 
   it('un salvataggio dal futuro non produce tick', async () => {
@@ -269,10 +280,18 @@ describe('la serie del patrimonio netto', () => {
     expect(store.netWorthSeries.items).toHaveLength(BALANCE.NET_WORTH_SAMPLES)
   })
 
-  it('una notte a finestra nascosta vale **un** campione, non uno per intervallo trascorso', async () => {
-    // È il caso che il grafico deve dire invece di nascondere: di saldi ne esiste uno solo,
-    // perché il reddito arretrato entra in una transazione sola. Millecinquecento barre finte
-    // sarebbero millecinquecento numeri che nessuno ha mai avuto.
+  it('una notte a finestra nascosta riempie la serie, e le barre non sono finte', async () => {
+    // **D040 ha invertito questo test, e la ragione vale più dell'asserzione.**
+    //
+    // Fino a D040 chiedeva **un** campione, e aveva ragione: il recupero era un `advance` solo,
+    // quindi il reddito arretrato entrava in una transazione sola e di saldi ne esisteva
+    // letteralmente uno. Millecinquecento barre sarebbero state millecinquecento numeri che
+    // nessuno aveva mai avuto — il commento di `sampleOf` lo diceva, ed era vero.
+    //
+    // Adesso il mondo avanza a blocchi di un giorno di gioco, quindi quei saldi intermedi
+    // **esistono**: ognuno è stato il patrimonio del giocatore per un giorno di gioco. Le barre
+    // non sono finte, e disegnarle è dire la verità invece di nasconderla — che è il punto della
+    // fetta 03.
     const store = await start()
     stage.frame()
 
@@ -280,7 +299,9 @@ describe('la serie del patrimonio netto', () => {
     stage.setVisible(true)
     run(A_NIGHT)
 
-    expect(store.netWorthSeries.items).toHaveLength(1)
+    // Il tetto di recupero copre 146 intervalli di campionamento, e la lista ne tiene 30: è il
+    // `boundedList` che fa il suo lavoro, non un troncamento accidentale.
+    expect(store.netWorthSeries.items).toHaveLength(BALANCE.NET_WORTH_SAMPLES)
   })
 
   it('una partita nuova la azzera: la scala non è quella della partita buttata via', async () => {
@@ -406,12 +427,16 @@ describe('riaprire il gioco dopo una notte', () => {
   const reopened = async (): Promise<ReturnType<typeof useGameStore>> =>
     start({ load: found(freshPayload(), SAVED_AT), wallClock: SAVED_AT + A_NIGHT })
 
-  it('lascia un campione e una candela per strumento, non zero', async () => {
+  it('lascia una serie piena e una candela per intervallo, non zero e non una', async () => {
+    // D037 aveva portato questo numero da **zero** a **uno**: il recupero chiamava `tickAll` per
+    // conto suo, quindi il tempo arrivava ai domini e non alle serie. D040 lo porta da uno a
+    // trenta, ed è la stessa verità detta a grana più fine — il tempo passato ha una **forma**,
+    // non solo un totale.
     const store = await reopened()
 
-    expect(store.netWorthSeries.items).toHaveLength(1)
-    expect(store.cashCandles.items).toHaveLength(1)
-    expect(store.cardCandles.items).toHaveLength(1)
+    expect(store.netWorthSeries.items).toHaveLength(BALANCE.NET_WORTH_SAMPLES)
+    expect(store.cashCandles.items).toHaveLength(BALANCE.INSTRUMENT_CANDLES)
+    expect(store.cardCandles.items).toHaveLength(BALANCE.INSTRUMENT_CANDLES)
   })
 
   it('e il campione porta il patrimonio che il recupero ha appena prodotto', async () => {
@@ -425,17 +450,48 @@ describe('riaprire il gioco dopo una notte', () => {
     )
   })
 
-  it('e la candela dei contanti dice da dove sono saliti, invece di aprire sul salto', async () => {
-    // Apertura sul saldo caricato — zero — e chiusura sul caveau pieno: è **una** candela per otto
-    // ore, non millecinquecento, perché il reddito arretrato entra in una transazione sola.
+  it('e a notte intera le ultime candele sono piatte sul muro, che è la verità', async () => {
+    // Prima di D040 questa candela apriva a zero e chiudeva sul caveau pieno: **una** candela per
+    // tutta la notte, perché di saldi ce n'era uno. Adesso la salita c'è davvero, e finisce
+    // presto — il caveau di partenza si riempie all'ottocentotrentatreesimo tick su 7.300 — quindi
+    // la finestra di trenta candele che il grafico tiene è **tutta dopo** il muro.
+    //
+    // Piatte sul muro non è un difetto, è il referto: il giocatore torna e vede che per quasi
+    // tutta la notte non è entrato niente. A dire quanto sono `incomeWithheld` e il tempo scartato
+    // dal tetto, non una candela che finge una salita che era già finita.
     const store = await reopened()
+    const wall = toString(CASH_START_CAPACITY)
 
-    expect(numbersOf(store.cashCandles.items[0])).toEqual([
-      '0',
-      toString(CASH_START_CAPACITY),
-      '0',
-      toString(CASH_START_CAPACITY)
-    ])
+    expect(numbersOf(store.cashCandles.items[0])).toEqual([wall, wall, wall, wall])
+  })
+
+  it('e a recupero corto disegna la salita, che prima era un salto solo', async () => {
+    // **È la prova che D040 serviva.** Cinquecento tick di arretrati — sotto gli 833 che riempiono
+    // il caveau, quindi nessun muro di mezzo — sono dieci intervalli di candela.
+    //
+    // Con il recupero a passo unico questa serie avrebbe **una** candela: apertura a zero,
+    // chiusura a 600,00 €, e in mezzo il nulla. Con i blocchi ha dieci candele che salgono, e
+    // ognuna è un saldo che il giocatore ha davvero avuto per cinque secondi di gioco. È la
+    // differenza fra sapere il totale e vedere cosa è successo — cioè fra un mondo che va avanti
+    // e un mondo che salta.
+    const RECOVERED = ticks(500)
+    const store = await start({
+      load: found(freshPayload(), SAVED_AT),
+      wallClock: SAVED_AT + clock.ticksToMilliseconds(RECOVERED)
+    })
+
+    const every = BALANCE.INSTRUMENT_CANDLE_EVERY
+    const closes = store.cashCandles.items.map((candle) => Number(toString(candle.close)))
+
+    expect(store.cashCandles.items).toHaveLength(RECOVERED / every)
+    expect(closes).toEqual([...closes].sort((first, second) => first - second))
+    expect(new Set(closes).size).toBe(closes.length)
+
+    // E il totale è quello di sempre: spezzare il tempo non crea né distrugge denaro. È
+    // l'invariante 3 della delega, e il difetto che chiuderebbe è un ciclo che perde l'ultimo
+    // blocco parziale.
+    const earned = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(RECOVERED)
+    expect(toString(game.ctx.ledger.balance('cash'))).toBe(toString(earned))
   })
 
   it('e la carta, che nessuno ha toccato, porta una candela piatta', async () => {

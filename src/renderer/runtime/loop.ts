@@ -64,11 +64,16 @@ export interface Sampling {
  * scritta in `stores/` non sarebbe raggiungibile dallo store. `stepOf` ha già questa forma — è
  * esportata da qui e chiamata da `recover()` — e questa la segue.
  *
- * **Il tetto del recupero produce un campione solo, non millecinquecento.** Tornare dopo otto ore
- * arriva qui come un `elapsed` enorme, e non ci sono valori intermedi da campionare: il reddito
- * arretrato entra in una transazione sola (`income/system.ts`), quindi di saldi ce n'è **uno**.
- * Dividere quel salto in barre finte sarebbe disegnare numeri che nessuno ha mai avuto — la
- * correzione 1 di D015 con un altro vestito.
+ * **Un recupero produce molti campioni, e nessuno è finto** (D040). Questo paragrafo diceva il
+ * contrario fino al 2026-08-23, e aveva ragione allora: il recupero era **un** `advance` con tutti
+ * i tick arretrati, il reddito entrava in una transazione sola, e di saldi ne esisteva
+ * letteralmente uno — disegnarne millecinquecento sarebbe stato inventare numeri che nessuno aveva
+ * mai avuto, cioè la correzione 1 di D015 con un altro vestito.
+ *
+ * Adesso `Game.advance` cammina l'intervallo a blocchi di un giorno di gioco, quindi quei valori
+ * intermedi **esistono**: ognuno è stato il patrimonio del giocatore per un giorno di gioco intero.
+ * La regola non è cambiata — non si disegna un numero che nessuno ha avuto — è cambiato quali
+ * numeri il giocatore ha avuto, ed è precisamente ciò che la fetta 03 è servita a fare.
  *
  * `every` è un intero positivo che arriva da `balance/`, quindi non c'è una guardia contro lo
  * zero: sarebbe un ramo che nessun test può raggiungere passando dal gioco, cioè codice che si

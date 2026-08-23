@@ -25,6 +25,7 @@ export const it: Dictionary = {
   'app.loading.title': 'Caricamento…',
   'app.loading.catchup': 'Recupero il tempo passato…',
   'app.loading.away_for': 'Sei stato via {duration}.',
+  'app.loading.dropped': 'Il tetto di recupero ne ha scartati {duration}.',
   'app.closing.saving': 'Salvataggio in corso…',
 
   'app.error.retry': 'Riprova',
