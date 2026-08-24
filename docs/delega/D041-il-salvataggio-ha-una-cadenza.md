@@ -1,6 +1,7 @@
 # D041 — Il salvataggio ha una cadenza, e non è un secondo orologio
 
-- **Stato:** **Chiusa** — ramo `d041-il-salvataggio-ha-una-cadenza`, che parte da `main`. Scritta ed
+- **Stato:** **Chiusa** — commit `a351000`, ramo `d041-il-salvataggio-ha-una-cadenza`, che parte da
+  `main`. Scritta ed
   eseguita il 2026-08-24, nella stessa sessione. Le tre decisioni aperte sono state prese **in
   autonomia** su direttiva generale dell'utente, e sono **contestabili**: vedi _Le correzioni_
 - **Stato precedente:** **Aperta** — scritta il 2026-08-24, non eseguita. Il ramo parte da `main`:
