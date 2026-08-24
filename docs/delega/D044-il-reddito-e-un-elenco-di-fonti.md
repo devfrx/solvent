@@ -1,7 +1,8 @@
 # D044 — Il reddito è un elenco di fonti
 
 - **Stato:** **Chiusa** — scritta **ed eseguita** il 2026-08-24 sul ramo
-  `d044-il-reddito-e-un-elenco-di-fonti`. `npm run verify` è verde, e i punti 9 delle tre deleghe
+  `d044-il-reddito-e-un-elenco-di-fonti`, **fusa in `main` e spinta**. `npm run verify` e
+  `npm run build` sono verdi — 1.399 test — e i punti 9 delle tre deleghe
   aperte — questa, [D042](D042-il-caveau-ha-uno-spazio-e-una-scala.md) e
   [D043](D043-il-reddito-si-mette-in-regola.md) — sono stati chiusi in una finestra sola. Il
   consuntivo è in fondo
