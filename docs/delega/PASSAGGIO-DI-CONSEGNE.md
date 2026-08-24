@@ -45,7 +45,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23, chiudendo la quinta sessione, sono stati fusi i due rami incatenati che aspettavano: `d038-cio-che-si-preme-e-cio-che-scorre` discendeva da `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, quindi è bastato un `--ff-only` sul secondo per portarli tutti e due. `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sui rami, e i due rami sono stati cancellati con `git branch -d` — quello che si rifiuta se resta lavoro non fuso: **nessuno dei due si è rifiutato** |
 | `origin/main`            | **si verifica, non si dichiara.** Un allineamento scritto qui lo invalida il primo commit che arriva dopo — compreso quello che lo scrive — e l'elenco di cosa si è spinto invecchia a ogni delega consegnata. Lo dice `git rev-list --count origin/main..main`: se non fa `0`, c'è del lavoro solo su questa macchina. Quando si spinge, i gate girano prima **su `main` fuso** e non solo sui rami                                                                                                                                                                |
 | Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Prossimo passo           | **la seconda delega della fetta 03, il salvataggio a intervalli**, e va scritta: [D040](D040-il-recupero-avanza-a-blocchi.md) è chiusa e in `main`, e ha costruito il gancio che serve — qualcosa che succede ogni N tick sulla via unica. La fetta 03 è **in corso**, non conclusa                                                                                                                                                                                                                                                                                 |
+| Prossimo passo           | **eseguire [D041](D041-il-salvataggio-ha-una-cadenza.md)**, la seconda delega della fetta 03: scritta il 2026-08-24, non eseguita, con **tre decisioni aperte** che si prendono con l'utente prima di cominciare. La fetta 03 è **in corso**, non conclusa                                                                                                                                                                                                                                                                                                          |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -1393,9 +1393,23 @@ Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: all
 
 ## Il prossimo passo, in concreto
 
-**È scrivere la seconda delega della fetta 03: il salvataggio a intervalli.**
-[D040](D040-il-recupero-avanza-a-blocchi.md) è chiusa e in `main`, e quante deleghe siano aperte lo
-dice [stato.md](../stato.md), che le conta.
+**È eseguire [D041](D041-il-salvataggio-ha-una-cadenza.md) — il salvataggio a intervalli — che è
+stata scritta il 2026-08-24 e non è stata eseguita.** Quante deleghe siano aperte lo dice
+[stato.md](../stato.md), che le conta.
+
+**Ha tre decisioni aperte, e non si esegue prima di averle prese con l'utente**: dove vive la
+cadenza, ogni quanto scatta, e cosa succede quando una scrittura a cadenza fallisce. Ognuna porta il
+proprio budget, e la prima cambia la forma di tutto il resto.
+
+**Una cosa che quella delega ha trovato leggendo il codice, e che questa pagina dichiarava al
+contrario.** Il registro dice che salvataggio a intervalli e progresso offline sono «lo stesso
+problema», e il prompt qui sotto lo ripeteva: è vero del **gancio** — una via unica dove passa ogni
+tick — e falso dell'**unità**. La durabilità si misura in tempo reale, i blocchi in tempo di gioco, e
+le due cose coincidono solo mentre si gioca: al tetto pieno passano 7.300 tick in meno di tre
+millisecondi, quindi una cadenza da un minuto contata sui tick sarebbe «ora» dodici volte in tre
+millisecondi. Ne discende che qualunque ramo conti i tick deve **coalizzare**, e che non salvare
+durante un recupero non perde niente — un recupero riparte dallo stesso `savedAt` e produce lo stesso
+stato. Il ragionamento per esteso sta in D041, sotto _Il gancio che D040 ha costruito_.
 
 **Il gancio esiste già, ed è quello che D040 ha costruito.** Il
 [registro YAGNI](../roadmap-fette.md) dice che salvataggio a intervalli e progresso offline sono
@@ -1983,37 +1997,60 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-**Non c'è niente da fondere e niente da eseguire**, e il lavoro torna di specie diversa: si scrive
-una delega. Quante ne restino aperte lo dice [stato.md](../stato.md), che le conta.
+**Non c'è niente da fondere, e c'è una delega da eseguire.** Quante ne restino aperte lo dice
+[stato.md](../stato.md), che le conta.
 
 ```
-Non c'e' una delega da eseguire: si scrive la SECONDA della fetta 03, il
-salvataggio a intervalli. Prima pero' si controlla che il punto di partenza sia
-quello che questo documento dichiara, perche' un handoff si verifica invece di
-crederci — due comandi:
+Esegui D041 — il salvataggio ha una cadenza.
 
+La delega e' docs/delega/D041-il-salvataggio-ha-una-cadenza.md, scritta il
+2026-08-24 e non eseguita. HA TRE DECISIONI APERTE e non si esegue prima di
+averle prese con l'utente: dove vive la cadenza, ogni quanto scatta, cosa
+succede se una scrittura a cadenza fallisce. Ognuna porta il proprio budget, e
+la prima cambia la forma di tutto il resto.
+
+Prima pero' si controlla che il punto di partenza sia quello che il passaggio di
+consegne dichiara, perche' un handoff si verifica invece di crederci — e il
+primo comando non basta senza il fetch, che e' la lezione del 2026-08-24:
+
+  git fetch --all --prune
   git branch                              # deve restare `main` e basta
   git rev-list --count origin/main..main  # deve fare 0
+  git rev-list --count main..origin/main  # deve fare 0 — senza il fetch mente
 
 Se non torna, siamo in una situazione che questo documento non descrive: vale la
 realta', non il documento.
 
-IL GANCIO C'E' GIA'. D040 ha fatto camminare Game.advance a blocchi di un giorno
-di gioco (ADR 0049), e il registro YAGNI dice che salvataggio a intervalli e
-progresso offline sono «lo stesso problema»: tutti e due vogliono che qualcosa
-succeda ogni N tick sulla VIA UNICA. Non serve un secondo ciclo — sarebbe
-esattamente il difetto che l'ADR 0049 esiste per impedire.
+IL GANCIO C'E' GIA', E L'UNITA' NO. D040 ha fatto camminare Game.advance a
+blocchi di un giorno di gioco (ADR 0049), quindi c'e' un posto solo dove passa
+ogni tick e qualunque cosa debba succedere «ogni N tick» ha dove attaccarsi — e
+la primitiva pura esiste, e' sampleOf in runtime/loop.ts. Ma la durabilita' si
+misura in tempo REALE e i blocchi sono tempo di GIOCO: coincidono mentre si
+gioca (dieci tick = un secondo) e non durante un recupero, dove 7.300 tick
+passano in meno di tre millisecondi. Ne discende che qualunque ramo conti i tick
+deve COALIZZARE. Il ragionamento per esteso e' nella delega, e questo paragrafo
+sostituisce quello che questa pagina diceva prima.
 
 Le tre cose da leggere prima, e sono corte: l'ADR 0049 per capire di chi e' la
-responsabilita' di spezzare il tempo, la voce «Salvataggio automatico a
-intervalli» nel registro YAGNI, e recover() in renderer/stores/game.ts, che e'
-il chiamante da cui il salvataggio prendera' esempio senza copiarlo.
+responsabilita' quando il tempo passa, la tabella «Quando si salva» in
+design/ciclo-di-vita.md (e' la riga che questa delega ribalta), e close() in
+renderer/stores/game.ts — l'unico posto che oggi scrive, con la guardia INV-17
+che la cadenza deve riusare invece di copiare.
 
-Due trappole gia' pagate, per non ripagarle:
-- non mettere il ciclo nel chiamante. R25 resterebbe verde mentre la sua
+Tre trappole gia' pagate, per non ripagarle:
+- non mettere la cadenza nel chiamante. R25 non la vedrebbe nemmeno: guarda chi
+  nomina tickAll, e una cadenza non lo nomina. Resterebbe verde mentre la sua
   ragione viene aggirata, ed e' successo abbastanza da avere un ADR
 - il velo del recupero dura tre millisecondi e non si fotografa: si legge il DOM
   dentro la stessa Runtime.evaluate che forza lo stato, dopo un setTimeout(0)
+- a finestra nascosta NON passano tick, quindi la cadenza NON scatta: guardare
+  questa delega li' darebbe zero scritture e sembrerebbe un difetto. E' il
+  contrario del recupero, che si guarda proprio a finestra nascosta
+
+E una precauzione che con questa delega non basta piu': il salvataggio
+dell'utente in %APPDATA%/solvent/ D040 lo ha protetto TERMINANDO l'app invece di
+chiuderla. Una cadenza attiva ci scrive sopra da se', senza che nessuno chiuda
+niente. Si prova con --user-data-dir, e qui non e' un consiglio.
 
 E tre regole che valgono per QUALUNQUE schermata nuova, da D038: un pulsante si
 scrive `<UiButton>` e non `<button>` (R26), un'area che scorre si scrive
@@ -2035,8 +2072,9 @@ I prompt delle deleghe già consegnate stanno nel `git log` di questo file: si r
 invece di tenerli tutti in vita, che è la stessa ragione per cui i numeri stanno in un posto solo.
 Questa riga li elencava per nome, ed era un elenco che invecchiava a ogni delega consegnata.
 
-**Torna il lavoro di specie diversa: scrivere una delega, non eseguirne una.** Il materiale c'è
-tutto e non va inventato:
+**E dopo D041, torna il lavoro di specie diversa: scrivere una delega, non eseguirne una** — perché
+D041 chiude la fetta 03, e la successiva non è ancora scritta. Il materiale c'è tutto e non va
+inventato:
 
 - il [registro delle fette](../roadmap-fette.md) dice cosa viene dopo e in che ordine: la **fetta
   03** è il progresso offline, e sotto la sua riga stanno i problemi che la riga stessa non dice;
