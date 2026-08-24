@@ -23,10 +23,10 @@ dall'intestazione del suo ADR, ed è da lì che questo elenco arriva.
 
 ## Deleghe
 
-**43** deleghe: 42 `Chiusa`, 1 `In corso`, 0 `Aperta`.
+**43** deleghe: 41 `Chiusa`, 2 `In corso`, 0 `Aperta`.
 
 - `Aperta`: _nessuno_
-- `In corso`: D042
+- `In corso`: D042, D043
 
 L'ordine in cui si eseguono non è questo elenco: è il grafo in
 [delega/README.md](delega/README.md).

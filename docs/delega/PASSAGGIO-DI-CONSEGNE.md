@@ -30,22 +30,22 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 
 ## Dove siamo, esattamente
 
-|                          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                                                                                                                                                                                                                                                                                                                                 |
-| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23, chiudendo la quinta sessione, sono stati fusi i due rami incatenati che aspettavano: `d038-cio-che-si-preme-e-cio-che-scorre` discendeva da `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, quindi è bastato un `--ff-only` sul secondo per portarli tutti e due. `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sui rami, e i due rami sono stati cancellati con `git branch -d` — quello che si rifiuta se resta lavoro non fuso: **nessuno dei due si è rifiutato** |
-| `origin/main`            | **si verifica, non si dichiara.** Un allineamento scritto qui lo invalida il primo commit che arriva dopo — compreso quello che lo scrive — e l'elenco di cosa si è spinto invecchia a ogni delega consegnata. Lo dice `git rev-list --count origin/main..main`: se non fa `0`, c'è del lavoro solo su questa macchina. Quando si spinge, i gate girano prima **su `main` fuso** e non solo sui rami                                                                                                                                                                |
-| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Prossimo passo           | **chiudere [D042](D042-il-caveau-ha-uno-spazio-e-una-scala.md)**, che e' `In corso`: manca il punto 9 della sua definizione di fatto, cioe' guardare la pagina del caveau nella finestra vera. Poi **la prima delega della fetta 04**, calore e black market — che comincia da una **scheda di dominio compilata**, la quarta, cioe' quella su cui la forma della scheda va rivista                                                                                                                                                                                 |
+|                          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| STOP 1                   | **approvato** — nome, stile visivo, le tre dipendenze di runtime, la simulazione nel renderer                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| STOP 2                   | **riportato** da [D013](D013-verifica-della-fetta.md): la fetta 01 è conclusa e verificata, otto passi manuali su otto                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Deleghe                  | quali sono chiuse e quali aperte lo dice [stato.md](../stato.md); **l'ordine in cui si eseguono** è il grafo in [README.md](README.md)                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Kernel                   | **finito** (D003–D008) — le righe le conta [stato.md](../stato.md), con il metodo scritto nel codice che le conta                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Persistenza nel main     | **finita** — lo schema eseguito, la scrittura atomica, i tre canali IPC                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Domini                   | tre: `income` ha stato e ticchetta, `vault` ha stato e **non** ticchetta, `atm` è due comandi. Da D026 ognuno ha la sua pagina, e da D033 il bancomat ha la **sua**: la `home` non esiste più, al suo posto ci sono `atm` e `board`                                                                                                                                                                                                                                                                                                                                           |
+| Schede di dominio        | da D018 il modulo è [design/domini/README.md](../design/domini/README.md), e i tre domini che esistono l'hanno compilato                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Le regole                | la mappa completa, con la forza di ciascuna, è [tracciabilita.md](../tracciabilita.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `npm run verify`         | **verde**; i tempi, con la data accanto, stanno in [qualita.md](../qualita.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `npm run verify:release` | **verde** — il renderer compila; il peso, con la data accanto, sta in [qualita.md](../qualita.md) e non si ripete qui                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23, chiudendo la quinta sessione, sono stati fusi i due rami incatenati che aspettavano: `d038-cio-che-si-preme-e-cio-che-scorre` discendeva da `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, quindi è bastato un `--ff-only` sul secondo per portarli tutti e due. `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sui rami, e i due rami sono stati cancellati con `git branch -d` — quello che si rifiuta se resta lavoro non fuso: **nessuno dei due si è rifiutato**           |
+| `origin/main`            | **si verifica, non si dichiara.** Un allineamento scritto qui lo invalida il primo commit che arriva dopo — compreso quello che lo scrive — e l'elenco di cosa si è spinto invecchia a ogni delega consegnata. Lo dice `git rev-list --count origin/main..main`: se non fa `0`, c'è del lavoro solo su questa macchina. Quando si spinge, i gate girano prima **su `main` fuso** e non solo sui rami                                                                                                                                                                          |
+| Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Prossimo passo           | **chiudere D042 e D043**, che sono tutte e due `In corso` per la stessa ragione: manca il punto 9, cioè guardare la pagina nella finestra vera — quella del caveau per [D042](D042-il-caveau-ha-uno-spazio-e-una-scala.md), quella del reddito per [D043](D043-il-reddito-si-mette-in-regola.md), che ci ha aggiunto un pannello nuovo. Si fa in un colpo solo: una finestra, due pagine. Poi **la prima delega della fetta 04**, calore e black market — che comincia da una **scheda di dominio compilata**, la quarta, cioè quella su cui la forma della scheda va rivista |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -67,10 +67,112 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 > Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
 > agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
 
-## La **ottava** sessione del 2026-08-24: D042, lo spazio del caveau smette di essere denaro
+## La **nona** sessione del 2026-08-24: D043, il caveau smette di essere il tetto del gioco
 
 Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
 recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
+
+**Cosa è stato fatto.**
+
+| Cosa                                                         | Cos'era                                                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| [ADR 0052](../adr/0052-un-guadagno-dichiara-dove-atterra.md) | dove atterrano i soldi era una costante privata, `INCOME_POOL = 'cash'`, decisa da nessuno |
+| [D043](D043-il-reddito-si-mette-in-regola.md)                | scritta **ed eseguita**, e non ancora chiusa: manca la prova a schermo, come D042          |
+| `main`                                                       | D041, D042 e D043 fusi con `--ff-only` e **spinti**: `origin/main` è a `485fa8e`           |
+
+### Le sei cose che chi arriva adesso deve sapere
+
+**1. La richiesta era «il caveau è sbilanciato, a 250k si riempie ogni secondo», e la risposta non è
+stata spostare il tetto.** È la seconda volta di fila — la sessione ottava aveva già rifiutato «togli
+il cappello a 250k» — e la ragione è la stessa: **prima di muovere un numero di bilanciamento si
+verifica l'argomento che lo sostiene.** Qui l'argomento era vero a metà. Il fastidio era reale e non
+immaginato: con un reddito grande il caveau si riempie dentro un tick e l'unica valvola è un pulsante
+da premere dieci volte al secondo. Ma la causa non era il tetto: era che **tutto** il reddito passava
+di lì.
+
+**2. Il difetto era una riga che nessun documento aveva deciso.** `const INCOME_POOL: Pool = 'cash'`
+stava in `domains/income/system.ts` dalla fetta 01, quando la carta non aveva ancora niente da fare.
+Ne discendeva che il tetto dei **contanti** fosse il tetto di **tutto il reddito del gioco** — che
+non è ciò che il caveau dichiara di essere: la sua scheda dice «tiene i contanti **anonimi**, e ne
+tiene pochi», e la visione dichiara la carta «illimitata». Il tetto doveva essere il prezzo
+dell'anonimato ed era diventato il soffitto della partita.
+
+**3. Il regime è un dato, e la regola vale per tutti.** L'ADR 0052 dice che ogni guadagno dichiara
+dove atterra, e che a dichiararlo è la **fonte** — non un interruttore del giocatore. In nero →
+`cash`, niente trattenute, il muro; in regola → `card`, che non ha tetto, e la parte dello Stato. Il
+tick legge un regime e non nomina più nessun pool, che è la forma dell'ADR 0017: le affordance sono
+dati, non un `if` sul nome.
+
+C'è un corollario che oggi non ha ancora niente da sorvegliare e che vale la pena conoscere prima
+della fetta 04: **ciò che accade da solo atterra in un pool senza tetto.** Uno stop-loss che scatta a
+finestra chiusa non può chiedere dove mettere i soldi e non può essere rifiutato da una capienza. Il
+grilletto è nel registro YAGNI.
+
+**4. È un acquisto, e non si torna indietro — e le due cose sono la stessa.** Un interruttore
+gratuito ha un gioco ottimale: in nero finché c'è spazio, in regola quando il caveau è pieno, in nero
+appena si libera. Cioè la mansione di prima con un pulsante diverso. Una scelta che si paga e non si
+disfa non ha quel gioco ottimale.
+
+**5. Il 3% non è tarato sul realismo fiscale: è tarato sulla commissione del bancomat.** Chi resta in
+nero e vuole i soldi sulla carta li versa a mano e paga `ATM_FEE_RATE_IN`, l'1,5%. Sotto quella cifra
+la carta domina e i contanti muoiono; sopra il 5% restare in nero e cliccare verrebbe **pagato**
+abbastanza da valere la pena — e avremmo scritto un'ADR per rendere ottimale la mansione che voleva
+togliere. `income_tax_rate` sorveglia tutti e due i versi con lo stesso intervallo, ed è per questo
+che è stretto.
+
+**6. `income` ha guadagnato un terzo argomento obbligatorio, e ha toccato dodici file.** Era il prezzo
+dichiarato: `income(pool, amount, withheld)` rende **INV-27 un errore di compilazione** invece di un
+test — un reddito senza regime non compila. Le modifiche sono tutte `, ZERO` e nessuna è
+interessante, ma sono il grosso delle 405 righe di test contate nell'indice: **le prove nuove sono
+ventitré.** Chi legge quel numero senza questa riga si fa un'idea sbagliata di quanto sia coperta la
+fetta.
+
+### Le due cose che l'esecuzione ha corretto rispetto alla delega
+
+**Il listino della dichiarazione non si svuota a chi è già in regola.** La delega diceva di copiare
+la forma di `expansionPrices` del caveau — lista vuota all'ultimo livello, così non serve un ramo. È
+sbagliato: quella forma vale per una **scala**, dove l'indice cade fuori da solo. Qui lo stato è un
+booleano, e un listino che dipende dallo stato rende dipendente dallo stato anche `accepts`, cioè la
+cosa che il Ledger deve poter sapere prima di guardare una partita. Il gemello che sta venti righe
+sopra nello stesso file, `upgradePrices()`, rispondeva già bene.
+
+**`declared` assente e `declared: undefined` non sono la stessa cosa.** La delega diceva «assente
+vale `false`», e scritto come `loaded.declared !== undefined` avrebbe fatto passare anche uno stato
+manomesso — cioè avrebbe bucato INV-20. A trovarlo è stato
+`tests/rules/stateful-systems-reject-garbage`, che genera la spazzatura **dallo stato buono** e
+quindi ha provato `declared: undefined` senza che nessuno glielo chiedesse. La distinzione giusta è
+`'declared' in loaded`: JSON non sa produrre una chiave presente che vale `undefined`.
+
+### Cosa questa sessione lascia indietro
+
+- **D042 e D043 sono tutte e due `In corso`, per lo stesso punto 9.** La finestra vera non è stata
+  aperta: la pagina del caveau di D042 e il pannello nuovo di D043 non li ha visti nessuno. Si
+  chiudono in un colpo solo. Il punto 9 di D043 **è stato aggiunto dopo l'esecuzione**, e la sua
+  assenza era il difetto: la delega aggiungeva un pannello nuovo e non si era chiesta di guardarlo.
+- **`tracciabilita.md` ha un buco fra INV-25 e INV-27.** INV-26 è di D042, che non ha ancora chiuso.
+- **Quattro commenti citano costanti che D042 ha cancellato** — `VAULT_CAPACITIES` e
+  `VAULT_PRICES_CARD`, in `src/core/balance/constants.ts` e `src/core/contracts/pools.ts:56`.
+  Trovati passando di qui e lasciati stare: sono di quella delega.
+- **Il grafo delle deleghe in [README.md](README.md) non ha né D042 né D043.** Aggiungere solo la
+  seconda avrebbe disegnato una freccia verso un nodo che non esiste.
+- **I tre rami di lavoro non sono stati cancellati**, a differenza di come si è fatto nelle sessioni
+  precedenti: `d041-il-salvataggio-ha-una-cadenza`, `d042-il-caveau-ha-uno-spazio-e-una-scala` e
+  `d043-il-reddito-si-mette-in-regola` esistono in locale **e su `origin`**. Sono tutti antenati di
+  `main`, quindi `git branch -d` li accetterebbe senza protestare — ma cancellare un ramo spinto si
+  vede anche agli altri, ed è una di quelle cose che si chiedono.
+
+### Cosa il giocatore vede, in una riga
+
+Sulla pagina **Reddito** c'è un pannello nuovo, «Regime del reddito». Si parte in nero; l'acquisto
+costa 50.000,00 € sulla carta, è irreversibile, e da lì lo stipendio arriva sulla carta al netto del
+3%. Il muro del caveau smette di riguardare lo stipendio e resta dov'era per il denaro anonimo — che
+è ciò che serve alla fetta 04.
+
+## La **ottava** sessione del 2026-08-24: D042, lo spazio del caveau smette di essere denaro
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. Sopra c'è la nona, che
+è la più recente: questa e tutte le sezioni sotto descrivono stati già superati, e si leggono come
+storia.
 
 **Cosa è stato fatto.**
 

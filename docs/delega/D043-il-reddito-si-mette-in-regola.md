@@ -1,6 +1,11 @@
 # D043 — Il reddito si mette in regola
 
-- **Stato:** **Chiusa** — cancelli verdi il 2026-08-24: `npm run verify` a zero, 1.343 test
+- **Stato:** **In corso** — scritta **ed eseguita** il 2026-08-24 sul ramo
+  `d043-il-reddito-si-mette-in-regola`, fusa in `main` e spinta. `npm run verify` e `npm run build`
+  sono verdi, 1.343 test. **Manca il punto 9**: la pagina non è ancora stata guardata nella
+  finestra vera. Il punto 9 **non c'era** quando la delega è stata scritta, e la sua assenza era il
+  difetto: [D042](D042-il-caveau-ha-uno-spazio-e-una-scala.md) ce l'aveva, questa aggiunge un
+  pannello nuovo e non se l'era chiesto
 - **Data:** 2026-08-24
 - **Fetta:** 02 riaperta da una sessione di gioco, e non è un ritocco di bilanciamento: è la riga
   che decide dove atterrano i soldi
@@ -213,6 +218,11 @@ ragione per cui `Space` è rimasto dentro `domains/vault/`. Il grilletto per sal
       trattenuta si confronta con `ATM_FEE_RATE_IN` e si misura anche **simulando** un minuto in
       regola; il prezzo si confronta con la scala del caveau, non con una cifra ricopiata.
 - [x] Parità i18n, gate verdi, `docs/stato.md` rigenerato.
+- [ ] **La pagina del reddito guardata nella finestra vera**: il pannello del regime si disegna, il
+      flusso del pagamento si apre e si chiude, e dopo l'acquisto la pagina dice «in regola» invece
+      di restare indietro. Aggiunto **dopo** l'esecuzione, e vale la pena dire perché: la delega
+      era stata scritta senza, mentre D042 ce l'aveva — e questa aggiunge un pannello nuovo, cioè
+      esattamente il caso in cui un gate verde non dimostra che si veda qualcosa.
 
 ## Trappole note
 
