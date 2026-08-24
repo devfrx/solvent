@@ -136,8 +136,17 @@ finte e passi veri, e la sua mappa è vuota da cinque fette.
 `git diff --name-only main..HEAD`, che non stampa niente fuori da quella cartella. Quanti commit
 porti lo dice `git log --oneline main..HEAD`, e non si scrive qui per la ragione di
 [D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md): questa riga ne ha già dichiarato uno
-mentre ne stava arrivando un secondo, cioè il passaggio di consegne stesso. Il ramo non è fuso e non
-è spinto.
+mentre ne stava arrivando un secondo, cioè il passaggio di consegne stesso.
+
+**Il ramo è spinto e non è fuso**, e la prima metà della frase si verifica invece di crederci — per
+la stessa ragione per cui `origin/main` non si dichiara: un allineamento scritto qui lo invalida il
+primo commit che arriva dopo, compreso quello che lo scrive.
+
+```bash
+git rev-list --count origin/d044-il-reddito-e-un-elenco-di-fonti..HEAD
+```
+
+Se non fa `0`, c'è del lavoro solo su questa macchina.
 
 `npm run verify` è **verde**: 90 file di test, 1.343 test. `verify:release` non è stato rigirato, e
 non serve: il diff non tocca una riga di `src/`.
@@ -169,10 +178,13 @@ fetta 04.
 - **I quattro commenti che citano costanti cancellate da D042 sono ancora lì**, verificati con un
   `grep` passando di qui: `VAULT_PRICES_CARD` in `src/core/balance/constants.ts` alle righe 200, 385
   e 400, e `VAULT_CAPACITIES` in `src/core/contracts/pools.ts:56`. Sono di quella delega.
-- **Quattro rami esistono**: `d041-il-salvataggio-ha-una-cadenza`,
-  `d042-il-caveau-ha-uno-spazio-e-una-scala` e `d043-il-reddito-si-mette-in-regola` in locale **e su
-  `origin`**, `d044-il-reddito-e-un-elenco-di-fonti` **solo in locale**. Nessuno è stato cancellato,
-  fuso o spinto: sono decisioni dell'utente.
+- **I rami di lavoro esistono tutti, in locale e su `origin`**, e nessuno è fuso in `main`:
+  `d041-il-salvataggio-ha-una-cadenza`, `d042-il-caveau-ha-uno-spazio-e-una-scala`,
+  `d043-il-reddito-si-mette-in-regola` e `d044-il-reddito-e-un-elenco-di-fonti`. L'ultimo è stato
+  spinto **su richiesta dell'utente** chiudendo questa sessione; i primi tre erano già lì. Quali
+  siano davvero lo dice `git branch -a` dopo un `git fetch --all --prune`, e nessuno è stato
+  cancellato: cancellare un ramo spinto si vede anche agli altri, ed è una di quelle cose che si
+  chiedono.
 - **Il plateau è un numero che nessuno ha ancora giocato.** 364,50 €/s è **derivato**, non provato:
   l'intervallo che lo tiene onesto è un bersaglio, la cifra dentro l'intervallo si sceglie giocando.
 
@@ -2421,7 +2433,7 @@ consegne dichiara, perche' un handoff si verifica invece di crederci — e il
 primo comando non basta senza il fetch, che e' la lezione del 2026-08-24:
 
   git fetch --all --prune
-  git branch                              # d044-... esiste ed e' SOLO locale
+  git branch -a                           # d044-... c'e' in locale E su origin
   git log --oneline main..d044-il-reddito-e-un-elenco-di-fonti   # un commit
   git status                              # deve essere pulito
   npm run verify                          # verde, 1.343 test
