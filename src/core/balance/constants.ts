@@ -1,5 +1,4 @@
 import { fromString } from '@core/contracts/money'
-import { CASH_START_CAPACITY } from '@core/contracts/pools'
 
 import { clock, seconds } from '@core/kernel/Clock'
 
@@ -192,67 +191,95 @@ export const BALANCE = {
   ATM_DEFAULT_AMOUNT: ATM_LARGEST,
 
   /**
-   * Le capienze del caveau, **una per livello**, dal livello zero all'ultimo. Quanti livelli
-   * esistano non è un numero a parte: è la lunghezza di questo elenco, e `MAX_LEVEL` la legge.
+   * Quanti euro di contanti stanno in **un'unità di ingombro** (D042, ADR 0051).
+   *
+   * È la densità dei contanti, ed è il numero che tiene in piedi il muro per sempre: lo spazio del
+   * caveau è finito e dichiarato, quindi con una densità ferma la cifra massima che i contanti
+   * possano raggiungere è ferma anche lei. Un oggetto — il giorno in cui esisterà — dichiara la
+   * **propria** densità e non questa: è per quello che un diamante porta dentro molto valore senza
+   * togliere spazio a nessuno, e i contanti no.
+   *
+   * **Oggi questo numero non cambia niente, ed è la prova che il cambio di unità è stato neutro.**
+   * Lo spazio del livello zero si deriva da `CASH_START_CAPACITY` dividendola per questa densità, e
+   * la capienza si ottiene rimoltiplicando: la densità **si cancella**, e la scala in euro resta
+   * `CASH_START_CAPACITY × crescita^livello` qualunque valore abbia. Misurato portandola a 200: la
+   * scala in euro non si muove e `seconds_to_first_wall` resta verde.
+   *
+   * Ne discendono due avvertimenti, e valgono più del numero. Il primo: **chi la ritocca sperando di
+   * spostare il muro non sposta niente** — le leve del muro sono `VAULT_LEVELS` e
+   * `VAULT_SPACE_GROWTH`. Il secondo: **diventerà un numero di bilanciamento vero il giorno degli
+   * oggetti**, perché il rapporto fra la densità di un oggetto e questa è ciò che deciderà se
+   * conviene tenere dentro un quadro o del denaro — cioè la scelta centrale del dominio.
+   *
+   * Cento, e non un altro numero, per una ragione di leggibilità: il caveau di partenza viene
+   * **10 unità** e l'ultimo **2.560**, cifre che si potranno scrivere accanto a un oggetto senza
+   * sembrare un codice.
+   */
+  CASH_PER_SPACE: fromString('100'),
+
+  /**
+   * Di quanto lo spazio del caveau cresce a ogni livello.
+   *
+   * Sostituisce l'elenco delle capienze che stava qui fino a D042. **Una curva e non una lista**
+   * per la ragione che la [visione](../../../docs/prodotto/visione.md) dà ai miglioramenti: la
+   * scala è un **rapporto**, e un rapporto scritto come cinque cifre è un rapporto che nessuno
+   * verifica. Le cifre vecchie andavano ×5, ×4, ×3,75 e ×3,33 — quattro fattori diversi che
+   * nessuno aveva scelto.
    *
    * Livelli **finiti** con un tetto dichiarato, e non una curva che si strozza da sola: in un idle
    * «costa più di quanto renda» è un bersaglio mobile, tarato contro la curva del gioco, mentre un
    * tetto si verifica con un test e non si ritara mai (docs/design/domini/vault.md).
-   *
-   * L'ultima cifra è il muro definitivo: sopra 250.000,00 € i contanti smettono di essere una
-   * scelta possibile, non una scelta cara — ed è la forma 1 della saturazione, l'unica in cui la
-   * pozza di uno strumento **coincide** con il suo tetto.
-   *
-   * Il primo elemento non è scritto qui: è `CASH_START_CAPACITY`, che il pool dichiara da sé
-   * (ADR 0017). Riscriverlo sarebbe la stessa cifra in due posti.
    */
-  VAULT_CAPACITIES: [
-    CASH_START_CAPACITY,
-    fromString('5000'),
-    fromString('20000'),
-    fromString('75000'),
-    fromString('250000')
-  ],
+  VAULT_SPACE_GROWTH: fromString('2'),
 
   /**
-   * Quanto costa passare al livello successivo pagando in **contanti**, indicizzato dal livello da
-   * cui si parte. Un elemento in meno delle capienze: dall'ultimo livello non si va da nessuna
-   * parte, e a dirlo è la lunghezza invece di un `if`.
+   * Quanti livelli ha il caveau, contando lo zero. `MAX_LEVEL` è questo numero meno uno.
    *
-   * Ogni prezzo sta appena sotto la capienza del livello da cui si paga — 900 su 1.000, 4.500 su
-   * 5.000 — e non è un caso: per pagare in contanti bisogna **poterli tenere**, quindi il caveau
-   * va quasi riempito prima di potersi ampliare. È il muro che insegna sé stesso.
+   * **È la leva della scala, ed è una sola.** Da D042 allungare o accorciare la progressione è
+   * cambiare questa cifra: prima erano tredici numeri in tre elenchi, e allungarla voleva dire
+   * scriverne altri tre allineati a mano.
+   *
+   * **Nove, contro i cinque di D017**, e il muro finale resta dov'era — 256.000,00 € contro
+   * 250.000,00 €, che è ciò che `vault_max_cash` sorveglia. Cosa cambia è **quante volte** il
+   * giocatore incontra la decisione: otto ampliamenti invece di quattro. È bilanciamento, ed è
+   * contestabile: arrivare in fondo costa 229.500,00 € contro i 91.400,00 € di prima, cioè due
+   * volte e mezzo. Un caveau è un pozzo dove il denaro esce dal gioco, e un pozzo più profondo è
+   * ciò che un idle vuole — ma se giocandoci la scala sembra lunga, è **questo** il numero da
+   * spostare.
    */
-  VAULT_PRICES_CASH: [
-    fromString('900'),
-    fromString('4500'),
-    fromString('18000'),
-    fromString('68000')
-  ],
+  VAULT_LEVELS: 9,
 
   /**
-   * Gli stessi ampliamenti pagati con la **carta**, e sono due euro in meno ciascuno.
+   * Il prezzo di un ampliamento, come frazione della capienza del livello **da cui si paga**.
+   *
+   * È il muro che insegna sé stesso: per pagare in contanti bisogna **poterli tenere**, quindi il
+   * caveau va quasi riempito prima di potersi ampliare. Fino a D042 quella frase era un commento, e
+   * a renderla vera erano quattro numeri allineati a mano — 900 su 1.000, 4.500 su 5.000, 18.000 su
+   * 20.000 e 68.000 su 75.000. I primi tre sono il 90,0% esatto; **il quarto è il 90,7%**, cioè
+   * era già scivolato, e nessun test lo guardava. Adesso è una regola.
+   */
+  VAULT_EXPANSION_PRICE_RATIO: fromString('0.90'),
+
+  /**
+   * Quanto si risparmia pagando un ampliamento con la **carta** invece che in contanti.
    *
    * Due euro sembrano nulla, e sono l'unico numero possibile finché il calore non esiste. Chi ha
    * solo contanti, per pagare con la carta, deve prima versarli e lasciare la commissione al
    * bancomat: lo sconto conviene **solo se supera la commissione**, e da D032 la commissione più
-   * bassa che possa esistere è `ATM_FEE_FLOOR` — è contro **quel** numero che questi sono tarati,
-   * perché è il caso peggiore per i contanti. Con uno sconto di 50,00 € i contanti
-   * diventerebbero una voce di listino che nessuno sceglie mai — arredamento con dentro del codice
-   * — perché la carta non paga ancora niente in cambio della traccia che lascia.
+   * bassa che possa esistere è `ATM_FEE_FLOOR` — è contro **quel** numero che questo è tarato,
+   * perché è il caso peggiore per i contanti. Con uno sconto di 50,00 € i contanti diventerebbero
+   * una voce di listino che nessuno sceglie mai — arredamento con dentro del codice — perché la
+   * carta non paga ancora niente in cambio della traccia che lascia.
    *
-   * Sono quattro costanti loro, non una sottrazione applicata alle prime: due dichiarazioni della
-   * stessa cosa possono divergere, un prezzo derivato da un altro non è un prezzo. Che la
-   * differenza resti sotto la commissione lo verifica `tests/balance/targets`, non questo commento.
+   * **Uno e non quattro.** Fino a D042 erano quattro costanti che portavano tutte lo stesso numero,
+   * con scritto accanto che due dichiarazioni della stessa cosa possono divergere: era l'argomento
+   * giusto applicato al verso sbagliato, perché a divergere erano proprio loro. Lo sconto è una
+   * leva di gioco, e una leva si tiene con una mano sola. Che resti sotto la commissione lo
+   * verifica `tests/balance/targets`, non questo commento.
    *
-   * Quando il calore arriverà (fetta 04), questo elenco è il primo posto da ritarare.
+   * Quando il calore arriverà (fetta 04), questo numero è il primo posto da ritarare.
    */
-  VAULT_PRICES_CARD: [
-    fromString('898'),
-    fromString('4498'),
-    fromString('17998'),
-    fromString('67998')
-  ],
+  VAULT_CARD_DISCOUNT: fromString('2.00'),
 
   /**
    * ADR 0009 — il tetto ai tick di recupero. Riaprire il gioco dopo giorni non deve bloccare

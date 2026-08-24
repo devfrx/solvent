@@ -5,6 +5,7 @@ import { ref, shallowRef } from 'vue'
 import type { Pool } from '@core/contracts/pools'
 
 import PaymentDialog from '@renderer/components/payment/PaymentDialog.vue'
+import VaultAlarm from '@renderer/components/vault/VaultAlarm.vue'
 import type { GameError } from '@renderer/i18n'
 import { useTranslator } from '@renderer/i18n'
 import { useGameStore } from '@renderer/stores/game'
@@ -32,6 +33,25 @@ import UiText from '@renderer/ui/UiText.vue'
  * Il pulsante «amplia» non si spegne e non **può** spegnersi (INV-21): quando nessuno dei due
  * strumenti basta si smorza, e a spiegare è il rifiuto del Ledger con le due cifre.
  *
+ * **Da [D042](../../../../docs/delega/D042-il-caveau-ha-uno-spazio-e-una-scala.md) la pagina
+ * risponde a due domande a cui non rispondeva**, e la scheda del dominio le chiedeva tutte e due:
+ * quanti ampliamenti restano, e **cosa compra** il prossimo. La scheda chiedeva anche quanto costa,
+ * e su quella riga aveva torto: un prezzo mostrato qui sarebbe un'opzione di listino nominata fuori
+ * dal flusso di pagamento, che R24 vieta e che
+ * l'[ADR 0042](../../../../docs/adr/0042-il-pagamento-e-un-flusso-solo.md) ha deciso **dopo** che la
+ * scheda era stata scritta.
+ *
+ * **L'ingombro non compare, ed è una scelta.** Da D042 lo spazio del caveau si misura in unità di
+ * ingombro e non in euro ([ADR 0051](../../../../docs/adr/0051-lo-spazio-di-un-caveau-non-e-una-somma-di-denaro.md)),
+ * ma finché i contanti sono l'unico inquilino quel numero non decide niente: è la capienza in euro
+ * divisa per una costante. Scriverlo sarebbe un numero che nessuno conta
+ * ([D021](../../../../docs/delega/D021-un-numero-che-nessuno-conta-non-si-scrive.md)). Compare il
+ * giorno in cui c'è dentro qualcosa che non è denaro.
+ *
+ * **L'allarme compare anche qui**, con lo **stesso** componente che la pagina del bancomat monta:
+ * là il giocatore incontra il muro, qui viene a capire cosa farci. Una seconda frase scritta a mano
+ * sarebbe la stessa cosa detta due volte, e le due divergerebbero.
+ *
  * **Da [D036](../../../../docs/delega/D036-il-pagamento-e-un-flusso-solo.md) la scelta non è più
  * qui.** C'erano due pulsanti, uno per strumento, disegnati da un ciclo sul listino, e una
  * `instrumentOf` scritta anche in `IncomePanel` — con il commento che lo dichiarava. Adesso c'è una
@@ -41,7 +61,8 @@ import UiText from '@renderer/ui/UiText.vue'
 
 const store = useGameStore()
 const { cashCapacity, vaultProgress, vaultRoom, vaultFill, vaultIsFull } = storeToRefs(store)
-const { expansionPrices, canAffordExpansion, vaultAtMax, card } = storeToRefs(store)
+const { vaultNextCapacity, expansionPrices, canAffordExpansion, vaultAtMax, card } =
+  storeToRefs(store)
 const { text, money, failure } = useTranslator()
 
 const paying = ref(false)
@@ -82,7 +103,17 @@ const expand = (pool: Pool, code: string): void => {
         <dt>{{ text('vault.room') }}</dt>
         <dd>{{ vaultRoom === null ? text('pool.unlimited') : money(vaultRoom) }}</dd>
       </div>
+      <div v-if="vaultNextCapacity !== null" class="fact">
+        <dt>{{ text('vault.next_holds') }}</dt>
+        <dd>{{ money(vaultNextCapacity) }}</dd>
+      </div>
+      <div v-if="!vaultAtMax" class="fact">
+        <dt>{{ text('vault.expansions_left') }}</dt>
+        <dd>{{ vaultProgress.left }}</dd>
+      </div>
     </dl>
+
+    <VaultAlarm />
 
     <UiText v-if="vaultAtMax" tone="ink-3" size="xs" class="alarm">
       {{ text('vault.at_max') }}

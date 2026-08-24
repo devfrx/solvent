@@ -90,6 +90,8 @@ export const en: Dictionary = {
 
   'vault.level': 'Vault {level} of {total}',
   'vault.room': 'Free space',
+  'vault.next_holds': 'The next one holds',
+  'vault.expansions_left': 'Expansions left',
   'vault.expand': 'Expand',
   'vault.at_max': 'Last level: this is where cash ends.',
   'vault.full': 'The vault is full: your salary no longer fits. Deposit it into the account.',

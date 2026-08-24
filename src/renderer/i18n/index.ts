@@ -140,6 +140,8 @@ export type ScreenKey =
   // reddito si è fermato: un idle in cui i soldi smettono di arrivare senza dirlo è un idle rotto.
   | 'vault.level'
   | 'vault.room'
+  | 'vault.next_holds'
+  | 'vault.expansions_left'
   | 'vault.expand'
   | 'vault.at_max'
   | 'vault.full'

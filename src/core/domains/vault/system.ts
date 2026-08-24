@@ -7,7 +7,7 @@ import { err, ok } from '@core/contracts/result'
 import { spend, type Ledger } from '@core/kernel/Ledger'
 import { defineSystem, ORDER, type Stateful } from '@core/kernel/Registry'
 
-import { capacityFor, expansionPriceFor, expansionPrices, isMaxLevel, MAX_LEVEL } from './rules'
+import { cashCapacityFor, expansionPriceFor, expansionPrices, isMaxLevel, MAX_LEVEL } from './rules'
 import type { VaultSave, VaultState } from './types'
 
 /**
@@ -66,10 +66,15 @@ export interface Vault {
   /** Lo stato, in sola lettura. Serve a chi deve **anticipare** l'esito di un ampliamento. */
   readonly state: () => VaultState
   /**
-   * La capienza corrente. È questa funzione che il bootstrap consegna al Ledger (ADR 0025) e che
-   * la UI interroga: **una sola**, non due che devono coincidere (INV-18).
+   * Quanti **contanti** ci stanno adesso. È questa funzione che il bootstrap consegna al Ledger
+   * (ADR 0025) e che la UI interroga: **una sola**, non due che devono coincidere (INV-18).
+   *
+   * Fino a D042 si chiamava `capacity`, e il nome bastava perché di capienze ce n'era una. Adesso
+   * ce ne sono due — l'**ingombro**, che è la grandezza fisica del caveau, e quanti euro di
+   * contanti ci stiano dentro (ADR 0051) — e chi riceve questa funzione riceve la seconda: euro,
+   * come prima, calcolati diversamente.
    */
-  readonly capacity: () => Money
+  readonly cashCapacity: () => Money
   /**
    * ADR 0027 — l'argomento è lo **strumento**, non il prezzo. Chi chiama sceglie con cosa paga; a
    * dire quanto costa con quello resta il listino, che il comando interroga da sé.
@@ -126,7 +131,7 @@ export const createVault = (ledger: Ledger): Vault => {
 
     state: () => state,
 
-    capacity: () => capacityFor(state.level),
+    cashCapacity: () => cashCapacityFor(state.level),
 
     /**
      * Ritorna lo stato **nuovo** invece di scriverlo prima di pagare: se il Ledger rifiuta, un

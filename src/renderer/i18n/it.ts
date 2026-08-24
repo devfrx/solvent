@@ -92,6 +92,8 @@ export const it: Dictionary = {
 
   'vault.level': 'Caveau {level} di {total}',
   'vault.room': 'Spazio libero',
+  'vault.next_holds': 'Il prossimo tiene',
+  'vault.expansions_left': 'Ampliamenti che restano',
   'vault.expand': 'Amplia',
   'vault.at_max': 'Ultimo livello: i contanti finiscono qui.',
   'vault.full': 'Il caveau è pieno: lo stipendio non entra più. Deposita sul conto.',

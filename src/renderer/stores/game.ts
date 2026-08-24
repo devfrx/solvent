@@ -31,8 +31,10 @@ import {
 import type { IncomeState } from '@core/domains/income/types'
 import {
   canExpand,
+  cashCapacityFor,
   expansionPriceFor,
   expansionPrices,
+  isMaxLevel,
   MAX_LEVEL,
   VAULT_POOL
 } from '@core/domains/vault/rules'
@@ -417,16 +419,41 @@ export const useGameStore = defineStore('game', () => {
   const room = computed<Money | null>(() => roomIn(cashCapacity.value, balances.value[VAULT_POOL]))
 
   /**
-   * «Caveau 1 di 5»: il livello come lo conta il giocatore, non come lo conta un indice.
+   * «Caveau 1 di 9, ne restano 8»: il livello come lo conta il giocatore, non come lo conta un
+   * indice.
    *
-   * Lo scarto di uno vive qui e non nel template per la regola di sempre — un `.vue` non calcola
-   * (R05) — e i due numeri viaggiano insieme perché insieme vanno nella stessa frase. Che i
+   * Le due sottrazioni vivono qui e non nel template per la regola di sempre — un `.vue` non
+   * calcola (R05) — e i tre numeri viaggiano insieme perché insieme vanno nella stessa frase. Che i
    * livelli finiscano il giocatore lo vede dal primo secondo: è metà del dominio.
+   *
+   * **`left` nasce con D042**, e non è lo stesso fatto detto due volte: «dove sei» e «quanto manca»
+   * sono due domande diverse, e con nove gradini invece di cinque la seconda smette di essere una
+   * sottrazione che si fa a mente. La scheda del dominio la chiedeva — _deve vedere quanti livelli
+   * restano_ — e finora si rispondeva a metà.
    */
-  const progress = computed<{ readonly level: number; readonly total: number }>(() => ({
+  const progress = computed<{
+    readonly level: number
+    readonly total: number
+    readonly left: number
+  }>(() => ({
     level: vault.value.level + 1,
-    total: MAX_LEVEL + 1
+    total: MAX_LEVEL + 1,
+    left: MAX_LEVEL - vault.value.level
   }))
+
+  /**
+   * Quanti contanti terrebbe il caveau **dopo** il prossimo ampliamento, `null` all'ultimo livello.
+   *
+   * È ciò che la pagina mostra al posto del **prezzo**: quanto costa vive nel flusso di pagamento e
+   * fuori da lì nessun `.vue` nomina un'opzione di listino (R24, ADR 0042). La scheda del dominio
+   * chiedeva il prezzo, ed è stata corretta: l'ADR è più recente ed è meccanizzato.
+   *
+   * Legge la **stessa** funzione che il Ledger farà rispettare a ampliamento avvenuto, quindi il
+   * numero promesso e quello imposto sono per costruzione lo stesso (INV-18).
+   */
+  const nextCapacity = computed<Money | null>(() =>
+    isMaxLevel(vault.value) ? null : cashCapacityFor(vault.value.level + 1)
+  )
 
   /**
    * Il muro, detto come booleano: non c'è più spazio, e lo stipendio non entra affatto. È diverso
@@ -990,6 +1017,7 @@ export const useGameStore = defineStore('game', () => {
     cashCapacity,
     cardCapacity,
     vaultProgress: progress,
+    vaultNextCapacity: nextCapacity,
     vaultRoom: room,
     vaultFill: fill,
     vaultIsFull: isFull,

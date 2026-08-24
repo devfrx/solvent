@@ -1,6 +1,9 @@
 # D042 — Il caveau ha uno spazio, e una scala invece di quattro numeri
 
-- **Stato:** **Aperta** — scritta il 2026-08-24, non ancora eseguita
+- **Stato:** **In corso** — scritta **ed eseguita** il 2026-08-24 sul ramo
+  `d042-il-caveau-ha-uno-spazio-e-una-scala`. `npm run verify` e `npm run verify:release` sono
+  verdi, e otto rotture volute sono state fatte e ripristinate (in fondo, _Consuntivo_). **Manca il
+  punto 9 della definizione di fatto**: la pagina non è ancora stata guardata nella finestra vera
 - **Dipende da:** [D017](D017-il-caveau.md), che ha costruito il caveau, e
   [D019](D019-il-pagamento.md), che gli ha dato il listino. Niente altro: il kernel non si tocca
 - **Sblocca:** il blocco A della [roadmap](../roadmap-fette.md) — aste di box, negozio, oggetti nel
@@ -68,18 +71,33 @@ scheda le fa.
 
 ### 1 · La densità dei contanti, e perché il muro non si sposta
 
-`CASH_PER_SPACE` vale **100,00 € per unità di ingombro**, e non è scelto: è **derivato**
-all'indietro dal muro che esiste già.
+`CASH_PER_SPACE` vale **100,00 € per unità di ingombro**, e la cosa importante da sapere è che
+**oggi quel numero non cambia niente**. Non è una debolezza della scelta: è la prova che il cambio
+di unità non ha toccato il bilanciamento.
 
 Il caveau di partenza tiene 1.000,00 € — è `CASH_START_CAPACITY`, dichiarata dal pool
-([ADR 0017](../adr/0017-il-denaro-e-plurale.md)) — e il bersaglio `seconds_to_first_wall` pretende
-che a 12,00 €/s il muro arrivi fra i 60 e i 120 secondi. Con 100,00 € per unità, il livello zero
-sono **10 unità**, e quel numero non è scritto da nessuna parte: si calcola dividendo la capienza
-dichiarata dal pool per la densità. La cifra dichiarata resta **una sola**, come oggi.
+([ADR 0017](../adr/0017-il-denaro-e-plurale.md)). Lo spazio del livello zero si **deriva da lei**,
+dividendola per la densità, e la capienza si ottiene rimoltiplicando: la densità **si cancella**.
 
-Ne discende che nessuno dei due bersagli esistenti si muove di un centesimo, e questa è metà del
-valore della scelta: un cambio di unità che sposta il bilanciamento è un cambio di unità **e** una
-ritaratura, e chi lo rileggesse non saprebbe più quale delle due ha rotto cosa.
+```
+capienza(L) = (CASH_START / densità) × crescita^L × densità = CASH_START × crescita^L
+```
+
+**Misurato, non dedotto**: portando la densità da 100 a 200 e rigirando i test, `seconds_to_first_wall`
+resta verde e la scala in euro non si muove di un centesimo — cade **un** solo test, quello che
+confronta la colonna _Spazio_ della tabella qui sotto. È il comportamento giusto, e va saputo per
+due ragioni:
+
+1. **La densità non è un numero di bilanciamento, è una scelta di unità.** Chi la ritocca sperando di
+   spostare il muro non sposta niente. Le leve del muro sono `VAULT_LEVELS` e `VAULT_SPACE_GROWTH`.
+2. **Diventerà un numero di bilanciamento il giorno degli oggetti**, e non prima: quando un secondo
+   inquilino dichiara il proprio ingombro, il rapporto fra la sua densità e quella dei contanti è
+   ciò che decide se conviene tenere dentro un quadro o del denaro. È **la** scelta del dominio, e
+   oggi non esiste ancora nulla con cui confrontarsi.
+
+Cento e non un altro numero: a 100,00 € per unità il caveau di partenza è **10 unità** e l'ultimo è
+**2.560**, cioè cifre che un giorno si potranno scrivere a schermo accanto a un oggetto senza
+sembrare un codice.
 
 ### 2 · La scala, e perché una curva invece di tredici numeri
 
@@ -295,3 +313,73 @@ Censito prima di cominciare, non dopo.
 3. **`vault_max_cash` misura il muro, non l'esperienza del muro.** Quanto tempo di gioco ci voglia
    ad arrivarci non ha un bersaglio, e non lo avrà finché il reddito è l'unica fonte: con un secondo
    dominio che produce denaro quel numero cambierebbe senza che nessuno abbia toccato il caveau.
+
+## Consuntivo
+
+### Cosa è stato costruito
+
+| File                                       | Cosa                                                                                    |
+| ------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `domains/vault/types.ts`                   | il tipo `Space`, branded su `Money`, e il costruttore `space()`                         |
+| `domains/vault/rules.ts`                   | la scala calcolata, `cashCapacityFor` al posto di `capacityFor`, i due listini derivati |
+| `domains/vault/system.ts`                  | `Vault.capacity()` → `Vault.cashCapacity()`                                             |
+| `balance/constants.ts`                     | tre elenchi (13 cifre) → cinque costanti                                                |
+| `balance/targets.ts`                       | `vault_max_cash`                                                                        |
+| `renderer/runtime/createGame.ts`           | una riga                                                                                |
+| `renderer/stores/game.ts`                  | `vaultProgress.left` e `vaultNextCapacity`                                              |
+| `renderer/components/vault/VaultPanel.vue` | le due righe nuove, e `VaultAlarm` montato anche qui                                    |
+| `i18n/index.ts`, `it.ts`, `en.ts`          | due chiavi, in parità                                                                   |
+| `tests/rules/vault-space-is-not-money.ts`  | il secondo verso di INV-26                                                              |
+
+### Le otto rotture volute, e i test caduti
+
+Ognuna è stata fatta, misurata, e **ripristinata con un `diff` che conferma l'identità**.
+
+| Rottura                                                     | Caduti                                         |
+| ----------------------------------------------------------- | ---------------------------------------------- |
+| `VAULT_LEVELS` da 9 a 8                                     | 5                                              |
+| `VAULT_SPACE_GROWTH` da 2 a 3                               | 4                                              |
+| `VAULT_EXPANSION_PRICE_RATIO` da 0,90 a 1,10                | 8                                              |
+| `CASH_PER_SPACE` da 100 a 200                               | **1** — e il perché è la scoperta qui sotto    |
+| `VAULT_CARD_DISCOUNT` da 2,00 a 50,00                       | 2                                              |
+| `CASH_PER_SPACE` nominata anche in `stores/game.ts`         | 1, ed è il test di regola nuovo                |
+| `vaultNextCapacity` che non torna `null` all'ultimo livello | 1                                              |
+| `left` che conta i livelli invece degli ampliamenti         | 2                                              |
+| `space()` tolto da `SPACE_AT_ZERO`                          | typecheck: `Decimal` non assegnabile a `Space` |
+
+### Cosa l'esecuzione ha scoperto
+
+**`CASH_PER_SPACE` oggi non cambia niente, e la rottura da un test solo è la prova.** La densità si
+cancella fra la derivazione dello spazio di partenza e la moltiplicazione che ne ricava la capienza:
+la scala in euro resta `CASH_START_CAPACITY × crescita^livello` qualunque valore abbia. La delega
+diceva che il numero era «derivato all'indietro dal muro», ed era una descrizione sbagliata di una
+cosa giusta — la decisione 1 è stata riscritta durante l'esecuzione, insieme al commento della
+costante. **Diventa un numero di bilanciamento vero il giorno degli oggetti**, e non prima.
+
+**`spaceOf` è nato ed è morto nella stessa ora.** Era la porta pubblica sull'ingombro, e il
+typecheck l'ha dichiarata inutilizzata appena le capienze sono state precalcolate. È uscita invece
+di essere tenuta viva dai propri test — e la riga che spiega perché sta nel file, sotto
+`cashCapacityFor`.
+
+**Le capienze si precalcolano, e non è un'ottimizzazione: è INV-18.** Con una capienza calcolata a
+ogni chiamata, il confronto fra ciò che il Ledger fa rispettare e ciò che la UI mostra sarebbe
+tornato un'uguaglianza fra due valori invece di un'identità, e i tre test che oggi lo provano con
+`toBe` non avrebbero più potuto farlo.
+
+**Lo spazio non compare a schermo, ed è una correzione in corsa.** La sezione _Applicazione_ prometteva
+una barra che mostra l'ingombro. Finché i contanti sono l'unico inquilino quel numero è la capienza
+in euro divisa per una costante: non decide niente, ed è il difetto che
+[D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md) ha tolto ai documenti vivi. Compare il
+giorno in cui c'è dentro qualcosa che non è denaro.
+
+### Cosa resta da fare
+
+1. **Il punto 9 della definizione di fatto**: guardare la pagina nella finestra vera con
+   `scripts/cdp.mjs`, nei due temi, e raggiungere il muro davvero con i cheat. Chi lo fa usi
+   `--user-data-dir` su una cartella usa-e-getta: da [D041](D041-il-salvataggio-ha-una-cadenza.md)
+   il gioco scrive **da sé** ogni trenta secondi, e la partita dell'utente è in pericolo senza che
+   nessuno chiuda niente.
+2. **INV-26 non è ancora in [tracciabilita.md](../tracciabilita.md)**, e il suo test esiste. La riga
+   si scrive quando il punto 1 è chiuso e la delega passa a `Chiusa`.
+3. **`vault_max_cash` non ha un fratello che misuri il tempo**: quanto ci voglia ad arrivare al muro
+   finale non ha un bersaglio, e non lo avrà finché il reddito è l'unica fonte di denaro.

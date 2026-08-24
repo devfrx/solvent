@@ -17,7 +17,12 @@ import { createRng } from '@core/kernel/Rng'
 
 import { incomePerSecond, upgradeModifier } from '../../src/core/domains/income/rules'
 import { createIncome } from '../../src/core/domains/income/system'
-import { capacityFor, expansionPrices, VAULT_POOL } from '../../src/core/domains/vault/rules'
+import {
+  cashCapacityFor,
+  expansionPrices,
+  MAX_LEVEL,
+  VAULT_POOL
+} from '../../src/core/domains/vault/rules'
 import { createVault } from '../../src/core/domains/vault/system'
 
 /**
@@ -54,7 +59,7 @@ interface Simulation {
 const simulate = (): Simulation => {
   const bus = createBus()
   const capacities: Capacities = (pool) =>
-    pool === VAULT_POOL ? vault.capacity() : poolCapacity(pool)
+    pool === VAULT_POOL ? vault.cashCapacity() : poolCapacity(pool)
   const ledger = createLedger(bus, capacities)
   const vault = createVault(ledger)
   const modifiers = createModifiers()
@@ -103,7 +108,7 @@ describe('i bersagli di bilanciamento', () => {
     // Non una costante riletta: il numero si **misura** dai due che lo producono, la capienza di
     // partenza e il reddito al secondo. Cambiarne uno solo sposta questa cifra e rende rosso.
     const perSecond = incomePerSecond(createModifiers())
-    const secondsToWall = capacityFor(0).div(perSecond)
+    const secondsToWall = cashCapacityFor(0).div(perSecond)
     const target = TARGETS.seconds_to_first_wall
 
     expect(secondsToWall.greaterThanOrEqualTo(target.min)).toBe(true)
@@ -115,7 +120,7 @@ describe('i bersagli di bilanciamento', () => {
     // e il saldo si ferma **al tetto**, non a zero. Zero sarebbe il rifiuto atomico, cioè il
     // difetto che la preparazione di D017 ha trovato misurando.
     const { ledger, registry, ctx } = simulate()
-    const wall = capacityFor(0)
+    const wall = cashCapacityFor(0)
 
     registry.tickAll(ctx, clock.secondsToTicks(WELL_PAST_THE_WALL))
 
@@ -132,10 +137,9 @@ describe('i bersagli di bilanciamento', () => {
     // è la più bassa che possa esistere: se lo sconto sta sotto di lui, sta sotto ogni commissione
     // che il bancomat possa mai chiedere. È il confronto più severo, non quello più comodo.
     const target = TARGETS.vault_card_discount
-    const levels = BALANCE.VAULT_PRICES_CASH.length
 
-    expect(levels).toBeGreaterThan(0)
-    for (let level = 0; level < levels; level += 1) {
+    expect(MAX_LEVEL).toBeGreaterThan(0)
+    for (let level = 0; level < MAX_LEVEL; level += 1) {
       const [cash, card] = expansionPrices(level)
       if (cash === undefined || card === undefined) throw new Error('listino a due voci atteso')
 
@@ -144,6 +148,21 @@ describe('i bersagli di bilanciamento', () => {
       expect(discount.lessThanOrEqualTo(target.max)).toBe(true)
       expect(discount.lessThan(BALANCE.ATM_FEE_FLOOR)).toBe(true)
     }
+  })
+
+  it('il muro finale resta dove la visione lo vuole: vault_max_cash', () => {
+    // Il numero da cui dipende la **forma 1** della saturazione — sopra quella cifra i contanti
+    // smettono di essere una scelta possibile, non una scelta cara — e fino a D042 era l'unico
+    // numero del caveau che nessun test guardava.
+    //
+    // Si **misura** dall'ultimo gradino della scala invece di essere riletto da una costante:
+    // cambiare quanti livelli esistono, di quanto crescono o quanto valgono sposta questa cifra e
+    // rende rosso qui, che è il posto giusto per accorgersene.
+    const wall = cashCapacityFor(MAX_LEVEL)
+    const target = TARGETS.vault_max_cash
+
+    expect(wall.greaterThanOrEqualTo(target.min)).toBe(true)
+    expect(wall.lessThanOrEqualTo(target.max)).toBe(true)
   })
 
   it('con l upgrade attivo il reddito esce dall intervallo di partenza', () => {

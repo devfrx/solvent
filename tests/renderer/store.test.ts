@@ -11,7 +11,7 @@ import type { LoadedSave, SavePayload, SaveResult } from '@core/contracts/save'
 import { BALANCE } from '@core/balance/constants'
 import { DEPOSIT, WITHDRAW } from '@core/domains/atm/commands'
 import { upgradePrices } from '@core/domains/income/rules'
-import { capacityFor, expansionPrices, MAX_LEVEL } from '@core/domains/vault/rules'
+import { cashCapacityFor, expansionPrices, MAX_LEVEL } from '@core/domains/vault/rules'
 import { clock, ticks } from '@core/kernel/Clock'
 import { income } from '@core/kernel/Ledger'
 
@@ -159,7 +159,7 @@ describe('il recupero all’avvio', () => {
       wallClock: SAVED_AT + hundredHours
     })
 
-    const wall = capacityFor(0)
+    const wall = cashCapacityFor(0)
 
     expect(store.status).toBe('playing')
     expect(toString(game.ctx.ledger.balance('cash'))).not.toBe('0')
@@ -1109,7 +1109,7 @@ describe('i selettori del bancomat', () => {
     const store = await start()
 
     expect(store.cashCapacity).toBe(game.ctx.ledger.capacities('cash'))
-    expect(store.cashCapacity).toBe(capacityFor(0))
+    expect(store.cashCapacity).toBe(cashCapacityFor(0))
     expect(store.cardCapacity).toBeNull()
   })
 })
@@ -1128,18 +1128,12 @@ describe('i selettori del caveau', () => {
     expect(store.expansionPrices).toHaveLength(2)
   })
 
-  it('il livello si conta come lo conta il giocatore, e i livelli finiscono', async () => {
-    const store = await start()
-
-    expect(store.vaultProgress).toEqual({ level: 1, total: MAX_LEVEL + 1 })
-  })
-
   it('lo spazio libero è il tetto meno quello che c’è', async () => {
     const store = await start()
     fund('cash', '400')
 
     expect(toString(store.vaultRoom ?? fromString('-1'))).toBe(
-      toString(capacityFor(0).minus(fromString('400')))
+      toString(cashCapacityFor(0).minus(fromString('400')))
     )
   })
 
@@ -1147,7 +1141,7 @@ describe('i selettori del caveau', () => {
     const store = await start()
     expect(store.vaultFill).toBe('0%')
 
-    fund('cash', toString(capacityFor(0).div(2)))
+    fund('cash', toString(cashCapacityFor(0).div(2)))
 
     expect(store.vaultFill).toBe('50%')
   })
@@ -1157,12 +1151,12 @@ describe('i selettori del caveau', () => {
     // economico, quindi il Bus tace. Fino a D017 `cashCapacity` era letto una volta sola alla
     // costruzione, ed era corretto perché il numero non si muoveva mai.
     const store = await start()
-    fund('cash', toString(capacityFor(0)))
+    fund('cash', toString(cashCapacityFor(0)))
 
     expect(store.expandVault('cash', NO_PROOF).ok).toBe(true)
 
     expect(store.vaultProgress.level).toBe(2)
-    expect(store.cashCapacity).toBe(capacityFor(1))
+    expect(store.cashCapacity).toBe(cashCapacityFor(1))
     expect(store.cashCapacity).toBe(game.ctx.ledger.capacities('cash'))
     expect(store.expansionPrices).toEqual(expansionPrices(1))
   })
@@ -1173,7 +1167,7 @@ describe('i selettori del caveau', () => {
     expect(store.canExpandWith('cash')).toBe(false)
     expect(store.canExpandWith('card')).toBe(false)
 
-    fund('card', toString(capacityFor(0)))
+    fund('card', toString(cashCapacityFor(0)))
 
     expect(store.canExpandWith('cash')).toBe(false)
     expect(store.canExpandWith('card')).toBe(true)
@@ -1192,7 +1186,7 @@ describe('i selettori del caveau', () => {
     const store = await start()
     expect(store.vaultIsFull).toBe(false)
 
-    fund('cash', toString(capacityFor(0)))
+    fund('cash', toString(cashCapacityFor(0)))
 
     expect(store.vaultIsFull).toBe(true)
     expect(store.vaultFill).toBe('100%')
@@ -1220,9 +1214,37 @@ describe('i selettori del caveau', () => {
     expect(store.vaultIsFull).toBe(true)
   })
 
+  it('il livello si conta come lo conta il giocatore, e dice quanti ampliamenti restano', async () => {
+    // «Restano otto ampliamenti» è la cifra su cui si decide; «Caveau 1 di 9» è dove sei. Sono due
+    // domande diverse, e finora la seconda costringeva a fare la sottrazione a mente.
+    const store = await start()
+
+    expect(store.vaultProgress).toEqual({ level: 1, total: MAX_LEVEL + 1, left: MAX_LEVEL })
+  })
+
+  it('e cosa compra il prossimo ampliamento, che è la cosa su cui si decide', async () => {
+    // Non **quanto costa**: il prezzo vive nel flusso di pagamento, e fuori da lì nessun `.vue` lo
+    // nomina (R24, ADR 0042). Quello che la pagina può dire è cosa ci si porta a casa — e lo legge
+    // dalla stessa funzione che il Ledger farà rispettare dopo l'acquisto (INV-18).
+    const store = await start()
+
+    expect(store.vaultNextCapacity).toBe(cashCapacityFor(1))
+  })
+
+  it('e all’ultimo livello non compra più niente', async () => {
+    const played = createGame(SEED)
+    played.vault.system.load({ level: MAX_LEVEL })
+
+    const store = await start({ load: found(played.save(), SAVED_AT), wallClock: SAVED_AT })
+
+    expect(store.vaultNextCapacity).toBeNull()
+    expect(store.vaultProgress.left).toBe(0)
+    expect(store.vaultAtMax).toBe(true)
+  })
+
   it('il caveau ampliato attraversa il salvataggio', async () => {
     const played = createGame(SEED)
-    played.ctx.ledger.transaction(income('cash', capacityFor(0)), {
+    played.ctx.ledger.transaction(income('cash', cashCapacityFor(0)), {
       reason: 'reason.income.tick'
     })
     expect(played.vault.expand('cash').ok).toBe(true)
@@ -1230,7 +1252,7 @@ describe('i selettori del caveau', () => {
     const store = await start({ load: found(played.save(), SAVED_AT), wallClock: SAVED_AT })
 
     expect(store.vaultProgress.level).toBe(2)
-    expect(store.cashCapacity).toBe(capacityFor(1))
+    expect(store.cashCapacity).toBe(cashCapacityFor(1))
   })
 })
 

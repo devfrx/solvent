@@ -10,7 +10,7 @@ import { createLedger, income, poolCapacity, type Ledger } from '@core/kernel/Le
 import { ORDER } from '@core/kernel/Registry'
 
 import {
-  capacityFor,
+  cashCapacityFor,
   expansionPriceFor,
   MAX_LEVEL,
   VAULT_POOL
@@ -42,7 +42,7 @@ beforeEach(() => {
     posted.push(transaction)
   })
   const capacities: Capacities = (pool) =>
-    pool === VAULT_POOL ? subject.capacity() : poolCapacity(pool)
+    pool === VAULT_POOL ? subject.cashCapacity() : poolCapacity(pool)
   ledger = createLedger(bus, capacities)
   subject = createVault(ledger)
 })
@@ -74,7 +74,7 @@ describe('come si presenta al Registry', () => {
 
   it('parte dal livello zero, con la capienza di partenza', () => {
     expect(subject.state()).toEqual({ level: 0 })
-    expect(subject.capacity()).toBe(capacityFor(0))
+    expect(subject.cashCapacity()).toBe(cashCapacityFor(0))
   })
 })
 
@@ -88,7 +88,7 @@ describe('l’ampliamento', () => {
     expect(toString(ledger.balance('cash'))).toBe(
       toString(money('1000').minus(money(priceOf(0, 'cash'))))
     )
-    expect(subject.capacity()).toBe(capacityFor(1))
+    expect(subject.cashCapacity()).toBe(cashCapacityFor(1))
     expect(total()).toBe('0')
   })
 
@@ -103,7 +103,7 @@ describe('l’ampliamento', () => {
     })
 
     expect(beyondTheOldWall.ok).toBe(true)
-    expect(ledger.balance('cash').lessThanOrEqualTo(capacityFor(1))).toBe(true)
+    expect(ledger.balance('cash').lessThanOrEqualTo(cashCapacityFor(1))).toBe(true)
   })
 
   it('si paga anche con la carta, che costa meno', () => {
@@ -141,7 +141,7 @@ describe('l’ampliamento', () => {
     // Il livello **non** è salito: si paga prima, e lo stato nuovo esiste solo se il Ledger ha
     // detto di sì. L'ordine inverso lascerebbe un caveau più grande di quello comprato.
     expect(subject.state()).toEqual({ level: 0 })
-    expect(subject.capacity()).toBe(capacityFor(0))
+    expect(subject.cashCapacity()).toBe(cashCapacityFor(0))
     expect(posted).toHaveLength(0)
   })
 
@@ -178,7 +178,7 @@ describe('salvare e ricaricare', () => {
     reopened.system.load(saved)
 
     expect(reopened.state()).toEqual({ level: 1 })
-    expect(reopened.capacity()).toBe(capacityFor(1))
+    expect(reopened.cashCapacity()).toBe(cashCapacityFor(1))
   })
 
   it('rifiuta un livello che non è un numero — campo per campo, non “è un oggetto”', () => {
@@ -225,6 +225,6 @@ describe('azzerare', () => {
     subject.system.reset('hard')
 
     expect(subject.state()).toEqual({ level: 0 })
-    expect(subject.capacity()).toBe(capacityFor(0))
+    expect(subject.cashCapacity()).toBe(cashCapacityFor(0))
   })
 })

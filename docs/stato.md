@@ -23,10 +23,10 @@ dall'intestazione del suo ADR, ed è da lì che questo elenco arriva.
 
 ## Deleghe
 
-**42** deleghe: 41 `Chiusa`, 0 `In corso`, 1 `Aperta`.
+**42** deleghe: 41 `Chiusa`, 1 `In corso`, 0 `Aperta`.
 
-- `Aperta`: D042
-- `In corso`: _nessuno_
+- `Aperta`: _nessuno_
+- `In corso`: D042
 
 L'ordine in cui si eseguono non è questo elenco: è il grafo in
 [delega/README.md](delega/README.md).
@@ -38,7 +38,7 @@ L'ordine in cui si eseguono non è questo elenco: è il grafo in
 ## Codice
 
 **99** file sotto `src/`, di cui **36** `.vue`.
-**89** file di test. I domini sono 3: `atm`, `income`, `vault`.
+**90** file di test. I domini sono 3: `atm`, `income`, `vault`.
 
 Le righe sono **righe di codice**: commenti e righe vuote escluse, con lo stesso metodo per
 tutti — ed è `codeLines` in `tests/helpers/projectState.ts` a definirlo, così due misure restano
@@ -48,9 +48,9 @@ confrontabili.
 | ----------------------------- | ---- | ----- |
 | `src/core/contracts/`         | 11   | 207   |
 | `src/core/kernel/`            | 7    | 549   |
-| `src/core/balance/`           | 3    | 111   |
-| `src/core/domains/`           | 12   | 432   |
+| `src/core/balance/`           | 3    | 98    |
+| `src/core/domains/`           | 12   | 452   |
 | `src/main/` + `src/preload/`  | 8    | 246   |
-| `src/renderer/`               | 58   | 4.222 |
-| — di cui `src/renderer/i18n/` | 3    | 642   |
+| `src/renderer/`               | 58   | 4.250 |
+| — di cui `src/renderer/i18n/` | 3    | 648   |
 | — di cui CSS dentro i `.vue`  | 36   | 1.039 |

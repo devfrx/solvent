@@ -26,6 +26,7 @@ export interface BalanceTarget {
 export const TARGET_IDS = [
   'income_per_minute_at_start',
   'seconds_to_first_wall',
+  'vault_max_cash',
   'vault_card_discount'
 ] as const
 
@@ -51,6 +52,26 @@ export const TARGETS: Readonly<Record<BalanceTargetId, BalanceTarget>> = {
    * accanto — e questa è metà del suo lavoro: cambiarne uno solo rende il test rosso.
    */
   seconds_to_first_wall: { min: fromString('60'), max: fromString('120') },
+
+  /**
+   * Quanti contanti tiene il caveau **all'ultimo livello**: il muro definitivo del gioco.
+   *
+   * È il numero da cui dipende la **forma 1** della saturazione — sopra quella cifra i contanti
+   * smettono di essere una scelta possibile, non una scelta cara — cioè la spina dorsale della
+   * dualità contanti/carta. Per due fette è stato l'unico numero del caveau che nessun test
+   * guardava, ed è entrato qui con [D042](../../../docs/delega/D042-il-caveau-ha-uno-spazio-e-una-scala.md).
+   *
+   * **Che sia ridicolo a fine partita è il funzionamento, non la scadenza.** Con un patrimonio a
+   * 1e12 questo tetto è un arrotondamento, ed è precisamente il momento in cui il gioco vuole che i
+   * contanti smettano di essere una risposta. Chi arriva qui perché la cifra «sembra bassa» stia
+   * togliendo la tensione che regge diciassette domini, e lo faccia sapendolo.
+   *
+   * L'intervallo è stretto attorno ai 256.000,00 € che la scala produce, e la strettezza è il suo
+   * lavoro: un livello in più o in meno raddoppia o dimezza quella cifra e cade fuori, e un fattore
+   * di crescita diverso pure. Tollera solo un ritocco della densità dei contanti, che è l'unica
+   * delle tre leve a non cambiare quante volte il giocatore incontra la decisione.
+   */
+  vault_max_cash: { min: fromString('220000'), max: fromString('290000') },
 
   /**
    * Quanto si risparmia ampliando il caveau con la **carta** invece che con i contanti.

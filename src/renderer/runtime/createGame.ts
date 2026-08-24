@@ -126,7 +126,7 @@ export const createGame = (seed: number = randomSeed()): Game => {
    * oggetto che per un istante non è ancora sé stesso.
    */
   const capacities: Capacities = (pool) =>
-    pool === VAULT_POOL ? vault.capacity() : poolCapacity(pool)
+    pool === VAULT_POOL ? vault.cashCapacity() : poolCapacity(pool)
 
   const ledger = createLedger(bus, capacities)
   const rng = createRng(seed)

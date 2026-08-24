@@ -11,7 +11,7 @@ import {
   isValidAmount,
   largestThatFits
 } from '../../../src/core/domains/atm/rules'
-import { capacityFor } from '../../../src/core/domains/vault/rules'
+import { cashCapacityFor } from '../../../src/core/domains/vault/rules'
 
 /**
  * Le regole pure del bancomat, provate senza kernel, senza Ledger e senza comandi: è esattamente
@@ -132,7 +132,7 @@ describe('la capienza di un pool', () => {
     // `capacityOf` stava qui accanto e non c'è più: leggeva `POOLS`, cioè la capienza di partenza,
     // che dopo il primo ampliamento è la risposta sbagliata. È stata rifatta invece che affiancata
     // (INV-18, ADR 0025), e a rispondere adesso è il Ledger con la funzione del caveau.
-    const capacity = capacityFor(0)
+    const capacity = cashCapacityFor(0)
 
     expect(capacity.greaterThan(money('0'))).toBe(true)
     expect(fitsIn(capacity, money('0'), capacity)).toBe(true)
