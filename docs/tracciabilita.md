@@ -128,6 +128,7 @@ segnala che un confine si sta spostando.
 | INV-24 | Un saldo attraversa il confine di persistenza in forma decimale piena     | ADR 0041 | `tests/save/kernel-roundtrip` — un `Ledger.save()` oltre la soglia di notazione passa `parseEnvelope`; ⚠️ non vede il confine di presentazione     |
 | INV-25 | Mai due scritture del salvataggio in volo insieme                         | ADR 0050 | `tests/renderer/store.test.ts` — la chiusura aspetta quella a cadenza, e la cadenza salta il giro; ⚠️ prova il percorso del renderer, non il disco |
 | INV-27 | Un guadagno dichiara il pool in cui atterra e quanto ne viene trattenuto  | ADR 0052 | 🔒 la firma di `income(pool, amount, withheld)`: un reddito senza regime non compila. INV-26 arriva con D042, che è ancora `In corso`              |
+| INV-28 | Il prezzo di un livello di reddito è il suo incremento per il rientro     | ADR 0053 | `tests/balance/targets` — `income_level_payback` lo misura su ogni livello di ogni fonte, dal listino e dalle rese, mai dalla costante             |
 
 Il buco fra INV-17 e INV-19 **è stato chiuso** da [D017](delega/D017-il-caveau.md): i numeri si
 assegnano quando si scrive la delega, e D019 si era infilata dopo D017 nell'ordine di scrittura ma

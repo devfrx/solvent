@@ -138,16 +138,21 @@ decidere**, come **può andare male**, e quanto **pesa** in termini di quantità
 
 #### 1. Reddito
 
-**Ciclo:** il tempo passa, i soldi entrano in contanti. Si compra un potenziamento e ne entrano di
-più.
+**Ciclo:** il tempo passa e i soldi entrano. Si aprono fonti e si sale di livello, e ne entrano di
+più — finché non c'è più un livello da comprare.
 **Deve vedere:** quanto entra per unità di tempo; il totale accumulato; quali fonti di reddito
-sono attive e a che livello; quanto costa il prossimo potenziamento e se se lo può permettere.
-**Deve decidere:** se spendere adesso per guadagnare di più dopo, sapendo che il reddito attivo ha
-un plateau.
-**Può andare male:** il potenziamento si paga **solo con la carta** — e da
+sono attive e a che livello; **dove atterra** ciò che ognuna produce e quanto ne viene trattenuto;
+quanto costa il livello successivo, con quale strumento si paga, e quanto manca al plateau.
+**Deve decidere:** in quale pozza vuole che atterrino i soldi. Ogni livello di ogni fonte rientra
+nello stesso tempo ([ADR 0053](../adr/0053-un-miglioramento-dichiara-il-tempo-in-cui-rientra.md)),
+quindi il prezzo non discrimina: a discriminare sono il regime della fonte, il tetto che la aspetta
+e la traccia che lascia. E sopra a tutto: il reddito attivo ha un plateau, il capitale no.
+**Può andare male:** **ogni fonte dichiara con quale strumento si comprano i suoi livelli** — la
+carta per il lavoro, i contanti per i lavoretti — e da
 [D019](../delega/D019-il-pagamento.md) lo si legge **prima** di premere, accanto al prezzo, invece
-di scoprirlo sbagliando. Se il giocatore ha solo contanti l'azione viene rifiutata con una
-spiegazione, non disabilitata in silenzio.
+di scoprirlo sbagliando. Se lo strumento non basta l'azione viene rifiutata con una spiegazione, non
+disabilitata in silenzio. In cima alla scala non c'è più niente da comprare, ed è un esito
+raccontato, non un pulsante spento.
 **Pesa:** poco. Una manciata di fonti, ciascuna con nome, livello, effetto e costo.
 
 #### 2. Bancomat

@@ -190,11 +190,11 @@ uno per dominio non è denaro» vale per i domini che si aprono, non per quello 
 
 La regola operativa della visione chiede **due**. Il caveau ne ha tre, e uno dei tre lo domina.
 
-| Dominio               | Come si collegano                                                                                                                                                    |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Reddito**           | il reddito **in nero** arriva in contanti, quindi entra nel caveau, e quando il caveau è pieno si ferma. Vale per le fonti nere, non per il reddito in sé (ADR 0052) |
-| **Bancomat**          | è la valvola. Con un caveau infinito è comodo; con un caveau pieno diventa **obbligatorio**, e non cambia di una riga per diventarlo                                 |
-| **Calore e indagini** | la perquisizione è l'unica cosa che svuota il caveau da fuori. Arriva con le fette 04 e 06                                                                           |
+| Dominio               | Come si collegano                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Reddito**           | il reddito **in nero** arriva in contanti, quindi entra nel caveau, e quando il caveau è pieno si ferma. Vale per le fonti nere, non per il reddito in sé (ADR 0052). Da [D044](../../delega/D044-il-reddito-e-un-elenco-di-fonti.md) il legame è **doppio**: i livelli delle fonti nere si pagano **in contanti**, quindi il caveau limita anche quanto in fretta crescono |
+| **Bancomat**          | è la valvola. Con un caveau infinito è comodo; con un caveau pieno diventa **obbligatorio**, e non cambia di una riga per diventarlo                                                                                                                                                                                                                                        |
+| **Calore e indagini** | la perquisizione è l'unica cosa che svuota il caveau da fuori. Arriva con le fette 04 e 06                                                                                                                                                                                                                                                                                  |
 
 In futuro anche **black market** e **aste di box**, che sono i domini da cui nascono gli oggetti.
 Finché non esistono, il caveau è un contenitore con dentro solo denaro.
