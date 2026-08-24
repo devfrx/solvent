@@ -45,7 +45,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23, chiudendo la quinta sessione, sono stati fusi i due rami incatenati che aspettavano: `d038-cio-che-si-preme-e-cio-che-scorre` discendeva da `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, quindi è bastato un `--ff-only` sul secondo per portarli tutti e due. `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sui rami, e i due rami sono stati cancellati con `git branch -d` — quello che si rifiuta se resta lavoro non fuso: **nessuno dei due si è rifiutato** |
 | `origin/main`            | **si verifica, non si dichiara.** Un allineamento scritto qui lo invalida il primo commit che arriva dopo — compreso quello che lo scrive — e l'elenco di cosa si è spinto invecchia a ogni delega consegnata. Lo dice `git rev-list --count origin/main..main`: se non fa `0`, c'è del lavoro solo su questa macchina. Quando si spinge, i gate girano prima **su `main` fuso** e non solo sui rami                                                                                                                                                                |
 | Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Prossimo passo           | **scrivere la prima delega della fetta 04**, calore e black market: la fetta 03 è **conclusa** con [D041](D041-il-salvataggio-ha-una-cadenza.md), e non c'è niente da eseguire. Il lavoro torna di specie diversa, e comincia da una **scheda di dominio compilata** — che sarà la quarta, cioè quella su cui la forma della scheda va rivista                                                                                                                                                                                                                      |
+| Prossimo passo           | **chiudere [D042](D042-il-caveau-ha-uno-spazio-e-una-scala.md)**, che e' `In corso`: manca il punto 9 della sua definizione di fatto, cioe' guardare la pagina del caveau nella finestra vera. Poi **la prima delega della fetta 04**, calore e black market — che comincia da una **scheda di dominio compilata**, la quarta, cioe' quella su cui la forma della scheda va rivista                                                                                                                                                                                 |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -66,6 +66,111 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 >
 > Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
 > agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
+
+## La **ottava** sessione del 2026-08-24: D042, lo spazio del caveau smette di essere denaro
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
+recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
+
+**Cosa è stato fatto.**
+
+| Cosa                                                                        | Cos'era                                                                                 |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [ADR 0051](../adr/0051-lo-spazio-di-un-caveau-non-e-una-somma-di-denaro.md) | l'ingombro di un oggetto era dichiarato in **euro**, come il denaro che gli sta accanto |
+| [D042](D042-il-caveau-ha-uno-spazio-e-una-scala.md)                         | scritta **ed eseguita**, e non ancora chiusa: manca la prova a schermo                  |
+| La scala del caveau                                                         | tredici cifre scritte a mano, di cui una già scivolata                                  |
+
+### Le sei cose che chi arriva adesso deve sapere
+
+**1. La richiesta era «togli il tetto a 250k», e la risposta è no — con la ragione scritta.**
+L'utente ha chiesto una progressione «non cappata a 250k ma dinamica». Il primo argomento a favore
+era **sbagliato**, ed è stato verificato invece che creduto: «un quadro da dieci milioni non entra
+in un caveau da 250.000» è falso, perché l'ingombro di un oggetto **non è il suo valore** e la
+scheda del dominio lo dichiara da sempre. Il tetto regge un numero qualunque di oggetti, a qualunque
+scala. Toglierlo avrebbe tolto la forma 1 della saturazione, cioè la spina dorsale del gioco. Vale
+come metodo: **prima di obbedire a una richiesta che sposta un numero di bilanciamento, si verifica
+l'argomento che la sostiene.**
+
+**2. Il difetto vero era l'unità, ed era più piccolo e più profondo.** Un euro che misura denaro e un
+euro che misura ingombro sono la stessa unità su due grandezze che non si sommano. Oggi non si
+sommano solo perché nessuno ha ancora provato: il giorno degli oggetti quella sottrazione si scrive,
+il compilatore tace, e a valle esce una capienza sbagliata che il giocatore scopre come stipendio
+che non arriva. Adesso `Space` è un tipo branded e il compilatore rifiuta un `Money` al suo posto —
+**verificato togliendo `space()` da `SPACE_AT_ZERO`**, e l'errore è
+`Type 'Decimal' is not assignable to type 'Space'`.
+
+**3. `CASH_PER_SPACE` oggi non cambia niente, e va saputo prima di ritoccarlo.** La densità si
+**cancella** fra la derivazione dello spazio di partenza e la moltiplicazione che ne ricava la
+capienza: la scala in euro resta `CASH_START_CAPACITY × crescita^livello` qualunque valore abbia.
+Misurato portandola da 100 a 200: cade **un** test solo, quello della colonna _Spazio_, e
+`seconds_to_first_wall` resta verde. Chi la ritocca sperando di spostare il muro non sposta niente —
+le leve sono `VAULT_LEVELS` e `VAULT_SPACE_GROWTH`. Diventerà un numero di bilanciamento vero il
+giorno degli oggetti, perché il rapporto fra la loro densità e questa è **la** scelta del dominio.
+
+**4. Dei quattro prezzi scritti a mano, uno era già scivolato, e nessun test lo guardava.** La regola
+«ogni prezzo sta appena sotto la capienza da cui si paga» era un commento: 900 su 1.000, 4.500 su
+5.000 e 18.000 su 20.000 sono il 90,0% esatto, **68.000 su 75.000 è il 90,7%**. Adesso è una regola
+con una costante sola. Vale come metodo: **una relazione fra numeri che vive in un commento è una
+relazione che diverge, e la divergenza non fa rumore.**
+
+**5. Il caveau non può diventare profondo, e non è pigrizia.** La richiesta diceva anche «i domini
+devono essere profondi, non un pulsante». La sua etichetta dichiara **attenzione quasi zero** — «un
+pulsante ogni tanto, nessuna entità da seguire» — ed è la sua identità. La sua profondità sono gli
+**oggetti** e la **perquisizione**, e tutti e due arrivano da domini che non esistono. Chi vuole un
+dominio profondo da costruire guardi il **blocco A** della [roadmap](../roadmap-fette.md): aste di
+box e negozio, dove vive la decisione «cosa vale la pena tenere».
+
+**6. Una meccanica è stata proposta, bocciata dall'utente, e la delega spiega perché aveva ragione.**
+Era il **taglio delle banconote**: i contanti che occupano spazio secondo il taglio, e un
+«consolidamento» che costa una commissione. Suonava profonda ed era invenzione: avrebbe costretto il
+Ledger ad avere un **secondo depositario** del saldo dei contanti — la composizione in banconote —
+cioè due dichiarazioni dello stesso fatto. Sta in _Fuori scope_ di D042 con il suo grilletto vero,
+che è il calore.
+
+### Cosa c'è nell'albero di lavoro alla chiusura
+
+Verificato con i comandi, non ricordato.
+
+- **`npm run verify` verde** (90 file di test) e **`npm run verify:release` verde**.
+- **L'albero di lavoro è pulito**: `git status` non ha niente. I due commit di D042 stanno sul ramo
+  `d042-il-caveau-ha-uno-spazio-e-una-scala`, che parte da `d041-il-salvataggio-ha-una-cadenza` —
+  **è un ramo incatenato**, come D030 → D032 → D031 e D037 → D038, e si scioglie con un `--ff-only`.
+  Quanti commit siano non si scrive qui: lo dicono `git rev-list --count main..HEAD` e
+  `git rev-list --count origin/main..main`.
+- **Fondere e spingere sono decisioni dell'utente**, e questa sessione non le ha prese. La domanda è
+  stata posta: la scelta è stata «ramo d042 da qui», non «fondi prima D041».
+- **Otto rotture volute**, ognuna ripristinata con un `diff` che conferma l'identità — 5, 4, 8, 1, 2,
+  1, 1 e 2 test caduti — più il typecheck rotto di proposito sul tipo branded. Il conto sta in fondo
+  a D042.
+- **Niente residui di debug**, nessun `TODO`, nessun file temporaneo nel repo.
+
+### Cosa questa sessione ha lasciato indietro
+
+Censito, non nascosto.
+
+1. **Il punto 9 della definizione di fatto di D042 non è stato fatto**: la pagina del caveau **non è
+   stata guardata nella finestra vera**. È la ragione per cui la delega è `In corso` e non `Chiusa`.
+   Chi la chiude usi `--user-data-dir` su una cartella usa-e-getta: da D041 il gioco scrive **da sé**
+   ogni trenta secondi, e la partita dell'utente è in pericolo senza che nessuno chiuda niente.
+2. **INV-26 non è in [tracciabilita.md](../tracciabilita.md)**, e il suo test esiste già
+   (`tests/rules/vault-space-is-not-money`). La riga si scrive insieme alla chiusura di D042.
+3. **L'ADR 0051 è `Proposta`.** Il meccanismo che lo impone è scritto e verde; passa ad _Accettata_
+   nello stesso commit che chiude D042, come il 0025 con D017.
+4. **Nove livelli e fattore 2 sono bilanciamento, e sono contestabili.** Arrivare al muro finale
+   costa 229.500,00 € contro i 91.400,00 € di prima — due volte e mezzo, cioè ~5,3 ore di gioco al
+   reddito base invece di ~2,1. La leva è **una**, `VAULT_LEVELS`, e il conto sta nella decisione 2
+   di D042.
+5. **La quarta scheda di dominio non è stata compilata**, ed era il prossimo passo dichiarato dalla
+   settima sessione. Questa sessione ha fatto un lavoro di specie diversa, chiesto dall'utente.
+
+### Un vicolo cieco, per non ripercorrerlo
+
+**Un accessore pubblico sull'ingombro non serve, e il typecheck lo dice in mezz'ora.** `spaceOf` è
+nato come porta pubblica su `Space`, ed è morto appena le capienze sono state precalcolate: nessuno
+lo chiamava. Il Ledger, il reddito, il bancomat e la UI vogliono **euro**, e il giorno degli oggetti
+a chiamarlo sarà `CASH_CAPACITIES`, cioè lo stesso file. Tenerlo vivo per i propri test sarebbe
+stato un campo provato e non usato — e nessun gate sa vedere la differenza. La riga che lo spiega sta
+in `vault/rules.ts`, sotto `cashCapacityFor`.
 
 ## La **settima** sessione del 2026-08-24: D041 scritta ed eseguita, e la fetta 03 chiusa
 
