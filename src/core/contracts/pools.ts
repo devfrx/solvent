@@ -11,7 +11,7 @@ import { fromString, ZERO } from './money'
  *
  * L'ordine di questa lista è l'ordine con cui i saldi finiscono nel salvataggio: è stabile.
  */
-export const POOL_IDS = ['cash', 'card', 'world', 'sink', 'fees', 'house'] as const
+export const POOL_IDS = ['cash', 'card', 'world', 'sink', 'fees', 'house', 'tax'] as const
 
 export type Pool = (typeof POOL_IDS)[number]
 
@@ -75,7 +75,14 @@ export const POOLS: Readonly<Record<Pool, PoolProps>> = {
   world: { traceable: true, capacity: null, yields: false, player: false, bearer: false },
   sink: { traceable: true, capacity: null, yields: false, player: false, bearer: false },
   fees: { traceable: true, capacity: null, yields: false, player: false, bearer: false },
-  house: { traceable: true, capacity: null, yields: false, player: false, bearer: false }
+  house: { traceable: true, capacity: null, yields: false, player: false, bearer: false },
+
+  // `tax` è il quinto, ed è nuovo con l'ADR 0052: dove finisce ciò che lo Stato trattiene su un
+  // reddito dichiarato. **Non è `fees`**, che raccoglie le commissioni: sono due prezzi che il
+  // giocatore paga per ragioni diverse, e mescolarli perderebbe per sempre la risposta a «quanto
+  // ho pagato di tasse» — un'informazione persa è debito che non si vede. Sta in fondo alla lista
+  // perché quell'ordine è l'ordine dei saldi nel salvataggio.
+  tax: { traceable: true, capacity: null, yields: false, player: false, bearer: false }
 }
 
 /**

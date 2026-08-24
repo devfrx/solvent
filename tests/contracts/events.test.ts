@@ -29,10 +29,11 @@ describe('GameEvents', () => {
         world: ZERO,
         sink: ZERO,
         fees: ZERO,
-        house: ZERO
+        house: ZERO,
+        tax: ZERO
       }
     }
     expect(payload.transaction.reason).toBe('reason.income.tick')
-    expect(Object.keys(payload.balances)).toHaveLength(6)
+    expect(Object.keys(payload.balances)).toHaveLength(7)
   })
 })

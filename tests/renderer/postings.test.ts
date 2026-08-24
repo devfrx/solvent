@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { fromString, toString } from '@core/contracts/money'
+import { fromString, toString, ZERO } from '@core/contracts/money'
 
 import { income, spend, transfer } from '@core/kernel/Ledger'
 
@@ -21,7 +21,7 @@ const FEE = money('2.50')
 describe('un reddito', () => {
   it('mostra solo dove il denaro arriva: la contropartita non è un movimento del giocatore', () => {
     // ADR 0020 — `world` esiste perché la somma faccia zero, non perché qualcuno lo guardi.
-    const rows = visibleRows(income('cash', money('12')))
+    const rows = visibleRows(income('cash', money('12'), ZERO))
 
     expect(rows).toHaveLength(1)
     expect(rows[0]?.pool).toBe('cash')

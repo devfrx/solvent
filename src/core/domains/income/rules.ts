@@ -1,4 +1,5 @@
 import type { Money } from '@core/contracts/money'
+import { ZERO } from '@core/contracts/money'
 import type { PaymentOption, PriceList } from '@core/contracts/payment'
 import type { Pool } from '@core/contracts/pools'
 
@@ -38,6 +39,74 @@ export const incomePerSecond = (modifiers: Modifiers): Money =>
 /** Quanto si guadagna in `elapsed` tick. Quanti tick stanno in un secondo lo sa solo il Clock (R04). */
 export const incomeOver = (clock: Clock, modifiers: Modifiers, elapsed: Ticks): Money =>
   clock.perSecondToPerTick(incomePerSecond(modifiers)).mul(elapsed)
+
+/**
+ * ADR 0052 — **il regime di una fonte di guadagno**: dove atterra ciò che produce, e quale
+ * frazione ne viene trattenuta lungo la strada.
+ *
+ * Le due cose stanno insieme perché non si scelgono separatamente: un pool senza tetto che non
+ * trattiene niente domina sempre, e la legge della non dominanza cadrebbe al primo confronto.
+ *
+ * `withholdingRate` è una **frazione**, non un importo — il nome lo dice perché l'unità di un
+ * `Money` non lo dice.
+ */
+export interface Regime {
+  readonly pool: Pool
+  readonly withholdingRate: Money
+}
+
+/**
+ * I due regimi, dichiarati come **dati**.
+ *
+ * È la forma che i pool usano già per sé stessi (ADR 0017): un `if (declared) pool = 'card'`
+ * dentro il tick sarebbe un ramo sul nome di un pool, cioè precisamente ciò che quell'ADR ha tolto
+ * dal progetto una volta. Qui il tick legge un regime e non nomina nessuno strumento.
+ *
+ * **In nero**: contanti, anonimi, niente trattenute — e il tetto del caveau, che è il prezzo.
+ * **In regola**: la carta, che non ha tetto, e la parte dello Stato.
+ */
+const UNDECLARED: Regime = { pool: 'cash', withholdingRate: ZERO }
+const DECLARED: Regime = { pool: 'card', withholdingRate: BALANCE.INCOME_TAX_RATE }
+
+/**
+ * Il regime che vale, dato lo stato. Due valori fermi e una scelta fra loro: non costruisce niente
+ * a ogni chiamata, quindi il tick può interrogarla dieci volte al secondo senza allocare.
+ */
+export const regimeOf = (state: IncomeState): Regime => (state.declared ? DECLARED : UNDECLARED)
+
+/**
+ * Il listino della **dichiarazione**: con quali strumenti si compra il passaggio in regola, e a
+ * quanto con ognuno (ADR 0027). Una voce sola, la carta, per la ragione di `UPGRADE_PRICE_CARD`:
+ * la carta si riempie solo dal bancomat, quindi il prezzo obbliga a passare dal ponte.
+ *
+ * **Non si svuota a chi è già in regola**, e la scelta è deliberata: la forma del caveau — un
+ * listino che diventa vuoto all'ultimo livello — vale per una **scala**, dove l'indice cade fuori
+ * da solo. Qui lo stato è un booleano, e il gemello che gli sta venti righe sopra risponde già
+ * così: il listino dichiara cosa si può comprare e con cosa, «l'hai già comprato» lo dicono
+ * `canDeclare` e il comando. Renderlo dipendente dallo stato renderebbe anche `accepts`
+ * dipendente dallo stato, e `accepts` è ciò che il Ledger deve poter sapere prima di guardare
+ * una partita.
+ */
+export const declarationPrices = (): PriceList => [
+  { pool: 'card', price: BALANCE.INCOME_DECLARATION_PRICE_CARD }
+]
+
+/**
+ * L'opzione del listino per uno strumento, `null` se il listino non lo offre. È la gemella di
+ * `upgradePriceFor`, e per la stessa ragione: la UI la chiama prima di mostrare un prezzo, il
+ * comando prima di pagarlo, e leggono lo **stesso** posto (INV-19).
+ */
+export const declarationPriceFor = (pool: Pool): PaymentOption | null =>
+  declarationPrices().find((option) => option.pool === pool) ?? null
+
+/**
+ * L'anteprima del pulsante: si può se non lo si è già e se quello strumento basta. Il prezzo
+ * arriva **per argomento**, dentro l'opzione, e l'opzione viene dal listino: ripescarlo qui
+ * sarebbe una seconda lettura da tenere allineata a quella del comando, che è ciò che INV-19
+ * vieta.
+ */
+export const canDeclare = (state: IncomeState, option: PaymentOption, available: Money): boolean =>
+  !state.declared && available.greaterThanOrEqualTo(option.price)
 
 /**
  * Quanto del reddito maturato entra davvero: **quanto ci sta**, e il resto non entra. Non «tutto o

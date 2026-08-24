@@ -1,19 +1,26 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import type { Transaction } from '@core/contracts/ledger'
-import { fromString, toString } from '@core/contracts/money'
+import { fromString, toString, ZERO } from '@core/contracts/money'
 import type { PaymentOption } from '@core/contracts/payment'
 import { POOL_IDS, POOLS } from '@core/contracts/pools'
 
+import { BALANCE } from '@core/balance/constants'
 import { createModifiers, type Modifiers } from '@core/balance/modifiers'
 import { createBus, type Bus } from '@core/kernel/Bus'
 import { createLedger, income, spend, type Ledger } from '@core/kernel/Ledger'
 
-import { UPGRADE_PAYMENT, createBuyUpgrade } from '../../../src/core/domains/income/commands'
+import {
+  DECLARATION_PAYMENT,
+  UPGRADE_PAYMENT,
+  createBuyUpgrade,
+  createDeclare
+} from '../../../src/core/domains/income/commands'
 import {
   INCOME_TARGET,
   UPGRADE_MODIFIER_ID,
   canBuyUpgrade,
+  declarationPrices,
   upgradePriceFor,
   upgradePrices
 } from '../../../src/core/domains/income/rules'
@@ -28,7 +35,7 @@ import type { IncomeState } from '../../../src/core/domains/income/types'
  * chiudere: che il listino e `accepts` non possano divergere.
  */
 
-const FRESH: IncomeState = { upgraded: false }
+const FRESH: IncomeState = { upgraded: false, declared: false }
 
 /** I due strumenti del giocatore. Gli altri quattro conti non si scelgono (ADR 0020). */
 type Instrument = 'cash' | 'card'
@@ -49,7 +56,7 @@ const cardOption = (): PaymentOption => {
 
 /** Mette soldi su un pool passando dal Ledger vero: nessun saldo si scrive a mano (R06). */
 const fund = (pool: Instrument, amount: string): void => {
-  ledger.transaction(income(pool, fromString(amount)), { reason: 'reason.income.tick' })
+  ledger.transaction(income(pool, fromString(amount), ZERO), { reason: 'reason.income.tick' })
 }
 
 const buy = (
@@ -73,7 +80,7 @@ describe('comprare con i fondi che bastano', () => {
 
     const bought = buy()
 
-    expect(bought).toEqual({ ok: true, value: { upgraded: true } })
+    expect(bought).toEqual({ ok: true, value: { upgraded: true, declared: false } })
     expect(toString(ledger.balance('card'))).toBe('200')
     expect(modifiers.sourcesFor(INCOME_TARGET).map((source) => source.id)).toEqual([
       UPGRADE_MODIFIER_ID
@@ -149,7 +156,7 @@ describe('comprare due volte', () => {
     const first = buy()
     expect(first.ok).toBe(true)
 
-    const again = buy({ upgraded: true })
+    const again = buy({ upgraded: true, declared: false })
 
     expect(again).toEqual({ ok: false, error: { code: 'error.income.already_upgraded' } })
     expect(modifiers.sourcesFor(INCOME_TARGET)).toHaveLength(1)
@@ -160,7 +167,7 @@ describe('comprare due volte', () => {
     buy()
     const afterFirst = toString(ledger.balance('card'))
 
-    buy({ upgraded: true })
+    buy({ upgraded: true, declared: false })
 
     expect(toString(ledger.balance('card'))).toBe(afterFirst)
   })
@@ -213,12 +220,75 @@ describe('con cosa si paga', () => {
     for (const pool of POOL_IDS.filter((id) => POOLS[id].player)) {
       bus = createBus()
       ledger = createLedger(bus)
-      ledger.transaction(income(pool, price.mul(2)), { reason: 'reason.income.tick' })
+      ledger.transaction(income(pool, price.mul(2), ZERO), { reason: 'reason.income.tick' })
 
       const paid = ledger.transaction(spend(pool, price), UPGRADE_PAYMENT)
       const refusedAsInstrument = !paid.ok && paid.error.code === 'error.ledger.pool_not_accepted'
 
       expect(refusedAsInstrument).toBe(upgradePriceFor(pool) === null)
     }
+  })
+})
+
+describe('mettersi in regola', () => {
+  const declare = (
+    state: IncomeState = FRESH,
+    pool: Instrument = 'card'
+  ): ReturnType<ReturnType<typeof createDeclare>> => createDeclare({ ledger })({ state, pool })
+
+  it('paga con la carta e cambia il regime', () => {
+    fund('card', toString(BALANCE.INCOME_DECLARATION_PRICE_CARD))
+
+    const result = declare()
+
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.value.declared).toBe(true)
+    expect(ledger.balance('card').isZero()).toBe(true)
+    expect(total()).toBe('0')
+  })
+
+  it('non dimentica l’upgrade gia comprato: cambia il regime, non lo stato intero', () => {
+    fund('card', toString(BALANCE.INCOME_DECLARATION_PRICE_CARD))
+
+    const result = declare({ upgraded: true, declared: false })
+
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.value).toEqual({ upgraded: true, declared: true })
+  })
+
+  it('due volte e un esito, non un lancio, e non paga una seconda volta', () => {
+    fund('card', toString(BALANCE.INCOME_DECLARATION_PRICE_CARD))
+
+    const result = declare({ upgraded: false, declared: true })
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('error.income.already_declared')
+    expect(toString(ledger.balance('card'))).toBe(toString(BALANCE.INCOME_DECLARATION_PRICE_CARD))
+  })
+
+  it('in contanti e rifiutata, e l’errore dice quali strumenti andavano bene', () => {
+    fund('cash', '900')
+
+    const result = declare(FRESH, 'cash')
+
+    expect(result.ok).toBe(false)
+    if (!result.ok && result.error.code === 'error.ledger.pool_not_accepted') {
+      expect(result.error.accepted).toEqual(['card'])
+    }
+    expect(toString(ledger.balance('cash'))).toBe('900')
+  })
+
+  it('senza fondi fallisce e non muove niente', () => {
+    fund('card', '10')
+
+    const result = declare()
+
+    expect(result.ok).toBe(false)
+    expect(toString(ledger.balance('card'))).toBe('10')
+    expect(toString(ledger.balance('sink'))).toBe('0')
+  })
+
+  it('`accepts` non affianca il listino: ne e generato', () => {
+    expect(DECLARATION_PAYMENT.accepts).toEqual(declarationPrices().map((each) => each.pool))
   })
 })

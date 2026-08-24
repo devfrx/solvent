@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import type { Transaction } from '@core/contracts/ledger'
-import { fromString, toString } from '@core/contracts/money'
+import { fromString, toString, ZERO } from '@core/contracts/money'
 import { POOL_IDS } from '@core/contracts/pools'
 
 import { createBus } from '@core/kernel/Bus'
@@ -49,7 +49,7 @@ beforeEach(() => {
 
 /** Mette denaro passando dal Ledger vero: nessun saldo si scrive a mano (R06). */
 const fund = (pool: 'cash' | 'card', amount: string): void => {
-  ledger.transaction(income(pool, money(amount)), { reason: 'reason.income.tick' })
+  ledger.transaction(income(pool, money(amount), ZERO), { reason: 'reason.income.tick' })
   posted = []
 }
 
@@ -98,7 +98,7 @@ describe('l’ampliamento', () => {
     fund('cash', '1000')
     subject.expand('cash')
 
-    const beyondTheOldWall = ledger.transaction(income('cash', money('1500')), {
+    const beyondTheOldWall = ledger.transaction(income('cash', money('1500'), ZERO), {
       reason: 'reason.income.tick'
     })
 

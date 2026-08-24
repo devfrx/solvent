@@ -79,6 +79,15 @@ export const en: Dictionary = {
   'income.upgrade.overtime.name': 'Overtime',
   'income.upgrade.overtime.desc': 'Raises the income of every source.',
   'income.upgrade.owned': 'Already running',
+  'income.regime.name': 'Income regime',
+  'income.regime.black': 'Off the books',
+  'income.regime.declared': 'Declared',
+  'income.regime.desc':
+    'Off the books the salary arrives as cash: anonymous, and with the vault ceiling on it.',
+  'income.regime.buys':
+    'Declaring it makes the salary arrive on the card, which has no ceiling. The state keeps ' +
+    '{rate} of it, and there is no way back.',
+  'income.regime.declare': 'Declare it',
 
   'payment.only_with': 'Paid with {pool} only',
   'payment.with': 'With {pool}',
@@ -177,6 +186,7 @@ export const en: Dictionary = {
 
   'reason.income.tick': 'Salary',
   'reason.income.upgrade': 'Overtime purchased',
+  'reason.income.declare': 'Income declared',
   'reason.atm.deposit': 'Deposit',
   'reason.atm.withdraw': 'Withdrawal',
   'reason.vault.expand': 'Vault expanded',
@@ -187,6 +197,7 @@ export const en: Dictionary = {
   'error.ledger.invalid_amount': 'That amount cannot be used on {pool}: {amount}.',
   'error.payment.unauthorized': 'The code does not match this instrument ({pool}).',
   'error.income.already_upgraded': 'Overtime has already been bought.',
+  'error.income.already_declared': 'Income is already declared.',
   'error.vault.max_level': 'The vault is already at its last level: it does not get any bigger.',
   'error.atm.amount_not_positive': 'The amount must be greater than zero, not {amount}.',
   'error.atm.fee_exceeds_amount': 'The {fee} fee eats up the whole {amount}.',

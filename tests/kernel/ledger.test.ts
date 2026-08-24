@@ -54,7 +54,7 @@ describe('atomicità', () => {
   it('se l ultimo movimento di una transazione a tre fallisce, nessuno dei tre è applicato', () => {
     const bus = createBus()
     const ledger = createLedger(bus)
-    ledger.transaction(income('cash', money('100')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('100'), ZERO), { reason: 'reason.income.tick' })
 
     let emitted = 0
     bus.on('money.posted', () => {
@@ -81,7 +81,7 @@ describe('atomicità', () => {
   it('una transazione valida a tre movimenti applica tutto ed emette una volta sola', () => {
     const bus = createBus()
     const ledger = createLedger(bus)
-    ledger.transaction(income('card', money('500')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('card', money('500'), ZERO), { reason: 'reason.income.tick' })
 
     let emitted = 0
     bus.on('money.posted', () => {
@@ -108,11 +108,11 @@ describe('atomicità', () => {
     const bus = createBus()
     const ledger = createLedger(bus)
     bus.on('money.posted', () => {
-      ledger.transaction(income('cash', money('1')), { reason: 'reason.income.tick' })
+      ledger.transaction(income('cash', money('1'), ZERO), { reason: 'reason.income.tick' })
     })
 
     expect(() =>
-      ledger.transaction(income('cash', money('10')), { reason: 'reason.income.tick' })
+      ledger.transaction(income('cash', money('10'), ZERO), { reason: 'reason.income.tick' })
     ).toThrow(NestedTransactionError)
   })
 })
@@ -155,7 +155,7 @@ describe('la somma zero', () => {
 
       const result =
         roll < 0.5
-          ? ledger.transaction(income(pool, amount), { reason: 'reason.income.tick' })
+          ? ledger.transaction(income(pool, amount, ZERO), { reason: 'reason.income.tick' })
           : roll < 0.8
             ? ledger.transaction(spend(pool, amount), { reason: 'reason.income.upgrade' })
             : ledger.transaction(transfer('card', 'cash', amount, amount.mul('0.005')), {
@@ -175,7 +175,7 @@ describe('i costruttori', () => {
   it('income costruisce il movimento da world senza che il chiamante lo nomini', () => {
     const { ledger } = bench()
 
-    const result = ledger.transaction(income('cash', money('12')), {
+    const result = ledger.transaction(income('cash', money('12'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -184,9 +184,31 @@ describe('i costruttori', () => {
     expect(ledger.balance('world').toString()).toBe('-12')
   })
 
+  it('income trattiene la parte dello Stato e la manda in tax', () => {
+    const { ledger } = bench()
+
+    const result = ledger.transaction(income('card', money('100'), money('3')), {
+      reason: 'reason.income.tick'
+    })
+
+    expect(result.ok).toBe(true)
+    expect(ledger.balance('card').toString()).toBe('97')
+    expect(ledger.balance('tax').toString()).toBe('3')
+    expect(ledger.balance('world').toString()).toBe('-100')
+  })
+
+  it('una trattenuta a zero non scrive un movimento da zero: non c è niente da raccontare', () => {
+    expect(income('cash', money('12'), ZERO)).toHaveLength(2)
+    expect(income('card', money('12'), money('1'))).toHaveLength(3)
+  })
+
+  it('una trattenuta più grande del reddito lancia: al giocatore arriverebbe meno di zero', () => {
+    expect(() => income('card', money('10'), money('20'))).toThrow(RangeError)
+  })
+
   it('spend manda il costo nel sink', () => {
     const { ledger } = bench()
-    ledger.transaction(income('card', money('30')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('card', money('30'), ZERO), { reason: 'reason.income.tick' })
 
     ledger.transaction(spend('card', money('30')), { reason: 'reason.income.upgrade' })
 
@@ -196,7 +218,7 @@ describe('i costruttori', () => {
 
   it('transfer trattiene la commissione e la manda in fees', () => {
     const { ledger } = bench()
-    ledger.transaction(income('card', money('500')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('card', money('500'), ZERO), { reason: 'reason.income.tick' })
 
     ledger.transaction(transfer('card', 'cash', money('500'), money('2.50')), {
       reason: 'reason.atm.withdraw'
@@ -208,7 +230,8 @@ describe('i costruttori', () => {
   })
 
   it('un importo negativo passato a un costruttore lancia: è una grandezza, non un movimento', () => {
-    expect(() => income('cash', money('-12'))).toThrow(RangeError)
+    expect(() => income('cash', money('-12'), ZERO)).toThrow(RangeError)
+    expect(() => income('cash', money('12'), money('-1'))).toThrow(RangeError)
     expect(() => spend('cash', money('-12'))).toThrow(RangeError)
     expect(() => transfer('card', 'cash', money('12'), money('-1'))).toThrow(RangeError)
   })
@@ -221,7 +244,7 @@ describe('i costruttori', () => {
 describe('i rifiuti', () => {
   it('fondi insufficienti: l errore porta required e available', () => {
     const { ledger } = bench()
-    ledger.transaction(income('cash', money('12.50')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('12.50'), ZERO), { reason: 'reason.income.tick' })
 
     const result = ledger.transaction(spend('cash', money('500')), {
       reason: 'reason.income.upgrade'
@@ -239,7 +262,7 @@ describe('i rifiuti', () => {
 
   it('pool non accettato: l errore elenca quali sarebbero andati bene', () => {
     const { ledger } = bench()
-    ledger.transaction(income('cash', money('100')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('100'), ZERO), { reason: 'reason.income.tick' })
 
     const result = ledger.transaction(spend('cash', money('30')), {
       reason: 'reason.income.upgrade',
@@ -258,7 +281,7 @@ describe('i rifiuti', () => {
   it('i conti non-giocatore non passano da accepts: sono contabilità, non strumenti', () => {
     const { ledger } = bench()
 
-    const result = ledger.transaction(income('cash', money('10')), {
+    const result = ledger.transaction(income('cash', money('10'), ZERO), {
       reason: 'reason.income.tick',
       accepts: ['cash']
     })
@@ -310,8 +333,8 @@ describe('l evento', () => {
     })
 
     // Due transazioni: se l'evento portasse i saldi vecchi, l'handler vedrebbe 10, non 40.
-    ledger.transaction(income('cash', money('10')), { reason: 'reason.income.tick' })
-    ledger.transaction(income('cash', money('30')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('10'), ZERO), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('30'), ZERO), { reason: 'reason.income.tick' })
 
     expect(seenInPayload['cash']).toBe('40')
     expect(seenInPayload['world']).toBe('-40')
@@ -329,7 +352,7 @@ describe('l evento', () => {
       rows = transaction.postings
     })
 
-    ledger.transaction(income('cash', money('7')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('7'), ZERO), { reason: 'reason.income.tick' })
 
     expect(reason).toBe('reason.income.tick')
     expect(rows.map((row) => row.pool)).toEqual(['world', 'cash'])
@@ -357,7 +380,7 @@ describe('l evento', () => {
 describe('la persistenza', () => {
   it('nel salvataggio i saldi sono stringhe decimali, conti non-giocatore inclusi', () => {
     const { ledger } = bench()
-    ledger.transaction(income('cash', money('12.50')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('12.50'), ZERO), { reason: 'reason.income.tick' })
 
     const saved = ledger.save()
 
@@ -368,8 +391,8 @@ describe('la persistenza', () => {
 
   it('0,1 più 0,2 salvato e ricaricato è esattamente 0,3', () => {
     const { ledger } = bench()
-    ledger.transaction(income('cash', money('0.1')), { reason: 'reason.income.tick' })
-    ledger.transaction(income('cash', money('0.2')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('0.1'), ZERO), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('0.2'), ZERO), { reason: 'reason.income.tick' })
 
     const reloaded = createLedger(createBus())
     reloaded.load(ledger.save())
@@ -380,7 +403,7 @@ describe('la persistenza', () => {
 
   it('dopo load la somma di tutti i conti è ancora zero', () => {
     const { ledger } = bench()
-    ledger.transaction(income('card', money('500')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('card', money('500'), ZERO), { reason: 'reason.income.tick' })
     ledger.transaction(transfer('card', 'cash', money('500'), money('2.50')), {
       reason: 'reason.atm.withdraw'
     })
@@ -396,14 +419,14 @@ describe('la persistenza', () => {
 
     expect(() =>
       reloaded.load({
-        balances: { cash: '100', card: '0', world: '0', sink: '0', fees: '0', house: '0' }
+        balances: { cash: '100', card: '0', world: '0', sink: '0', fees: '0', house: '0', tax: '0' }
       })
     ).toThrow(UnbalancedSaveError)
   })
 
   it('caricare non emette: non è un evento economico', () => {
     const { ledger } = bench()
-    ledger.transaction(income('cash', money('9')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('9'), ZERO), { reason: 'reason.income.tick' })
 
     const bus = createBus()
     let emitted = 0
@@ -419,7 +442,7 @@ describe('la persistenza', () => {
 describe('il reset', () => {
   it('hard azzera tutto, invariante inclusa', () => {
     const { ledger } = bench()
-    ledger.transaction(income('cash', money('123.45')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('123.45'), ZERO), { reason: 'reason.income.tick' })
 
     ledger.reset('hard')
 
@@ -429,7 +452,7 @@ describe('il reset', () => {
 
   it('soft non tocca i saldi: azzerare a un prestige è una transazione, non un reset', () => {
     const { ledger } = bench()
-    ledger.transaction(income('cash', money('123.45')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('123.45'), ZERO), { reason: 'reason.income.tick' })
 
     ledger.reset('soft')
 
@@ -460,7 +483,7 @@ describe('i saldi sono privati', () => {
     const { ledger } = bench()
     const other = createLedger(createBus())
 
-    ledger.transaction(income('cash', money('50')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('50'), ZERO), { reason: 'reason.income.tick' })
 
     expect(other.balance('cash').toString()).toBe('0')
   })

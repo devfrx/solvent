@@ -12,12 +12,17 @@ import {
   INCOME_TARGET,
   UPGRADE_MODIFIER_ID,
   canBuyUpgrade,
+  canDeclare,
+  declarationPriceFor,
+  declarationPrices,
   incomeOver,
   incomePerSecond,
+  regimeOf,
   upgradeModifier,
   upgradePriceFor,
   upgradePrices
 } from '../../../src/core/domains/income/rules'
+import type { IncomeState } from '../../../src/core/domains/income/types'
 import { read } from '../../helpers/sources'
 
 /**
@@ -26,6 +31,10 @@ import { read } from '../../helpers/sources'
  */
 
 const noModifiers = createModifiers()
+
+/** I due regimi, come stati: la partita appena nata, e quella di chi si è messo in regola. */
+const inTheBlack: IncomeState = { upgraded: false, declared: false }
+const declaredState: IncomeState = { upgraded: false, declared: true }
 
 /**
  * L'opzione della carta, presa **dal listino** invece di essere scritta qui: un'opzione ricopiata
@@ -120,12 +129,64 @@ describe('l’upgrade', () => {
   it('è comprabile solo se non è già comprato e se lo strumento scelto basta', () => {
     const option = cardOption()
     const price = option.price
-    const fresh = { upgraded: false }
+    const fresh = inTheBlack
 
     expect(canBuyUpgrade(fresh, option, price)).toBe(true)
     expect(canBuyUpgrade(fresh, option, price.plus(fromString('0.01')))).toBe(true)
     expect(canBuyUpgrade(fresh, option, price.minus(fromString('0.01')))).toBe(false)
-    expect(canBuyUpgrade({ upgraded: true }, option, price.mul(10))).toBe(false)
+    expect(canBuyUpgrade({ upgraded: true, declared: false }, option, price.mul(10))).toBe(false)
+  })
+})
+
+describe('il regime', () => {
+  it('in nero il reddito atterra nei contanti e non trattiene niente', () => {
+    const regime = regimeOf(inTheBlack)
+
+    expect(regime.pool).toBe('cash')
+    expect(regime.withholdingRate.isZero()).toBe(true)
+  })
+
+  it('in regola il reddito atterra sulla carta, e la trattenuta è **la costante**', () => {
+    const regime = regimeOf(declaredState)
+
+    expect(regime.pool).toBe('card')
+    // Identità e non uguaglianza, per la ragione del listino: una copia si muoverebbe da sola.
+    expect(regime.withholdingRate).toBe(BALANCE.INCOME_TAX_RATE)
+  })
+
+  it('il pool del regime dichiarato non ha tetto: è la regola 3 dell’ADR 0052', () => {
+    // Ciò che accade da solo non può essere rifiutato da una capienza. Oggi lo prova il regime
+    // dichiarato; domani sarà la fonte automatica, e il controllo è già scritto.
+    expect(POOLS[regimeOf(declaredState).pool].capacity).toBeNull()
+  })
+})
+
+describe('il listino della dichiarazione', () => {
+  it('offre la carta, al prezzo che sta in constants.ts', () => {
+    expect(declarationPrices()).toEqual([
+      { pool: 'card', price: BALANCE.INCOME_DECLARATION_PRICE_CARD }
+    ])
+  })
+
+  it('interrogato per uno strumento ritorna la sua voce, e null per gli altri', () => {
+    // Identità e non uguaglianza, per la ragione del listino dell'upgrade.
+    expect(declarationPriceFor('card')?.price).toBe(BALANCE.INCOME_DECLARATION_PRICE_CARD)
+    expect(declarationPriceFor('cash')).toBeNull()
+  })
+
+  it('non offre nessuno dei conti che strumenti non sono (ADR 0020)', () => {
+    for (const pool of POOL_IDS.filter((id) => !POOLS[id].player)) {
+      expect(declarationPriceFor(pool)).toBeNull()
+    }
+  })
+
+  it('si può dichiarare solo se non lo si è già e se lo strumento scelto basta', () => {
+    const option = declarationPriceFor('card') as PaymentOption
+    const price = option.price
+
+    expect(canDeclare(inTheBlack, option, price)).toBe(true)
+    expect(canDeclare(inTheBlack, option, price.minus(fromString('0.01')))).toBe(false)
+    expect(canDeclare(declaredState, option, price.mul(10))).toBe(false)
   })
 })
 

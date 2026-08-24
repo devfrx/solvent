@@ -125,20 +125,24 @@ describe('la partita giocata, dal disco e ritorno', () => {
   it('lo stato di partenza è una partita giocata, non uno stato costruito a mano', () => {
     const payload = game.save()
 
-    // Cinque conti su sei mossi, decimali compresi: il giro del bancomat li produce da solo.
+    // Cinque conti su sette mossi, decimali compresi: il giro del bancomat li produce da solo.
     expect(payload.ledger.balances).toEqual({
       cash: '2.6',
       card: '7.71',
       world: '-1725',
       sink: '1700',
       fees: '14.69',
-      house: '0'
+      house: '0',
+      tax: '0'
     })
 
     // I due domini veri — l'upgrade comprato e il caveau ampliato — non un sistema finto che
     // ritorna un oggetto. Il livello è anche il primo stato salvato del progetto che non sia un
     // booleano, quindi il primo che un salvataggio manomesso possa sbagliare in silenzio.
-    expect(payload.systems).toEqual({ income: { upgraded: true }, vault: { level: 1 } })
+    expect(payload.systems).toEqual({
+      income: { upgraded: true, declared: false },
+      vault: { level: 1 }
+    })
     expect(payload.rng.cursors).toEqual({ income: 3 })
   })
 

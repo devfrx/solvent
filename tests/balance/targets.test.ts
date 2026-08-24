@@ -15,8 +15,13 @@ import type { Registry, SystemContext } from '@core/kernel/Registry'
 import { createRegistry } from '@core/kernel/Registry'
 import { createRng } from '@core/kernel/Rng'
 
-import { incomePerSecond, upgradeModifier } from '../../src/core/domains/income/rules'
-import { createIncome } from '../../src/core/domains/income/system'
+import {
+  declarationPriceFor,
+  incomePerSecond,
+  regimeOf,
+  upgradeModifier
+} from '../../src/core/domains/income/rules'
+import { createIncome, type Income } from '../../src/core/domains/income/system'
 import {
   cashCapacityFor,
   expansionPrices,
@@ -46,6 +51,8 @@ interface Simulation {
   readonly registry: Registry
   readonly modifiers: Modifiers
   readonly ctx: SystemContext
+  /** Serve a mettersi in regola dentro la simulazione: il regime è stato, non una costante. */
+  readonly income: Income
 }
 
 /**
@@ -69,7 +76,7 @@ const simulate = (): Simulation => {
   )
   registry.register(income.system)
   registry.register(vault.system)
-  return { ledger, registry, modifiers, ctx: { clock, rng: createRng(1), bus, ledger } }
+  return { ledger, registry, modifiers, income, ctx: { clock, rng: createRng(1), bus, ledger } }
 }
 
 describe('i bersagli di bilanciamento', () => {
@@ -163,6 +170,52 @@ describe('i bersagli di bilanciamento', () => {
 
     expect(wall.greaterThanOrEqualTo(target.min)).toBe(true)
     expect(wall.lessThanOrEqualTo(target.max)).toBe(true)
+  })
+
+  it('la trattenuta sta sopra la commissione del bancomat: income_tax_rate', () => {
+    // La legge della non dominanza applicata al regime (ADR 0052). Il vincolo non è quanto tassa
+    // uno Stato vero: è quanto costa fare la stessa cosa a mano. Sotto `ATM_FEE_RATE_IN`
+    // dichiarare costerebbe meno che versare, la carta diventerebbe migliore sotto ogni aspetto e
+    // i contanti smetterebbero di essere una scelta. Il confronto è con la costante e non con una
+    // cifra ricopiata: ritoccare il tasso del bancomat deve rendere rosso **questo** test.
+    const rate = regimeOf({ upgraded: false, declared: true }).withholdingRate
+    const target = TARGETS.income_tax_rate
+
+    expect(rate.greaterThan(BALANCE.ATM_FEE_RATE_IN)).toBe(true)
+    expect(rate.greaterThanOrEqualTo(target.min)).toBe(true)
+    expect(rate.lessThanOrEqualTo(target.max)).toBe(true)
+  })
+
+  it('e il gioco la applica davvero: un minuto in regola lascia allo Stato quella frazione', () => {
+    // Il tasso dichiarato e il tasso pagato sono due cose diverse finché qualcuno non le mette una
+    // di fronte all'altra: un arrotondamento per tick basterebbe a spostare il secondo senza che
+    // il primo se ne accorga.
+    const { ledger, registry, ctx, income } = simulate()
+    income.system.load({ upgraded: false, declared: true })
+
+    const tickCount = clock.secondsToTicks(ONE_MINUTE)
+    for (let elapsed = 0; elapsed < tickCount; elapsed += 1) registry.tickAll(ctx, ONE_TICK)
+
+    const gross = ledger.balance('world').neg()
+    const rate = regimeOf({ upgraded: false, declared: true }).withholdingRate
+    expect(toString(ledger.balance('tax'))).toBe(toString(gross.mul(rate)))
+    // E il muro del caveau non c'entra più niente: in regola i contanti restano a zero.
+    expect(ledger.balance('cash').isZero()).toBe(true)
+  })
+
+  it('mettersi in regola si paga attraversando la scala del caveau: income_declaration_price', () => {
+    // Il prezzo non è una cifra scelta perché suona bene: è **dove** sta nella scala del caveau a
+    // renderlo una meccanica. Sotto il primo gradino la fetta 02 diventerebbe un tutorial da
+    // saltare; sopra l'ultimo, la dichiarazione arriverebbe quando il muro non dà più fastidio a
+    // nessuno. Misurato contro la scala, non contro se stesso.
+    const option = declarationPriceFor('card')
+    if (option === null) throw new Error('il listino della dichiarazione non offre la carta')
+    const target = TARGETS.income_declaration_price
+
+    expect(option.price.greaterThanOrEqualTo(target.min)).toBe(true)
+    expect(option.price.lessThanOrEqualTo(target.max)).toBe(true)
+    expect(option.price.greaterThan(cashCapacityFor(0))).toBe(true)
+    expect(option.price.lessThan(cashCapacityFor(MAX_LEVEL))).toBe(true)
   })
 
   it('con l upgrade attivo il reddito esce dall intervallo di partenza', () => {

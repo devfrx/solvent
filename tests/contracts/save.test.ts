@@ -9,7 +9,7 @@ import { SAVE_VERSION, type SaveEnvelope, type SavePayload } from '@core/contrac
  * perché il tipo non ha quel campo. I test `@ts-expect-error` sono la prova che il tipo funziona
  * davvero — falliscono se l'errore di compilazione non c'è.
  */
-const BALANCES = { cash: '0', card: '0', world: '0', sink: '0', fees: '0', house: '0' }
+const BALANCES = { cash: '0', card: '0', world: '0', sink: '0', fees: '0', house: '0', tax: '0' }
 
 describe('SavePayload', () => {
   it('non ha un campo versione', () => {

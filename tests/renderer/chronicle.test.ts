@@ -22,7 +22,7 @@ import { createChronicle } from '../../src/renderer/runtime/chronicle'
 /** L'evento del Ledger, nella forma minima: la cronaca non ne legge il contenuto, solo il fatto. */
 const POSTED: GameEvents['money.posted'] = {
   transaction: { reason: 'reason.income.tick', postings: [] },
-  balances: { cash: ZERO, card: ZERO, world: ZERO, sink: ZERO, fees: ZERO, house: ZERO }
+  balances: { cash: ZERO, card: ZERO, world: ZERO, sink: ZERO, fees: ZERO, house: ZERO, tax: ZERO }
 }
 
 const EVERY = ticks(10)

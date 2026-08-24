@@ -39,7 +39,7 @@ const { text, poolName } = useTranslator()
  * Il colore di uno strumento, come `roleOf` per un movimento: un `Record` **totale** su `Pool`,
  * quindi un pool nuovo non compila finché qualcuno non decide di che colore è.
  *
- * I quattro conti non-giocatore prendono il colore del testo e non compaiono mai qui (ADR 0017):
+ * I cinque conti non-giocatore prendono il colore del testo e non compaiono mai qui (ADR 0017):
  * la loro riga è la dichiarazione che non li abbiamo dimenticati.
  */
 const TONES: Readonly<Record<Pool, ColorRole>> = {
@@ -48,7 +48,8 @@ const TONES: Readonly<Record<Pool, ColorRole>> = {
   world: 'ink-3',
   sink: 'ink-3',
   fees: 'ink-3',
-  house: 'ink-3'
+  house: 'ink-3',
+  tax: 'ink-3'
 }
 </script>
 

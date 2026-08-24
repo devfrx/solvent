@@ -4,7 +4,7 @@ import { join } from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { fromString, toString } from '@core/contracts/money'
+import { fromString, toString, ZERO } from '@core/contracts/money'
 import { POOL_IDS } from '@core/contracts/pools'
 import type { SavePayload } from '@core/contracts/save'
 
@@ -46,7 +46,7 @@ const buildState = (): SavePayload => {
   // capienza di partenza (D017) la prima transazione verrebbe rifiutata e questo giro proverebbe
   // il round-trip di una partita vuota — che passa sempre e non dimostra niente.
   const ledger = createLedger(createBus(), () => null)
-  ledger.transaction(income('cash', fromString('1234.56')), { reason: 'reason.income.tick' })
+  ledger.transaction(income('cash', fromString('1234.56'), ZERO), { reason: 'reason.income.tick' })
   ledger.transaction(transfer('cash', 'card', fromString('400'), fromString('2.50')), {
     reason: 'reason.atm.deposit'
   })
@@ -174,7 +174,7 @@ describe('INV-24 · la scala non ferma il salvataggio', () => {
   const savedWith = (amount: string): SavePayload => {
     // Senza tetto, come `buildState`: qui la domanda è la forma della stringa, non la capienza.
     const ledger = createLedger(createBus(), () => null)
-    ledger.transaction(income('card', fromString(amount)), { reason: 'reason.income.tick' })
+    ledger.transaction(income('card', fromString(amount), ZERO), { reason: 'reason.income.tick' })
     return { ledger: ledger.save(), rng: createRng(0).save(), systems: {} }
   }
 

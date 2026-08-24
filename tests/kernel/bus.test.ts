@@ -17,7 +17,7 @@ import { createBus, EventCycleError, MAX_EMIT_DEPTH } from '@core/kernel/Bus'
 
 const POSTED: GameEvents['money.posted'] = {
   transaction: { reason: 'reason.income.tick', postings: [] },
-  balances: { cash: ZERO, card: ZERO, world: ZERO, sink: ZERO, fees: ZERO, house: ZERO }
+  balances: { cash: ZERO, card: ZERO, world: ZERO, sink: ZERO, fees: ZERO, house: ZERO, tax: ZERO }
 }
 
 describe('Bus', () => {

@@ -27,7 +27,9 @@ export const TARGET_IDS = [
   'income_per_minute_at_start',
   'seconds_to_first_wall',
   'vault_max_cash',
-  'vault_card_discount'
+  'vault_card_discount',
+  'income_tax_rate',
+  'income_declaration_price'
 ] as const
 
 export type BalanceTargetId = (typeof TARGET_IDS)[number]
@@ -90,5 +92,36 @@ export const TARGETS: Readonly<Record<BalanceTargetId, BalanceTarget>> = {
    * tracce e oggi le tracce non costano niente. Quando costeranno (fetta 04), questo intervallo si
    * allarga — ed è il primo posto da guardare.
    */
-  vault_card_discount: { min: fromString('0.50'), max: fromString('2.49') }
+  vault_card_discount: { min: fromString('0.50'), max: fromString('2.49') },
+
+  /**
+   * Quanto lo Stato trattiene su un reddito **dichiarato** (ADR 0052). È una frazione, non euro —
+   * ed è il secondo bersaglio del progetto a non misurarsi in denaro, dopo `seconds_to_first_wall`.
+   *
+   * **L'intervallo sta tutto sopra `ATM_FEE_RATE_IN`**, ed è la legge della non dominanza applicata
+   * al regime. Chi resta in nero e vuole i soldi sulla carta li versa a mano e paga l'1,5%: se
+   * dichiarare costasse meno, la carta sarebbe migliore sotto ogni aspetto e i contanti
+   * smetterebbero di essere una scelta — il caveau resterebbe un dominio senza clienti.
+   *
+   * **E il massimo è basso apposta.** Sopra il 5% l'alternativa manuale — restare in nero e premere
+   * «deposita» a ogni riempimento — verrebbe pagata abbastanza da valere la pena, e il gioco
+   * ottimale tornerebbe a essere la mansione che l'ADR 0052 esiste per togliere. È il bersaglio che
+   * sorveglia **due** difetti opposti con lo stesso intervallo, ed è il motivo per cui è stretto.
+   *
+   * Quando il calore arriverà (fetta 04), la carta comincerà a pagare due prezzi invece di uno e
+   * questo intervallo si sposta verso il basso: è il primo posto da guardare.
+   */
+  income_tax_rate: { min: fromString('0.016'), max: fromString('0.05') },
+
+  /**
+   * Quanto costa **mettersi in regola**, e la sua posizione nella scala del caveau è la meccanica.
+   *
+   * L'intervallo sta fra il quinto gradino (32.000,00 €) e il sesto (64.000,00 €), e quello che
+   * verifica non è la cifra: è che il prezzo cada **dentro** la scala. Sotto il primo gradino la
+   * dichiarazione si comprerebbe prima di aver mai incontrato il muro, e la fetta 02 diventerebbe
+   * un tutorial da saltare; oltre l'ultimo arriverebbe quando i contanti non danno più fastidio a
+   * nessuno, cioè quando non serve più. Il test lo confronta con `cashCapacityFor`, non con questi
+   * due numeri: cambiare la scala del caveau deve rendere rosso lì.
+   */
+  income_declaration_price: { min: fromString('30000'), max: fromString('70000') }
 }

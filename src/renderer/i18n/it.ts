@@ -81,6 +81,15 @@ export const it: Dictionary = {
   'income.upgrade.overtime.name': 'Straordinari',
   'income.upgrade.overtime.desc': 'Aumenta il reddito di tutte le fonti.',
   'income.upgrade.owned': 'Già in funzione',
+  'income.regime.name': 'Regime del reddito',
+  'income.regime.black': 'In nero',
+  'income.regime.declared': 'In regola',
+  'income.regime.desc':
+    'In nero lo stipendio arriva in contanti: anonimo, e con il tetto del caveau addosso.',
+  'income.regime.buys':
+    'Mettersi in regola lo fa arrivare sulla carta, che non ha tetto. Lo Stato ne trattiene il ' +
+    '{rate}, e non si torna indietro.',
+  'income.regime.declare': 'Mettiti in regola',
 
   'payment.only_with': 'Si paga solo con: {pool}',
   'payment.with': 'Con {pool}',
@@ -181,6 +190,7 @@ export const it: Dictionary = {
 
   'reason.income.tick': 'Stipendio',
   'reason.income.upgrade': 'Straordinari acquistati',
+  'reason.income.declare': 'Reddito messo in regola',
   'reason.atm.deposit': 'Deposito',
   'reason.atm.withdraw': 'Prelievo',
   'reason.vault.expand': 'Caveau ampliato',
@@ -191,6 +201,7 @@ export const it: Dictionary = {
   'error.ledger.invalid_amount': 'Importo non utilizzabile su {pool}: {amount}.',
   'error.payment.unauthorized': 'Il codice non corrisponde a questo strumento ({pool}).',
   'error.income.already_upgraded': 'Gli straordinari sono già stati comprati.',
+  'error.income.already_declared': 'Il reddito è già in regola.',
   'error.vault.max_level': 'Il caveau è già all’ultimo livello: più grande di così non si fa.',
   'error.atm.amount_not_positive': 'Serve un importo maggiore di zero, non {amount}.',
   'error.atm.fee_exceeds_amount': 'La commissione di {fee} si mangia tutti i {amount}.',

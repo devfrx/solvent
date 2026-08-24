@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import type { Money } from '@core/contracts/money'
 import { fromString, toString, ZERO } from '@core/contracts/money'
-import { POOL_IDS } from '@core/contracts/pools'
+import type { Pool } from '@core/contracts/pools'
+import { POOL_IDS, POOLS } from '@core/contracts/pools'
 
 import { BALANCE } from '@core/balance/constants'
 import { createModifiers, type Modifiers } from '@core/balance/modifiers'
@@ -36,10 +37,16 @@ let ctx: SystemContext
  */
 let room: Money | null
 
+/**
+ * A quale pool il tick ha chiesto lo spazio. Da D043 non è più una domanda retorica: il pool
+ * dipende dal **regime**, e chiederlo a quello sbagliato produce un muro dove non esiste.
+ */
+let askedRoomOf: Pool[]
+
 const tick = (elapsed = ONE_SECOND): void => subject.system.tick?.(ctx, elapsed)
 
 const fund = (pool: 'cash' | 'card', amount: string): void => {
-  ledger.transaction(income(pool, fromString(amount)), { reason: 'reason.income.tick' })
+  ledger.transaction(income(pool, fromString(amount), ZERO), { reason: 'reason.income.tick' })
 }
 
 const total = (): string =>
@@ -50,7 +57,14 @@ beforeEach(() => {
   ledger = createLedger(bus, () => null)
   modifiers = createModifiers()
   room = null
-  subject = createIncome(ledger, modifiers, () => room)
+  askedRoomOf = []
+  // Lo spazio finto risponde come quello vero: un tetto ce l'ha solo chi lo dichiara, e la carta
+  // non lo dichiara (`POOLS`). Rispondere `room` a chiunque renderebbe verdi anche i casi in cui
+  // il tick interroga il pool sbagliato, che è precisamente ciò che questi test devono vedere.
+  subject = createIncome(ledger, modifiers, (pool) => {
+    askedRoomOf.push(pool)
+    return POOLS[pool].capacity === null ? null : room
+  })
   ctx = { clock, rng: createRng(1), bus, ledger }
 })
 
@@ -179,7 +193,7 @@ describe('il tick quando il caveau non tiene tutto', () => {
     room = ZERO
     tick()
 
-    subject.system.load({ upgraded: false })
+    subject.system.load({ upgraded: false, declared: false })
 
     expect(toString(subject.withheld())).toBe('0')
   })
@@ -245,7 +259,7 @@ describe('azzerare', () => {
     tick()
 
     expect(toString(ledger.balance('cash'))).toBe(BALANCE.INCOME_BASE_PER_SECOND.toString())
-    expect(subject.system.save()).toEqual({ upgraded: false })
+    expect(subject.system.save()).toEqual({ upgraded: false, declared: false })
   })
 
   it('toglie la propria sorgente dal registro, non l’intero registro', () => {
@@ -261,5 +275,84 @@ describe('azzerare', () => {
     subject.system.reset('hard')
 
     expect(modifiers.sourcesFor('other.all')).toHaveLength(1)
+  })
+})
+
+describe('il regime (ADR 0052)', () => {
+  const declare = (): void => subject.system.load({ upgraded: false, declared: true })
+
+  it('in nero atterra nei contanti, non trattiene niente e non tocca il conto dello Stato', () => {
+    tick()
+
+    expect(askedRoomOf).toEqual(['cash'])
+    expect(toString(ledger.balance('cash'))).toBe('12')
+    expect(ledger.balance('tax').isZero()).toBe(true)
+  })
+
+  it('in regola atterra sulla carta, al netto della parte dello Stato', () => {
+    declare()
+
+    tick()
+
+    const earned = BALANCE.INCOME_BASE_PER_SECOND
+    const withheld = earned.mul(BALANCE.INCOME_TAX_RATE)
+    expect(toString(ledger.balance('card'))).toBe(toString(earned.minus(withheld)))
+    expect(toString(ledger.balance('tax'))).toBe(toString(withheld))
+    expect(ledger.balance('cash').isZero()).toBe(true)
+    expect(total()).toBe('0')
+  })
+
+  it('in regola chiede lo spazio alla carta, non ai contanti', () => {
+    declare()
+
+    tick()
+
+    expect(askedRoomOf).toEqual(['card'])
+  })
+
+  it('in regola il muro del caveau non lo riguarda piu, nemmeno a spazio zero', () => {
+    // `room` vale per il pool che il tick interroga: se interrogasse i contanti, questo zero
+    // fermerebbe uno stipendio che sulla carta ci starebbe tutto.
+    declare()
+    room = ZERO
+
+    tick()
+
+    expect(subject.withheld().isZero()).toBe(true)
+    expect(ledger.balance('card').isZero()).toBe(false)
+  })
+
+  it('un salvataggio scritto prima di D043 apre in nero', () => {
+    // Il campo non c'e' perche' quella partita e' stata scritta quando il regime non esisteva, non
+    // perche' qualcuno l'abbia tolto: chi giocava allora era per forza in nero.
+    subject.system.load({ upgraded: false } as unknown as IncomeSave)
+
+    tick()
+
+    expect(askedRoomOf).toEqual(['cash'])
+  })
+
+  it('un `declared` che non e un booleano resta una manomissione', () => {
+    expect(() =>
+      subject.system.load({ upgraded: false, declared: 'si' } as unknown as IncomeSave)
+    ).toThrow(TypeError)
+  })
+
+  it('azzerare riporta in nero', () => {
+    declare()
+
+    subject.system.reset('hard')
+    tick()
+
+    expect(askedRoomOf).toEqual(['cash'])
+  })
+
+  it('il regime sopravvive a un giro di salvataggio', () => {
+    declare()
+
+    subject.system.load(subject.system.save())
+    tick()
+
+    expect(askedRoomOf).toEqual(['card'])
   })
 })

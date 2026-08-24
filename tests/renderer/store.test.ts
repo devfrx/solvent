@@ -3,16 +3,16 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { toRaw } from 'vue'
 
 import type { Balances } from '@core/contracts/ledger'
-import { fromString, toString } from '@core/contracts/money'
+import { fromString, toString, ZERO } from '@core/contracts/money'
 import type { Pool } from '@core/contracts/pools'
 import { CASH_START_CAPACITY } from '@core/contracts/pools'
 import type { LoadedSave, SavePayload, SaveResult } from '@core/contracts/save'
 
 import { BALANCE } from '@core/balance/constants'
 import { DEPOSIT, WITHDRAW } from '@core/domains/atm/commands'
-import { upgradePrices } from '@core/domains/income/rules'
+import { declarationPrices, upgradePrices } from '@core/domains/income/rules'
 import { cashCapacityFor, expansionPrices, MAX_LEVEL } from '@core/domains/vault/rules'
-import { clock, ticks } from '@core/kernel/Clock'
+import { clock, seconds, ticks } from '@core/kernel/Clock'
 import { income } from '@core/kernel/Ledger'
 
 import { cardOf } from '../../src/core/domains/atm/card'
@@ -198,7 +198,7 @@ describe('il mirror', () => {
       emitted = posted.balances
     })
 
-    game.ctx.ledger.transaction(income('cash', fromString('120')), {
+    game.ctx.ledger.transaction(income('cash', fromString('120'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -224,7 +224,7 @@ describe('il mirror', () => {
     const store = await start()
 
     for (let posted = 0; posted < 25; posted += 1) {
-      game.ctx.ledger.transaction(income('cash', fromString('1')), {
+      game.ctx.ledger.transaction(income('cash', fromString('1'), ZERO), {
         reason: 'reason.income.tick'
       })
     }
@@ -691,7 +691,7 @@ describe('una partita nuova dopo un errore', () => {
 describe('i comandi', () => {
   it('passano dal gioco, e il mirror li vede', async () => {
     const store = await start()
-    game.ctx.ledger.transaction(income('cash', fromString('1000')), {
+    game.ctx.ledger.transaction(income('cash', fromString('1000'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -715,7 +715,9 @@ describe('i comandi', () => {
 
 describe('il massimo del bancomat', () => {
   const fund = (pool: Pool, amount: string): void => {
-    game.ctx.ledger.transaction(income(pool, fromString(amount)), { reason: 'reason.income.tick' })
+    game.ctx.ledger.transaction(income(pool, fromString(amount), ZERO), {
+      reason: 'reason.income.tick'
+    })
   }
 
   it('depositando è tutto il contante che c’è: la carta non ha un tetto', async () => {
@@ -776,7 +778,7 @@ describe('il massimo del bancomat', () => {
 describe('i selettori del reddito', () => {
   /** Il listino dell'upgrade offre **solo** la carta (ADR 0027), e il reddito entra in contanti. */
   const fundCard = (amount: string): void => {
-    game.ctx.ledger.transaction(income('card', fromString(amount)), {
+    game.ctx.ledger.transaction(income('card', fromString(amount), ZERO), {
       reason: 'reason.income.tick'
     })
   }
@@ -798,7 +800,7 @@ describe('i selettori del reddito', () => {
 
   it('l’anteprima è per strumento: la carta sì, i contanti mai', async () => {
     const store = await start()
-    game.ctx.ledger.transaction(income('cash', fromString('5000')), {
+    game.ctx.ledger.transaction(income('cash', fromString('5000'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -813,7 +815,7 @@ describe('i selettori del reddito', () => {
 
   it('e comprare con uno strumento fuori dal listino è rifiutato con l’elenco giusto', async () => {
     const store = await start()
-    game.ctx.ledger.transaction(income('cash', fromString('5000')), {
+    game.ctx.ledger.transaction(income('cash', fromString('5000'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -876,7 +878,7 @@ describe('i selettori del reddito', () => {
 
 describe('l’anteprima e il comando dicono la stessa cosa', () => {
   const fundCard = (amount: string): void => {
-    game.ctx.ledger.transaction(income('card', fromString(amount)), {
+    game.ctx.ledger.transaction(income('card', fromString(amount), ZERO), {
       reason: 'reason.income.tick'
     })
   }
@@ -913,7 +915,7 @@ describe('l’anteprima e il comando dicono la stessa cosa', () => {
     // È la trappola della fetta: il reddito entra in contanti, l'upgrade si paga con la carta, e
     // il ponte fra i due è il bancomat. Un selettore che guardasse la somma direbbe di sì.
     const store = await start()
-    game.ctx.ledger.transaction(income('cash', fromString('5000')), {
+    game.ctx.ledger.transaction(income('cash', fromString('5000'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -1052,7 +1054,9 @@ describe('il tempo passato che la schermata di recupero mostra', () => {
 
 /** Denaro vero, dalla porta vera: nessun saldo si scrive a mano (R06). */
 const fund = (pool: Pool, amount: string): void => {
-  game.ctx.ledger.transaction(income(pool, fromString(amount)), { reason: 'reason.income.tick' })
+  game.ctx.ledger.transaction(income(pool, fromString(amount), ZERO), {
+    reason: 'reason.income.tick'
+  })
 }
 
 describe('i selettori del bancomat', () => {
@@ -1116,7 +1120,7 @@ describe('i selettori del bancomat', () => {
 
 describe('i selettori del caveau', () => {
   const fund = (pool: Pool, amount: string): void => {
-    game.ctx.ledger.transaction(income(pool, fromString(amount)), {
+    game.ctx.ledger.transaction(income(pool, fromString(amount), ZERO), {
       reason: 'reason.income.tick'
     })
   }
@@ -1244,7 +1248,7 @@ describe('i selettori del caveau', () => {
 
   it('il caveau ampliato attraversa il salvataggio', async () => {
     const played = createGame(SEED)
-    played.ctx.ledger.transaction(income('cash', cashCapacityFor(0)), {
+    played.ctx.ledger.transaction(income('cash', cashCapacityFor(0), ZERO), {
       reason: 'reason.income.tick'
     })
     expect(played.vault.expand('cash').ok).toBe(true)
@@ -1391,7 +1395,7 @@ describe('le ultime operazioni', () => {
  */
 describe('la prova del pagamento', () => {
   const fundCard = (amount: string): void => {
-    game.ctx.ledger.transaction(income('card', fromString(amount)), {
+    game.ctx.ledger.transaction(income('card', fromString(amount), ZERO), {
       reason: 'reason.income.tick'
     })
   }
@@ -1658,5 +1662,71 @@ describe('il salvataggio a cadenza', () => {
 
     run(EVERY)
     expect(stage.written()).toHaveLength(written)
+  })
+})
+
+describe('il regime del reddito', () => {
+  const fundCard = (amount: string): void => {
+    game.ctx.ledger.transaction(income('card', fromString(amount), ZERO), {
+      reason: 'reason.income.tick'
+    })
+  }
+
+  const price = (): string => toString(BALANCE.INCOME_DECLARATION_PRICE_CARD)
+
+  it('una partita nuova nasce in nero', async () => {
+    const store = await start()
+
+    expect(store.declared).toBe(false)
+    expect(store.declarationPrices).toEqual(declarationPrices())
+  })
+
+  it('e il prezzo è **lo stesso oggetto**, non una copia proxata da Pinia', async () => {
+    const store = await start()
+
+    expect(store.declarationPrices[0]?.price).toBe(BALANCE.INCOME_DECLARATION_PRICE_CARD)
+  })
+
+  it('l’anteprima è per strumento: la carta si, i contanti mai', async () => {
+    const store = await start()
+    game.ctx.ledger.transaction(income('cash', fromString('99999'), ZERO), {
+      reason: 'reason.income.tick'
+    })
+
+    expect(store.canDeclareWith('cash')).toBe(false)
+    expect(store.canDeclareWith('card')).toBe(false)
+
+    fundCard(price())
+    expect(store.canDeclareWith('card')).toBe(true)
+  })
+
+  it('mettersi in regola cambia dove atterra lo stipendio, e il mirror se ne accorge', async () => {
+    // Nessun evento annuncia un cambio di regime: se lo store non rileggesse, la pagina direbbe
+    // «in nero» mentre i soldi arrivano gia sulla carta.
+    const store = await start()
+    fundCard(price())
+
+    expect(store.declareIncome('card', store.card.code).ok).toBe(true)
+
+    expect(store.declared).toBe(true)
+    expect(store.canDeclareWith('card')).toBe(false)
+  })
+
+  it('e da li in avanti i contanti non si riempiono piu', async () => {
+    const store = await start()
+    fundCard(price())
+    store.declareIncome('card', store.card.code)
+    const cashBefore = toString(store.balances.cash)
+
+    game.advance(clock.secondsToTicks(seconds(10)))
+
+    expect(toString(store.balances.cash)).toBe(cashBefore)
+    expect(store.balances.tax.isZero()).toBe(false)
+  })
+
+  it('quanto trattiene lo Stato è quello del regime, non un numero riscritto', async () => {
+    const store = await start()
+
+    expect(store.declaredWithholding).toBe(BALANCE.INCOME_TAX_RATE)
   })
 })

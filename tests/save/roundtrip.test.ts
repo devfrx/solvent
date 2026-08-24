@@ -134,9 +134,9 @@ describe('quando qualcosa non va, il file precedente resta dov’è', () => {
     expect(await readdir(directory)).toEqual([SAVE_FILE_NAME])
   })
 
-  it('un payload senza uno dei sei conti non viene scritto', async () => {
-    const { house: _house, ...five } = PAYLOAD.ledger.balances
-    const saved = await store.save({ ...PAYLOAD, ledger: { balances: five } })
+  it('un payload senza uno dei sette conti non viene scritto', async () => {
+    const { house: _house, ...withoutHouse } = PAYLOAD.ledger.balances
+    const saved = await store.save({ ...PAYLOAD, ledger: { balances: withoutHouse } })
 
     expect(saved).toEqual({
       ok: false,

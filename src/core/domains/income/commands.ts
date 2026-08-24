@@ -1,12 +1,19 @@
 import type { CommandHandler } from '@core/contracts/commands'
 import type { LedgerError, TransactionMeta } from '@core/contracts/ledger'
+import type { PriceList } from '@core/contracts/payment'
 import type { Pool } from '@core/contracts/pools'
 import { err, ok } from '@core/contracts/result'
 
 import type { Modifiers } from '@core/balance/modifiers'
 import { spend, type Ledger } from '@core/kernel/Ledger'
 
-import { upgradeModifier, upgradePriceFor, upgradePrices } from './rules'
+import {
+  declarationPriceFor,
+  declarationPrices,
+  upgradeModifier,
+  upgradePriceFor,
+  upgradePrices
+} from './rules'
 import type { IncomeState } from './types'
 
 /**
@@ -21,8 +28,15 @@ export type IncomeError =
    * **lanciando**, e un doppio clic non è un programma scritto male. Qui diventa un esito.
    */
   | { readonly code: 'error.income.already_upgraded' }
+  /**
+   * Mettersi in regola due volte, come comprare due volte: un esito e non un guasto. Ed è anche il
+   * meccanismo dell'irreversibilità dichiarata dall'ADR 0052 — non esiste un comando che riporti
+   * `declared` a `false`, quindi il regime si sceglie una volta e resta.
+   */
+  | { readonly code: 'error.income.already_declared' }
 
 const ALREADY_UPGRADED: IncomeError = { code: 'error.income.already_upgraded' }
+const ALREADY_DECLARED: IncomeError = { code: 'error.income.already_declared' }
 
 /**
  * ADR 0027 — `accepts` **si genera dal listino**, non gli sta accanto.
@@ -51,10 +65,10 @@ export const UPGRADE_PAYMENT: TransactionMeta = {
  * un prezzo, e un pool fuori listino un prezzo non ce l'ha. Per i pool che il listino offre,
  * l'ultima parola resta di `accepts`.
  */
-const notInPriceList = (pool: Pool): LedgerError => ({
+const notInPriceList = (pool: Pool, prices: PriceList): LedgerError => ({
   code: 'error.ledger.pool_not_accepted',
   pool,
-  accepted: upgradePrices().map((option) => option.pool)
+  accepted: prices.map((option) => option.pool)
 })
 
 export interface UpgradeDeps {
@@ -89,11 +103,58 @@ export const createBuyUpgrade =
     if (state.upgraded) return err(ALREADY_UPGRADED)
 
     const chosen = upgradePriceFor(pool)
-    if (chosen === null) return err(notInPriceList(pool))
+    if (chosen === null) return err(notInPriceList(pool, upgradePrices()))
 
     const paid = ledger.transaction(spend(chosen.pool, chosen.price), UPGRADE_PAYMENT)
     if (!paid.ok) return paid
 
     modifiers.register(upgradeModifier())
-    return ok({ upgraded: true })
+    return ok({ ...state, upgraded: true })
+  }
+
+/**
+ * Il pagamento della dichiarazione, con `accepts` **generato dal listino** per la ragione scritta
+ * su `UPGRADE_PAYMENT`: sono due dichiarazioni della stessa cosa, e derivarne una dall'altra
+ * toglie il problema invece di sorvegliarlo.
+ */
+export const DECLARATION_PAYMENT: TransactionMeta = {
+  reason: 'reason.income.declare',
+  accepts: declarationPrices().map((option) => option.pool)
+}
+
+/**
+ * Mettersi in regola non registra nessun modificatore — il reddito non cambia di un centesimo, ne
+ * cambia la **destinazione** — quindi questo comando non ha bisogno del registro. Riceve il solo
+ * Ledger, ed è la differenza che si vede nella firma invece che in un commento.
+ */
+export interface DeclareDeps {
+  readonly ledger: Ledger
+}
+
+/** Come `UpgradePurchase`: lo stato di partenza e lo strumento scelto. Il prezzo no (ADR 0027). */
+export interface Declaration {
+  readonly state: IncomeState
+  readonly pool: Pool
+}
+
+/**
+ * ADR 0052 — il comando che cambia il regime del reddito.
+ *
+ * Ritorna lo stato **nuovo** invece di scriverlo, come il suo gemello, e lo ritorna **a partire da
+ * quello vecchio**: `{ ...state, declared: true }` e non un oggetto costruito da zero, o
+ * dichiararsi cancellerebbe l'upgrade già comprato. È il difetto che un `IncomeState` a due campi
+ * rende possibile e che a tre sarebbe più facile ancora.
+ */
+export const createDeclare =
+  ({ ledger }: DeclareDeps): CommandHandler<Declaration, IncomeState, IncomeError> =>
+  ({ state, pool }) => {
+    if (state.declared) return err(ALREADY_DECLARED)
+
+    const chosen = declarationPriceFor(pool)
+    if (chosen === null) return err(notInPriceList(pool, declarationPrices()))
+
+    const paid = ledger.transaction(spend(chosen.pool, chosen.price), DECLARATION_PAYMENT)
+    if (!paid.ok) return paid
+
+    return ok({ ...state, declared: true })
   }

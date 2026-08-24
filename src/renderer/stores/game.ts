@@ -24,7 +24,11 @@ import { largestThatFits } from '@core/domains/atm/rules'
 import type { IncomeError } from '@core/domains/income/commands'
 import {
   canBuyUpgrade,
+  canDeclare,
+  declarationPriceFor,
+  declarationPrices,
   incomePerSecond,
+  regimeOf,
   upgradePriceFor,
   upgradePrices
 } from '@core/domains/income/rules'
@@ -317,6 +321,45 @@ export const useGameStore = defineStore('game', () => {
 
   /** Se l'upgrade è già stato comprato. Alla UI serve il fatto, non lo stato del sistema. */
   const owned = computed<boolean>(() => upgrade.value.upgraded)
+
+  /**
+   * Il listino della dichiarazione, e le sue anteprime: le stesse tre forme dell'upgrade — il
+   * listino in uno `shallowRef`, la domanda per strumento, la domanda «almeno uno» — e per le
+   * stesse tre ragioni, che stanno scritte venti righe più su.
+   *
+   * Sono separate da quelle dell'upgrade e non generalizzate in una coppia sola: sono due acquisti
+   * con due listini e due condizioni, e un aiutante condiviso da due casi identici è
+   * generalizzazione da due — il progetto ha già deciso così una volta, sui validatori dello stato
+   * salvato (registro YAGNI).
+   */
+  const declarationPriceList = shallowRef<PriceList>(declarationPrices())
+
+  const canDeclareWith = (pool: Pool): boolean => {
+    const option = declarationPriceFor(pool)
+    return option !== null && canDeclare(upgrade.value, option, balances.value[pool])
+  }
+
+  const canAffordDeclaration = computed<boolean>(() =>
+    declarationPriceList.value.some((each) => canDeclareWith(each.pool))
+  )
+
+  /**
+   * Se il reddito è già in regola. È il fatto da cui la pagina decide **cosa** mostrare: il regime
+   * corrente, e se l'acquisto ha ancora senso.
+   */
+  const declared = computed<boolean>(() => upgrade.value.declared)
+
+  /**
+   * Quanto trattiene lo Stato in regime dichiarato. Non è il **prezzo** della dichiarazione — quello
+   * resta dentro il flusso di pagamento (R24) — è ciò che l'acquisto **compra**, e la pagina lo
+   * deve dire prima, non dopo: è metà della decisione, e l'altra metà è che non si torna indietro.
+   *
+   * Si legge dal **regime**, non da `BALANCE`: il numero che la pagina mostra è lo stesso che il
+   * tick applica, non una seconda dichiarazione della stessa cosa (INV-19).
+   */
+  const declaredWithholding = shallowRef<Money>(
+    regimeOf({ upgraded: false, declared: true }).withholdingRate
+  )
 
   /**
    * I numeri del bancomat. Tutti costanti per tutta la partita, tutti dentro uno `shallowRef` per
@@ -960,6 +1003,26 @@ export const useGameStore = defineStore('game', () => {
   }
 
   /**
+   * ADR 0052 — mettersi in regola. Passa dallo stesso cancello di `buyUpgrade` perché è lo stesso
+   * gesto: si paga con la carta, e la carta chiede prima di chi è (ADR 0042).
+   *
+   * Rispecchia per la stessa ragione dell'upgrade, e qui è più stretta: cambiare regime cambia
+   * **dove** atterrerà il prossimo stipendio, e nessun evento lo annuncia — se il mirror restasse
+   * indietro, la pagina direbbe «in nero» mentre i soldi arrivano già sulla carta.
+   */
+  const declareIncome = (
+    pool: Pool,
+    code: string
+  ): Result<IncomeState, IncomeError | PaymentError> => {
+    const refused = unauthorized(pool, code)
+    if (refused !== null) return { ok: false, error: refused }
+
+    const done = game.income.declare(pool)
+    if (done.ok) readIncome()
+    return done
+  }
+
+  /**
    * D029 — eseguire un cheat, e rispecchiare ciò che il Ledger non annuncia.
    *
    * I saldi arrivano da soli con `money.posted`; il livello del caveau e il potenziamento del
@@ -1007,6 +1070,11 @@ export const useGameStore = defineStore('game', () => {
     upgradePrices: prices,
     canBuyUpgradeWith,
     canAffordUpgrade,
+    declared,
+    declarationPrices: declarationPriceList,
+    canDeclareWith,
+    canAffordDeclaration,
+    declaredWithholding,
     atmFeeRates: feeRates,
     atmSides: sides,
     atmAmounts: amounts,
@@ -1055,6 +1123,7 @@ export const useGameStore = defineStore('game', () => {
     close,
     closeWithoutSaving,
     buyUpgrade,
+    declareIncome,
     isRunning: loop.isRunning
   }
 })

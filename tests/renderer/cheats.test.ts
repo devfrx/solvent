@@ -112,7 +112,15 @@ describe('i cheat installati su una partita', () => {
     // basterebbe comunque a coprire un milione.
     game.load({
       ledger: {
-        balances: { cash: '9000', card: '0', world: '-9000', sink: '0', fees: '0', house: '0' }
+        balances: {
+          cash: '9000',
+          card: '0',
+          world: '-9000',
+          sink: '0',
+          fees: '0',
+          house: '0',
+          tax: '0'
+        }
       },
       rng: game.save().rng,
       systems: game.save().systems

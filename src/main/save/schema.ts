@@ -26,12 +26,13 @@ const DECIMAL = /^-?(0|[1-9]\d*)(\.\d+)?$/
 const decimalString = z.string().regex(DECIMAL, 'atteso un decimale in forma di stringa')
 
 /**
- * Tutte e sei le chiavi, e nessuna in più (ADR 0020): i conti non-giocatore stanno nel
+ * Tutte e sette le chiavi, e nessuna in più (ADR 0020): i conti non-giocatore stanno nel
  * salvataggio, altrimenti al ricaricamento la somma non farebbe zero.
  *
  * `POOL_IDS` non è importabile da qui — INV-03 concede al main il solo `contracts/save.ts` —
  * quindi l'elenco è ricopiato a mano. A impedire che si disallinei è `tests/save/schema`, che
  * costruisce i saldi **da** `POOL_IDS` e li passa di qui: un pool in più o in meno diventa rosso.
+ * `tax` è arrivato con D043 ed è **proprio** quel test ad averlo preteso qui.
  */
 const balancesSchema = z.strictObject({
   cash: decimalString,
@@ -39,7 +40,8 @@ const balancesSchema = z.strictObject({
   world: decimalString,
   sink: decimalString,
   fees: decimalString,
-  house: decimalString
+  house: decimalString,
+  tax: decimalString
 })
 
 /**

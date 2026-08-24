@@ -122,6 +122,15 @@ export type ScreenKey =
   | 'income.upgrade.overtime.name'
   | 'income.upgrade.overtime.desc'
   | 'income.upgrade.owned'
+  // Il regime del reddito (ADR 0052). `income.regime.buys` dice cosa l'acquisto compra **prima**
+  // che si apra il flusso del pagamento: la trattenuta e l'irreversibilità non sono un prezzo — e
+  // un acquisto senza ritorno che si scopre dopo non è una decisione.
+  | 'income.regime.name'
+  | 'income.regime.black'
+  | 'income.regime.declared'
+  | 'income.regime.desc'
+  | 'income.regime.buys'
+  | 'income.regime.declare'
   // Il pagamento (ADR 0027). `payment.only_with` è nata con un listino di una voce sola, dove non
   // c'era una scelta da etichettare ma una ragione da dare. Il caveau porta il primo listino a
   // **due** voci, e con esso la parola che manca: il nome dello strumento non basta più, perché
@@ -245,7 +254,10 @@ const POOL_KEYS: Readonly<Record<Pool, MessageKey | null>> = {
   world: null,
   sink: null,
   fees: null,
-  house: null
+  house: null,
+  // Il conto dello Stato (ADR 0052). Non si mostra per la ragione degli altri quattro: è
+  // contabilità, non uno strumento, e nessun listino lo offre.
+  tax: null
 }
 
 /**
@@ -466,6 +478,7 @@ export const createTranslator = (wording: Wording): Translator => {
       case 'error.payment.unauthorized':
         return text(error.code, { pool: poolName(error.pool) })
       case 'error.income.already_upgraded':
+      case 'error.income.already_declared':
       case 'error.vault.max_level':
         return text(error.code)
       case 'error.atm.amount_not_positive':

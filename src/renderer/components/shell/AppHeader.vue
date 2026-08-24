@@ -56,7 +56,8 @@ const POOL_LOOKS: Readonly<Record<Pool, InstrumentLook | null>> = {
   world: null,
   sink: null,
   fees: null,
-  house: null
+  house: null,
+  tax: null
 }
 
 interface Instrument extends InstrumentLook {

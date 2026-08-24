@@ -105,7 +105,7 @@ export class UnbalancedSaveError extends Error {
 }
 
 /**
- * I tre costruttori esistono perché nessun dominio nomini a mano `world`, `sink` o `fees`
+ * I tre costruttori esistono perché nessun dominio nomini a mano `world`, `sink`, `fees` o `tax`
  * (INV-10): chi scrive un sistema dichiara una grandezza e un pool del giocatore, la contropartita
  * la scrive il kernel.
  *
@@ -113,12 +113,33 @@ export class UnbalancedSaveError extends Error {
  * l'unico punto in cui un saldo cambia — e resta anche l'unico punto da leggere per sapere quando
  * un saldo può cambiare.
  */
-export const income = (pool: Pool, amount: Money): readonly Posting[] => {
+/**
+ * ADR 0052 — **la trattenuta è un argomento, non un'opzione.** Un guadagno dichiara dove atterra
+ * *e* quanto ne viene trattenuto lungo la strada: le due cose non si scelgono separatamente, e un
+ * parametro con un valore predefinito lascerebbe scrivere un reddito senza averci pensato — che è
+ * esattamente il modo in cui `INCOME_POOL = 'cash'` è sopravvissuto due fette senza essere deciso.
+ *
+ * È la forma di `transfer`, che chiede la commissione anche quando vale zero, e per la stessa
+ * ragione: chi non trattiene niente lo **dice**.
+ *
+ * A zero i movimenti restano **due**. Una riga da 0,00 € verso `tax` sarebbe un movimento per
+ * qualcosa che non è successo, ed è lo stesso principio con cui il reddito non emette transazioni
+ * quando non accredita niente.
+ */
+export const income = (pool: Pool, amount: Money, withheld: Money): readonly Posting[] => {
   const value = magnitude(amount, 'un reddito')
-  return [
+  const kept = magnitude(withheld, 'una trattenuta')
+  if (kept.greaterThan(value)) {
+    throw new RangeError(
+      `Ledger — la trattenuta (${toString(kept)}) non può superare il reddito ` +
+        `(${toString(value)}): al giocatore arriverebbe meno di zero.`
+    )
+  }
+  const posted: readonly Posting[] = [
     { pool: 'world', amount: value.neg(), category: 'income' },
-    { pool, amount: value, category: 'income' }
+    { pool, amount: value.minus(kept), category: 'income' }
   ]
+  return kept.isZero() ? posted : [...posted, { pool: 'tax', amount: kept, category: 'fee' }]
 }
 
 export const spend = (pool: Pool, amount: Money): readonly Posting[] => {

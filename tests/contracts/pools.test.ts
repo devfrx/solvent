@@ -37,9 +37,12 @@ describe('POOLS', () => {
     expect(playerPools).toEqual(['cash', 'card'])
   })
 
-  it('i conti non-giocatore sono i quattro dell’ADR 0020', () => {
+  it('i conti non-giocatore sono i cinque dell’ADR 0020', () => {
+    // Quattro fino a D043, che aggiunge `tax` in fondo: dove finisce ciò che lo Stato trattiene su
+    // un reddito dichiarato (ADR 0052). In fondo e non in mezzo, perché quest'ordine è l'ordine
+    // dei saldi nel salvataggio.
     const internalPools = POOL_IDS.filter((id) => !POOLS[id].player)
-    expect(internalPools).toEqual(['world', 'sink', 'fees', 'house'])
+    expect(internalPools).toEqual(['world', 'sink', 'fees', 'house', 'tax'])
   })
 
   it('un tetto ce l’ha solo il caveau, e nessuno matura interessi', () => {

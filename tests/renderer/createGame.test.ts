@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { fromString, toString } from '@core/contracts/money'
+import { fromString, toString, ZERO } from '@core/contracts/money'
 import { POOL_IDS } from '@core/contracts/pools'
 import type { SavePayload } from '@core/contracts/save'
 
@@ -49,7 +49,7 @@ describe('la registrazione dei sistemi', () => {
 
 describe('una partita è un’istanza sola di ciascuna cosa', () => {
   it('il Ledger del contesto è quello che i due domini usano', () => {
-    game.ctx.ledger.transaction(income('cash', fromString('1000')), {
+    game.ctx.ledger.transaction(income('cash', fromString('1000'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -65,7 +65,7 @@ describe('una partita è un’istanza sola di ciascuna cosa', () => {
     // invece usa quello del `SystemContext`: sono due porte diverse per la stessa istanza, e
     // niente **obbliga** il bootstrap a passare la stessa. Provato mettendone una seconda: tutto
     // restava verde. Questo caso è l'unica rete che c'è.
-    game.ctx.ledger.transaction(income('card', fromString('1000')), {
+    game.ctx.ledger.transaction(income('card', fromString('1000'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -182,7 +182,7 @@ describe('il tempo che avanza', () => {
 
 describe('il salvataggio', () => {
   it('save → load riproduce saldi, seme e stato dei domini', () => {
-    game.ctx.ledger.transaction(income('card', fromString('900')), {
+    game.ctx.ledger.transaction(income('card', fromString('900'), ZERO), {
       reason: 'reason.income.tick'
     })
     game.income.buyUpgrade('card')
@@ -234,7 +234,7 @@ describe('il salvataggio', () => {
 
 describe('il reset', () => {
   it('hard azzera i conti e riporta i domini all’inizio', () => {
-    game.ctx.ledger.transaction(income('card', fromString('900')), {
+    game.ctx.ledger.transaction(income('card', fromString('900'), ZERO), {
       reason: 'reason.income.tick'
     })
     game.income.buyUpgrade('card')
@@ -243,7 +243,10 @@ describe('il reset', () => {
 
     expect(total()).toBe('0')
     expect(toString(game.ctx.ledger.balance('card'))).toBe('0')
-    expect(game.registry.saveAll()).toEqual({ income: { upgraded: false }, vault: { level: 0 } })
+    expect(game.registry.saveAll()).toEqual({
+      income: { upgraded: false, declared: false },
+      vault: { level: 0 }
+    })
   })
 
   it('hard è una partita nuova, quindi una casualità nuova', () => {
@@ -284,7 +287,7 @@ describe('caricare non è un movimento economico', () => {
     // Senza, la prima candela di una partita riaperta salirebbe da zero al patrimonio caricato:
     // una salita mai avvenuta, e per giunta quella che decide la scala dell'asse. Nessun evento lo
     // annuncia — caricare non posta — quindi a dirlo è `Game.load`.
-    game.ctx.ledger.transaction(income('card', fromString('340')), {
+    game.ctx.ledger.transaction(income('card', fromString('340'), ZERO), {
       reason: 'reason.income.tick'
     })
     const saved: SavePayload = game.save()

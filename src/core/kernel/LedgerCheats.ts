@@ -1,6 +1,6 @@
 import type { Cheat, CheatResult } from '@core/contracts/cheats'
 import type { Money } from '@core/contracts/money'
-import { fromString } from '@core/contracts/money'
+import { fromString, ZERO } from '@core/contracts/money'
 import type { Pool } from '@core/contracts/pools'
 import type { Result } from '@core/contracts/result'
 import { ok } from '@core/contracts/result'
@@ -30,7 +30,9 @@ const nothing = <E>(result: Result<unknown, E>): Result<void, E> =>
 const grant =
   (ledger: Ledger, pool: Pool) =>
   (amount: Money): CheatResult =>
-    nothing(ledger.transaction(income(pool, amount), { reason: 'reason.cheat.grant' }))
+    // Un cheat non è una fonte di reddito: non ha un regime, quindi non trattiene niente. Lo dice
+    // qui invece di ereditarlo da un valore predefinito, che è ciò che l'ADR 0052 non vuole.
+    nothing(ledger.transaction(income(pool, amount, ZERO), { reason: 'reason.cheat.grant' }))
 
 /**
  * Svuotare è **spendere tutto quello che c'è**, non «scrivere zero»: la contropartita finisce in

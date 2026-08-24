@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { fromString } from '@core/contracts/money'
+import { fromString, ZERO } from '@core/contracts/money'
 import type { Pool } from '@core/contracts/pools'
 
 import { createBus } from '@core/kernel/Bus'
@@ -33,7 +33,7 @@ describe('la capienza di un pool', () => {
   it('accetta ciò che ci sta esattamente', () => {
     const ledger = createLedger(createBus(), cappedAt(CAP))
 
-    const result = ledger.transaction(income('cash', money(CAP)), {
+    const result = ledger.transaction(income('cash', money(CAP), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -43,9 +43,9 @@ describe('la capienza di un pool', () => {
 
   it('rifiuta ciò che la supererebbe, e dice quanto ci starebbe ancora', () => {
     const ledger = createLedger(createBus(), cappedAt(CAP))
-    ledger.transaction(income('cash', money('700')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('700'), ZERO), { reason: 'reason.income.tick' })
 
-    const result = ledger.transaction(income('cash', money('400')), {
+    const result = ledger.transaction(income('cash', money('400'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -65,10 +65,10 @@ describe('la capienza di un pool', () => {
     bus.on('money.posted', () => {
       emitted += 1
     })
-    ledger.transaction(income('cash', money('700')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('700'), ZERO), { reason: 'reason.income.tick' })
     emitted = 0
 
-    ledger.transaction(income('cash', money('400')), { reason: 'reason.income.tick' })
+    ledger.transaction(income('cash', money('400'), ZERO), { reason: 'reason.income.tick' })
 
     expect(ledger.balance('cash').toString()).toBe('700')
     expect(ledger.balance('world').toString()).toBe('-700')
@@ -82,7 +82,15 @@ describe('la capienza di un pool', () => {
     // giocatore non poteva né depositare, né prelevare, né ampliare il caveau.
     const ledger = createLedger(createBus(), cappedAt(CAP))
     ledger.load({
-      balances: { cash: '9000', card: '0', world: '-9000', sink: '0', fees: '0', house: '0' }
+      balances: {
+        cash: '9000',
+        card: '0',
+        world: '-9000',
+        sink: '0',
+        fees: '0',
+        house: '0',
+        tax: '0'
+      }
     })
 
     const result = ledger.transaction(spend('cash', money('500')), { reason: 'reason.atm.deposit' })
@@ -96,10 +104,18 @@ describe('la capienza di un pool', () => {
     // per chiunque sia già sopra: la capienza ferma **chi sale**, non chi si trova già in alto.
     const ledger = createLedger(createBus(), cappedAt(CAP))
     ledger.load({
-      balances: { cash: '9000', card: '0', world: '-9000', sink: '0', fees: '0', house: '0' }
+      balances: {
+        cash: '9000',
+        card: '0',
+        world: '-9000',
+        sink: '0',
+        fees: '0',
+        house: '0',
+        tax: '0'
+      }
     })
 
-    const result = ledger.transaction(income('cash', money('0.01')), {
+    const result = ledger.transaction(income('cash', money('0.01'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -112,10 +128,20 @@ describe('la capienza di un pool', () => {
     // più raccontare due cose diverse.
     const ledger = createLedger(createBus(), cappedAt(CAP))
     ledger.load({
-      balances: { cash: '9000', card: '0', world: '-9000', sink: '0', fees: '0', house: '0' }
+      balances: {
+        cash: '9000',
+        card: '0',
+        world: '-9000',
+        sink: '0',
+        fees: '0',
+        house: '0',
+        tax: '0'
+      }
     })
 
-    const result = ledger.transaction(income('cash', money('1')), { reason: 'reason.income.tick' })
+    const result = ledger.transaction(income('cash', money('1'), ZERO), {
+      reason: 'reason.income.tick'
+    })
 
     expect(result.ok).toBe(false)
     if (result.ok) return
@@ -126,7 +152,7 @@ describe('la capienza di un pool', () => {
   it('un pool senza capienza non ha tetto', () => {
     const ledger = createLedger(createBus(), cappedAt(CAP))
 
-    const result = ledger.transaction(income('card', money('999999999')), {
+    const result = ledger.transaction(income('card', money('999999999'), ZERO), {
       reason: 'reason.income.tick'
     })
 
@@ -142,13 +168,13 @@ describe('la capienza di un pool', () => {
     const ledger = createLedger(createBus(), () => limit)
 
     expect(
-      ledger.transaction(income('cash', money('1200')), { reason: 'reason.income.tick' }).ok
+      ledger.transaction(income('cash', money('1200'), ZERO), { reason: 'reason.income.tick' }).ok
     ).toBe(false)
 
     limit = money('5000')
 
     expect(
-      ledger.transaction(income('cash', money('1200')), { reason: 'reason.income.tick' }).ok
+      ledger.transaction(income('cash', money('1200'), ZERO), { reason: 'reason.income.tick' }).ok
     ).toBe(true)
     expect(ledger.balance('cash').toString()).toBe('1200')
   })

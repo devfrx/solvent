@@ -18,6 +18,7 @@ import { POOL_IDS, POOLS } from './pools'
 export type Reason =
   | 'reason.income.tick'
   | 'reason.income.upgrade'
+  | 'reason.income.declare'
   | 'reason.atm.deposit'
   | 'reason.atm.withdraw'
   | 'reason.vault.expand'

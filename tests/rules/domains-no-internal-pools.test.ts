@@ -61,8 +61,8 @@ describe('il rilevatore', () => {
 })
 
 describe('i conti non-giocatore', () => {
-  it('si derivano da POOLS e sono quattro', () => {
-    expect([...INTERNAL_POOLS]).toEqual(['world', 'sink', 'fees', 'house'])
+  it('si derivano da POOLS e sono cinque', () => {
+    expect([...INTERNAL_POOLS]).toEqual(['world', 'sink', 'fees', 'house', 'tax'])
   })
 
   it('ci sono dei file di dominio da guardare, altrimenti il test non guarda niente', () => {

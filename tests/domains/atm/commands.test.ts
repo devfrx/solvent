@@ -39,7 +39,7 @@ let posted: Transaction[]
  * anche le transazioni raccolte, cosi `posted` contiene solo l'operazione sotto esame.
  */
 const fund = (pool: Pool, amount: string): void => {
-  ledger.transaction(income(pool, money(amount)), { reason: 'reason.income.tick' })
+  ledger.transaction(income(pool, money(amount), ZERO), { reason: 'reason.income.tick' })
   posted = []
 }
 
@@ -314,8 +314,8 @@ describe('il pool in arrivo, quando ha un tetto', () => {
     // fa rispettare. Qui il Ledger ne ha una vera, non quella del `beforeEach` senza tetto.
     const bus = createBus()
     const capped = createLedger(bus, (pool) => (pool === 'cash' ? money('1000') : null))
-    capped.transaction(income('cash', money('900')), { reason: 'reason.income.tick' })
-    capped.transaction(income('card', money('1000')), { reason: 'reason.income.tick' })
+    capped.transaction(income('cash', money('900'), ZERO), { reason: 'reason.income.tick' })
+    capped.transaction(income('card', money('1000'), ZERO), { reason: 'reason.income.tick' })
 
     const done = createAtm(capped).withdraw(money('500'))
 

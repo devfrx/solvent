@@ -131,6 +131,43 @@ export const BALANCE = {
   UPGRADE_MULTIPLIER: fromString('1.5'),
 
   /**
+   * Quanto lo Stato trattiene su un reddito **dichiarato** (ADR 0052).
+   *
+   * **Non è tarato sul realismo fiscale: è tarato sulla commissione del bancomat.** Chi resta in
+   * nero e vuole comunque i soldi sulla carta li versa a mano e paga `ATM_FEE_RATE_IN`, cioè
+   * l'1,5%. È quello il confronto vero, perché è l'alternativa che il giocatore ha davvero.
+   *
+   * **Sotto l'1,5%** dichiarare costerebbe meno che versare, la carta diventerebbe migliore sotto
+   * ogni aspetto e i contanti smetterebbero di essere una scelta — il caveau resterebbe un dominio
+   * senza clienti, che è ciò che D017 ha già evitato una volta tarando lo sconto della carta.
+   *
+   * **Sopra il 5%** il verso opposto, ed è il difetto peggiore dei due: restare in nero e premere
+   * «deposita» a ogni riempimento verrebbe pagato abbastanza da valere la pena, e avremmo scritto
+   * un'ADR per rendere ottimale proprio la mansione che voleva togliere.
+   *
+   * **Il 3%, cioè il doppio della commissione.** Un punto e mezzo di reddito è il prezzo di non
+   * dover guardare il caveau mai più. A sorvegliarlo è `income_tax_rate` in `targets.ts`, non
+   * questo commento.
+   *
+   * **Quando il calore arriverà (fetta 04) questo è il primo numero da rileggere**, perché la
+   * carta comincerà a pagare due prezzi invece di uno e l'equilibrio si sposta tutto.
+   */
+  INCOME_TAX_RATE: fromString('0.03'),
+
+  /**
+   * Quanto costa **mettersi in regola**, e si paga solo con la carta — come l'upgrade, e per la
+   * stessa ragione: la carta si riempie solo dal bancomat, quindi il prezzo obbliga a passare dal
+   * ponte invece di aggirarlo.
+   *
+   * **50.000,00 € sta fra il quinto livello del caveau (32.000,00 €) e il sesto (64.000,00 €)**, e
+   * la posizione è la meccanica: per accumulare questa cifra senza passare la serata al bancomat
+   * bisogna prima ampliare, quindi la scala che D042 ha costruito si **attraversa** invece di
+   * essere saltata. Un prezzo molto più basso renderebbe la fetta 02 un tutorial da saltare; molto
+   * più alto farebbe arrivare la dichiarazione quando il muro non dà più fastidio a nessuno.
+   */
+  INCOME_DECLARATION_PRICE_CARD: fromString('50000'),
+
+  /**
    * Il **pavimento** della commissione del bancomat: quanto trattiene un'operazione piccola,
    * qualunque cosa dica la percentuale.
    *
