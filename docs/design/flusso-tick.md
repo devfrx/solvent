@@ -37,7 +37,8 @@ flowchart TD
   BLK -- no --> TICK
   SPLIT --> TICK["registry.tickAll(ctx, blocco)"]
   TICK --> CHR["chronicle.advance(blocco)<br/>chiude gli intervalli scaduti"]
-  CHR --> MORE{"resta<br/>del tempo?"}
+  CHR --> CAD["saveCadence.advance(blocco)<br/>segna se il disco è dovuto"]
+  CAD --> MORE{"resta<br/>del tempo?"}
   MORE -- sì --> TICK
   MORE -- no --> RENDER["la UI legge i selettori"]
   WAIT --> RENDER
@@ -54,6 +55,14 @@ intervallo lungo non arriva ai sistemi in un colpo: viene camminato a blocchi di
 perché una soglia attraversata e rientrata dentro un salto unico non scatta mai. A spezzare è
 `advance` e non chi lo chiama — se fosse del chiamante, ogni chiamante nuovo potrebbe dimenticarsene
 in silenzio, e R25 resterebbe verde mentre la sua ragione viene aggirata.
+
+**Il terzo nodo del blocco è di [D041](../delega/D041-il-salvataggio-ha-una-cadenza.md), e non
+registra: segna.** La cadenza del salvataggio riceve lo stesso blocco che ricevono i sistemi e la
+cronaca, e l'unica cosa che fa è alzare un `boolean` quando la soglia è passata. **Non scrive**: a
+scrivere è lo store, al primo frame utile, perché è l'unico che ha `SaveApi` sotto mano e perché una
+scrittura è asincrona dentro un ciclo che è sincrono. Che sia un `boolean` e non un contatore è la
+riga che regge il recupero: 7.300 tick attraversano la soglia ventiquattro volte in tre millisecondi,
+e ventiquattro cose dovute sono **una** cosa da fare ([ADR 0050](../adr/0050-la-cadenza-sta-sulla-via-unica.md)).
 
 **Le due frecce che entrano in `advance` sono il punto del disegno.** Il passo del frame e il
 recupero all'avvio sono lo stesso fatto — _è passato del tempo mentre non guardavamo_ — e da

@@ -124,8 +124,15 @@ Verificato con i comandi, non ricordato.
 - **`npm run verify` verde** e **`npm run verify:release` verde**. Quanti siano i test e quanto duri
   la catena lo dice [qualita.md](../qualita.md), rimisurata in questa sessione dopo nove deleghe di
   numeri scaduti.
-- **Il ramo `d041-il-salvataggio-ha-una-cadenza` non è in `main`.** Fondere e spingere sono
-  decisioni dell'utente, e questa sessione non le ha prese.
+- **Il ramo `d041-il-salvataggio-ha-una-cadenza` è avanti a `main` di tre commit, e `main` è
+  avanti a `origin/main` di uno** — il commit che _scrive_ la delega, fatto prima di ramificare.
+  Fondere e spingere sono decisioni dell'utente, e questa sessione non le ha prese: la domanda è
+  stata posta e non ha ancora risposta. I due numeri non si scrivono qui perché invecchiano al primo
+  commit: li dicono `git rev-list --count main..HEAD` e `git rev-list --count origin/main..main`.
+- **`npm ci` ha modificato `package-lock.json` e la modifica è stata annullata.** Toglieva 78 righe
+  di dipendenze **opzionali** di `electron-builder` (`@electron/windows-sign` e i suoi). Non è
+  lavoro di D041 e infilarla nel commit della delega l'avrebbe resa invisibile: è stata ripristinata
+  con `git checkout --`. Se sia giusto tenerla è una decisione a sé, e nessuno l'ha presa.
 - **Niente residui di debug**, e la cartella usa-e-getta della prova sta nello scratchpad, non nel
   repo.
 - **Il ramo è stato provato rompendolo sei volte**, con il conto in fondo alla delega — 3, 3, 2, 1,

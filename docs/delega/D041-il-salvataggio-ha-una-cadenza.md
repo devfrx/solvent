@@ -386,6 +386,16 @@ _Come si lavora_ sono **contestabili**: chi vuole ridiscuterle trova qui il cont
     posizione fuori dal ciclo, correzione 9. I tre file sono stati copiati prima e ripristinati con un
     `diff` che conferma l'identità.
 
+12. **Due documenti di struttura non nominavano il file nuovo, e nessun gate poteva vederlo.**
+    `architettura.md` elencava i file di `runtime/` in due punti — il nodo del diagramma e l'albero
+    delle cartelle — e `cadence.ts` non c'era in nessuno dei due; `flusso-tick.md` disegnava il
+    blocco di `advance` con due nodi invece di tre. `tests/rules/import-graph` era **verde e aveva
+    ragione**: sceglie il nodo per **prefisso**, quindi un file nuovo dentro una cartella già
+    mappata non lo fa diventare rosso — è la correzione 1 di
+    [D026](D026-dove-si-attacca-un-dominio.md) che torna. Trovati rileggendo, non da un gate, e
+    corretti chiudendo. È la stessa classe della correzione 10, e il fatto che siano due in una
+    delega sola dice che è la classe più facile da lasciare indietro.
+
 ### Cosa è stato guardato nella finestra vera
 
 Con `scripts/cdp.mjs`, e con `--user-data-dir` su una cartella dello scratchpad. **Quella precauzione

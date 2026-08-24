@@ -27,7 +27,7 @@ flowchart TD
     UI["ui/*<br/>tokens · roles · theme · i pezzi<br/>non sa che gioco è"]
     I18N["i18n/*"]
     ST["stores/*"]
-    RT["runtime/*<br/>createGame · loop · host · cheats · candles · chronicle"]
+    RT["runtime/*<br/>createGame · loop · host · cheats · candles · chronicle · cadence"]
   end
 
   subgraph CORE["core — nessun Vue, Pinia o Electron"]
@@ -208,6 +208,7 @@ solvent/
 │     ├─ App.vue                  # il guscio: i 7 stati, la navigazione, i token e le primitive
 │     ├─ runtime/
 │     │  ├─ createGame.ts         # registra i sistemi, monta il contesto, fa avanzare il tempo
+│     │  ├─ cadence.ts            # ogni quanti tick qualcosa è dovuto: un boolean, non un contatore (ADR 0050)
 │     │  ├─ chronicle.ts          # le serie che il tempo alimenta: una lista, due forme (R25)
 │     │  ├─ host.ts               # l'unico file che tocca il browser
 │     │  └─ loop.ts               # rAF + accumulatore -> tick a passo fisso
