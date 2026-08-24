@@ -1,8 +1,10 @@
 # ADR 0053 — Un miglioramento dichiara il tempo in cui rientra
 
-- **Stato:** **Proposta** — il meccanismo che la impone non esiste ancora. La costruisce
-  [D044](../delega/D044-il-reddito-e-un-elenco-di-fonti.md), e passa ad _Accettata_ nel commit che
-  porta il prezzo calcolato dal rientro e il bersaglio che lo misura
+- **Stato:** **Accettata** — [D044](../delega/D044-il-reddito-e-un-elenco-di-fonti.md) l'ha
+  costruita il 2026-08-24. Il meccanismo è `pricesOf` in `domains/income/rules.ts`, che calcola ogni
+  prezzo come incremento di resa per `INCOME_PAYBACK_SECONDS`, e il bersaglio è
+  `income_level_payback`, che misura il rientro su **ogni** livello di **ogni** fonte partendo dal
+  listino e dalle rese — mai dalla costante, o direbbe che un numero è uguale a sé stesso
 - **Data:** 2026-08-24
 - **Nasce da:** una sessione di gioco. «Compro gli straordinari a 800 €?» è una domanda sul nome, e
   la risposta è che sotto quel nome non c'è una scala: ci sono tre numeri — un prezzo, un

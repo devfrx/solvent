@@ -1,10 +1,10 @@
 # Reddito — scheda di dominio
 
-- **Stato:** **ricompilata il 2026-08-24** per [D044](../../delega/D044-il-reddito-e-un-elenco-di-fonti.md),
-  leggendo `src/core/domains/income/`. **Descrive un dominio che non esiste ancora**: le sezioni
-  qui sotto vincolano ciò che D044 costruirà, e vanno **rilette contro `src/`** il giorno dopo
-  l'esecuzione. È già successo alla [scheda del caveau](vault.md), che riletta ha smentito tre
-  delle proprie righe senza cambiare nessuna decisione di gioco
+- **Stato:** **ricompilata il 2026-08-24** per [D044](../../delega/D044-il-reddito-e-un-elenco-di-fonti.md)
+  e **riletta contro `src/` lo stesso giorno**, a esecuzione finita. Era stata scritta quando il
+  dominio non esisteva ancora — vincolava ciò che D044 avrebbe costruito — e la rilettura ne ha
+  smentite **tre**, senza cambiare nessuna decisione di gioco. Sono elencate in fondo, come è
+  successo alla [scheda del caveau](vault.md)
 - **Compilata prima:** il 2026-08-21 da [D018](../../delega/D018-la-scheda-di-dominio.md), e riletta
   il 2026-08-24 da [D043](../../delega/D043-il-reddito-si-mette-in-regola.md)
 - **Costruito da:** [D010](../../delega/D010-dominio-income.md), fetta 01; il listino è di
@@ -54,9 +54,13 @@ non c'è più un livello da comprare.
 ### 3 · Deve vedere, deve decidere, può andare male
 
 **Deve vedere:** quali fonti esistono, quali sono aperte e **a che livello**; quanto rende ciascuna
-adesso e quanto renderebbe al livello dopo; quanto costa quel livello e con quale strumento si paga,
-letto **prima di premere** ([D019](../../delega/D019-il-pagamento.md)); quanto manca al plateau; e
+adesso e quanto renderebbe al livello dopo; dove atterra ciò che produce; quanto manca al plateau; e
 **quanto non è entrato** perché il caveau non lo teneva.
+
+Il **prezzo no**, e non è una dimenticanza: nominarlo sul pannello sarebbe un'opzione di listino
+fuori dal flusso di pagamento, che R24 vieta e che
+l'[ADR 0042](../../adr/0042-il-pagamento-e-un-flusso-solo.md) ha deciso dopo D019. Si legge
+comunque **prima di pagare**, dentro `PaymentDialog`, che è il senso che quella riga aveva.
 
 **Deve decidere: in quale pozza vuole che atterrino i soldi.** Il prezzo non discrimina più — ogni
 livello di ogni fonte rientra nello stesso tempo
@@ -135,10 +139,16 @@ tara `INCOME_TAX_RATE` deve saperlo.
 **Prende in prestito:** il pool `cash` e il pool `card` (`contracts/pools.ts`), il listino
 (`contracts/payment.ts`), e lo **spazio** del caveau — che arriva per costruzione, mai per import.
 
-**Presta il bersaglio `income.all`** (`INCOME_TARGET`), e da D044 lo presta **nudo**: i livelli sono
-aritmetica pura sullo stato, non modificatori registrati, quindi dentro il dominio nessuno vi
-registra più niente. È il gancio trasversale del progetto in attesa del suo primo cliente vero, che
-sarà l'albero delle abilità.
+**Presta il bersaglio `income.all`** (`INCOME_TARGET`), e da D044 lo presta quasi nudo: i livelli
+sono aritmetica pura sullo stato, non modificatori registrati, quindi **il gioco** non vi registra
+più niente. È il gancio trasversale del progetto in attesa del suo primo cliente vero, che sarà
+l'albero delle abilità.
+
+L'unico che vi registra è il **devcheat** `cheat.income.boost` (`domains/income/cheats.ts`), e non è
+un dettaglio da nascondere: è ciò che tiene `register` e `remove` provati da qualcosa che non sia un
+loro test, cioè che impedisce al registro dei modificatori di diventare quel «campo provato e non
+usato» che [D040](../../delega/D040-il-recupero-avanza-a-blocchi.md) ha già pagato una volta. In un
+pacchetto di rilascio quel file non è raggiungibile, quindi lì il gancio è nudo davvero.
 
 **Presta anche una forma**, ed è la prima volta che questo dominio ne presta una: _prezzo =
 incremento × rientro_ ([ADR 0053](../../adr/0053-un-miglioramento-dichiara-il-tempo-in-cui-rientra.md)).
@@ -156,20 +166,20 @@ limite. La pagina che era nata stretta cresce col dominio, che è ciò che quell
 
 ## Metà kernel
 
-| #   | Domanda                               | Reddito                                                                                                                                                                                                                                    |
-| --- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | Ha stato?                             | **sì**: i livelli delle fonti e il regime. `load` valida ogni livello — intero, dentro la scala — e il booleano del regime; `reset` rimette `INITIAL`                                                                                      |
-| 2   | Ticchetta? In quale `ORDER`?          | **sì**, `ORDER.INCOME`. Viene **dopo** `ECONOMY`, così al caricamento il caveau ritrova il livello prima che il recupero ticchetti                                                                                                         |
-| 3   | Cosa fa con un `elapsed` grande?      | un `tick` per blocco, come oggi. **Non** incassa un rifiuto: chiede quanto ci sta e accredita quello, **per pozza**                                                                                                                        |
-| 4   | Soglie che si attraversano?           | **no, non sue**. Le attraversa quelle del caveau, e le vede da fuori con `room`                                                                                                                                                            |
-| 5   | Cosa serve fuori dal `SystemContext`? | `ledger`, `modifiers` e `room`, tutti e tre per costruzione (ADR 0024). `modifiers` **resta anche se nessuno vi registra più niente**: è il punto di composizione di `income.all`, e toglierlo vorrebbe dire togliere il gancio            |
-| 6   | Eventi, e domini importati?           | **nessun evento**, emesso o ascoltato. **Non importa nessun dominio**                                                                                                                                                                      |
-| 7   | Quali `Reason` introduce?             | `reason.income.tick`, `reason.income.level` e `reason.income.declare`. Più due codici suoi, `error.income.max_level` e `error.income.already_declared`                                                                                     |
-| 8   | Tocca il denaro? Quali pool?          | **sì.** In entrata il pool lo dichiara il regime **della fonte**, e il tick raggruppa **per pool**: una transazione per pozza, non una per fonte. In uscita `spend` con `accepts` generato dal listino della fonte. Nessuna capienza è sua |
-| 9   | Conti propri per entità?              | **no**, e vale la pena dirlo perché una fonte _sembra_ un'entità: non ha un budget, non si crea e non si distrugge. L'elenco è fisso e dichiarato                                                                                          |
-| 10  | Liste storiche?                       | **no**. Quanto non è entrato è un numero solo e descrive l'ultimo tick, non la partita: infatti non si salva                                                                                                                               |
-| 11  | Sapere che giorno è?                  | **no**. Riceve durate in tick, mai date                                                                                                                                                                                                    |
-| 12  | Usa l'Rng?                            | **no**, e discende dalla varianza zero                                                                                                                                                                                                     |
+| #   | Domanda                               | Reddito                                                                                                                                                                                                                                                                        |
+| --- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Ha stato?                             | **sì**: i livelli delle fonti e il regime. `load` valida ogni livello — intero, dentro la scala — e il booleano del regime; `reset` rimette `INITIAL`                                                                                                                          |
+| 2   | Ticchetta? In quale `ORDER`?          | **sì**, `ORDER.INCOME`. Viene **dopo** `ECONOMY`, così al caricamento il caveau ritrova il livello prima che il recupero ticchetti                                                                                                                                             |
+| 3   | Cosa fa con un `elapsed` grande?      | un `tick` per blocco, come oggi. **Non** incassa un rifiuto: chiede quanto ci sta e accredita quello, **per regime**                                                                                                                                                           |
+| 4   | Soglie che si attraversano?           | **no, non sue**. Le attraversa quelle del caveau, e le vede da fuori con `room`                                                                                                                                                                                                |
+| 5   | Cosa serve fuori dal `SystemContext`? | `ledger`, `modifiers` e `room`, tutti e tre per costruzione (ADR 0024). `modifiers` **resta anche se nessuno vi registra più niente**: è il punto di composizione di `income.all`, e toglierlo vorrebbe dire togliere il gancio                                                |
+| 6   | Eventi, e domini importati?           | **nessun evento**, emesso o ascoltato. **Non importa nessun dominio**                                                                                                                                                                                                          |
+| 7   | Quali `Reason` introduce?             | `reason.income.tick`, `reason.income.level` e `reason.income.declare`. Più due codici suoi, `error.income.max_level` e `error.income.already_declared`                                                                                                                         |
+| 8   | Tocca il denaro? Quali pool?          | **sì.** In entrata il pool lo dichiara il regime **della fonte**, e il tick raggruppa **per regime**: una transazione per regime, non una per fonte né una per pool. In uscita `spend` con `accepts` generato dal listino della fonte, **per livello**. Nessuna capienza è sua |
+| 9   | Conti propri per entità?              | **no**, e vale la pena dirlo perché una fonte _sembra_ un'entità: non ha un budget, non si crea e non si distrugge. L'elenco è fisso e dichiarato                                                                                                                              |
+| 10  | Liste storiche?                       | **no**. Quanto non è entrato è un numero solo e descrive l'ultimo tick, non la partita: infatti non si salva                                                                                                                                                                   |
+| 11  | Sapere che giorno è?                  | **no**. Riceve durate in tick, mai date                                                                                                                                                                                                                                        |
+| 12  | Usa l'Rng?                            | **no**, e discende dalla varianza zero                                                                                                                                                                                                                                         |
 
 **Numeri di gioco introdotti:** quanti livelli ha una fonte, di quanto cresce la resa a ogni
 livello, in quanti secondi un livello rientra, e la resa base di ciascuna fonte. `INCOME_TAX_RATE` e
@@ -215,3 +225,46 @@ prima vera, e il registro lo dichiarava da cinque fette.
 scrive nel proprio commento _«il reddito massimo che questo gioco raggiunge oggi è 18,00 €/s»_. Da
 qui non è più vero. Il criterio sopravvive — con l'ADR 0053 i prezzi crescono **insieme** a ciò che
 una scrittura mancata fa perdere — ma il margine si stringe, e va rimisurato invece che ereditato.
+
+---
+
+## Cosa la rilettura contro `src/` ha corretto
+
+La scheda è stata compilata **prima** che il dominio esistesse, e rileggerla contro il codice il
+giorno dopo è il controllo che [D018](../../delega/D018-la-scheda-di-dominio.md) si era prenotato.
+Tre righe non tornavano. **Nessuna delle tre cambia una decisione di gioco**, ed è il punto: una
+scheda che sbaglia sul come e non sul cosa è una scheda che ha fatto il proprio lavoro.
+
+**1. «Il tick raggruppa per pozza» era la parola sbagliata, e la delega aveva già la ragione.** La
+metà kernel diceva «una transazione per pozza»; il codice raggruppa **per regime**. Sembrano la
+stessa cosa finché due regimi non condividono un pool con trattenute diverse — e allora la
+trattenuta di una transazione sola andrebbe scalata sul parziale, cioè divisa fra `Decimal`, cioè
+precisione persa e INV-08 rotta in silenzio. Oggi i due regimi stanno su due pool diversi e le due
+descrizioni coincidono: è precisamente il caso in cui una parola sbagliata non fa rumore.
+
+**2. Il pannello non dice il prezzo, e non deve.** La sezione 3 chiedeva «quanto costa quel livello
+e con quale strumento si paga, letto prima di premere», citando D019. Era vero quando D019 l'ha
+scritto e non lo è più: l'[ADR 0042](../../adr/0042-il-pagamento-e-un-flusso-solo.md) ha spostato
+prezzo e scelta dentro `PaymentDialog`, e R24 rende rosso un componente che li nomina fuori di lì.
+**È la stessa riga che la rilettura della [scheda del caveau](vault.md) aveva già corretto**, con la
+stessa causa: una scheda scritta prima di un'ADR che le è passata sopra.
+
+**3. Il gancio `income.all` non è nudo: ha un cliente, ed è il devcheat.** La sezione 8 diceva che
+dentro il dominio non vi registra più nessuno. `domains/income/cheats.ts` sì —
+`cheat.income.boost` accende e spegne un `mult` — ed è deliberato: senza, `register` e `remove`
+resterebbero vivi solo nei propri test. La riga corretta distingue **il gioco**, che non registra
+niente, da **lo strumento di sviluppo**, che è l'unica cosa che tiene quel gancio percorso.
+
+### E una cosa che la scheda non prevedeva, trovata scrivendo il codice
+
+**I modificatori si compongono per regime, non sulla somma delle fonti.** La delega diceva
+«`incomePerSecond` — la somma delle fonti, poi i modificatori su `income.all`», e il tick ha bisogno
+di un importo **per regime**: ripartire un totale già composto vorrebbe dire dividere fra `Decimal`,
+cioè la trappola che la delega stessa vietava due paragrafi più in là. La composizione è quindi
+scesa dentro il gruppo, e `incomePerSecond` somma ciò che i gruppi hanno già composto — una formula
+sola, letta da due parti, invece di due che devono coincidere.
+
+**Per un `mult` i due risultati sono identici**, perché moltiplicare è distributivo, e `mult` è
+l'unico tipo che qualcuno registri oggi su `income.all`. Per un `add` no: si sommerebbe a **ogni**
+regime. È la riga da rileggere il giorno in cui l'albero delle abilità diventa il primo cliente
+vero, ed è scritta dov'è il codice invece che solo qui.

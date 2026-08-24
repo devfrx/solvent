@@ -31,7 +31,7 @@ export const installCheats = (game: Game): Cheats => {
 
   cheats.register(...ledgerCheats(game.ctx.ledger))
   cheats.register(...vaultCheats(game.vault))
-  cheats.register(...incomeCheats(game.income))
+  cheats.register(...incomeCheats(game.modifiers))
 
   return cheats
 }

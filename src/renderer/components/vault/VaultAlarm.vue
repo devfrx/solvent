@@ -20,7 +20,7 @@ import UiText from '@renderer/ui/UiText.vue'
  * c'è niente da dire non rende niente, e non lascia nemmeno lo spazio.
  */
 
-const { vaultIsFull, incomeWithheld } = storeToRefs(useGameStore())
+const { vaultIsFull, incomeBlocked } = storeToRefs(useGameStore())
 const { text, money } = useTranslator()
 </script>
 
@@ -28,9 +28,9 @@ const { text, money } = useTranslator()
   <p v-if="vaultIsFull" class="alarm">
     <UiText tone="loss" size="xs">{{ text('vault.full') }}</UiText>
   </p>
-  <p v-else-if="!incomeWithheld.isZero()" class="alarm">
+  <p v-else-if="!incomeBlocked.isZero()" class="alarm">
     <UiText tone="loss" size="xs">
-      {{ text('vault.withholding', { amount: money(incomeWithheld) }) }}
+      {{ text('vault.blocked', { amount: money(incomeBlocked) }) }}
     </UiText>
   </p>
 </template>

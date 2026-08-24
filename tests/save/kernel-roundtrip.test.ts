@@ -50,7 +50,7 @@ const buildState = (): SavePayload => {
   ledger.transaction(transfer('cash', 'card', fromString('400'), fromString('2.50')), {
     reason: 'reason.atm.deposit'
   })
-  ledger.transaction(spend('card', fromString('100.25')), { reason: 'reason.income.upgrade' })
+  ledger.transaction(spend('card', fromString('100.25')), { reason: 'reason.income.level' })
 
   const rng = createRng(-987_654)
   for (let draw = 0; draw < 5; draw += 1) rng.stream('income').next()

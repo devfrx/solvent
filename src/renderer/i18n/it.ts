@@ -74,13 +74,27 @@ export const it: Dictionary = {
   'cheat.vault.level_up': 'Caveau: un livello in più',
   'cheat.vault.max_level': 'Caveau: livello massimo',
   'cheat.vault.reset_level': 'Caveau: torna al livello zero',
-  'cheat.income.toggle_upgrade': 'Reddito: inverti il potenziamento',
+  'cheat.income.boost': 'Reddito: inverti il moltiplicatore di prova',
   'reason.cheat.grant': 'Regalo di sviluppo',
   'reason.cheat.drain': 'Svuotamento di sviluppo',
   'income.per_second': '+ {amount} / s',
-  'income.upgrade.overtime.name': 'Straordinari',
-  'income.upgrade.overtime.desc': 'Aumenta il reddito di tutte le fonti.',
-  'income.upgrade.owned': 'Già in funzione',
+  'income.source.job.name': 'Lavoro dipendente',
+  'income.source.job.desc':
+    'Paga in contanti finché sei in nero, sulla carta quando ti metti in regola. I suoi livelli ' +
+    'si comprano con la carta.',
+  'income.source.gigs.name': 'Lavoretti',
+  'income.source.gigs.desc':
+    'Paga sempre in contanti, e in regola non ci va: nessun atto burocratico li rende ' +
+    'tracciabili. I suoi livelli si comprano in contanti.',
+  'income.source.level': 'liv. {level} di {max}',
+  'income.source.closed': 'Chiusa',
+  'income.source.open': 'Apri',
+  'income.source.yields': 'Rende',
+  'income.source.next_level': 'Al livello dopo',
+  'income.source.lands_in': 'Atterra su',
+  'income.source.at_max': 'Ultimo livello: da qui non si compra più reddito.',
+  'income.plateau': 'Plateau',
+  'income.to_plateau': 'Manca al plateau',
   'income.regime.name': 'Regime del reddito',
   'income.regime.black': 'In nero',
   'income.regime.declared': 'In regola',
@@ -106,7 +120,7 @@ export const it: Dictionary = {
   'vault.expand': 'Amplia',
   'vault.at_max': 'Ultimo livello: i contanti finiscono qui.',
   'vault.full': 'Il caveau è pieno: lo stipendio non entra più. Deposita sul conto.',
-  'vault.withholding': 'Il caveau non tiene tutto: {amount} di stipendio non è entrato.',
+  'vault.blocked': 'Il caveau non tiene tutto: {amount} di stipendio non è entrato.',
 
   'stats.saved_at.title': 'Ultimo salvataggio',
   'stats.saved_at.never': 'Mai: questa partita non è ancora stata scritta su disco.',
@@ -121,7 +135,8 @@ export const it: Dictionary = {
   'board.description':
     'Come sta andando la partita: quanto entra, quanto vale, quanto è costato spostarlo.',
   'income.description':
-    'Lo stipendio arriva da solo: qui si comprano le cose che lo fanno arrivare più in fretta.',
+    'Il denaro arriva da solo, da una fonte alla volta. Qui si aprono le fonti e si sale di ' +
+    'livello, finché non c’è più un livello da comprare.',
 
   'vault.description':
     'Quanti contanti puoi tenere addosso, e quanto costa tenerne di più. Quando è pieno lo ' +
@@ -132,7 +147,7 @@ export const it: Dictionary = {
   'board.tile.earned': 'Guadagnato in totale',
   'board.tile.spent': 'Speso in totale',
   'board.tile.fees': 'Commissioni pagate',
-  'board.tile.income.explained': 'Quanto entra ogni secondo, con gli upgrade già contati.',
+  'board.tile.income.explained': 'Quanto entra ogni secondo, con tutte le fonti già contate.',
   'board.tile.net_worth.explained':
     'Contanti più carta. È guadagnato meno speso meno commissioni: sempre, per costruzione.',
   'board.tile.earned.explained':
@@ -189,7 +204,7 @@ export const it: Dictionary = {
   'card.hint.drag': 'Trascina per girare la carta',
 
   'reason.income.tick': 'Stipendio',
-  'reason.income.upgrade': 'Straordinari acquistati',
+  'reason.income.level': 'Livello di reddito comprato',
   'reason.income.declare': 'Reddito messo in regola',
   'reason.atm.deposit': 'Deposito',
   'reason.atm.withdraw': 'Prelievo',
@@ -200,7 +215,7 @@ export const it: Dictionary = {
   'error.ledger.pool_not_accepted': 'Non si paga con {pool}. Si accetta: {accepted}.',
   'error.ledger.invalid_amount': 'Importo non utilizzabile su {pool}: {amount}.',
   'error.payment.unauthorized': 'Il codice non corrisponde a questo strumento ({pool}).',
-  'error.income.already_upgraded': 'Gli straordinari sono già stati comprati.',
+  'error.income.max_level': 'Questa fonte è già al livello massimo.',
   'error.income.already_declared': 'Il reddito è già in regola.',
   'error.vault.max_level': 'Il caveau è già all’ultimo livello: più grande di così non si fa.',
   'error.atm.amount_not_positive': 'Serve un importo maggiore di zero, non {amount}.',

@@ -36,8 +36,15 @@ export interface SavePayload {
   readonly systems: SystemsSave
 }
 
-/** La scrive solo il main (ADR 0004). La versione 1 non ha migrazioni: non ha nulla da cui migrare. */
-export const SAVE_VERSION = 1
+/**
+ * La scrive solo il main (ADR 0004).
+ *
+ * **La 2 è la prima versione con una migrazione vera** (D044): lo stato del reddito è passato da
+ * due booleani a un elenco di livelli, e una partita della versione 1 va portata avanti invece che
+ * rifiutata. Il runner esiste da [D009](../../../docs/delega/D009-persistenza-main.md) ed era
+ * provato con migrazioni finte; la mappa che aspettava questo giorno stava vuota da cinque fette.
+ */
+export const SAVE_VERSION = 2
 
 export interface SaveEnvelope {
   readonly version: number

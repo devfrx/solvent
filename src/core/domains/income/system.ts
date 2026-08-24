@@ -7,9 +7,9 @@ import type { Modifiers } from '@core/balance/modifiers'
 import { income, type Ledger } from '@core/kernel/Ledger'
 import { defineSystem, ORDER, type Stateful } from '@core/kernel/Registry'
 
-import { createBuyUpgrade, createDeclare, type IncomeError } from './commands'
-import { incomeOver, incomeThatFits, regimeOf, upgradeModifier, UPGRADE_MODIFIER_ID } from './rules'
-import type { IncomeSave, IncomeState } from './types'
+import { createBuyLevel, createDeclare, type IncomeError } from './commands'
+import { incomeOver, incomeThatFits, MAX_LEVEL, type IncomeSource } from './rules'
+import type { IncomeSave, IncomeSourceId, IncomeState } from './types'
 
 /**
  * Il primo sistema del gioco. Non calcola: legge il proprio stato, chiama le regole pure e chiede
@@ -17,7 +17,15 @@ import type { IncomeSave, IncomeState } from './types'
  * costruttore `income()` (INV-10).
  */
 
-const INITIAL: IncomeState = { upgraded: false, declared: false }
+/**
+ * La partita si apre **identica a com'era prima di D044**: il lavoro al primo livello, cioè
+ * 12,00 €/s, e i lavoretti chiusi. A sorvegliarlo è `income_per_minute_at_start`, e se diventa
+ * rosso non è il bersaglio a essere invecchiato — è la partita che non si apre più come prima.
+ *
+ * **C'è una voce per ogni fonte, e il tipo lo pretende.** Un `levels` parziale darebbe `undefined`,
+ * e `yieldAt` ci costruirebbe sopra un importo non finito che il Ledger scopre molto più a valle.
+ */
+const INITIAL: IncomeState = { levels: { job: 1, gigs: 0 }, declared: false }
 
 /**
  * Quanto spazio c'è ancora in un pool, `null` se non ha tetto.
@@ -27,28 +35,60 @@ const INITIAL: IncomeState = { upgraded: false, declared: false }
  * contendono le stesse risorse. A collegarli è il bootstrap, che è l'unico posto che ha entrambi
  * sotto mano (ADR 0024).
  *
- * Non è un valore ma una funzione, e va chiamata a ogni tick: lo spazio cambia a ogni transazione.
+ * Non è un valore ma una funzione, e da D044 va chiamata **prima di ogni transazione** e non una
+ * volta per tick: se due regimi atterrano nello stesso pool, il primo ne ha già consumato una
+ * parte.
  */
 export type Room = (pool: Pool) => Money | null
+
+/**
+ * Il livello di **una** fonte, letto da un salvataggio e verificato prima di essere creduto
+ * (INV-20, D020).
+ *
+ * Un livello frazionario, negativo o fuori scala non fa rumore: produce una resa sbagliata, e il
+ * giocatore la scopre come uno stipendio che non torna. Una fonte **mancante** è peggio ancora —
+ * `undefined` diventerebbe un importo non finito che il Ledger scopre molto più a valle — quindi
+ * qui è spazzatura, non un valore predefinito.
+ */
+const validLevel = (
+  levels: Readonly<Record<IncomeSourceId, number>>,
+  id: IncomeSourceId
+): number => {
+  const level: unknown = levels[id]
+  if (typeof level !== 'number' || !Number.isInteger(level) || level < 0 || level > MAX_LEVEL) {
+    throw new TypeError(
+      `income — stato salvato non valido: il livello di '${id}' deve essere un intero fra 0 e ` +
+        `${MAX_LEVEL}.`
+    )
+  }
+  return level
+}
+
+/** Ciò che serve per comprare un livello dal di fuori: quale fonte, e con che cosa si paga. */
+export interface LevelOrder {
+  readonly source: IncomeSource
+  readonly pool: Pool
+}
 
 export interface Income {
   readonly system: Stateful<IncomeSave>
   /**
    * Lo stato, in sola lettura. Serve a chi deve **anticipare** l'esito di un acquisto —
-   * `canBuyUpgrade` lo vuole per argomento — e non è `save()` travestito: `save()` è il contratto
+   * `canBuyLevel` lo vuole per argomento — e non è `save()` travestito: `save()` è il contratto
    * con il disco, e i due nomi restano distinti proprio perché rispondono a domande diverse
-   * (`types.ts`). Il giorno in cui lo stato guadagna un campo che non si salva, questa firma non
-   * cambia e quella sì.
+   * (`types.ts`).
    */
   readonly state: () => IncomeState
   /**
-   * ADR 0027 — l'argomento è lo **strumento**, non il prezzo. Chi chiama sceglie con cosa paga; a
-   * dire quanto costa con quello resta il listino, che il comando interroga da sé.
+   * ADR 0027 — gli argomenti sono la **fonte** e lo **strumento**, non il prezzo. Chi chiama
+   * sceglie quale scala salire e con cosa paga; a dire quanto costa resta il listino, che il
+   * comando interroga da sé.
    */
-  readonly buyUpgrade: CommandHandler<Pool, IncomeState, IncomeError>
+  readonly buyLevel: CommandHandler<LevelOrder, IncomeState, IncomeError>
   /**
-   * ADR 0052 — mettersi in regola: da qui in avanti lo stipendio atterra sulla carta, al netto
-   * della parte dello Stato. Come `buyUpgrade`, l'argomento è lo **strumento** e non il prezzo.
+   * ADR 0052 — mettersi in regola: da qui in avanti ciò che le fonti dichiarano di poter
+   * dichiarare atterra sulla carta, al netto della parte dello Stato. Come `buyLevel`, non riceve
+   * un prezzo.
    *
    * Non esiste il comando opposto, ed è il meccanismo dell'irreversibilità: un regime che si
    * cambia quando conviene è un interruttore, e il gioco ottimale di un interruttore è premerlo a
@@ -57,23 +97,30 @@ export interface Income {
   readonly declare: CommandHandler<Pool, IncomeState, IncomeError>
   /**
    * Quanto dell'ultimo tick **non** è entrato perché il caveau non lo teneva. Zero quando tutto
-   * entra, e quando il caveau è pieno vale l'intero stipendio maturato.
+   * entra, e a caveau pieno vale tutto ciò che le fonti in nero hanno maturato.
    *
    * Esiste perché un idle in cui il reddito smette di entrare **senza dirlo** è un idle rotto: il
    * giocatore deve capire in un colpo d'occhio che i soldi non stanno arrivando, e perché. È un
    * numero e non un booleano perché la condizione ha due gradi che il giocatore vive in modo
    * diverso — «ne entra una parte» e «non entra niente» — e con un `sì/no` la prima sparirebbe.
    *
+   * **Fino a D044 si chiamava `withheld`, e il cambio non è cosmetico**: `withheld` era quanto il
+   * caveau non ha fatto entrare, `withholdingRate` è la parte dello Stato. Due cose diverse con lo
+   * stesso nome nello stesso dominio, dalla stessa delega — e con due fonti e due regimi la
+   * confusione smette di essere teorica.
+   *
    * Non si salva: descrive l'ultimo tick, non la partita. Alla riapertura vale zero finché il
    * primo tick non dice il contrario.
    */
-  readonly withheld: () => Money
+  readonly blocked: () => Money
 }
 
 /**
  * `modifiers` arriva per costruzione perché non può stare nel `SystemContext`: vive in `balance/`,
- * e `kernel/` non può importare `balance/` (D008). `ledger` arriva per la stessa porta ma per una
- * ragione diversa: un comando parte dalla UI, fuori da ogni `tick`, quindi nasce già legato al
+ * e `kernel/` non può importare `balance/` (D008). **Resta anche se dentro il dominio nessuno vi
+ * registra più niente**: è il punto di composizione di `income.all`, e toglierlo vorrebbe dire
+ * togliere il gancio che l'albero delle abilità userà. `ledger` arriva per la stessa porta ma per
+ * una ragione diversa: un comando parte dalla UI, fuori da ogni `tick`, quindi nasce già legato al
  * proprio contesto (docs/design/flusso-tick.md).
  *
  * **Deve essere lo stesso `Ledger` che il runtime mette nel `SystemContext`.** Due istanze diverse
@@ -82,19 +129,9 @@ export interface Income {
  */
 export const createIncome = (ledger: Ledger, modifiers: Modifiers, room: Room): Income => {
   let state: IncomeState = INITIAL
-  let withheld: Money = ZERO
-  const purchase = createBuyUpgrade({ ledger, modifiers })
+  let blocked: Money = ZERO
+  const purchase = createBuyLevel({ ledger })
   const declaration = createDeclare({ ledger })
-
-  /**
-   * Il modificatore vive nel registro, non nello stato: dopo un `load` o un `reset` va rimesso
-   * d'accordo con lo stato. `remove` prima di `register` perché `register` lancia sul duplicato, e
-   * caricare due volte di fila è lecito.
-   */
-  const syncUpgradeModifier = (): void => {
-    modifiers.remove(UPGRADE_MODIFIER_ID)
-    if (state.upgraded) modifiers.register(upgradeModifier())
-  }
 
   return {
     system: defineSystem<IncomeSave>({
@@ -102,101 +139,116 @@ export const createIncome = (ledger: Ledger, modifiers: Modifiers, room: Room): 
       order: ORDER.INCOME,
 
       /**
-       * D017 — questo è il giorno che il commento di D010 annunciava: la capienza del caveau
-       * esiste, e il reddito può non entrare.
+       * D017 — il tick **non chiede e incassa il rifiuto**: sa quanto ci sta **prima** di chiedere,
+       * e accredita quello. La ragione è il recupero, che è **un solo** `advance` con tutti i tick
+       * arretrati — cioè una transazione da otto ore di stipendio, e il Ledger la rifiuterebbe
+       * intera perché una transazione è atomica (ADR 0019). Chi è stato via una notte tornerebbe
+       * con **zero**, a caveau vuoto: non un muro, un guasto travestito da regola.
        *
-       * Il tick **non chiede e incassa il rifiuto**: sa quanto ci sta **prima** di chiedere, e
-       * accredita quello. La ragione è il recupero, che è **un solo** `advance` con tutti i tick
-       * arretrati — cioè una transazione sola da otto ore di stipendio, e il Ledger la
-       * rifiuterebbe intera perché una transazione è atomica (ADR 0019). Chi è stato via una notte
-       * tornerebbe con **zero**, a caveau vuoto: non un muro, un guasto travestito da regola.
+       * **Da D044 il giro è per regime e non per fonte** (ADR 0052, D044 trappole). Due regimi
+       * possono condividere un pool con trattenute diverse, e allora la trattenuta di una
+       * transazione sola andrebbe scalata sul parziale — cioè una divisione fra `Decimal`, cioè
+       * precisione persa e INV-08 rotta in silenzio. Raggruppati per regime, la trattenuta resta
+       * `entrato × tasso` come al primo giorno.
        *
-       * Il `Result` continua a non avere un ramo qui, e adesso è una proprietà invece di una
-       * scommessa: la capienza è già stata guardata, e l'unico altro fallimento possibile su un
-       * `income` sarebbe un importo non finito, che è un programma scritto male.
+       * Al minuto zero i regimi in gioco sono **uno**, quindi il tick emette una transazione sola
+       * come prima: il raggruppamento dello stipendio nelle ultime operazioni non peggiora.
        */
       tick: (ctx, elapsed) => {
-        // ADR 0052 — dove atterra lo stipendio è una proprietà del **regime**, non una costante di
-        // questo file. Lo spazio si chiede al pool del regime: chiederlo a `cash` mentre si
-        // accredita sulla carta produrrebbe un muro dove non esiste.
-        const regime = regimeOf(state)
-        const earned = incomeOver(ctx.clock, modifiers, elapsed)
-        const credited = incomeThatFits(earned, room(regime.pool))
-        // `ZERO` e non `earned.minus(credited)` quando non c'è niente da trattenere: sarebbe lo
-        // stesso numero dentro un oggetto nuovo a ogni tick, cioè dieci volte al secondo un
-        // mirror che si sveglia per dire la stessa cosa.
-        withheld = credited.equals(earned) ? ZERO : earned.minus(credited)
+        let stopped: Money = ZERO
 
-        // Zero non è un non-evento: sarebbe una transazione valida che non muove niente ed emette
-        // lo stesso, e il giocatore vedrebbe lo storico riempirsi di stipendi da 0,00 € proprio
-        // mentre gli si dice che il caveau è pieno.
-        if (credited.isZero()) return
+        for (const { regime, amount } of incomeOver(ctx.clock, state, modifiers, elapsed)) {
+          // Un regime che non ha maturato niente non è un muro e non è una transazione: è un
+          // regime le cui fonti sono ancora chiuse. Chiedergli quanto spazio c'è sarebbe una
+          // domanda su un accredito che non esiste, e la risposta non cambierebbe nulla.
+          if (amount.isZero()) continue
 
-        // La trattenuta si calcola su ciò che **entra**, non su ciò che è maturato: a caveau pieno
-        // entra una parte, e tassare il maturato farebbe pagare le tasse su soldi mai ricevuti.
-        // Oggi le due cifre coincidono sempre in regime dichiarato — la carta non ha tetto — ma
-        // coincidono per una proprietà della carta, non per costruzione.
-        //
-        // Non si arrotonda ai centesimi, e non è una dimenticanza: un tasso su un importo per tick
-        // è già una grandezza sotto il centesimo (1,20 € a tick), e arrotondare per eccesso a ogni
-        // tick porterebbe la trattenuta effettiva molto sopra quella dichiarata — con un bersaglio
-        // di bilanciamento che continua a guardare la costante. Il denaro qui è `Decimal` fino in
-        // fondo (ADR 0006), e la partita doppia non chiede centesimi interi.
-        const taxed = credited.mul(regime.withholdingRate)
+          // Lo spazio si chiede **qui dentro**, prima di ciascuna transazione, e non una volta per
+          // tick: se due regimi atterrano nello stesso pool, il primo ne ha già consumato una
+          // parte, e un tetto letto prima del giro sarebbe il tetto di un pool che non esiste più.
+          const credited = incomeThatFits(amount, room(regime.pool))
+          if (!credited.equals(amount)) stopped = stopped.plus(amount.minus(credited))
 
-        ctx.ledger.transaction(income(regime.pool, credited, taxed), {
-          reason: 'reason.income.tick'
-        })
+          // Zero non è un non-evento: sarebbe una transazione valida che non muove niente ed emette
+          // lo stesso, e il giocatore vedrebbe lo storico riempirsi di stipendi da 0,00 € proprio
+          // mentre gli si dice che il caveau è pieno.
+          if (credited.isZero()) continue
+
+          // La trattenuta si calcola su ciò che **entra**, non su ciò che è maturato: a caveau
+          // pieno entra una parte, e tassare il maturato farebbe pagare le tasse su soldi mai
+          // ricevuti.
+          //
+          // Non si arrotonda ai centesimi, e non è una dimenticanza: un tasso su un importo per
+          // tick è già una grandezza sotto il centesimo, e arrotondare per eccesso a ogni tick
+          // porterebbe la trattenuta effettiva molto sopra quella dichiarata — con un bersaglio di
+          // bilanciamento che continua a guardare la costante. Il denaro qui è `Decimal` fino in
+          // fondo (ADR 0006), e la partita doppia non chiede centesimi interi.
+          ctx.ledger.transaction(
+            income(regime.pool, credited, credited.mul(regime.withholdingRate)),
+            {
+              reason: 'reason.income.tick'
+            }
+          )
+        }
+
+        blocked = stopped
       },
 
       save: () => state,
 
+      /**
+       * INV-20 · D020 — **campo per campo**, non «è un oggetto».
+       *
+       * `SystemsSave` è opaco per lo schema del main (ADR 0002, D009): un salvataggio manomesso o
+       * prodotto da una versione bacata arriva fin qui intatto, e questo è l'unico punto che può
+       * guardarlo. Un `load` che lancia è un esito — `loadAll` lo trasforma in
+       * `error.registry.load_failed` — mentre accettarlo declasserebbe il giocatore in silenzio.
+       *
+       * **Si chiede una voce per ogni fonte, e una fonte mancante è spazzatura** — non un valore
+       * predefinito. Un livello assente diventerebbe `undefined`, e da lì un importo non finito che
+       * il Ledger scopre molto più a valle: lontano da dove è nato, e senza più niente da cui
+       * risalire.
+       */
       load: (loaded) => {
-        // `SystemsSave` è opaco per lo schema del main (ADR 0002, D009): un salvataggio manomesso
-        // o prodotto da una versione bacata arriva fin qui intatto, e questo è l'unico punto che
-        // può guardarlo. Un `load` che lancia è un esito — `loadAll` lo trasforma in
-        // `error.registry.load_failed` — mentre accettarlo declasserebbe il giocatore in silenzio.
-        if (typeof loaded?.upgraded !== 'boolean') {
+        const levels = loaded?.levels
+        if (typeof levels !== 'object' || levels === null) {
+          throw new TypeError(`income — stato salvato non valido: 'levels' deve essere un oggetto.`)
+        }
+        if (typeof loaded.declared !== 'boolean') {
           throw new TypeError(
-            `income — stato salvato non valido: 'upgraded' deve essere un booleano.`
+            `income — stato salvato non valido: 'declared' deve essere un booleano.`
           )
         }
-        // `declared` **assente** è una partita scritta prima di D043, cioè una partita in nero: il
-        // significato dell'assenza è dichiarato in `IncomeSave`, non indovinato qui.
-        //
-        // La distinzione è fra **chiave mancante** e chiave presente che vale `undefined`, e non è
-        // pignoleria: JSON non sa produrre la seconda, quindi vederla vuol dire che qualcuno ha
-        // scritto quello stato a mano. È spazzatura, e INV-20 la rifiuta come rifiuta un `upgraded`
-        // che non è un booleano. A pretenderlo è `tests/rules/stateful-systems-reject-garbage`.
-        if ('declared' in loaded && typeof loaded.declared !== 'boolean') {
-          throw new TypeError(
-            `income — stato salvato non valido: 'declared', se c'è, deve essere un booleano.`
-          )
+        // Ricostruito **fonte per fonte** invece di essere adottato così com'è: ciò che arriva ha
+        // superato i controlli sulle chiavi che conosciamo, e nient'altro. Copiarlo intero
+        // porterebbe dentro anche le chiavi che non conosciamo, cioè spazzatura che si salverebbe
+        // da sola al primo `save`. E il giorno in cui una fonte nuova entra, questa riga non
+        // compila finché non la si nomina — che è il posto giusto per accorgersene.
+        state = {
+          levels: { job: validLevel(levels, 'job'), gigs: validLevel(levels, 'gigs') },
+          declared: loaded.declared
         }
-        state = { upgraded: loaded.upgraded, declared: loaded.declared ?? false }
         // Ciò che l'ultimo tick non ha incassato riguarda l'ultimo tick, e dopo un caricamento
         // l'ultimo tick è di un'altra sessione. Il recupero, che arriva subito dopo, lo riscrive.
-        withheld = ZERO
-        syncUpgradeModifier()
+        blocked = ZERO
       },
 
       // `soft` e `hard` fanno la stessa cosa, e a dirlo è questo commento invece di un `if` che
       // finge una differenza: il prestige è la fetta 06, e nessun documento ha ancora deciso se un
-      // upgrade comprato con i soldi sopravvive a un reset morbido. Sceglierlo qui adesso
+      // livello comprato con i soldi sopravviva a un reset morbido. Sceglierlo qui adesso
       // significherebbe inventare una regola di gioco dentro una delega che non la riguarda.
       reset: () => {
         state = INITIAL
-        withheld = ZERO
-        syncUpgradeModifier()
+        blocked = ZERO
       }
     }),
 
     state: () => state,
 
-    withheld: () => withheld,
+    blocked: () => blocked,
 
-    buyUpgrade: (pool) => {
-      const bought = purchase({ state, pool })
+    buyLevel: ({ source, pool }) => {
+      const bought = purchase({ state, source, pool })
       if (bought.ok) state = bought.value
       return bought
     },

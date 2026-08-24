@@ -157,7 +157,7 @@ describe('la somma zero', () => {
         roll < 0.5
           ? ledger.transaction(income(pool, amount, ZERO), { reason: 'reason.income.tick' })
           : roll < 0.8
-            ? ledger.transaction(spend(pool, amount), { reason: 'reason.income.upgrade' })
+            ? ledger.transaction(spend(pool, amount), { reason: 'reason.income.level' })
             : ledger.transaction(transfer('card', 'cash', amount, amount.mul('0.005')), {
                 reason: 'reason.atm.withdraw'
               })
@@ -210,7 +210,7 @@ describe('i costruttori', () => {
     const { ledger } = bench()
     ledger.transaction(income('card', money('30'), ZERO), { reason: 'reason.income.tick' })
 
-    ledger.transaction(spend('card', money('30')), { reason: 'reason.income.upgrade' })
+    ledger.transaction(spend('card', money('30')), { reason: 'reason.income.level' })
 
     expect(ledger.balance('card').toString()).toBe('0')
     expect(ledger.balance('sink').toString()).toBe('30')
@@ -247,7 +247,7 @@ describe('i rifiuti', () => {
     ledger.transaction(income('cash', money('12.50'), ZERO), { reason: 'reason.income.tick' })
 
     const result = ledger.transaction(spend('cash', money('500')), {
-      reason: 'reason.income.upgrade'
+      reason: 'reason.income.level'
     })
 
     expect(result.ok).toBe(false)
@@ -265,7 +265,7 @@ describe('i rifiuti', () => {
     ledger.transaction(income('cash', money('100'), ZERO), { reason: 'reason.income.tick' })
 
     const result = ledger.transaction(spend('cash', money('30')), {
-      reason: 'reason.income.upgrade',
+      reason: 'reason.income.level',
       accepts: ['card']
     })
 
@@ -310,7 +310,7 @@ describe('i rifiuti', () => {
   it('un rifiuto non muove niente e non emette niente', () => {
     const { ledger, emitted } = bench()
 
-    ledger.transaction(spend('cash', money('1')), { reason: 'reason.income.upgrade' })
+    ledger.transaction(spend('cash', money('1')), { reason: 'reason.income.level' })
 
     expect(totalOfAccounts(ledger).isZero()).toBe(true)
     expect(ledger.balance('cash').toString()).toBe('0')

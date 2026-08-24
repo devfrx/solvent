@@ -37,7 +37,7 @@ export type CheatId =
   | 'cheat.vault.max_level'
   | 'cheat.vault.reset_level'
   // Il reddito. Ha un potenziamento solo, quindi il cheat è un interruttore.
-  | 'cheat.income.toggle_upgrade'
+  | 'cheat.income.boost'
 
 /**
  * Un cheat fallisce come fallisce un comando di gioco, e per le stesse ragioni: regalare contanti

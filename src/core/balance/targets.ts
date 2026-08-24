@@ -29,7 +29,9 @@ export const TARGET_IDS = [
   'vault_max_cash',
   'vault_card_discount',
   'income_tax_rate',
-  'income_declaration_price'
+  'income_declaration_price',
+  'income_plateau',
+  'income_level_payback'
 ] as const
 
 export type BalanceTargetId = (typeof TARGET_IDS)[number]
@@ -123,5 +125,47 @@ export const TARGETS: Readonly<Record<BalanceTargetId, BalanceTarget>> = {
    * nessuno, cioè quando non serve più. Il test lo confronta con `cashCapacityFor`, non con questi
    * due numeri: cambiare la scala del caveau deve rendere rosso lì.
    */
-  income_declaration_price: { min: fromString('30000'), max: fromString('70000') }
+  income_declaration_price: { min: fromString('30000'), max: fromString('70000') },
+
+  /**
+   * **Il plateau**: quanto rende il reddito attivo con tutte le fonti all'ultimo livello, al
+   * secondo. È il tetto oltre il quale il denaro non compra più reddito attivo, ed è la legge 6
+   * della [visione](../../../docs/prodotto/visione.md) scritta in un numero — _«lo stipendio e i
+   * suoi upgrade arrivano a un plateau; da lì in poi si cresce solo mettendo il capitale a
+   * lavorare»_.
+   *
+   * **La cifra è tarata su cosa deve finire, non su come suona.** A 364,50 €/s un anno di gioco —
+   * dodici minuti — vale 262.440,00 €, cioè poco più di un caveau pieno all'ultimo livello
+   * (256.000,00 €). È la frase che dice al giocatore che i contanti hanno finito il loro mestiere,
+   * e insieme il punto in cui il capitale deve prendere il posto del reddito attivo.
+   *
+   * **Stretto apposta**: un livello in più o in meno moltiplica o divide questa cifra per il
+   * fattore di crescita e ci cade fuori, e un fattore diverso pure. Si misura **dalle regole** —
+   * `INCOME_PLATEAU`, che somma le rese al livello massimo — non dalle costanti da cui quelle rese
+   * discendono: cambiare una qualunque delle tre leve deve rendere rosso qui.
+   *
+   * Da [D044](../../../docs/delega/D044-il-reddito-e-un-elenco-di-fonti.md), ed è la prima volta
+   * che il reddito ha una saturazione **sua**. Fino a D043 la risposta era «lo ferma il caveau», e
+   * l'[ADR 0052](../../../docs/adr/0052-un-guadagno-dichiara-dove-atterra.md) quel legame l'ha
+   * sciolto per il reddito in regola.
+   */
+  income_plateau: { min: fromString('320'), max: fromString('410') },
+
+  /**
+   * **INV-28 · [ADR 0053](../../../docs/adr/0053-un-miglioramento-dichiara-il-tempo-in-cui-rientra.md)
+   * — in quanti secondi un livello di reddito si ripaga.** È il terzo bersaglio del progetto a non
+   * misurarsi in denaro, ed è quello che rende l'ADR 0053 una **proprietà** invece di
+   * un'intenzione.
+   *
+   * Si verifica su **ogni** livello di **ogni** fonte, calcolando il prezzo dal listino e
+   * l'incremento da `yieldAt`: non dalla costante `INCOME_PAYBACK_SECONDS`, o misurerebbe che un
+   * numero è uguale a sé stesso. Chi scrive un prezzo a mano da qualche parte lo fa diventare
+   * rosso, ed è tutto ciò che questo bersaglio esiste per fare.
+   *
+   * L'intervallo è largo il 20% attorno ai cinque minuti dichiarati, ed è largo così per lasciare
+   * spazio a un ritocco del ritmo — non a una seconda curva che si allontana in silenzio. Se un
+   * giorno un livello rientrasse in un tempo diverso dagli altri, cadrebbe fuori di qui prima che
+   * qualcuno se ne accorga giocando.
+   */
+  income_level_payback: { min: fromString('240'), max: fromString('360') }
 }

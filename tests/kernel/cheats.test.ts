@@ -52,15 +52,12 @@ describe('il registro dei cheat', () => {
     const cheats = createCheats()
 
     cheats.register(spy('cheat.vault.max_level', seen).act)
-    cheats.register(
-      spy('cheat.ledger.grant_cash', seen).act,
-      spy('cheat.income.toggle_upgrade', seen).act
-    )
+    cheats.register(spy('cheat.ledger.grant_cash', seen).act, spy('cheat.income.boost', seen).act)
 
     expect(cheats.all().map((cheat) => cheat.id)).toEqual([
       'cheat.vault.max_level',
       'cheat.ledger.grant_cash',
-      'cheat.income.toggle_upgrade'
+      'cheat.income.boost'
     ])
   })
 

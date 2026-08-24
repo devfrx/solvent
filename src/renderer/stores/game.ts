@@ -23,16 +23,22 @@ import { DEPOSIT, previewOf, WITHDRAW } from '@core/domains/atm/commands'
 import { largestThatFits } from '@core/domains/atm/rules'
 import type { IncomeError } from '@core/domains/income/commands'
 import {
-  canBuyUpgrade,
+  canBuyLevel,
   canDeclare,
   declarationPriceFor,
   declarationPrices,
+  INCOME_PLATEAU,
   incomePerSecond,
+  isMaxLevel as isMaxIncomeLevel,
+  levelOf,
+  levelPriceFor,
+  levelPrices,
+  MAX_LEVEL as INCOME_MAX_LEVEL,
   regimeOf,
-  upgradePriceFor,
-  upgradePrices
+  SOURCES,
+  yieldAt
 } from '@core/domains/income/rules'
-import type { IncomeState } from '@core/domains/income/types'
+import type { IncomeSourceId, IncomeState } from '@core/domains/income/types'
 import {
   canExpand,
   cashCapacityFor,
@@ -181,6 +187,29 @@ const runtimeOrThrow = (): Runtime => {
   return provided
 }
 
+/**
+ * Ciò che una fonte di reddito mostra a schermo, già pronto: il `.vue` non calcola (R05) e non
+ * importa le regole di un dominio.
+ *
+ * `canAfford` **non è qui dentro**, ed è deliberato: dipende dai saldi, che cambiano dieci volte al
+ * secondo, e ricostruire questa lista a ogni tick vorrebbe dire ricostruire dei `Decimal` che
+ * INV-19 vuole identici. Le due domande sui fondi restano funzioni, come quelle del caveau.
+ */
+export interface IncomeSourceView {
+  readonly id: IncomeSourceId
+  readonly level: number
+  readonly maxLevel: number
+  readonly atMax: boolean
+  /** Quanto rende adesso, al secondo. Zero se la fonte è ancora chiusa. */
+  readonly perSecond: Money
+  /** Quanto renderebbe al livello dopo, `null` se non c'è un livello dopo. */
+  readonly nextPerSecond: Money | null
+  /** Su quale strumento atterra ciò che produce, sotto il regime che vale adesso. */
+  readonly landsIn: Pool
+  /** Il listino del livello successivo. **Vuoto** in cima alla scala: la lista è la risposta. */
+  readonly prices: PriceList
+}
+
 export const useGameStore = defineStore('game', () => {
   const { game, host, cheats } = runtimeOrThrow()
 
@@ -261,8 +290,8 @@ export const useGameStore = defineStore('game', () => {
    * «rileggi» è chi lo cambia — l'acquisto, il caricamento, l'azzeramento — e passa tutto da
    * `readIncome`.
    */
-  const upgrade = shallowRef<IncomeState>(game.income.state())
-  const rate = shallowRef<Money>(incomePerSecond(game.modifiers))
+  const incomeState = shallowRef<IncomeState>(game.income.state())
+  const rate = shallowRef<Money>(incomePerSecond(game.income.state(), game.modifiers))
   /**
    * Quanto dell'ultimo tick non è entrato perché il caveau non lo teneva. È l'unica cosa che dice
    * al giocatore che il reddito si è fermato: un idle in cui i soldi smettono di arrivare **senza
@@ -271,63 +300,102 @@ export const useGameStore = defineStore('game', () => {
    * Va riletto a ogni passo del loop, e non è un mirror come gli altri: nessun evento lo annuncia,
    * perché il tick che non incassa **non emette niente**. Un `ref` riscritto con lo stesso valore
    * non sveglia nessuno, quindi rileggerlo dieci volte al secondo costa un confronto.
+   *
+   * Da D044 si chiama `blocked` e non `withheld`, per la ragione scritta su `Income`: `withheld`
+   * era quanto il caveau non ha fatto entrare, `withholdingRate` è la parte dello Stato.
    */
-  const withheld = shallowRef<Money>(game.income.withheld())
+  const blocked = shallowRef<Money>(game.income.blocked())
+
+  const viewOf = (state: IncomeState): readonly IncomeSourceView[] =>
+    SOURCES.map((each) => {
+      const level = levelOf(state, each)
+      const atMax = isMaxIncomeLevel(state, each)
+      return {
+        id: each.id,
+        level,
+        maxLevel: INCOME_MAX_LEVEL,
+        atMax,
+        perSecond: yieldAt(each, level),
+        nextPerSecond: atMax ? null : yieldAt(each, level + 1),
+        landsIn: regimeOf(each, state).pool,
+        prices: levelPrices(each, level)
+      }
+    })
+
+  /**
+   * Le fonti, una riga per pannello. È un mirror e non una `computed` per la ragione dei saldi: il
+   * dominio vive in `core/` e non è reattivo (ADR 0001), quindi non c'è niente da osservare — a
+   * dire «rileggi» è chi lo cambia, e passa tutto da `readIncome`.
+   */
+  const sources = shallowRef<readonly IncomeSourceView[]>(viewOf(game.income.state()))
 
   const readIncome = (): void => {
-    upgrade.value = game.income.state()
-    rate.value = incomePerSecond(game.modifiers)
-    withheld.value = game.income.withheld()
+    incomeState.value = game.income.state()
+    rate.value = incomePerSecond(incomeState.value, game.modifiers)
+    blocked.value = game.income.blocked()
+    sources.value = viewOf(incomeState.value)
+  }
+
+  /** La fonte dietro un id. L'elenco è dichiarato e fisso, quindi cercarla non costa niente. */
+  const sourceOf = (id: IncomeSourceId) => SOURCES.find((each) => each.id === id)
+
+  /**
+   * L'anteprima del pulsante di una fonte, **per strumento**. Il prezzo non lo decide questa
+   * funzione: lo prende dal listino, cioè dallo stesso posto da cui lo prende il comando (INV-19).
+   * In cima alla scala il listino è vuoto e la risposta è `false` per chiunque, perché non c'è
+   * niente da comprare.
+   */
+  const canBuyIncomeLevelWith = (id: IncomeSourceId, pool: Pool): boolean => {
+    const source = sourceOf(id)
+    if (source === undefined) return false
+    const option = levelPriceFor(source, levelOf(incomeState.value, source), pool)
+    return option !== null && canBuyLevel(incomeState.value, source, option, balances.value[pool])
   }
 
   /**
-   * Il listino dell'upgrade — con quali strumenti si compra, e a che prezzo con ognuno — letto
-   * dalla **stessa** funzione che il comando interroga quando paga (INV-19, ADR 0027). Non una
-   * seconda tabella da tenere allineata: la stessa, chiamata da due parti.
-   *
-   * È un `shallowRef` pur non cambiando mai, e qui la ragione vale doppio: un `Money` esposto nudo
-   * da uno store Pinia viene avvolto in un proxy reattivo alla lettura, e da lì in poi non è più
-   * **lo stesso oggetto** che il dominio ha prodotto — che è esattamente ciò che INV-19 pretende.
-   */
-  const prices = shallowRef<PriceList>(upgradePrices())
-
-  /**
-   * L'anteprima del pulsante, **per strumento**. Il prezzo non lo decide questa funzione: lo prende
-   * dal listino, cioè dallo stesso posto da cui lo prende il comando. Un pool che il listino non
-   * offre risponde `false`, perché con quello non c'è niente da comprare.
-   *
-   * È una funzione e non una `computed` perché la domanda ha un argomento. Con un'opzione sola la
-   * differenza non si vede; con le due del caveau sì, e allora servirà una risposta per ciascuna.
-   *
-   * A decidere resta il Ledger quando il comando esegue, e che i due diano la stessa risposta lo
-   * verifica un test: quando divergono si spegne un pulsante che avrebbe funzionato.
-   */
-  const canBuyUpgradeWith = (pool: Pool): boolean => {
-    const option = upgradePriceFor(pool)
-    return option !== null && canBuyUpgrade(upgrade.value, option, balances.value[pool])
-  }
-
-  /**
-   * Se **almeno uno** degli strumenti del listino basta. È ciò che smorza il pulsante che apre il
-   * flusso del pagamento (D036): la domanda per strumento resta `canBuyUpgradeWith`, e la fa la
-   * finestra voce per voce.
+   * Se **almeno uno** degli strumenti del listino basta, fonte per fonte. È ciò che smorza il
+   * pulsante che apre il flusso del pagamento (D036): la domanda per strumento resta
+   * `canBuyIncomeLevelWith`, e la fa la finestra voce per voce.
    *
    * Sta qui e non nel pannello perché un `.vue` non calcola (R05) — e perché contare le voci di un
    * listino dentro un componente è precisamente la forma che R24 vieta.
    */
-  const canAffordUpgrade = computed<boolean>(() =>
-    prices.value.some((each) => canBuyUpgradeWith(each.pool))
-  )
-
-  /** Se l'upgrade è già stato comprato. Alla UI serve il fatto, non lo stato del sistema. */
-  const owned = computed<boolean>(() => upgrade.value.upgraded)
+  const canAffordIncomeLevel = computed<Readonly<Record<IncomeSourceId, boolean>>>(() => {
+    const affordable = {} as Record<IncomeSourceId, boolean>
+    for (const each of sources.value) {
+      affordable[each.id] = each.prices.some((option) =>
+        canBuyIncomeLevelWith(each.id, option.pool)
+      )
+    }
+    return affordable
+  })
 
   /**
-   * Il listino della dichiarazione, e le sue anteprime: le stesse tre forme dell'upgrade — il
-   * listino in uno `shallowRef`, la domanda per strumento, la domanda «almeno uno» — e per le
-   * stesse tre ragioni, che stanno scritte venti righe più su.
+   * **Il plateau**: il tetto del reddito attivo, e quanto ne manca. È un selettore perché la
+   * pagina deve poter dire quanto resta da comprare — e perché è il numero che dichiara come
+   * muore il secondo milione di questo dominio.
+   */
+  const plateau = shallowRef<Money>(INCOME_PLATEAU)
+
+  /**
+   * Quanto reddito al secondo resta da comprare prima del tetto. La sottrazione la farebbe anche un
+   * template, e proprio per questo sta qui: un `.vue` non calcola (R05).
    *
-   * Sono separate da quelle dell'upgrade e non generalizzate in una coppia sola: sono due acquisti
+   * Si ferma a zero perché un moltiplicatore — il devcheat, e domani l'albero delle abilità — può
+   * portare il reddito **sopra** il plateau: il tetto è dei livelli, non della somma, e una cifra
+   * negativa a schermo direbbe una cosa che non è.
+   */
+  const toPlateau = computed<Money>(() => {
+    const left = plateau.value.minus(rate.value)
+    return left.isNegative() ? ZERO : left
+  })
+
+  /**
+   * Il listino della dichiarazione, e le sue anteprime: le stesse tre forme dei livelli — il
+   * listino in uno `shallowRef`, la domanda per strumento, la domanda «almeno uno» — e per le
+   * stesse tre ragioni.
+   *
+   * Sono separate da quelle dei livelli e non generalizzate in una coppia sola: sono due acquisti
    * con due listini e due condizioni, e un aiutante condiviso da due casi identici è
    * generalizzazione da due — il progetto ha già deciso così una volta, sui validatori dello stato
    * salvato (registro YAGNI).
@@ -336,7 +404,7 @@ export const useGameStore = defineStore('game', () => {
 
   const canDeclareWith = (pool: Pool): boolean => {
     const option = declarationPriceFor(pool)
-    return option !== null && canDeclare(upgrade.value, option, balances.value[pool])
+    return option !== null && canDeclare(incomeState.value, option, balances.value[pool])
   }
 
   const canAffordDeclaration = computed<boolean>(() =>
@@ -347,18 +415,20 @@ export const useGameStore = defineStore('game', () => {
    * Se il reddito è già in regola. È il fatto da cui la pagina decide **cosa** mostrare: il regime
    * corrente, e se l'acquisto ha ancora senso.
    */
-  const declared = computed<boolean>(() => upgrade.value.declared)
+  const declared = computed<boolean>(() => incomeState.value.declared)
 
   /**
    * Quanto trattiene lo Stato in regime dichiarato. Non è il **prezzo** della dichiarazione — quello
    * resta dentro il flusso di pagamento (R24) — è ciò che l'acquisto **compra**, e la pagina lo
    * deve dire prima, non dopo: è metà della decisione, e l'altra metà è che non si torna indietro.
    *
-   * Si legge dal **regime**, non da `BALANCE`: il numero che la pagina mostra è lo stesso che il
-   * tick applica, non una seconda dichiarazione della stessa cosa (INV-19).
+   * Si legge dal **regime della fonte che lo subisce**, non da `BALANCE`: il numero che la pagina
+   * mostra è lo stesso che il tick applica, non una seconda dichiarazione della stessa cosa
+   * (INV-19). I lavoretti non ne hanno uno, e infatti non lo dichiarano.
    */
   const declaredWithholding = shallowRef<Money>(
-    regimeOf({ upgraded: false, declared: true }).withholdingRate
+    (SOURCES.find((each) => each.declared !== null)?.declared ?? SOURCES[0]?.base)
+      ?.withholdingRate ?? ZERO
   )
 
   /**
@@ -723,7 +793,7 @@ export const useGameStore = defineStore('game', () => {
       // Un tick che non incassa **non emette niente**, quindi nessun evento porta questa notizia:
       // è l'unico mirror che va riletto a ogni passo. Con il caveau che ha spazio è `ZERO` contro
       // `ZERO`, cioè lo stesso oggetto, e il `ref` non sveglia nessuno.
-      withheld.value = game.income.withheld()
+      blocked.value = game.income.blocked()
       readSeries()
 
       // Il primo frame dopo il ritorno dal nascondimento porta con sé tutto il tempo passato: è
@@ -988,22 +1058,35 @@ export const useGameStore = defineStore('game', () => {
     void close()
   })
 
-  const buyUpgrade = (
+  /**
+   * Comprare un livello di una fonte. L'id arriva dal pannello che l'ha disegnato, e la fonte si
+   * ripesca **qui**: un `.vue` non tiene in mano un oggetto di dominio.
+   *
+   * Un id che non esiste non è un esito di gioco — è un pannello scritto male — e infatti torna
+   * come rifiuto del Ledger sul pool, cioè con la stessa frase di «con questo non si paga».
+   */
+  const buyIncomeLevel = (
+    id: IncomeSourceId,
     pool: Pool,
     code: string
   ): Result<IncomeState, IncomeError | PaymentError> => {
     const refused = unauthorized(pool, code)
     if (refused !== null) return { ok: false, error: refused }
 
-    const bought = game.income.buyUpgrade(pool)
-    // I saldi li rispecchia l'evento del Ledger; i modificatori no, perché registrarne uno non
-    // è un movimento economico e nessuno lo annuncia.
+    const source = sourceOf(id)
+    if (source === undefined) {
+      return { ok: false, error: { code: 'error.ledger.pool_not_accepted', pool, accepted: [] } }
+    }
+
+    const bought = game.income.buyLevel({ source, pool })
+    // I saldi li rispecchia l'evento del Ledger; il livello no, perché comprarlo non è un
+    // movimento economico e nessuno lo annuncia. È la stessa trappola di `expandVault`.
     if (bought.ok) readIncome()
     return bought
   }
 
   /**
-   * ADR 0052 — mettersi in regola. Passa dallo stesso cancello di `buyUpgrade` perché è lo stesso
+   * ADR 0052 — mettersi in regola. Passa dallo stesso cancello di `buyIncomeLevel` perché è lo stesso
    * gesto: si paga con la carta, e la carta chiede prima di chi è (ADR 0042).
    *
    * Rispecchia per la stessa ragione dell'upgrade, e qui è più stretta: cambiare regime cambia
@@ -1027,7 +1110,7 @@ export const useGameStore = defineStore('game', () => {
    *
    * I saldi arrivano da soli con `money.posted`; il livello del caveau e il potenziamento del
    * reddito no, perché caricare uno stato non è un movimento economico e nessuno lo dice — è la
-   * stessa trappola di `expandVault` e di `buyUpgrade`. Rileggerli entrambi dopo **qualunque**
+   * stessa trappola di `expandVault` e di `buyIncomeLevel`. Rileggerli entrambi dopo **qualunque**
    * cheat costa due letture e toglie la classe di difetto in cui il pannello funziona e lo schermo
    * resta indietro.
    *
@@ -1065,11 +1148,13 @@ export const useGameStore = defineStore('game', () => {
     balances,
     history,
     savedAt,
-    upgraded: owned,
+    incomeSources: sources,
     incomePerSecond: rate,
-    upgradePrices: prices,
-    canBuyUpgradeWith,
-    canAffordUpgrade,
+    incomePlateau: plateau,
+    incomeToPlateau: toPlateau,
+    canBuyIncomeLevelWith,
+    canAffordIncomeLevel,
+    buyIncomeLevel,
     declared,
     declarationPrices: declarationPriceList,
     canDeclareWith,
@@ -1094,7 +1179,7 @@ export const useGameStore = defineStore('game', () => {
     canAffordExpansion,
     vaultAtMax: atMax,
     expandVault,
-    incomeWithheld: withheld,
+    incomeBlocked: blocked,
     preview,
     confirm,
     netWorth,
@@ -1122,7 +1207,6 @@ export const useGameStore = defineStore('game', () => {
     retry,
     close,
     closeWithoutSaving,
-    buyUpgrade,
     declareIncome,
     isRunning: loop.isRunning
   }

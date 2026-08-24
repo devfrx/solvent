@@ -39,7 +39,8 @@ componente che disegna la scelta. Al suo posto ogni pannello che paga fa un `v-f
 mette **un pulsante per strumento**.
 
 Sono due, e la duplicazione è già misurata: `instrumentOf` è la stessa funzione in
-[IncomePanel.vue](../../src/renderer/components/income/IncomePanel.vue) e in
+`IncomePanel.vue` (da D044
+[IncomeSourcePanel.vue](../../src/renderer/components/income/IncomeSourcePanel.vue)) e in
 [VaultPanel.vue](../../src/renderer/components/vault/VaultPanel.vue), e il commento della seconda lo
 dichiara per iscritto. È lo stesso reperto di
 [D031](D031-la-sovrapposizione-e-un-pezzo-del-kit.md), dove due copie della stessa meccanica

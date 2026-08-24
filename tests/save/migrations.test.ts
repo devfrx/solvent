@@ -28,9 +28,62 @@ const step =
     `${String(payload)}>${mark}`
 
 describe('la mappa vera', () => {
-  it('è vuota: la versione 1 non ha nulla da cui migrare', () => {
-    expect(SAVE_VERSION).toBe(1)
-    expect(MIGRATIONS.size).toBe(0)
+  it('ha il passo dalla 1 alla 2, che è la prima migrazione vera del progetto', () => {
+    expect(SAVE_VERSION).toBe(2)
+    expect([...MIGRATIONS.keys()]).toEqual([1])
+  })
+
+  it('porta il reddito da due booleani a un elenco di livelli', () => {
+    // Chi aveva comprato gli straordinari — un `×1,5` sul reddito base — si ritrova il lavoro al
+    // **secondo** livello, che vale esattamente `base × 1,5`. Chi non li aveva, al primo.
+    const step = MIGRATIONS.get(1)
+    if (step === undefined) throw new Error('il passo dalla 1 alla 2 non c’è')
+
+    const migrated = step({
+      ledger: { balances: {} },
+      rng: { seed: 1, cursors: {} },
+      systems: { income: { upgraded: true, declared: false }, vault: { level: 3 } }
+    })
+
+    expect(migrated).toEqual({
+      ledger: { balances: {} },
+      rng: { seed: 1, cursors: {} },
+      systems: { income: { levels: { job: 2, gigs: 0 }, declared: false }, vault: { level: 3 } }
+    })
+  })
+
+  it('e chi non li aveva si ritrova al primo livello, cioè dove era', () => {
+    const step = MIGRATIONS.get(1)
+    if (step === undefined) throw new Error('il passo dalla 1 alla 2 non c’è')
+
+    const migrated = step({ systems: { income: { upgraded: false } } }) as {
+      systems: { income: unknown }
+    }
+
+    expect(migrated.systems.income).toEqual({ levels: { job: 1, gigs: 0 }, declared: false })
+  })
+
+  it('un `declared` assente vale «in nero»: alla versione 1,0 il regime non esisteva', () => {
+    const step = MIGRATIONS.get(1)
+    if (step === undefined) throw new Error('il passo dalla 1 alla 2 non c’è')
+
+    const migrated = step({ systems: { income: { upgraded: false, declared: true } } }) as {
+      systems: { income: { declared: boolean } }
+    }
+
+    expect(migrated.systems.income.declared).toBe(true)
+  })
+
+  it('e ciò che non è nemmeno un oggetto passa intatto, per essere rifiutato dal dominio', () => {
+    // Una migrazione non valida: il posto in cui un salvataggio viene guardato campo per campo è
+    // il `load` del dominio (INV-20), che vede la forma di **adesso**.
+    const step = MIGRATIONS.get(1)
+    if (step === undefined) throw new Error('il passo dalla 1 alla 2 non c’è')
+
+    expect(step({ systems: { income: 'spazzatura' } })).toEqual({
+      systems: { income: 'spazzatura' }
+    })
+    expect(step('spazzatura')).toBe('spazzatura')
   })
 
   it('copre ogni versione sotto quella corrente, oggi e quando ce ne sarà più di una', () => {

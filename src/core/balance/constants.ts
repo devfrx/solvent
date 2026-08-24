@@ -74,18 +74,28 @@ const INSTRUMENT_CANDLE_SECONDS = 5
  * **Da dove viene, invece di essere scelto perché suona bene.** Il criterio è che ciò che si può
  * perdere resti sotto la cosa più economica che il gioco vende: se una scrittura mancata non costa
  * mai un acquisto, non c'è un momento in cui il giocatore perde una **decisione** invece che del
- * tempo. La cosa più economica è l'upgrade del reddito, `UPGRADE_PRICE_CARD`, a 800,00 €.
+ * tempo.
  *
- * Il reddito massimo che questo gioco raggiunge oggi è **18,00 €/s** — la base di 12,00 € per il
- * ×1,5 dell'upgrade, che si compra **una volta sola** (`upgraded` è un booleano, non un livello).
- * Ne discende la soglia: 800,00 € a 18,00 €/s sono **44 secondi**, e qualunque cadenza sotto quel
- * numero mantiene il criterio a **qualunque** momento della partita.
+ * **La derivazione è stata riscritta da [D044](../../../docs/delega/D044-il-reddito-e-un-elenco-di-fonti.md),
+ * e vale la pena dire cosa la vecchia dava per scontato.** Diceva che l'acquisto più economico
+ * costava 800,00 € e che «il reddito massimo che questo gioco raggiunge oggi è 18,00 €/s»: due
+ * numeri fermi, perché il reddito aveva un potenziamento solo. Da D044 non è più vero né l'uno né
+ * l'altro — i prezzi si calcolano dal rientro (ADR 0053) e crescono **insieme** al reddito.
  *
- * **Trenta e non quarantacinque**, che sarebbe il limite: al reddito massimo trenta secondi valgono
- * 540,00 € e al reddito base 360,00 €, cioè due terzi e meno della metà dell'acquisto più
- * economico. Il margine non è prudenza generica — è ciò che tiene il criterio in piedi il giorno in
- * cui un moltiplicatore nuovo entra nel gioco, invece di farlo scadere in silenzio come è successo
- * al tetto di recupero tarato in ore reali.
+ * **Il criterio sopravvive proprio per quello.** Un livello costa il suo incremento di resa per
+ * `INCOME_PAYBACK_SECONDS`, quindi il rapporto fra ciò che si perde e ciò che si compra non
+ * dipende più da quanto si è avanti: dipende da quanto **grande** è l'incremento rispetto al
+ * reddito totale, che è il caso peggiore da guardare.
+ *
+ * **Il caso peggiore è l'ultimo livello del lavoro**, dove l'incremento è la fetta più piccola di
+ * un reddito quasi al plateau: 13.668,75 € di prezzo contro 9.568,00 € di reddito in trenta
+ * secondi (318,94 €/s per 30). Il margine è **1,4×**, contro i circa 2,2× di prima — si stringe, e
+ * resta sopra l'uno, che è ciò che il criterio chiede.
+ *
+ * **Trenta e non sessanta.** A sessanta secondi il margine scenderebbe a 0,7× e il criterio
+ * cadrebbe: ci sarebbe un momento della partita in cui una scrittura mancata costa una decisione.
+ * È la prima volta che questo numero ha un limite superiore vicino invece che lontano, e il giorno
+ * in cui una fonte nuova entra va rifatto **questo** conto — non ereditato.
  *
  * **Cosa si paga.** Una scrittura è un round-trip IPC più un `rename` su un payload di poche
  * centinaia di byte: a trenta secondi sono **120 scritture in un'ora** di gioco, contro le sessanta
@@ -106,29 +116,63 @@ const ATM_LARGEST = fromString('500')
 
 export const BALANCE = {
   /**
-   * Il reddito della prima fonte, prima di qualunque modificatore. È dichiarato **al secondo**
-   * perché è così che il giocatore lo legge (`+ 12,00 € / s`); chi lo usa lo converte con il
-   * Clock, che è l'unico a sapere quanti tick stanno in un secondo (ADR 0009).
-   */
-  INCOME_BASE_PER_SECOND: fromString('12'),
-
-  /**
-   * Quanto costa l'upgrade **con la carta**, che è l'unico strumento che il suo listino offre
-   * (ADR 0027). Lo strumento sta nel nome perché il prezzo è per strumento: il caveau della fetta
-   * 02 ne avrà due, uno in contanti e uno sulla carta, e saranno due costanti — non una con uno
-   * sconto calcolato da qualche parte.
+   * Quanto rende il **lavoro dipendente** al primo livello, prima di qualunque modificatore. È
+   * dichiarato al secondo perché è così che il giocatore lo legge (`+ 12,00 € / s`); chi lo usa lo
+   * converte con il Clock, che è l'unico a sapere quanti tick stanno in un secondo (ADR 0009).
    *
-   * Fino a D019 si chiamava `UPGRADE_COST` e il commento diceva «si paga solo con la carta»: era
-   * vero, e a dirlo era una frase. Adesso lo dice il listino, e questo numero è una delle sue voci.
+   * **Non si tocca**: è il reddito con cui la partita si apre, e `income_per_minute_at_start` lo
+   * sorveglia. Fino a D044 si chiamava `INCOME_BASE_PER_SECOND`, quando la fonte era una sola.
    */
-  UPGRADE_PRICE_CARD: fromString('800'),
+  INCOME_JOB_BASE_PER_SECOND: fromString('12'),
 
   /**
-   * Di quanto l'upgrade moltiplica il reddito di tutte le fonti. È un `mult` su `income.all`, non
-   * un nuovo reddito base: se modificasse la base, il registro dei modificatori sarebbe già
-   * decorativo alla prima feature.
+   * Quanto rendono i **lavoretti** al primo livello. Più del lavoro, e non è generosità: sono
+   * l'unica fonte che non si mette mai in regola, quindi tutto quello che producono resta sotto il
+   * muro del caveau — e i loro livelli si pagano in contanti, cioè sotto lo stesso muro una
+   * seconda volta.
+   *
+   * Che rendano di più è ciò che impedisce al lavoro in regola di dominarli (D044, decisione 3):
+   * i lavoretti battono l'altra fonte sulla tracciabilità e sulla resa, il lavoro in regola li
+   * batte sulla liquidità e sulla pozza. Nessuna delle due è la scelta ovvia.
    */
-  UPGRADE_MULTIPLIER: fromString('1.5'),
+  INCOME_GIGS_BASE_PER_SECOND: fromString('20'),
+
+  /**
+   * Quanti livelli ha una fonte di reddito, contando quello a zero: otto, cioè da 0 a 7.
+   *
+   * Si conta come `VAULT_LEVELS` e per la stessa ragione (D042): il livello zero è una fonte
+   * chiusa, quindi il numero dei gradini comprende il gradino da cui non si è ancora partiti.
+   *
+   * **È la leva che decide il plateau.** Un livello in più o in meno lo moltiplica o lo divide per
+   * il fattore di crescita, e `income_plateau` diventa rosso: l'intervallo è stretto apposta.
+   */
+  INCOME_LEVELS: 8,
+
+  /**
+   * Di quanto cresce la resa di una fonte a ogni livello.
+   *
+   * È l'unico fattore di crescita del reddito, e con l'[ADR 0053](../../../docs/adr/0053-un-miglioramento-dichiara-il-tempo-in-cui-rientra.md)
+   * è anche l'unico da cui i prezzi discendono: non ci sono due curve da tenere allineate, perché
+   * la seconda non esiste. Alzarlo alza insieme la resa **e** il prezzo di ogni livello, e lascia
+   * il rientro dov'è.
+   */
+  INCOME_LEVEL_GROWTH: fromString('1.5'),
+
+  /**
+   * **In quanti secondi un livello di reddito si ripaga** — INV-28,
+   * [ADR 0053](../../../docs/adr/0053-un-miglioramento-dichiara-il-tempo-in-cui-rientra.md).
+   *
+   * Non è un prezzo: è un **tempo**, e i prezzi sono ciò che ne discende
+   * (`prezzo = incremento di resa × questo numero`). Chi lo sposta sposta il ritmo del gioco, non
+   * un cartellino, ed è il senso di avere una leva sola: «un livello si ripaga in cinque minuti» è
+   * una frase che un giocatore capisce, «il livello tre costa 4.860,00 €» non lo è.
+   *
+   * **Cinque minuti**, che mentre si gioca sono cinque minuti veri: abbastanza da far pesare la
+   * scelta, poco abbastanza da non far aspettare. Sono anche poco meno della metà dei dodici
+   * minuti che D044 chiama «un anno di gioco», cioè il tempo in cui il plateau riempie un caveau
+   * pieno. A sorvegliarlo è `income_level_payback`, che lo misura dal **listino** e non da qui.
+   */
+  INCOME_PAYBACK_SECONDS: 300,
 
   /**
    * Quanto lo Stato trattiene su un reddito **dichiarato** (ADR 0052).

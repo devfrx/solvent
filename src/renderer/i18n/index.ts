@@ -119,9 +119,24 @@ export type ScreenKey =
   | 'dev.subtitle'
   | 'dev.amount'
   | 'income.per_second'
-  | 'income.upgrade.overtime.name'
-  | 'income.upgrade.overtime.desc'
-  | 'income.upgrade.owned'
+  // Le fonti di reddito (D044). Il nome e la descrizione sono per fonte, il resto è la scala: a
+  // che livello si sta su quanti, quanto rende adesso, quanto renderebbe dopo, e dove atterra.
+  // `income.source.at_max` e' cio' che una scala finita dice invece di un pulsante spento.
+  | 'income.source.job.name'
+  | 'income.source.job.desc'
+  | 'income.source.gigs.name'
+  | 'income.source.gigs.desc'
+  | 'income.source.level'
+  | 'income.source.closed'
+  | 'income.source.open'
+  | 'income.source.yields'
+  | 'income.source.next_level'
+  | 'income.source.lands_in'
+  | 'income.source.at_max'
+  // Il plateau: il tetto del reddito attivo, e quanto ne manca. E' la legge 6 della visione
+  // detta al giocatore mentre gioca, invece che in un documento.
+  | 'income.plateau'
+  | 'income.to_plateau'
   // Il regime del reddito (ADR 0052). `income.regime.buys` dice cosa l'acquisto compra **prima**
   // che si apra il flusso del pagamento: la trattenuta e l'irreversibilità non sono un prezzo — e
   // un acquisto senza ritorno che si scopre dopo non è una decisione.
@@ -154,7 +169,7 @@ export type ScreenKey =
   | 'vault.expand'
   | 'vault.at_max'
   | 'vault.full'
-  | 'vault.withholding'
+  | 'vault.blocked'
   | 'stats.saved_at.title'
   | 'stats.saved_at.never'
   | 'stats.operations.title'
@@ -477,7 +492,7 @@ export const createTranslator = (wording: Wording): Translator => {
         return text(error.code, { pool: poolName(error.pool), amount: money(error.amount) })
       case 'error.payment.unauthorized':
         return text(error.code, { pool: poolName(error.pool) })
-      case 'error.income.already_upgraded':
+      case 'error.income.max_level':
       case 'error.income.already_declared':
       case 'error.vault.max_level':
         return text(error.code)

@@ -68,10 +68,10 @@ describe('SaveEnvelope', () => {
       savedAt: 1_755_600_000_000,
       payload: { ledger: { balances: BALANCES }, rng: { seed: 1, cursors: {} }, systems: {} }
     }
-    expect(envelope.version).toBe(1)
+    expect(envelope.version).toBe(2)
   })
 
-  it('la versione 1 non ha nulla da cui migrare', () => {
-    expect(SAVE_VERSION).toBe(1)
+  it('la versione corrente è la 2: la prima con una migrazione vera (D044)', () => {
+    expect(SAVE_VERSION).toBe(2)
   })
 })

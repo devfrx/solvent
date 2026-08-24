@@ -21,7 +21,8 @@ conseguenze una che nessuno ha costruito:
 
 Al suo posto ogni pannello che paga disegna **un pulsante per strumento**, dentro un `v-for` sul
 listino. Sono due, e la duplicazione è già cominciata: `instrumentOf` esiste identica in
-[IncomePanel.vue](../../src/renderer/components/income/IncomePanel.vue) e in
+`IncomePanel.vue` (da D044
+[IncomeSourcePanel.vue](../../src/renderer/components/income/IncomeSourcePanel.vue)) e in
 [VaultPanel.vue](../../src/renderer/components/vault/VaultPanel.vue), e il commento della seconda lo
 dichiara — «è la stessa funzione di `IncomePanel`, con l'altro ramo acceso». Non è un rischio
 futuro: è la stessa forma del difetto che

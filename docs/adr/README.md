@@ -164,7 +164,7 @@ Il grilletto resta quello che il registro YAGNI ha scritto: il primo dominio che
 | [0050](0050-la-cadenza-sta-sulla-via-unica.md)                                 | La cadenza sta sulla via unica, e si consuma in un posto solo      | **Accettata** | chi si accorge che il tempo è passato, e quando il gioco si scrive su disco                   | INV-25          |
 | [0051](0051-lo-spazio-di-un-caveau-non-e-una-somma-di-denaro.md)               | Lo spazio di un caveau non è una somma di denaro                   | **Proposta**  | in quale unità si misura ciò che sta in un caveau, e dove vive la conversione                 | INV-26          |
 | [0052](0052-un-guadagno-dichiara-dove-atterra.md)                              | Un guadagno dichiara dove atterra                                  | **Accettata** | in quale pool atterrano i soldi che un dominio produce, e chi lo decide                       | INV-27          |
-| [0053](0053-un-miglioramento-dichiara-il-tempo-in-cui-rientra.md)              | Un miglioramento dichiara il tempo in cui rientra                  | **Proposta**  | come si scrive il prezzo di un miglioramento che compra resa, e cosa si dichiara al posto suo | INV-28          |
+| [0053](0053-un-miglioramento-dichiara-il-tempo-in-cui-rientra.md)              | Un miglioramento dichiara il tempo in cui rientra                  | **Accettata** | come si scrive il prezzo di un miglioramento che compra resa, e cosa si dichiara al posto suo | INV-28          |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è
@@ -266,8 +266,8 @@ momento in cui il giocatore decide di lasciare una traccia; questa vieta che que
 un gesto da ripetere, e lo trasforma in una scelta che si prende una volta.
 
 Il **0053** nasce dalla stessa sessione di gioco del 0052, da una domanda sul nome — «compro gli
-straordinari a 800 €?» — e la risposta è che sotto quel nome non c'è una scala. È `Proposta` finché
-[D044](../delega/D044-il-reddito-e-un-elenco-di-fonti.md) non la esegue. La
+straordinari a 800 €?» — e la risposta è che sotto quel nome non c'è una scala. È `Accettata` dal
+giorno stesso: [D044](../delega/D044-il-reddito-e-un-elenco-di-fonti.md) l'ha eseguita. La
 [visione](../prodotto/visione.md) dichiara che il rapporto fra costo e resa è _«l'unico che conta»_,
 e nessun codice lo impone: il caveau ci arriva per un'altra strada — il suo prezzo è tarato sul
 muro, non sul rientro — e il reddito non ci arriva affatto. Questa ADR toglie il prezzo dal

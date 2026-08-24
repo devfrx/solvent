@@ -72,13 +72,27 @@ export const en: Dictionary = {
   'cheat.vault.level_up': 'Vault: one level up',
   'cheat.vault.max_level': 'Vault: top level',
   'cheat.vault.reset_level': 'Vault: back to level zero',
-  'cheat.income.toggle_upgrade': 'Income: flip the upgrade',
+  'cheat.income.boost': 'Income: flip the test multiplier',
   'reason.cheat.grant': 'Development grant',
   'reason.cheat.drain': 'Development drain',
   'income.per_second': '+ {amount} / s',
-  'income.upgrade.overtime.name': 'Overtime',
-  'income.upgrade.overtime.desc': 'Raises the income of every source.',
-  'income.upgrade.owned': 'Already running',
+  'income.source.job.name': 'Day job',
+  'income.source.job.desc':
+    'Pays in cash while you are off the books, on the card once you declare it. Its levels are ' +
+    'bought with the card.',
+  'income.source.gigs.name': 'Odd jobs',
+  'income.source.gigs.desc':
+    'Always pays in cash, and never goes on the books: no paperwork makes them traceable. Its ' +
+    'levels are bought with cash.',
+  'income.source.level': 'lvl. {level} of {max}',
+  'income.source.closed': 'Closed',
+  'income.source.open': 'Open it',
+  'income.source.yields': 'Yields',
+  'income.source.next_level': 'At the next level',
+  'income.source.lands_in': 'Lands in',
+  'income.source.at_max': 'Last level: no more income can be bought here.',
+  'income.plateau': 'Plateau',
+  'income.to_plateau': 'Left to the plateau',
   'income.regime.name': 'Income regime',
   'income.regime.black': 'Off the books',
   'income.regime.declared': 'Declared',
@@ -104,7 +118,7 @@ export const en: Dictionary = {
   'vault.expand': 'Expand',
   'vault.at_max': 'Last level: this is where cash ends.',
   'vault.full': 'The vault is full: your salary no longer fits. Deposit it into the account.',
-  'vault.withholding': 'The vault cannot hold it all: {amount} of salary did not come in.',
+  'vault.blocked': 'The vault cannot hold it all: {amount} of salary did not come in.',
 
   'stats.saved_at.title': 'Last save',
   'stats.saved_at.never': 'Never: this game has not been written to disk yet.',
@@ -118,7 +132,8 @@ export const en: Dictionary = {
   'board.description':
     'How the game is going: what comes in, what it is worth, what moving it has cost.',
   'income.description':
-    'The salary arrives on its own: here you buy the things that make it arrive faster.',
+    'Money arrives on its own, one source at a time. Here you open sources and level them up, ' +
+    'until there is no level left to buy.',
 
   'vault.description':
     'How much cash you can keep on you, and what it costs to keep more. When it is full the ' +
@@ -129,7 +144,7 @@ export const en: Dictionary = {
   'board.tile.earned': 'Earned in total',
   'board.tile.spent': 'Spent in total',
   'board.tile.fees': 'Fees paid',
-  'board.tile.income.explained': 'What comes in each second, upgrades already counted.',
+  'board.tile.income.explained': 'What comes in each second, every source already counted.',
   'board.tile.net_worth.explained':
     'Cash plus card. It is earned minus spent minus fees: always, by construction.',
   'board.tile.earned.explained':
@@ -185,7 +200,7 @@ export const en: Dictionary = {
   'card.hint.drag': 'Drag to flip the card',
 
   'reason.income.tick': 'Salary',
-  'reason.income.upgrade': 'Overtime purchased',
+  'reason.income.level': 'Income level bought',
   'reason.income.declare': 'Income declared',
   'reason.atm.deposit': 'Deposit',
   'reason.atm.withdraw': 'Withdrawal',
@@ -196,7 +211,7 @@ export const en: Dictionary = {
   'error.ledger.pool_not_accepted': 'You cannot pay with {pool}. Accepted: {accepted}.',
   'error.ledger.invalid_amount': 'That amount cannot be used on {pool}: {amount}.',
   'error.payment.unauthorized': 'The code does not match this instrument ({pool}).',
-  'error.income.already_upgraded': 'Overtime has already been bought.',
+  'error.income.max_level': 'This source is already at its highest level.',
   'error.income.already_declared': 'Income is already declared.',
   'error.vault.max_level': 'The vault is already at its last level: it does not get any bigger.',
   'error.atm.amount_not_positive': 'The amount must be greater than zero, not {amount}.',

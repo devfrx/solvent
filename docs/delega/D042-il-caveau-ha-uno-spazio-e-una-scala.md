@@ -1,9 +1,12 @@
 # D042 — Il caveau ha uno spazio, e una scala invece di quattro numeri
 
-- **Stato:** **In corso** — scritta **ed eseguita** il 2026-08-24 sul ramo
+- **Stato:** **Chiusa** — scritta **ed eseguita** il 2026-08-24 sul ramo
   `d042-il-caveau-ha-uno-spazio-e-una-scala`. `npm run verify` e `npm run verify:release` sono
-  verdi, e otto rotture volute sono state fatte e ripristinate (in fondo, _Consuntivo_). **Manca il
-  punto 9 della definizione di fatto**: la pagina non è ancora stata guardata nella finestra vera
+  verdi, e otto rotture volute sono state fatte e ripristinate (in fondo, _Consuntivo_). **Il punto
+  9 è stato chiuso il 2026-08-24 dentro [D044](D044-il-reddito-e-un-elenco-di-fonti.md)**: una
+  finestra sola, tre pagine. La pagina del caveau disegna la barra, «CAVEAU 1 DI 9», la capienza,
+  lo spazio libero, quanto tiene il prossimo livello e quanti ampliamenti restano — e la CTA che
+  apre il flusso del pagamento, senza nominare un prezzo (R24)
 - **Dipende da:** [D017](D017-il-caveau.md), che ha costruito il caveau, e
   [D019](D019-il-pagamento.md), che gli ha dato il listino. Niente altro: il kernel non si tocca
 - **Sblocca:** il blocco A della [roadmap](../roadmap-fette.md) — aste di box, negozio, oggetti nel

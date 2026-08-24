@@ -8,6 +8,7 @@ import { BALANCE } from '@core/balance/constants'
 import { ticks } from '@core/kernel/Clock'
 import { income } from '@core/kernel/Ledger'
 
+import { levelPriceFor, SOURCES } from '../../src/core/domains/income/rules'
 import { createGame, type Game } from '../../src/renderer/runtime/createGame'
 
 /**
@@ -27,6 +28,10 @@ const total = (): string =>
 beforeEach(() => {
   game = createGame(SEED)
 })
+
+/** Il lavoro dipendente, preso **dall'elenco**: una fonte ricostruita qui proverebbe altro. */
+const JOB = SOURCES[0]
+if (JOB === undefined) throw new Error('nessuna fonte nell’elenco del reddito')
 
 describe('la registrazione dei sistemi', () => {
   it('registra i due sistemi con stato, ognuno una volta sola e nel proprio ordine', () => {
@@ -60,31 +65,33 @@ describe('una partita è un’istanza sola di ciascuna cosa', () => {
     expect(toString(game.ctx.ledger.balance('card'))).toBe('492.5')
   })
 
-  it('anche il comando dell’upgrade paga da quel Ledger, non da uno suo', () => {
-    // `createIncome(ledger, modifiers)` riceve il Ledger per costruzione (ADR 0024), e il `tick`
-    // invece usa quello del `SystemContext`: sono due porte diverse per la stessa istanza, e
-    // niente **obbliga** il bootstrap a passare la stessa. Provato mettendone una seconda: tutto
+  it('anche il comando di un livello paga da quel Ledger, non da uno suo', () => {
+    // `createIncome(ledger, modifiers, room)` riceve il Ledger per costruzione (ADR 0024), e il
+    // `tick` invece usa quello del `SystemContext`: sono due porte diverse per la stessa istanza,
+    // e niente **obbliga** il bootstrap a passare la stessa. Provato mettendone una seconda: tutto
     // restava verde. Questo caso è l'unica rete che c'è.
-    game.ctx.ledger.transaction(income('card', fromString('1000'), ZERO), {
+    const price = levelPriceFor(JOB, 1, 'card')?.price
+    if (price === undefined) throw new Error('il listino del lavoro non offre la carta')
+    game.ctx.ledger.transaction(income('card', price.plus(fromString('200')), ZERO), {
       reason: 'reason.income.tick'
     })
 
-    const bought = game.income.buyUpgrade('card')
+    const bought = game.income.buyLevel({ source: JOB, pool: 'card' })
 
     expect(bought.ok).toBe(true)
     expect(toString(game.ctx.ledger.balance('card'))).toBe('200')
     expect(total()).toBe('0')
   })
 
-  it('e senza fondi su quel Ledger l’upgrade non si compra', () => {
-    const bought = game.income.buyUpgrade('card')
+  it('e senza fondi su quel Ledger un livello non si compra', () => {
+    const bought = game.income.buyLevel({ source: JOB, pool: 'card' })
 
     expect(bought.ok).toBe(false)
     if (bought.ok) return
     expect(bought.error.code).toBe('error.ledger.insufficient_funds')
   })
 
-  it('il tick del Registry accredita sullo stesso Ledger che l’upgrade paga', () => {
+  it('il tick del Registry accredita sullo stesso Ledger che i livelli pagano', () => {
     game.registry.tickAll(game.ctx, ticks(100))
     const earned = game.ctx.ledger.balance('cash')
 
@@ -148,14 +155,14 @@ describe('il tempo che avanza', () => {
 
     it('non perde il resto: un intervallo che non è multiplo del blocco vale per intero', () => {
       const odd = BALANCE.ADVANCE_BLOCK * 2 + 7
-      const expected = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(odd)
+      const expected = BALANCE.INCOME_JOB_BASE_PER_SECOND.div(10).mul(odd)
 
       expect(earnedOver(odd)).toBe(toString(expected))
     })
 
     it('e un intervallo più corto di un blocco intero vale sé stesso, non un blocco', () => {
       const short = 7
-      const expected = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(short)
+      const expected = BALANCE.INCOME_JOB_BASE_PER_SECOND.div(10).mul(short)
 
       expect(earnedOver(short)).toBe(toString(expected))
     })
@@ -182,10 +189,10 @@ describe('il tempo che avanza', () => {
 
 describe('il salvataggio', () => {
   it('save → load riproduce saldi, seme e stato dei domini', () => {
-    game.ctx.ledger.transaction(income('card', fromString('900'), ZERO), {
+    game.ctx.ledger.transaction(income('card', fromString('100000'), ZERO), {
       reason: 'reason.income.tick'
     })
-    game.income.buyUpgrade('card')
+    game.income.buyLevel({ source: JOB, pool: 'card' })
     game.ctx.rng.stream('income').next()
 
     const saved: SavePayload = game.save()
@@ -222,7 +229,7 @@ describe('il salvataggio', () => {
   })
 
   it('uno stato di dominio manomesso è colpa del dominio, e lo dice il codice', () => {
-    const tampered: SavePayload = { ...game.save(), systems: { income: { upgraded: 'sì' } } }
+    const tampered: SavePayload = { ...game.save(), systems: { income: { levels: 'sì' } } }
 
     const loaded = game.load(tampered)
 
@@ -234,17 +241,17 @@ describe('il salvataggio', () => {
 
 describe('il reset', () => {
   it('hard azzera i conti e riporta i domini all’inizio', () => {
-    game.ctx.ledger.transaction(income('card', fromString('900'), ZERO), {
+    game.ctx.ledger.transaction(income('card', fromString('100000'), ZERO), {
       reason: 'reason.income.tick'
     })
-    game.income.buyUpgrade('card')
+    game.income.buyLevel({ source: JOB, pool: 'card' })
 
     game.reset('hard')
 
     expect(total()).toBe('0')
     expect(toString(game.ctx.ledger.balance('card'))).toBe('0')
     expect(game.registry.saveAll()).toEqual({
-      income: { upgraded: false, declared: false },
+      income: { levels: { job: 1, gigs: 0 }, declared: false },
       vault: { level: 0 }
     })
   })

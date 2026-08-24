@@ -16,12 +16,17 @@ import { createRegistry } from '@core/kernel/Registry'
 import { createRng } from '@core/kernel/Rng'
 
 import {
+  INCOME_PLATEAU,
   declarationPriceFor,
   incomePerSecond,
+  levelPrices,
+  MAX_LEVEL as INCOME_MAX_LEVEL,
   regimeOf,
-  upgradeModifier
+  SOURCES,
+  yieldAt
 } from '../../src/core/domains/income/rules'
 import { createIncome, type Income } from '../../src/core/domains/income/system'
+import type { IncomeState } from '../../src/core/domains/income/types'
 import {
   cashCapacityFor,
   expansionPrices,
@@ -41,6 +46,12 @@ import { createVault } from '../../src/core/domains/vault/system'
  */
 
 const ONE_MINUTE = seconds(60)
+
+/** La partita appena nata: il lavoro al primo livello, i lavoretti chiusi. */
+const AT_START: IncomeState = { levels: { job: 1, gigs: 0 }, declared: false }
+
+/** La stessa partita, in regola: il lavoro passa alla carta, i lavoretti restano dov'erano. */
+const DECLARED: IncomeState = { levels: { job: 1, gigs: 0 }, declared: true }
 const ONE_TICK = ticks(1)
 
 /** Molto oltre il tempo che serve a riempire il caveau di partenza: il muro deve gia' aver morso. */
@@ -107,14 +118,14 @@ describe('i bersagli di bilanciamento', () => {
     for (let elapsed = 0; elapsed < tickCount; elapsed += 1) registry.tickAll(ctx, ONE_TICK)
 
     expect(toString(ledger.balance('cash'))).toBe(
-      toString(incomePerSecond(modifiers).mul(ONE_MINUTE))
+      toString(incomePerSecond(AT_START, modifiers).mul(ONE_MINUTE))
     )
   })
 
   it('il muro morde quando dichiarato: seconds_to_first_wall', () => {
     // Non una costante riletta: il numero si **misura** dai due che lo producono, la capienza di
     // partenza e il reddito al secondo. Cambiarne uno solo sposta questa cifra e rende rosso.
-    const perSecond = incomePerSecond(createModifiers())
+    const perSecond = incomePerSecond(AT_START, createModifiers())
     const secondsToWall = cashCapacityFor(0).div(perSecond)
     const target = TARGETS.seconds_to_first_wall
 
@@ -178,7 +189,9 @@ describe('i bersagli di bilanciamento', () => {
     // dichiarare costerebbe meno che versare, la carta diventerebbe migliore sotto ogni aspetto e
     // i contanti smetterebbero di essere una scelta. Il confronto è con la costante e non con una
     // cifra ricopiata: ritoccare il tasso del bancomat deve rendere rosso **questo** test.
-    const rate = regimeOf({ upgraded: false, declared: true }).withholdingRate
+    const job = SOURCES[0]
+    if (job === undefined) throw new Error('nessuna fonte nell’elenco')
+    const rate = regimeOf(job, DECLARED).withholdingRate
     const target = TARGETS.income_tax_rate
 
     expect(rate.greaterThan(BALANCE.ATM_FEE_RATE_IN)).toBe(true)
@@ -191,13 +204,15 @@ describe('i bersagli di bilanciamento', () => {
     // di fronte all'altra: un arrotondamento per tick basterebbe a spostare il secondo senza che
     // il primo se ne accorga.
     const { ledger, registry, ctx, income } = simulate()
-    income.system.load({ upgraded: false, declared: true })
+    income.system.load(DECLARED)
 
     const tickCount = clock.secondsToTicks(ONE_MINUTE)
     for (let elapsed = 0; elapsed < tickCount; elapsed += 1) registry.tickAll(ctx, ONE_TICK)
 
     const gross = ledger.balance('world').neg()
-    const rate = regimeOf({ upgraded: false, declared: true }).withholdingRate
+    const job = SOURCES[0]
+    if (job === undefined) throw new Error('nessuna fonte nell’elenco')
+    const rate = regimeOf(job, DECLARED).withholdingRate
     expect(toString(ledger.balance('tax'))).toBe(toString(gross.mul(rate)))
     // E il muro del caveau non c'entra più niente: in regola i contanti restano a zero.
     expect(ledger.balance('cash').isZero()).toBe(true)
@@ -218,13 +233,58 @@ describe('i bersagli di bilanciamento', () => {
     expect(option.price.lessThan(cashCapacityFor(MAX_LEVEL))).toBe(true)
   })
 
-  it('con l upgrade attivo il reddito esce dall intervallo di partenza', () => {
-    const modifiers = createModifiers()
-    modifiers.register(upgradeModifier())
+  it('con un livello comprato il reddito esce dall intervallo di partenza', () => {
+    const bought: IncomeState = { levels: { job: 2, gigs: 0 }, declared: false }
+    const perMinute = incomePerSecond(bought, createModifiers()).mul(ONE_MINUTE)
 
-    const perMinute = incomePerSecond(modifiers).mul(ONE_MINUTE)
-
-    // Se ci restasse dentro, l'upgrade non sarebbe percepibile e l'intervallo sarebbe troppo largo.
+    // Se ci restasse dentro, un livello non sarebbe percepibile e l'intervallo sarebbe troppo largo.
     expect(perMinute.greaterThan(TARGETS.income_per_minute_at_start.max)).toBe(true)
+  })
+
+  it('il tetto del reddito attivo resta dove la legge 6 lo vuole: income_plateau', () => {
+    // Si **misura** dalle regole e non dalle costanti: `INCOME_PLATEAU` somma le rese all'ultimo
+    // livello, quindi cambiare quanti livelli esistono, di quanto crescono o quanto rendono le
+    // fonti sposta questa cifra e rende rosso qui, che è il posto giusto per accorgersene.
+    const target = TARGETS.income_plateau
+
+    expect(INCOME_PLATEAU.greaterThanOrEqualTo(target.min)).toBe(true)
+    expect(INCOME_PLATEAU.lessThanOrEqualTo(target.max)).toBe(true)
+  })
+
+  it('e al plateau un anno di gioco riempie un caveau pieno', () => {
+    // È la frase che dice al giocatore che i contanti hanno finito il loro mestiere, e insieme il
+    // punto in cui il capitale deve prendere il posto del reddito attivo. Non è un intervallo
+    // separato: è la ragione per cui l'intervallo del plateau sta dove sta, e legarli qui rende
+    // rosso chi sposta uno dei due senza guardare l'altro.
+    const aYear = INCOME_PLATEAU.mul(seconds(720))
+
+    expect(aYear.greaterThanOrEqualTo(cashCapacityFor(MAX_LEVEL))).toBe(true)
+    expect(aYear.lessThan(cashCapacityFor(MAX_LEVEL).mul(2))).toBe(true)
+  })
+
+  it('ogni livello di ogni fonte si ripaga nel tempo dichiarato: income_level_payback', () => {
+    // INV-28 · ADR 0053 — è il bersaglio che rende la decisione una **proprietà** invece di
+    // un'intenzione. Il rientro si calcola dal **listino** e dalle rese, non dalla costante: chi
+    // scrivesse un prezzo a mano da qualche parte lo farebbe diventare rosso qui.
+    const target = TARGETS.income_level_payback
+    let measured = 0
+
+    for (const source of SOURCES) {
+      for (let level = 0; level < INCOME_MAX_LEVEL; level += 1) {
+        const [option] = levelPrices(source, level)
+        if (option === undefined) throw new Error('listino atteso sotto l’ultimo livello')
+
+        const gained = yieldAt(source, level + 1).minus(yieldAt(source, level))
+        const payback = option.price.div(gained)
+
+        expect(payback.greaterThanOrEqualTo(target.min)).toBe(true)
+        expect(payback.lessThanOrEqualTo(target.max)).toBe(true)
+        measured += 1
+      }
+    }
+
+    // Senza questa riga un elenco vuoto o una scala di un gradino renderebbero il caso verde
+    // senza aver misurato niente.
+    expect(measured).toBe(SOURCES.length * INCOME_MAX_LEVEL)
   })
 })

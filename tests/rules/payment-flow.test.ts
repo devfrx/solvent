@@ -102,7 +102,7 @@ describe('i due rilevatori', () => {
 describe('la scelta di uno strumento passa da un pezzo solo', () => {
   it('c’è qualcosa da guardare, e comprende i due pannelli che pagano', () => {
     expect(outsideFlow.length).toBeGreaterThan(0)
-    expect(outsideFlow).toContain('src/renderer/components/income/IncomePanel.vue')
+    expect(outsideFlow).toContain('src/renderer/components/income/IncomeSourcePanel.vue')
     expect(outsideFlow).toContain('src/renderer/components/vault/VaultPanel.vue')
     expect(components).toContain(`${FLOW}PaymentDialog.vue`)
   })

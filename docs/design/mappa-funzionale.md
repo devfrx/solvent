@@ -537,7 +537,10 @@ saperlo per capire da dove si parte — **non è un vincolo di design**.
 
 **Costruito e funzionante:**
 
-- reddito in contanti che entra a ogni tick, con un potenziamento acquistabile solo con la carta
+- reddito che entra a ogni tick da **due fonti** — il lavoro dipendente e i lavoretti — ciascuna
+  con otto livelli, un prezzo calcolato dal tempo di rientro e uno strumento con cui si paga; la
+  somma delle fonti al livello massimo è il **plateau**, oltre il quale il denaro non compra più
+  reddito attivo
 - bancomat che deposita e preleva trattenendo una commissione, con l'anteprima della scomposizione
   prima della conferma
 - una rappresentazione della carta di credito come **oggetto tridimensionale ruotabile col mouse**,

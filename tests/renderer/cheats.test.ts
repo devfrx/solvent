@@ -43,7 +43,7 @@ describe('i cheat installati su una partita', () => {
       'cheat.vault.level_up',
       'cheat.vault.max_level',
       'cheat.vault.reset_level',
-      'cheat.income.toggle_upgrade'
+      'cheat.income.boost'
     ])
   })
 
@@ -89,20 +89,24 @@ describe('i cheat installati su una partita', () => {
     expect(game.vault.state().level).toBe(1)
   })
 
-  it('il potenziamento del reddito si inverte, e il rendimento lo segue', () => {
-    // Il cheat passa da `system.load`, che risincronizza il modificatore: senza, `upgraded`
-    // direbbe di sì e il rendimento resterebbe quello di prima — due numeri che si contraddicono.
+  it('il moltiplicatore del reddito si inverte, e premerlo due volte non lancia', () => {
+    // Da D044 questo cheat è l'**unico** cliente di `income.all`: i livelli sono aritmetica pura
+    // sullo stato, e nel registro dei modificatori non c'è più niente. È ciò che tiene il gancio
+    // provato da qualcosa che non sia un test, finché l'albero delle abilità non arriva.
+    //
+    // `register` rifiuta il duplicato **lanciando**, quindi l'interruttore deve togliere prima di
+    // rimettere: la seconda pressione è il caso che quel difetto farebbe crollare.
     const before = toString(game.modifiers.compose('income.all', money('100')))
 
-    cheats.run('cheat.income.toggle_upgrade')
+    cheats.run('cheat.income.boost')
 
-    expect(game.income.state().upgraded).toBe(true)
     expect(toString(game.modifiers.compose('income.all', money('100')))).not.toBe(before)
 
-    cheats.run('cheat.income.toggle_upgrade')
+    cheats.run('cheat.income.boost')
 
-    expect(game.income.state().upgraded).toBe(false)
     expect(toString(game.modifiers.compose('income.all', money('100')))).toBe(before)
+
+    expect(() => cheats.run('cheat.income.boost')).not.toThrow()
   })
 
   it('e una partita murata viva si sblocca svuotando, senza toccare il file', () => {

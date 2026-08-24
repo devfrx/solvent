@@ -8,7 +8,7 @@ import { fromString, toString } from '@core/contracts/money'
 import { POOL_IDS } from '@core/contracts/pools'
 import type { SavePayload } from '@core/contracts/save'
 
-import { incomePerSecond } from '@core/domains/income/rules'
+import { incomePerSecond, SOURCES } from '@core/domains/income/rules'
 import { ticks } from '@core/kernel/Clock'
 
 import { createSaveFile } from '../../src/main/save/SaveFile'
@@ -25,9 +25,9 @@ import { createGame, type Game } from '../../src/renderer/runtime/createGame'
  * la UI invia, e lo stato di partenza nessuno lo scrive: lo **guadagna**.
  *
  * È la differenza che conta. Uno stato costruito a mano prova che il formato sopravvive al disco;
- * una partita giocata prova che sopravvive la **partita** — e le due cose divergono nel punto in
- * cui `IncomeState.upgraded` torna indietro come dato ma il moltiplicatore che quel dato comanda
- * vive nel registro dei modificatori, che nel salvataggio non c'è.
+ * una partita giocata prova che sopravvive la **partita** — e da D044 le due cose divergono nel
+ * punto in cui il salvataggio porta un **livello** e non una resa: la resa si ricalcola dalla
+ * scala, e un round-trip che guardasse solo i byte non direbbe se il ricalcolo è tornato uguale.
  */
 
 /** Il seme della partita giocata, e quello della partita che la rilegge: devono essere diversi. */
@@ -37,16 +37,21 @@ const REOPENED_SEED = SEED + 1
 const SAVED_AT = 1_755_600_000_000
 
 /**
- * Quanti tick servono a guadagnare il prezzo dell'upgrade **giocando**: a 12,00 €/s il reddito è
- * 1,20 € per tick, e 677 tick fanno 812,40 €. Il numero è scritto qui una volta sola perché è una
- * scelta di questo test, non del gioco.
+ * Quanti tick servono a guadagnare il secondo livello del lavoro **giocando**: a 12,00 €/s il
+ * reddito è 1,20 € per tick, e 1.523 tick fanno 1.827,60 €. Il numero è scritto qui una volta sola
+ * perché è una scelta di questo test, non del gioco.
  *
- * Erano 669 fino a D032, quando la commissione era 2,50 € qualunque fosse l'importo. Adesso
- * versare 812,40 € ne costa l'1,5%, cioè 12,19 €, e sul conto ne arrivano 800,21 — l'upgrade, con
- * pochissimo resto. **Che questo numero abbia dovuto salire è il punto della delega**: la
- * commissione ha ricominciato a farsi sentire su un importo grande.
+ * **Da dove viene.** Il livello costa 1.800,00 € — l'incremento di resa (6,00 €/s) per i cinque
+ * minuti di rientro dell'ADR 0053 — e si paga con la carta, quindi i contanti vanno prima versati
+ * lasciando l'1,5% al bancomat: servono 1.827,42 € perché ne arrivino 1.800,00. Il primo multiplo
+ * di 1,20 € che ci sta sopra è 1.827,60.
+ *
+ * Erano 677 fino a D044, quando il reddito aveva un potenziamento solo da 800,00 €. **Che questo
+ * numero sia più che raddoppiato è il punto della delega**: il prezzo non è più un cartellino, è
+ * l'incremento per il tempo di rientro — e con i contanti sotto il muro del caveau, arrivarci
+ * significa **prima** ampliare.
  */
-const TICKS_TO_AFFORD = 677
+const TICKS_TO_AFFORD = 1523
 
 /**
  * Quanti tick servono ad ampliare il caveau **in contanti**: a 1,20 € per tick, 750 tick fanno
@@ -55,29 +60,33 @@ const TICKS_TO_AFFORD = 677
  */
 const TICKS_TO_EXPAND = 750
 
+/** Il lavoro dipendente, preso **dall'elenco**: una fonte ricostruita qui proverebbe altro. */
+const JOB = SOURCES[0]
+if (JOB === undefined) throw new Error('nessuna fonte nell’elenco del reddito')
+
 let directory: string
 let store: SaveStore
 let game: Game
 
 /**
- * La fetta 01, giocata dal suo primo tick: si guadagna in contanti, si deposita al bancomat
- * pagando la commissione, si compra l'upgrade con la carta, e il reddito che segue è già quello
- * moltiplicato. È il giro descritto nella nota di chiusura di D015, percorso qui dal codice
- * invece che dallo schermo.
+ * La fetta 01, giocata dal suo primo tick: si amplia il caveau in contanti, si guadagna fino al
+ * prezzo del livello, si deposita al bancomat pagando la commissione, si compra il livello con la
+ * carta, e il reddito che segue è già quello del gradino nuovo. È il giro descritto nella nota di
+ * chiusura di D015, percorso qui dal codice invece che dallo schermo.
  */
 const play = (target: Game): void => {
   // Prima il caveau, e non per ordine alfabetico: da D017 i contanti hanno un tetto, quindi
-  // ampliarlo è il primo gesto che il giocatore compie davvero — e il livello che ne esce è
-  // l'unico stato di dominio del salvataggio che non sia un booleano.
+  // ampliarlo è il primo gesto che il giocatore compie davvero — e da D044 è anche **necessario**,
+  // perché 1.827,60 € in contanti nel caveau di partenza non ci starebbero.
   target.registry.tickAll(target.ctx, ticks(TICKS_TO_EXPAND))
   target.vault.expand('cash')
 
   target.registry.tickAll(target.ctx, ticks(TICKS_TO_AFFORD))
   target.atm.deposit(target.ctx.ledger.balance('cash'))
-  target.income.buyUpgrade('card')
+  target.income.buyLevel({ source: JOB, pool: 'card' })
 
-  // Dopo l'upgrade il reddito è 18,00 €/s: questi tick valgono più dei primi, e il salvataggio
-  // deve poterlo dimostrare.
+  // Al secondo livello il lavoro rende 18,00 €/s: questi tick valgono più dei primi, e il
+  // salvataggio deve poterlo dimostrare.
   target.registry.tickAll(target.ctx, ticks(7))
 
   // Un rifiuto fa parte del giocare, e non deve muovere un centesimo: il pavimento della
@@ -128,19 +137,20 @@ describe('la partita giocata, dal disco e ritorno', () => {
     // Cinque conti su sette mossi, decimali compresi: il giro del bancomat li produce da solo.
     expect(payload.ledger.balances).toEqual({
       cash: '2.6',
-      card: '7.71',
-      world: '-1725',
-      sink: '1700',
-      fees: '14.69',
+      card: '7.68',
+      world: '-2740.2',
+      sink: '2700',
+      fees: '29.92',
       house: '0',
       tax: '0'
     })
 
-    // I due domini veri — l'upgrade comprato e il caveau ampliato — non un sistema finto che
-    // ritorna un oggetto. Il livello è anche il primo stato salvato del progetto che non sia un
-    // booleano, quindi il primo che un salvataggio manomesso possa sbagliare in silenzio.
+    // I due domini veri — il livello comprato e il caveau ampliato — non un sistema finto che
+    // ritorna un oggetto. Da D044 lo stato del reddito è anche il primo del progetto che sia un
+    // **oggetto annidato**, quindi il primo che un salvataggio manomesso possa sbagliare in
+    // silenzio in più di un modo.
     expect(payload.systems).toEqual({
-      income: { upgraded: true, declared: false },
+      income: { levels: { job: 2, gigs: 0 }, declared: false },
       vault: { level: 1 }
     })
     expect(payload.rng.cursors).toEqual({ income: 3 })
@@ -171,16 +181,16 @@ describe('la partita giocata, dal disco e ritorno', () => {
 })
 
 describe('ciò che nel salvataggio non c’è', () => {
-  it('l’upgrade non torna come dato: torna come reddito', async () => {
-    // Il moltiplicatore vive nel registro dei modificatori, che il payload non contiene: a
-    // rimetterlo è `load` del sistema. Un round-trip che guardasse solo i byte direbbe verde
-    // anche su una partita che ha ricomprato il diritto all'upgrade senza il suo effetto.
+  it('il livello non torna come reddito: torna come **numero**, e il reddito ne discende', () => {
+    // Il salvataggio porta un livello, non una resa: la resa si ricalcola dalla scala. Salvarla
+    // accanto sarebbe salvare due volte lo stesso fatto, e il giorno in cui la curva cambia le
+    // vecchie partite porterebbero in giro il numero vecchio.
     const reopened = createGame(REOPENED_SEED)
-    expect(toString(incomePerSecond(reopened.modifiers))).toBe('12')
+    expect(toString(incomePerSecond(reopened.income.state(), reopened.modifiers))).toBe('12')
 
-    reopened.load(await saveAndReload(game.save()))
+    reopened.load(game.save())
 
-    expect(toString(incomePerSecond(reopened.modifiers))).toBe('18')
+    expect(toString(incomePerSecond(reopened.income.state(), reopened.modifiers))).toBe('18')
   })
 
   it('e il reddito riletto si vede sul conto, non solo in una firma', async () => {
@@ -190,7 +200,14 @@ describe('ciò che nel salvataggio non c’è', () => {
 
     reopened.registry.tickAll(reopened.ctx, ticks(10))
 
-    // Dieci tick sono un secondo (ADR 0009): con l'upgrade valgono 18,00 €, senza ne varrebbero 12.
+    // Dieci tick sono un secondo (ADR 0009): al secondo livello valgono 18,00 €, al primo 12,00 €.
     expect(toString(reopened.ctx.ledger.balance('cash').minus(before))).toBe('18')
+  })
+
+  it('e il registro dei modificatori resta vuoto: da D044 nel dominio non registra più nessuno', () => {
+    // Fino a D043 il `×1,5` dell'upgrade era l'unica registrazione del gioco, e questo file era il
+    // solo posto che provava che `load` la rimettesse. Adesso i livelli sono aritmetica pura sullo
+    // stato: il gancio `income.all` resta, e resta **senza clienti** fino all'albero delle abilità.
+    expect(game.modifiers.sourcesFor('income.all')).toEqual([])
   })
 })

@@ -1,11 +1,13 @@
 # D043 — Il reddito si mette in regola
 
-- **Stato:** **In corso** — scritta **ed eseguita** il 2026-08-24 sul ramo
+- **Stato:** **Chiusa** — scritta **ed eseguita** il 2026-08-24 sul ramo
   `d043-il-reddito-si-mette-in-regola`, fusa in `main` e spinta. `npm run verify` e `npm run build`
-  sono verdi, 1.343 test. **Manca il punto 9**: la pagina non è ancora stata guardata nella
-  finestra vera. Il punto 9 **non c'era** quando la delega è stata scritta, e la sua assenza era il
-  difetto: [D042](D042-il-caveau-ha-uno-spazio-e-una-scala.md) ce l'aveva, questa aggiunge un
-  pannello nuovo e non se l'era chiesto
+  sono verdi, 1.343 test. Il punto 9 **non c'era** quando la delega è stata scritta, e la sua
+  assenza era il difetto: [D042](D042-il-caveau-ha-uno-spazio-e-una-scala.md) ce l'aveva, questa
+  aggiunge un pannello nuovo e non se l'era chiesto. **È stato chiuso il 2026-08-24 dentro
+  [D044](D044-il-reddito-e-un-elenco-di-fonti.md)**: il pannello del regime si disegna, dichiara il
+  3,0% e l'irreversibilità **prima** del flusso di pagamento, e premendolo il lavoro passa davvero
+  dai contanti alla carta — a schermo, sulla riga «Atterra su», mentre i lavoretti restano dov'erano
 - **Data:** 2026-08-24
 - **Fetta:** 02 riaperta da una sessione di gioco, e non è un ritocco di bilanciamento: è la riga
   che decide dove atterrano i soldi

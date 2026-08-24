@@ -10,7 +10,7 @@ import type { LoadedSave, SavePayload, SaveResult } from '@core/contracts/save'
 
 import { BALANCE } from '@core/balance/constants'
 import { DEPOSIT, WITHDRAW } from '@core/domains/atm/commands'
-import { declarationPrices, upgradePrices } from '@core/domains/income/rules'
+import { declarationPrices, levelPriceFor, levelPrices, SOURCES } from '@core/domains/income/rules'
 import { cashCapacityFor, expansionPrices, MAX_LEVEL } from '@core/domains/vault/rules'
 import { clock, seconds, ticks } from '@core/kernel/Clock'
 import { income } from '@core/kernel/Ledger'
@@ -72,6 +72,22 @@ beforeEach(() => {
   setActivePinia(createPinia())
   game = createGame(SEED)
 })
+
+/**
+ * Il prezzo del secondo livello del lavoro, letto **dal listino** e non ricopiato: è il primo
+ * acquisto che un giocatore fa sulla carta, e più di un caso qui dentro lo finanzia.
+ */
+const JOB = SOURCES[0]
+if (JOB === undefined) throw new Error('nessuna fonte nell’elenco del reddito')
+
+const JOB_LEVEL_PRICE = (() => {
+  const option = levelPriceFor(JOB, 1, 'card')
+  if (option === null) throw new Error('il listino del lavoro non offre la carta')
+  return toString(option.price)
+})()
+
+/** Con quali strumenti si compra il secondo livello del lavoro, **generato** dal listino. */
+const JOB_LEVEL_POOLS = levelPrices(JOB, 1).map((option) => option.pool)
 
 describe('l’avvio', () => {
   it('senza salvataggio è una partita nuova, e il loop parte', async () => {
@@ -165,18 +181,18 @@ describe('il recupero all’avvio', () => {
     expect(toString(game.ctx.ledger.balance('cash'))).not.toBe('0')
     expect(toString(game.ctx.ledger.balance('cash'))).toBe(toString(wall))
 
-    // **D040 — `incomeWithheld` è il trattenuto dell'**ultimo blocco**, non di tutta la notte.**
+    // **D040 — `incomeBlocked` è il fermato dell'**ultimo blocco**, non di tutta la notte.**
     // Prima di D040 il recupero era un `advance` solo, quindi «l'ultimo tick» e «tutto il
     // recupero» erano la stessa cosa e questa riga poteva chiedere `matured.minus(wall)`. Adesso
     // il mondo avanza a blocchi di un giorno di gioco: il caveau si riempie durante il
     // quarantaduesimo — 1.000,00 € a 1,20 €/tick sono 833 tick — e i blocchi che restano
     // trattengono ognuno il proprio stipendio intero.
     //
-    // Non è una perdita di informazione, è la sua definizione: `withheld` risponde a «i soldi
-    // stanno entrando **adesso**?», e lo dichiara in `income/types.ts` — «descrive l'ultimo tick,
+    // Non è una perdita di informazione, è la sua definizione: `blocked` risponde a «i soldi
+    // stanno entrando **adesso**?», e lo dichiara in `income/system.ts` — «descrive l'ultimo tick,
     // non la partita». Un totale della notte sarebbe un'altra domanda, e avrebbe un altro nome.
-    const lastBlock = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(BALANCE.ADVANCE_BLOCK)
-    expect(toString(store.incomeWithheld)).toBe(toString(lastBlock))
+    const lastBlock = BALANCE.INCOME_JOB_BASE_PER_SECOND.div(10).mul(BALANCE.ADVANCE_BLOCK)
+    expect(toString(store.incomeBlocked)).toBe(toString(lastBlock))
   })
 
   it('un salvataggio dal futuro non produce tick', async () => {
@@ -490,7 +506,7 @@ describe('riaprire il gioco dopo una notte', () => {
     // E il totale è quello di sempre: spezzare il tempo non crea né distrugge denaro. È
     // l'invariante 3 della delega, e il difetto che chiuderebbe è un ciclo che perde l'ultimo
     // blocco parziale.
-    const earned = BALANCE.INCOME_BASE_PER_SECOND.div(10).mul(RECOVERED)
+    const earned = BALANCE.INCOME_JOB_BASE_PER_SECOND.div(10).mul(RECOVERED)
     expect(toString(game.ctx.ledger.balance('cash'))).toBe(toString(earned))
   })
 
@@ -776,17 +792,45 @@ describe('il massimo del bancomat', () => {
 })
 
 describe('i selettori del reddito', () => {
-  /** Il listino dell'upgrade offre **solo** la carta (ADR 0027), e il reddito entra in contanti. */
+  /** Il listino dei livelli del lavoro offre **solo** la carta (ADR 0027). */
   const fundCard = (amount: string): void => {
     game.ctx.ledger.transaction(income('card', fromString(amount), ZERO), {
       reason: 'reason.income.tick'
     })
   }
 
-  it('il listino è quello del dominio, non una tabella ricopiata', async () => {
+  /** Il prezzo del prossimo livello di una fonte, letto dal **listino** e non ricopiato. */
+  const priceOf = (id: 'job' | 'gigs', level: number): string => {
+    const source = SOURCES.find((each) => each.id === id)
+    const option = source === undefined ? null : levelPriceFor(source, level, source.levelPool)
+    if (option === null) throw new Error(`nessun listino per '${id}' al livello ${level}`)
+    return toString(option.price)
+  }
+
+  const jobPrice = priceOf('job', 1)
+
+  it('l’elenco delle fonti arriva pronto, una riga per pannello', async () => {
     const store = await start()
 
-    expect(store.upgradePrices).toEqual(upgradePrices())
+    expect(store.incomeSources.map((each) => each.id)).toEqual(SOURCES.map((each) => each.id))
+  })
+
+  it('e ogni riga porta il livello, la resa, dove atterra e il listino del gradino dopo', async () => {
+    const store = await start()
+    const [job, gigs] = store.incomeSources
+    if (job === undefined || gigs === undefined) throw new Error('due fonti attese')
+
+    expect(job.level).toBe(1)
+    expect(job.atMax).toBe(false)
+    expect(toString(job.perSecond)).toBe(toString(BALANCE.INCOME_JOB_BASE_PER_SECOND))
+    expect(job.landsIn).toBe('cash')
+
+    // I lavoretti sono chiusi: rendono zero, e il loro listino è il prezzo di **apertura**.
+    const gigsSource = SOURCES[1]
+    if (gigsSource === undefined) throw new Error('la seconda fonte non c’è')
+    expect(gigs.level).toBe(0)
+    expect(gigs.perSecond.isZero()).toBe(true)
+    expect(gigs.prices).toEqual(levelPrices(gigsSource, 0))
   })
 
   it('e i suoi prezzi sono **gli stessi oggetti**, non copie proxate da Pinia', async () => {
@@ -794,85 +838,111 @@ describe('i selettori del reddito', () => {
     // prezzo mostrato e quello addebitato sarebbero due valori uguali con due vite separate. È
     // anche la ragione per cui questo campo è uno `shallowRef` invece di un `ref`.
     const store = await start()
+    const source = SOURCES[0]
+    if (source === undefined) throw new Error('nessuna fonte nell’elenco')
 
-    expect(store.upgradePrices[0]?.price).toBe(BALANCE.UPGRADE_PRICE_CARD)
+    expect(store.incomeSources[0]?.prices[0]?.price).toBe(levelPriceFor(source, 1, 'card')?.price)
   })
 
-  it('l’anteprima è per strumento: la carta sì, i contanti mai', async () => {
+  it('l’anteprima è per strumento: la carta per il lavoro, i contanti mai', async () => {
     const store = await start()
-    game.ctx.ledger.transaction(income('cash', fromString('5000'), ZERO), {
+    game.ctx.ledger.transaction(income('cash', fromString('900'), ZERO), {
       reason: 'reason.income.tick'
     })
 
-    // Cinquemila euro in contanti non comprano un upgrade che il listino non offre in contanti:
-    // non è il saldo a decidere, è con cosa si paga.
-    expect(store.canBuyUpgradeWith('cash')).toBe(false)
-    expect(store.canBuyUpgradeWith('card')).toBe(false)
+    // I contanti non comprano un livello che il listino del lavoro non offre in contanti: non è il
+    // saldo a decidere, è con cosa si paga.
+    expect(store.canBuyIncomeLevelWith('job', 'cash')).toBe(false)
+    expect(store.canBuyIncomeLevelWith('job', 'card')).toBe(false)
 
-    fundCard('800')
-    expect(store.canBuyUpgradeWith('card')).toBe(true)
+    fundCard(jobPrice)
+    expect(store.canBuyIncomeLevelWith('job', 'card')).toBe(true)
+  })
+
+  it('e i lavoretti al contrario: contanti sì, carta mai', async () => {
+    const store = await start()
+    fundCard('100000')
+
+    expect(store.canBuyIncomeLevelWith('gigs', 'card')).toBe(false)
   })
 
   it('e comprare con uno strumento fuori dal listino è rifiutato con l’elenco giusto', async () => {
     const store = await start()
-    game.ctx.ledger.transaction(income('cash', fromString('5000'), ZERO), {
+    game.ctx.ledger.transaction(income('cash', fromString('900'), ZERO), {
       reason: 'reason.income.tick'
     })
 
-    const bought = store.buyUpgrade('cash', NO_PROOF)
+    const bought = store.buyIncomeLevel('job', 'cash', NO_PROOF)
 
     expect(bought.ok).toBe(false)
     if (bought.ok) return
     expect(bought.error).toEqual({
       code: 'error.ledger.pool_not_accepted',
       pool: 'cash',
-      accepted: upgradePrices().map((option) => option.pool)
+      accepted: JOB_LEVEL_POOLS
     })
-    expect(store.upgraded).toBe(false)
+    expect(store.incomeSources[0]?.level).toBe(1)
   })
 
-  it('il reddito al secondo è quello base finché non si compra', async () => {
+  it('il reddito al secondo è quello di partenza finché non si compra', async () => {
     const store = await start()
 
-    expect(toString(store.incomePerSecond)).toBe(toString(BALANCE.INCOME_BASE_PER_SECOND))
+    expect(toString(store.incomePerSecond)).toBe(toString(BALANCE.INCOME_JOB_BASE_PER_SECOND))
   })
 
-  it('e cresce quando l’acquisto riesce: i modificatori non annunciano niente', async () => {
-    // Registrare un modificatore non è un movimento economico, quindi il Bus tace: se lo store
-    // non rileggesse, il pannello resterebbe a 12,00 €/s per sempre dopo un acquisto riuscito.
+  it('e cresce quando l’acquisto riesce: comprare un livello non annuncia niente', async () => {
+    // Alzare un livello non è un movimento economico, quindi il Bus tace: se lo store non
+    // rileggesse, il pannello resterebbe a 12,00 €/s per sempre dopo un acquisto riuscito.
     const store = await start()
-    fundCard('800')
+    fundCard(jobPrice)
 
-    expect(store.buyUpgrade('card', store.card.code).ok).toBe(true)
+    expect(store.buyIncomeLevel('job', 'card', store.card.code).ok).toBe(true)
 
-    const boosted = BALANCE.INCOME_BASE_PER_SECOND.mul(BALANCE.UPGRADE_MULTIPLIER)
-    expect(toString(store.incomePerSecond)).toBe(toString(boosted))
-    expect(store.upgraded).toBe(true)
+    expect(toString(store.incomePerSecond)).toBe(
+      toString(BALANCE.INCOME_JOB_BASE_PER_SECOND.mul(BALANCE.INCOME_LEVEL_GROWTH))
+    )
+    expect(store.incomeSources[0]?.level).toBe(2)
   })
 
-  it('un caricamento con l’upgrade già comprato arriva con i numeri giusti', async () => {
-    // Il mirror va riletto a mano anche qui: caricare non emette, e il registro dei modificatori
-    // lo rimette a posto il sistema durante `load`.
+  it('un caricamento con dei livelli già comprati arriva con i numeri giusti', async () => {
     const payload = freshPayload()
-    const upgraded: SavePayload = { ...payload, systems: { income: { upgraded: true } } }
+    const played: SavePayload = {
+      ...payload,
+      systems: { income: { levels: { job: 2, gigs: 1 }, declared: false } }
+    }
 
-    const store = await start({ load: found(upgraded, SAVED_AT), wallClock: SAVED_AT })
+    const store = await start({ load: found(played, SAVED_AT), wallClock: SAVED_AT })
 
-    expect(store.upgraded).toBe(true)
-    expect(store.canBuyUpgradeWith('card')).toBe(false)
-    const boosted = BALANCE.INCOME_BASE_PER_SECOND.mul(BALANCE.UPGRADE_MULTIPLIER)
-    expect(toString(store.incomePerSecond)).toBe(toString(boosted))
+    expect(store.incomeSources.map((each) => each.level)).toEqual([2, 1])
+    expect(toString(store.incomePerSecond)).toBe(
+      toString(
+        BALANCE.INCOME_JOB_BASE_PER_SECOND.mul(BALANCE.INCOME_LEVEL_GROWTH).plus(
+          BALANCE.INCOME_GIGS_BASE_PER_SECOND
+        )
+      )
+    )
   })
 
   it('una partita nuova riporta indietro anche il reddito', async () => {
     const store = await start()
-    fundCard('800')
-    store.buyUpgrade('card', store.card.code)
+    fundCard(jobPrice)
+    store.buyIncomeLevel('job', 'card', store.card.code)
 
     await store.newGame()
 
-    expect(store.upgraded).toBe(false)
-    expect(toString(store.incomePerSecond)).toBe(toString(BALANCE.INCOME_BASE_PER_SECOND))
+    expect(store.incomeSources[0]?.level).toBe(1)
+    expect(toString(store.incomePerSecond)).toBe(toString(BALANCE.INCOME_JOB_BASE_PER_SECOND))
+  })
+
+  it('il plateau è un selettore, e quanto manca si ferma a zero', async () => {
+    // La pagina deve poter dire quanto resta da comprare: è la risposta di questo dominio alla
+    // domanda «come muore il secondo milione».
+    const store = await start()
+
+    expect(store.incomePlateau.greaterThan(store.incomePerSecond)).toBe(true)
+    expect(toString(store.incomeToPlateau)).toBe(
+      toString(store.incomePlateau.minus(store.incomePerSecond))
+    )
   })
 })
 
@@ -883,10 +953,17 @@ describe('l’anteprima e il comando dicono la stessa cosa', () => {
     })
   }
 
+  const jobPriceAt = (level: number): string => {
+    const source = SOURCES[0]
+    const option = source === undefined ? null : levelPriceFor(source, level, 'card')
+    if (option === null) throw new Error(`nessun listino per il lavoro al livello ${level}`)
+    return toString(option.price)
+  }
+
   /** Quando i due divergono si spegne un pulsante che avrebbe funzionato, o viceversa. */
   const agreeOn = (store: ReturnType<typeof useGameStore>): boolean => {
-    const foreseen = store.canBuyUpgradeWith('card')
-    const actual = store.buyUpgrade('card', store.card.code)
+    const foreseen = store.canBuyIncomeLevelWith('job', 'card')
+    const actual = store.buyIncomeLevel('job', 'card', store.card.code)
     expect(actual.ok).toBe(foreseen)
     return foreseen
   }
@@ -899,32 +976,35 @@ describe('l’anteprima e il comando dicono la stessa cosa', () => {
 
   it('con un centesimo in meno del prezzo: ancora no', async () => {
     const store = await start()
-    fundCard(toString(BALANCE.UPGRADE_PRICE_CARD.minus(fromString('0.01'))))
+    fundCard(toString(fromString(jobPriceAt(1)).minus(fromString('0.01'))))
 
     expect(agreeOn(store)).toBe(false)
   })
 
   it('con il prezzo esatto: sì', async () => {
     const store = await start()
-    fundCard(toString(BALANCE.UPGRADE_PRICE_CARD))
+    fundCard(jobPriceAt(1))
 
     expect(agreeOn(store)).toBe(true)
   })
 
   it('con i soldi in contanti invece che sulla carta: no, e non è il saldo totale a decidere', async () => {
-    // È la trappola della fetta: il reddito entra in contanti, l'upgrade si paga con la carta, e
-    // il ponte fra i due è il bancomat. Un selettore che guardasse la somma direbbe di sì.
+    // È la trappola della fetta: il reddito entra in contanti, i livelli del lavoro si pagano con
+    // la carta, e il ponte fra i due è il bancomat. Un selettore che guardasse la somma direbbe
+    // di sì.
     const store = await start()
-    game.ctx.ledger.transaction(income('cash', fromString('5000'), ZERO), {
+    game.ctx.ledger.transaction(income('cash', fromString('900'), ZERO), {
       reason: 'reason.income.tick'
     })
 
     expect(agreeOn(store)).toBe(false)
   })
 
-  it('la seconda volta: no da entrambe le parti', async () => {
+  it('e il gradino dopo costa di più: pagato il primo, il secondo è no da entrambe le parti', async () => {
+    // Il prezzo cresce con la resa (ADR 0053), quindi comprarne uno non compra il successivo: è
+    // la differenza con l'upgrade solo di prima, che dopo un acquisto non chiedeva più niente.
     const store = await start()
-    fundCard('2000')
+    fundCard(jobPriceAt(1))
     expect(agreeOn(store)).toBe(true)
 
     expect(agreeOn(store)).toBe(false)
@@ -1341,13 +1421,13 @@ describe('il cruscotto', () => {
     // verrebbe rifiutato per una ragione che non e' quella sotto esame.
     const store = await start()
     fund('cash', '900')
-    fund('card', '1000')
+    fund('card', '2000')
 
-    expect(store.buyUpgrade('card', store.card.code).ok).toBe(true)
+    expect(store.buyIncomeLevel('job', 'card', store.card.code).ok).toBe(true)
     expect(store.confirm('withdraw', fromString('100')).ok).toBe(true)
 
-    expect(toString(store.earned)).toBe('1900')
-    expect(toString(store.spent)).toBe(toString(BALANCE.UPGRADE_PRICE_CARD))
+    expect(toString(store.earned)).toBe('2900')
+    expect(toString(store.spent)).toBe(JOB_LEVEL_PRICE)
   })
 
   it('i numeri si tengono fra loro: guadagnato meno speso meno commissioni fa il patrimonio', async () => {
@@ -1355,8 +1435,8 @@ describe('il cruscotto', () => {
     // guardata dal lato del giocatore. Se un giorno non tornasse, il difetto sarebbe nel Ledger.
     const store = await start()
     fund('cash', '900')
-    fund('card', '1000')
-    store.buyUpgrade('card', store.card.code)
+    fund('card', '2000')
+    store.buyIncomeLevel('job', 'card', store.card.code)
     store.confirm('withdraw', fromString('100'))
 
     const held = store.earned.minus(store.spent).minus(store.feesPaid)
@@ -1405,15 +1485,15 @@ describe('la prova del pagamento', () => {
 
   it('la carta chiede il codice, e con quello sbagliato non si compra', async () => {
     const store = await start()
-    fundCard('800')
+    fundCard(JOB_LEVEL_PRICE)
     const before = balanceOf(store, 'card')
 
-    const bought = store.buyUpgrade('card', '000')
+    const bought = store.buyIncomeLevel('job', 'card', '000')
 
     expect(bought.ok).toBe(false)
     if (bought.ok) return
     expect(bought.error.code).toBe('error.payment.unauthorized')
-    expect(store.upgraded).toBe(false)
+    expect(store.incomeSources[0]?.level).toBe(1)
     // Il rifiuto arriva **prima** del Ledger: non c'è nessuna transazione da annullare.
     expect(balanceOf(store, 'card')).toBe(before)
   })
@@ -1422,20 +1502,20 @@ describe('la prova del pagamento', () => {
     // La lezione della candela piatta di D034: «il saldo non è cambiato» è vero anche per un
     // comando che non è mai stato chiamato. A discriminare è avere accanto il caso verde.
     const store = await start()
-    fundCard('800')
+    fundCard(JOB_LEVEL_PRICE)
     const before = balanceOf(store, 'card')
 
-    expect(store.buyUpgrade('card', store.card.code).ok).toBe(true)
+    expect(store.buyIncomeLevel('job', 'card', store.card.code).ok).toBe(true)
 
-    expect(store.upgraded).toBe(true)
+    expect(store.incomeSources[0]?.level).toBe(2)
     expect(balanceOf(store, 'card')).not.toBe(before)
   })
 
   it('un codice vuoto è un codice sbagliato, non un permesso', async () => {
     const store = await start()
-    fundCard('800')
+    fundCard(JOB_LEVEL_PRICE)
 
-    expect(store.buyUpgrade('card', NO_PROOF).ok).toBe(false)
+    expect(store.buyIncomeLevel('job', 'card', NO_PROOF).ok).toBe(false)
   })
 
   it('i contanti non chiedono niente: sono al portatore', async () => {
@@ -1453,7 +1533,7 @@ describe('la prova del pagamento', () => {
     expect(balanceOf(store, 'cash')).not.toBe(before)
   })
 
-  it('l’ampliamento con la carta chiede il codice come l’upgrade: la regola è dello strumento', async () => {
+  it('l’ampliamento con la carta chiede il codice come un livello: la regola è dello strumento', async () => {
     const store = await start()
     fundCard('2000')
 
