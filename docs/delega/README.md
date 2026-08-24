@@ -276,6 +276,7 @@ configurato dopo che c'erano già 156 file.
 | [D039](D039-lo-strumento-per-guardare-vive-nel-repo.md)       | Lo strumento per guardare vive nel repo, e non nello scratchpad della sessione        | 136 strumento + 0 test        | **Chiusa** |
 | [D040](D040-il-recupero-avanza-a-blocchi.md)                  | Il recupero avanza a blocchi, e il tetto si misura in tempo di gioco                  | 118 codice + 96 test          | **Chiusa** |
 | [D041](D041-il-salvataggio-ha-una-cadenza.md)                 | Il salvataggio ha una cadenza, e non è un secondo orologio                            | 52 codice + 182 test          | **Chiusa** |
+| [D042](D042-il-caveau-ha-uno-spazio-e-una-scala.md)           | Il caveau ha uno spazio, e una scala invece di quattro numeri                         | ~180 codice + ~220 test       | **Aperta** |
 
 D014, D015 e D016 hanno i numeri più alti perché sono nate dopo: D014 con gli ADR 0017–0020, D015
 il 2026-08-19 spezzando D012, D016 il 2026-08-20 dall'audit della codebase. Nel grafo sopra si vede

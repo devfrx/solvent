@@ -162,6 +162,7 @@ Il grilletto resta quello che il registro YAGNI ha scritto: il primo dominio che
 | [0048](0048-la-catena-di-build-si-muove-insieme.md)                            | La catena di build si muove insieme                                | **Accettata** | a quale versione sta Vite, e perché non alla più recente                                  | —               |
 | [0049](0049-il-mondo-avanza-a-blocchi.md)                                      | Il mondo avanza a blocchi, e il blocco è dell'operazione           | **Accettata** | a quale grana il mondo può cambiare, e di chi è la responsabilità di spezzare             | R25             |
 | [0050](0050-la-cadenza-sta-sulla-via-unica.md)                                 | La cadenza sta sulla via unica, e si consuma in un posto solo      | **Accettata** | chi si accorge che il tempo è passato, e quando il gioco si scrive su disco               | INV-25          |
+| [0051](0051-lo-spazio-di-un-caveau-non-e-una-somma-di-denaro.md)               | Lo spazio di un caveau non è una somma di denaro                   | **Proposta**  | in quale unità si misura ciò che sta in un caveau, e dove vive la conversione             | INV-26          |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è
@@ -238,6 +239,17 @@ tabella che nasce già **in vigore**: costa le due pagine nuove, la colonna a gr
 cartelle di `components/` e `tests/rules/domain-ui`. Contestarla non è gratis e non è caro: i file
 sono dove sono, e spostarli è un `git mv` più un giro di import. Il momento in cui diventerà caro è
 il primo dominio della fetta 04, che nascerà già dentro questa forma.
+
+Il **0051** nasce il 2026-08-24 rileggendo la [scheda del caveau](../design/domini/vault.md) contro
+il codice, ed è `Proposta` finché [D042](../delega/D042-il-caveau-ha-uno-spazio-e-una-scala.md) non
+la esegue. Corregge un **errore di unità** che nessun gate poteva vedere: la capienza del caveau è
+un `Money`, e l'ingombro di un oggetto — che per disegno **non è** il suo valore — era dichiarato
+nella stessa unità. Le due grandezze non si sommano, e oggi non si sommano solo perché nessuno ha
+ancora provato. Il costo oggi è un tipo branded e una moltiplicazione; il giorno degli oggetti
+sarebbe ogni chiamante di quell'ingombro. Va letta insieme
+all'[ADR 0025](0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md), che le ha preparato il posto:
+la capienza è già una **funzione** che il caveau possiede, quindi la conversione ha un punto solo
+dove vivere.
 
 ## Decisioni deliberatamente rimandate
 

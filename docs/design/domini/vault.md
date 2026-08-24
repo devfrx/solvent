@@ -4,8 +4,11 @@
   2026-08-21 quando [D017](../../delega/D017-il-caveau.md) è stata eseguita — cosa è cambiato sta
   in fondo, sotto _Cosa l'esecuzione ha smentito_. La **metà kernel** e la sezione _Cosa prende in
   prestito, e cosa presta_ le ha compilate [D018](../../delega/D018-la-scheda-di-dominio.md) lo
-  stesso giorno, leggendo `src/core/domains/vault/`
-- **Data:** 2026-08-20, riletta il 2026-08-21
+  stesso giorno, leggendo `src/core/domains/vault/`.
+  **Riletta una terza volta il 2026-08-24**, preparando [D042](../../delega/D042-il-caveau-ha-uno-spazio-e-una-scala.md):
+  quella rilettura ha trovato **un errore di unità** in _Lo spazio_ e **una riga sbagliata** in
+  _Deve vedere_. Tutte e due sono corrette qui sotto, con il segno di cosa erano prima
+- **Data:** 2026-08-20, riletta il 2026-08-21 e il 2026-08-24
 - **Costruito da:** [D017](../../delega/D017-il-caveau.md), fetta 02 — ma solo per i **contanti**.
   Oggetti, ingombro e perquisizione arrivano con le fette successive
 - **A monte:** la casa e le quattro forme di saturazione nella
@@ -77,56 +80,65 @@ mentre la sua virtù vera non compariva.
 
 ## Lo spazio: un tetto solo, due inquilini
 
-Il caveau ha **una** capienza, misurata in **euro**, e ci stanno dentro due cose che si fanno
+Il caveau ha **una** capienza, misurata in **ingombro**, e ci stanno dentro due cose che si fanno
 concorrenza.
 
 | Cosa         | Quanto spazio occupa                                                 |
 | ------------ | -------------------------------------------------------------------- |
-| **Contanti** | 1 € = 1 unità di spazio. Sempre, senza eccezioni                     |
+| **Contanti** | una **densità dichiarata**: tanti euro per unità di ingombro, ferma  |
 | **Oggetti**  | un **ingombro** dichiarato dall'oggetto, che **non è il suo valore** |
 
-**L'ingombro è espresso nella stessa unità della capienza, cioè in euro**, ed è la ragione per cui
-la sottrazione qui sotto ha senso senza nessuna conversione. Non è il valore dell'oggetto: è quanto
-spazio toglie ai contanti.
-
 ```
-spazio disponibile per i contanti  =  tetto del livello  −  ingombro degli oggetti
+ingombro disponibile per i contanti  =  spazio del livello  −  ingombro degli oggetti
+capienza in euro dei contanti        =  ingombro disponibile  ×  densità dei contanti
 ```
 
 Un diamante da 50.000 € può ingombrare 500; un quadro da 5.000 € può ingombrarne 4.000. Il
 giocatore impara da solo a tenere dentro **valore denso**, e scopre che i contanti sono il valore
 meno denso che esista.
 
-**Il kernel non cambia per reggere questa forma**, ed è la ragione per cui la si può decidere
-adesso invece che quando arriveranno gli oggetti. Il Ledger controlla `saldo + importo > capienza`
-con una capienza di tipo `Money`; l'[ADR 0025](../../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)
-la trasforma da costante a **funzione**, e la funzione del caveau fa la sottrazione qui sopra.
+**Fino al 2026-08-24 questa sezione diceva che l'ingombro si misura in euro**, e la ragione scritta
+era che così la sottrazione non ha bisogno di conversioni. Funzionava, ed è per questo che è durata
+due fette. Il difetto è che «un euro di denaro» e «un euro di ingombro» sono la stessa unità su due
+grandezze che non si sommano: il giorno degli oggetti quella sottrazione si scrive, il tipo dice che
+va tutto bene, e a valle esce una capienza sbagliata — che il Ledger fa rispettare, e che il
+giocatore scopre come stipendio che non arriva. Con D042 l'ingombro prende un tipo suo, `Space`, e la
+conversione diventa **una sola e dichiarata**: l'[ADR 0051](../../adr/0051-lo-spazio-di-un-caveau-non-e-una-somma-di-denaro.md).
 
-**Conseguenza per [D017](../../delega/D017-il-caveau.md): nessuna, ed è il punto.** La capienza che
-il Ledger riceve è una funzione che il caveau **possiede**, quindi il giorno degli oggetti la
-sottrazione entra dentro quella funzione e nient'altro si muove — nessun parametro nuovo, nessuna
-firma diversa, nessun test in più. Costruire oggi un posto dove mettere un ingombro che nessuno
-produce sarebbe generalizzazione speculativa, cioè la cosa che l'
+**Il kernel non cambia per reggere questa forma**, ed è ancora vero dopo la correzione. Il Ledger
+controlla `saldo + importo > capienza` con una capienza di tipo `Money`; l'[ADR 0025](../../adr/0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md)
+la trasforma da costante a **funzione**, e la funzione del caveau fa le due righe qui sopra prima di
+rispondere. Chi la riceve continua a ricevere degli euro, e non sa che dietro c'è un volume.
+
+**Conseguenza per gli oggetti: nessuna, ed è il punto.** La capienza che il Ledger riceve è una
+funzione che il caveau **possiede**, quindi il giorno degli oggetti la sottrazione entra dentro
+quella funzione e nient'altro si muove — nessun parametro nuovo, nessuna firma diversa, nessun test
+in più. Costruire oggi un posto dove mettere un ingombro che nessuno produce sarebbe
+generalizzazione speculativa, cioè la cosa che l'
 [ADR 0014](../../adr/0014-una-fetta-verticale-alla-volta.md) vieta.
 
-Quello che D017 deve rispettare è **una riga sola**: la capienza si misura in **euro**. Non in
-posti, non in slot, non in un'unità astratta di volume. Rispettarla costa zero perché è già così;
-ignorarla costerebbe una conversione a ogni transazione il giorno in cui il caveau contiene due
-cose diverse.
+**E una cosa che il tetto non è**, perché è la prima che sembra rotta: 250.000 € di contanti
+diventano ridicoli quando il patrimonio è a 1e12, e quello è il **funzionamento**, non la scadenza.
+Con l'ingombro slegato dal valore, un quadro da dieci milioni dichiara ingombro 4.000 ed entra lo
+stesso: il tetto non ha mai impedito agli oggetti di valere tanto, e togliendolo si toglierebbe solo
+la forma 1 della saturazione.
 
 ---
 
 ## L'ampliamento
 
 - **Livelli finiti, con un tetto dichiarato.** Il caveau arriva a un ultimo livello e lì si ferma.
-  Il giocatore lo vede dal primo secondo — «caveau 1 di 5» — e sa che i contanti hanno una fine.
-  Quanti siano è la lunghezza dell'elenco delle capienze, non un numero scritto accanto: la cifra
-  che stava qui, «3 di 8», era un esempio, e [D017](../../delega/D017-il-caveau.md) ne ha scelti
-  cinque.
+  Il giocatore lo vede dal primo secondo — «caveau 1 di 9» — e sa che i contanti hanno una fine.
+  Quanti siano è **una costante sola**: [D042](../../delega/D042-il-caveau-ha-uno-spazio-e-una-scala.md)
+  trasforma l'elenco in una curva, quindi allungare la scala diventa cambiare un numero invece di
+  scriverne tredici. D017 ne aveva scelti cinque; D042 ne dichiara nove, e il muro finale resta
+  dov'era.
 - Ogni livello dà più spazio e costa di più. **E ogni prezzo sta appena sotto la capienza del
   livello da cui si paga**: per pagare in contanti bisogna poterli tenere, quindi il caveau va
   quasi riempito prima di potersi ampliare. È il muro che insegna sé stesso, ed è una scelta di
-  D017 che questa scheda non aveva previsto.
+  D017 che questa scheda non aveva previsto. Con D042 quella frase diventa una **regola** — il prezzo è
+  una frazione dichiarata della capienza di partenza — invece di quattro numeri allineati a mano:
+  dei quattro, uno era già scivolato al 90,7% senza che nessuno se ne accorgesse.
 - **Si paga in contanti o con la carta, a prezzi diversi.** Il meccanismo — il **listino** di
   un'azione — è dell'[ADR 0027](../../adr/0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md)
   e lo costruisce [D019](../../delega/D019-il-pagamento.md); il caveau è il primo a offrirne due.
@@ -208,9 +220,17 @@ il muro, e va detto al giocatore invece che lasciato scoprire guardando un numer
 
 ## Deve vedere, deve decidere, può andare male
 
-**Deve vedere:** quanto spazio è occupato e quanto ne resta; quanto costa il livello successivo e
+**Deve vedere:** quanto spazio è occupato e quanto ne resta; **cosa compra** il livello successivo e
 quanti livelli restano; **che il reddito si è fermato**, e perché; cosa c'è dentro oltre al denaro,
 quando gli oggetti esisteranno.
+
+> **La prima riga diceva «quanto costa il livello successivo», e la scheda aveva torto.** Mostrare
+> il prezzo sulla pagina vuol dire nominare un'opzione di listino fuori dal flusso di pagamento, che
+> è ciò che **R24** vieta e che l'[ADR 0042](../../adr/0042-il-pagamento-e-un-flusso-solo.md) ha
+> deciso **dopo** che questa scheda era stata scritta. Vince l'ADR, che è più recente ed è
+> meccanizzato. La pagina dice cosa l'ampliamento **compra** — lo spazio e la capienza che ne esce —
+> e il prezzo resta dove si sceglie con cosa pagarlo. Corretta il 2026-08-24, preparando
+> [D042](../../delega/D042-il-caveau-ha-uno-spazio-e-una-scala.md).
 
 **Deve decidere:** quando smettere di accumulare contanti e portarli in banca, accettando la
 traccia. E, quando ci saranno gli oggetti: cosa vale la pena tenere, dato che ogni oggetto è
@@ -259,7 +279,8 @@ _Lo spazio_. Costa zero oggi e costa una riscrittura fra tre fette.
 | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ~~Quanto costa con ognuno dei due strumenti~~                 | **chiusa** da [D017](../../delega/D017-il-caveau.md): la carta costa **due euro in meno** a ogni livello, e quel numero è tarato contro `ATM_FEE_FLOOR` invece che scelto — sopra la commissione i contanti diventerebbero una voce che nessuno sceglie. Lo verifica `vault_card_discount` in `targets.ts` |
 | ~~I numeri: quanti livelli, quale curva di capienza e costo~~ | **chiusa** da [D017](../../delega/D017-il-caveau.md): **cinque** livelli, da 1.000,00 € a 250.000,00 €, con ogni prezzo appena sotto la capienza del livello da cui si paga. Il bersaglio è `seconds_to_first_wall`: il muro morde fra i 60 e i 120 secondi di gioco                                       |
-| **L'ingombro degli oggetti**: come si dichiara                | il primo dominio che produce oggetti — black market o aste di box                                                                                                                                                                                                                                          |
+| ~~In quale **unità** si misura lo spazio~~                    | **chiusa** da [D042](../../delega/D042-il-caveau-ha-uno-spazio-e-una-scala.md) e dall'[ADR 0051](../../adr/0051-lo-spazio-di-un-caveau-non-e-una-somma-di-denaro.md): non in euro. `Space` è un tipo suo, i contanti lo occupano a una densità dichiarata, e la conversione vive in un punto solo          |
+| **L'ingombro degli oggetti**: con quale numero                | il primo dominio che produce oggetti — black market o aste di box. Il **posto** dove entra non è più una domanda: è dentro `cashCapacityFor`, e non muove nient'altro                                                                                                                                      |
 
 ---
 
@@ -327,12 +348,17 @@ non «è un oggetto» (INV-20). Un livello frazionario o fuori scala non fa rumo
 capienza sbagliata, che il Ledger fa rispettare, e che il giocatore scopre come stipendio che non
 arriva.
 
-**Numeri di gioco introdotti:** `VAULT_CAPACITIES` (cinque livelli, da 1.000,00 € a 250.000,00 €),
-`VAULT_PRICES_CASH` e `VAULT_PRICES_CARD`. Quanti livelli esistano non è un numero a parte: è la
-lunghezza dell'elenco, e `MAX_LEVEL` la legge.
+**Numeri di gioco introdotti.** D017 ne aveva lasciati tre, tutti elenchi: `VAULT_CAPACITIES`,
+`VAULT_PRICES_CASH` e `VAULT_PRICES_CARD`, tredici cifre in tutto.
+[D042](../../delega/D042-il-caveau-ha-uno-spazio-e-una-scala.md) li sostituisce con **cinque
+costanti e due regole**: la densità dei contanti, il fattore di crescita dello spazio, quanti
+livelli esistono, il prezzo come frazione della capienza di partenza, e lo sconto della carta. Le
+tre liste si **calcolano**, e `MAX_LEVEL` si legge dal numero di livelli.
 
-**Bersagli lasciati:** `seconds_to_first_wall` (60–120 secondi) e `vault_card_discount`
-(0,50 €–2,49 €, tutto sotto `ATM_FEE_FLOOR`). È il solo dei tre domini a lasciarne **due**.
+**Bersagli lasciati:** `seconds_to_first_wall` (60–120 secondi), `vault_card_discount`
+(0,50 €–2,49 €, tutto sotto `ATM_FEE_FLOOR`) e, con D042, **`vault_max_cash`** — il muro finale, che
+per due fette è stato l'unico numero del caveau che nessun test guardava. È il solo dei tre domini a
+lasciarne più di uno.
 
 ---
 
