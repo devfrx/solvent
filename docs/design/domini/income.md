@@ -4,7 +4,8 @@
   `src/core/domains/income/`
 - **Costruito da:** [D010](../../delega/D010-dominio-income.md), fetta 01; il listino è di
   [D019](../../delega/D019-il-pagamento.md), il parziale a caveau pieno di
-  [D017](../../delega/D017-il-caveau.md)
+  [D017](../../delega/D017-il-caveau.md), il **regime** di
+  [D043](../../delega/D043-il-reddito-si-mette-in-regola.md)
 - **Perché è un caso di prova:** è il **caso pieno** — ha stato **e** ticchetta. Se la scheda non
   regge lui, non regge nessuno
 - **A monte:** il blocco 1 della [mappa funzionale](../mappa-funzionale.md)
@@ -19,20 +20,30 @@
 | --- | ----------------- | --------------------------------------------------------------------------------------------- |
 | 1   | **Rendimento**    | 12,00 € al secondo, ×1,5 con l'unico potenziamento. È il solo che crea denaro dal nulla       |
 | 2   | **Varianza**      | **zero**. Non usa l'Rng: ogni tick vale esattamente quanto il precedente                      |
-| 3   | **Liquidità**     | **massima**. Nasce in contanti, spendibili subito                                             |
-| 4   | **Tracciabilità** | **zero in entrata**, e non in uscita: il potenziamento si paga **solo con la carta**          |
+| 3   | **Liquidità**     | **massima in nero**: nasce in contanti, spendibili subito. In regola nasce sulla carta        |
+| 4   | **Tracciabilità** | **la sceglie il giocatore** (ADR 0052): zero in nero, totale in regola. In uscita mai zero    |
 | 5   | **Calore**        | **zero**. Uno stipendio non fa notare nessuno                                                 |
 | 6   | **Attenzione**    | **la più bassa del gioco**. Un acquisto in tutta la partita, e poi non chiede più niente      |
-| 7   | **Pozza**         | forma 1, **e non è sua**: a fermarlo è la capienza del caveau. Vedi _Come muore_              |
+| 7   | **Pozza**         | forma 1 **solo in nero**, e non è sua: a fermarlo è il caveau. In regola non ne ha nessuna    |
 | 8   | **Pagamento**     | **solo carta**. Il listino ha una voce sola, ed è la prova che la forma regge il caso stretto |
 | 9   | **Requisito**     | **nessuno**. È il dominio da cui la partita comincia                                          |
 
 La voce 4 è quella che rende il reddito interessante invece che neutro: **entra anonimo ed esce
 tracciato.** Per crescere bisogna aver già accettato la traccia, cioè aver già usato il bancomat.
 
+> **Riletta il 2026-08-24 da [D043](../../delega/D043-il-reddito-si-mette-in-regola.md), e quattro
+> voci sono cambiate.** La frase qui sopra era vera per un motivo che nessuno aveva scelto: il
+> reddito entrava anonimo perché `INCOME_POOL = 'cash'` stava scritto in un file, non perché il
+> gioco lo avesse deciso. Con l'[ADR 0052](../../adr/0052-un-guadagno-dichiara-dove-atterra.md) la
+> voce 4 smette di essere una proprietà del dominio e diventa **una scelta del giocatore**: in nero
+> entra anonimo, in regola entra tracciato e tassato. Ne discendono anche le voci 3 e 7 — la
+> liquidità e la pozza dipendono da dove il denaro atterra — mentre la 8, il pagamento, non si
+> muove: i due acquisti di questo dominio si comprano tutti e due solo con la carta.
+
 ### 2 · Il ciclo
 
-Il tempo passa e i contanti entrano. Un potenziamento, e ne entrano di più.
+Il tempo passa e i contanti entrano. Un potenziamento, e ne entrano di più. E, una volta sola, la
+scelta di **sotto quale regime** entrino: in nero nel caveau, o in regola sulla carta.
 
 ### 3 · Deve vedere, deve decidere, può andare male
 
@@ -69,11 +80,11 @@ cominciare. Un requisito qui sarebbe un cancello sul primo secondo di partita.
 
 ### 6 · A quali due domini si collega, e come
 
-| Dominio      | Come si collegano                                                                                                                                  |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Caveau**   | il reddito nasce in contanti, quindi finisce nel caveau. Quando il caveau è pieno il reddito **si ferma**: è il collegamento più stretto del gioco |
-| **Bancomat** | il potenziamento si paga solo con la carta, e la carta si riempie solo dal bancomat. Senza bancomat il reddito non cresce                          |
-| **Abilità**  | futuro: i nodi che danno `+x%` si attaccano al bersaglio `income.all` che questo dominio dichiara                                                  |
+| Dominio      | Come si collegano                                                                                                                                                              |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Caveau**   | **in nero** il reddito nasce in contanti e finisce nel caveau, e a caveau pieno **si ferma**. In regola il caveau non lo riguarda più: il regime scioglie il legame (ADR 0052) |
+| **Bancomat** | il potenziamento si paga solo con la carta, e la carta si riempie solo dal bancomat. Senza bancomat il reddito non cresce                                                      |
+| **Abilità**  | futuro: i nodi che danno `+x%` si attaccano al bersaglio `income.all` che questo dominio dichiara                                                                              |
 
 Il secondo legame è quello che chiude il cerchio della dualità: **per crescere devi tracciare.**
 
@@ -110,20 +121,20 @@ nome, livello, effetto e costo — sono ciò che la riempirà.
 
 ## Metà kernel
 
-| #   | Domanda                               | Reddito                                                                                                                                                   |
-| --- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Ha stato?                             | **sì**: `{ upgraded: boolean }`. `load` rifiuta ciò che non è un booleano lanciando; `reset` rimette `INITIAL` e risincronizza il modificatore            |
-| 2   | Ticchetta? In quale `ORDER`?          | **sì**, `ORDER.INCOME`. Viene **dopo** `ECONOMY`, così al caricamento il caveau ritrova il livello prima che il recupero ticchetti                        |
-| 3   | Cosa fa con un `elapsed` grande?      | un solo `tickAll` con tutti i tick arretrati, tetto a otto ore. **Non** incassa un rifiuto: chiede quanto ci sta e accredita quello                       |
-| 4   | Soglie che si attraversano?           | **no, non sue**. Le attraversa quelle del caveau, e le vede da fuori con `room`                                                                           |
-| 5   | Cosa serve fuori dal `SystemContext`? | `ledger`, `modifiers` e `room`, tutti e tre per costruzione (ADR 0024). `modifiers` non può stare nel contesto: vive in `balance/`                        |
-| 6   | Eventi, e domini importati?           | **nessun evento**, emesso o ascoltato. **Non importa nessun dominio**: lo spazio del caveau arriva per argomento, e a collegarli è il bootstrap           |
-| 7   | Quali `Reason` introduce?             | `reason.income.tick` e `reason.income.upgrade`. Più un codice d'errore suo, `error.income.already_upgraded`                                               |
-| 8   | Tocca il denaro? Quali pool?          | **sì**. In entrata `income('cash', …)`, che nasce da `world`; in uscita `spend('card', …)` con `accepts` **generato dal listino**. Nessuna capienza è sua |
-| 9   | Conti propri per entità?              | **no**                                                                                                                                                    |
-| 10  | Liste storiche?                       | **no**. `withheld` è un numero solo e descrive l'ultimo tick, non la partita: infatti non si salva                                                        |
-| 11  | Sapere che giorno è?                  | **no**. Riceve durate in tick, mai date                                                                                                                   |
-| 12  | Usa l'Rng?                            | **no**, e discende dalla varianza zero                                                                                                                    |
+| #   | Domanda                               | Reddito                                                                                                                                                                                                                                                           |
+| --- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Ha stato?                             | **sì**: `{ upgraded: boolean }`. `load` rifiuta ciò che non è un booleano lanciando; `reset` rimette `INITIAL` e risincronizza il modificatore                                                                                                                    |
+| 2   | Ticchetta? In quale `ORDER`?          | **sì**, `ORDER.INCOME`. Viene **dopo** `ECONOMY`, così al caricamento il caveau ritrova il livello prima che il recupero ticchetti                                                                                                                                |
+| 3   | Cosa fa con un `elapsed` grande?      | un solo `tickAll` con tutti i tick arretrati, tetto a otto ore. **Non** incassa un rifiuto: chiede quanto ci sta e accredita quello                                                                                                                               |
+| 4   | Soglie che si attraversano?           | **no, non sue**. Le attraversa quelle del caveau, e le vede da fuori con `room`                                                                                                                                                                                   |
+| 5   | Cosa serve fuori dal `SystemContext`? | `ledger`, `modifiers` e `room`, tutti e tre per costruzione (ADR 0024). `modifiers` non può stare nel contesto: vive in `balance/`                                                                                                                                |
+| 6   | Eventi, e domini importati?           | **nessun evento**, emesso o ascoltato. **Non importa nessun dominio**: lo spazio del caveau arriva per argomento, e a collegarli è il bootstrap                                                                                                                   |
+| 7   | Quali `Reason` introduce?             | `reason.income.tick`, `reason.income.upgrade` e `reason.income.declare`. Più due codici suoi, `error.income.already_upgraded` e `error.income.already_declared`                                                                                                   |
+| 8   | Tocca il denaro? Quali pool?          | **sì, e in entrata non è più una costante**: il pool lo dichiara il **regime** (ADR 0052) — `cash` in nero, `card` in regola, con la trattenuta che finisce in `tax`. In uscita `spend('card', …)` con `accepts` **generato dal listino**. Nessuna capienza è sua |
+| 9   | Conti propri per entità?              | **no**                                                                                                                                                                                                                                                            |
+| 10  | Liste storiche?                       | **no**. `withheld` è un numero solo e descrive l'ultimo tick, non la partita: infatti non si salva                                                                                                                                                                |
+| 11  | Sapere che giorno è?                  | **no**. Riceve durate in tick, mai date                                                                                                                                                                                                                           |
+| 12  | Usa l'Rng?                            | **no**, e discende dalla varianza zero                                                                                                                                                                                                                            |
 
 **Numeri di gioco introdotti:** `INCOME_BASE_PER_SECOND` (12,00 €/s), `UPGRADE_PRICE_CARD`
 (800,00 €), `UPGRADE_MULTIPLIER` (×1,5). Tutti in `balance/constants.ts`.

@@ -163,6 +163,7 @@ Il grilletto resta quello che il registro YAGNI ha scritto: il primo dominio che
 | [0049](0049-il-mondo-avanza-a-blocchi.md)                                      | Il mondo avanza a blocchi, e il blocco è dell'operazione           | **Accettata** | a quale grana il mondo può cambiare, e di chi è la responsabilità di spezzare             | R25             |
 | [0050](0050-la-cadenza-sta-sulla-via-unica.md)                                 | La cadenza sta sulla via unica, e si consuma in un posto solo      | **Accettata** | chi si accorge che il tempo è passato, e quando il gioco si scrive su disco               | INV-25          |
 | [0051](0051-lo-spazio-di-un-caveau-non-e-una-somma-di-denaro.md)               | Lo spazio di un caveau non è una somma di denaro                   | **Proposta**  | in quale unità si misura ciò che sta in un caveau, e dove vive la conversione             | INV-26          |
+| [0052](0052-un-guadagno-dichiara-dove-atterra.md)                              | Un guadagno dichiara dove atterra                                  | **Accettata** | in quale pool atterrano i soldi che un dominio produce, e chi lo decide                   | INV-27          |
 
 Gli ADR da 0017 a 0020 nascono dall'aver guardato la [visione di prodotto](../prodotto/visione.md)
 **prima** di scrivere il kernel. Tre di essi cambiano il Ledger rispetto allo STOP 1 iniziale: è
@@ -250,6 +251,18 @@ sarebbe ogni chiamante di quell'ingombro. Va letta insieme
 all'[ADR 0025](0025-la-capienza-di-un-pool-si-chiede-non-si-legge.md), che le ha preparato il posto:
 la capienza è già una **funzione** che il caveau possiede, quindi la conversione ha un punto solo
 dove vivere.
+
+Il **0052** nasce lo stesso giorno, e non da una rilettura: da una sessione di gioco. È `Proposta`
+finché [D043](../delega/D043-il-reddito-si-mette-in-regola.md) non la esegue. Il difetto che copre
+non è visibile nel codice di oggi — è una costante privata, `INCOME_POOL = 'cash'`, che nessun
+documento ha mai deciso e che fa del tetto dei contanti il tetto di **tutto** il reddito del gioco.
+A 12,00 €/s quel tetto è la lezione della fetta 02; con i domini che la
+[visione](../prodotto/visione.md) promette — impresa, mercato, immobiliare, crypto — è un pulsante
+da premere dieci volte al secondo. Va letta insieme
+all'[ADR 0027](0027-il-listino-e-dell-azione-la-scelta-del-giocatore.md), di cui estende il
+ragionamento: quell'ADR vieta la conversione automatica **dentro un acquisto** perché cancella il
+momento in cui il giocatore decide di lasciare una traccia; questa vieta che quel momento diventi
+un gesto da ripetere, e lo trasforma in una scelta che si prende una volta.
 
 ## Decisioni deliberatamente rimandate
 

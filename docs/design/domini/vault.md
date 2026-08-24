@@ -190,11 +190,11 @@ uno per dominio non è denaro» vale per i domini che si aprono, non per quello 
 
 La regola operativa della visione chiede **due**. Il caveau ne ha tre, e uno dei tre lo domina.
 
-| Dominio               | Come si collegano                                                                                                                                 |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Reddito**           | il reddito arriva in contanti, quindi **entra nel caveau**. Quando il caveau è pieno il reddito si ferma: è il collegamento più stretto del gioco |
-| **Bancomat**          | è la valvola. Con un caveau infinito è comodo; con un caveau pieno diventa **obbligatorio**, e non cambia di una riga per diventarlo              |
-| **Calore e indagini** | la perquisizione è l'unica cosa che svuota il caveau da fuori. Arriva con le fette 04 e 06                                                        |
+| Dominio               | Come si collegano                                                                                                                                                    |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Reddito**           | il reddito **in nero** arriva in contanti, quindi entra nel caveau, e quando il caveau è pieno si ferma. Vale per le fonti nere, non per il reddito in sé (ADR 0052) |
+| **Bancomat**          | è la valvola. Con un caveau infinito è comodo; con un caveau pieno diventa **obbligatorio**, e non cambia di una riga per diventarlo                                 |
+| **Calore e indagini** | la perquisizione è l'unica cosa che svuota il caveau da fuori. Arriva con le fette 04 e 06                                                                           |
 
 In futuro anche **black market** e **aste di box**, che sono i domini da cui nascono gli oggetti.
 Finché non esistono, il caveau è un contenitore con dentro solo denaro.
@@ -215,6 +215,14 @@ muro, sarebbe un guasto travestito da regola.
 
 Quando il caveau è pieno davvero, «quanto ci sta» vale zero e il reddito si ferma del tutto — che è
 il muro, e va detto al giocatore invece che lasciato scoprire guardando un numero che non sale.
+
+> **Da [D043](../../delega/D043-il-reddito-si-mette-in-regola.md) questa riga vale per le fonti
+> nere, non per «il reddito».** Il caveau è il tetto del denaro **anonimo**, e non lo è mai stato di
+> tutto ciò che il gioco produce: lo sembrava perché l'unica fonte esistente pagava in contanti per
+> una costante che nessun documento aveva deciso. Un reddito **dichiarato** atterra sulla carta, che
+> non ha tetto, e questa sezione non lo riguarda. Cosa succede all'eccedenza di una fonte nera —
+> black market, casinò — è una domanda della fetta 04, dove la risposta ha un nome: riciclare
+> ([ADR 0052](../../adr/0052-un-guadagno-dichiara-dove-atterra.md)).
 
 ---
 
