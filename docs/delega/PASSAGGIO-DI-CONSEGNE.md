@@ -132,9 +132,12 @@ finte e passi veri, e la sua mappa è vuota da cinque fette.
 ### Cosa c'è nell'albero di lavoro alla chiusura
 
 **Niente**: `git status` è pulito, e non c'è nessuno stash. Il ramo
-`d044-il-reddito-e-un-elenco-di-fonti` ha **un** commit, `f3026e1`, che tocca **solo `docs/`** —
-verificato con `git diff --name-only main..HEAD`, che non stampa niente fuori da quella cartella. Il
-ramo non è fuso e non è spinto.
+`d044-il-reddito-e-un-elenco-di-fonti` tocca **solo `docs/`** — verificato con
+`git diff --name-only main..HEAD`, che non stampa niente fuori da quella cartella. Quanti commit
+porti lo dice `git log --oneline main..HEAD`, e non si scrive qui per la ragione di
+[D021](D021-un-numero-che-nessuno-conta-non-si-scrive.md): questa riga ne ha già dichiarato uno
+mentre ne stava arrivando un secondo, cioè il passaggio di consegne stesso. Il ramo non è fuso e non
+è spinto.
 
 `npm run verify` è **verde**: 90 file di test, 1.343 test. `verify:release` non è stato rigirato, e
 non serve: il diff non tocca una riga di `src/`.
