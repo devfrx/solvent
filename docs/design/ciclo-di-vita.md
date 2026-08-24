@@ -91,12 +91,20 @@ memoria e non è mai arrivata sul disco, quindi chiudere la finestra è un altro
 
 ## Quando si salva
 
-| Momento                      | In questa fetta | Nota                                                            |
-| ---------------------------- | --------------- | --------------------------------------------------------------- |
-| alla chiusura della finestra | **sì**          | è l'unico salvataggio della fetta 01                            |
-| a intervalli regolari        | no              | fetta 03, insieme al progresso offline: sono lo stesso problema |
-| a ogni transazione           | mai             | scriverebbe su disco dieci volte al secondo                     |
-| su richiesta dell'utente     | no              | quando esisterà una schermata che lo offre                      |
+| Momento                      | Esiste | Nota                                                                                                                                                                                                               |
+| ---------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| alla chiusura della finestra | **sì** | è stato l'unico della fetta 01, e resta l'unico **autoritativo**: è l'ultima cosa che il giocatore fa                                                                                                              |
+| a intervalli regolari        | **sì** | ogni 30 s di gioco da [D041](../delega/D041-il-salvataggio-ha-una-cadenza.md) ([ADR 0050](../adr/0050-la-cadenza-sta-sulla-via-unica.md)): la cadenza sta sulla via unica del tempo, e si consuma in un posto solo |
+| a ogni transazione           | mai    | scriverebbe su disco dieci volte al secondo                                                                                                                                                                        |
+| su richiesta dell'utente     | no     | quando esisterà una schermata che lo offre                                                                                                                                                                         |
 
-Un solo momento di salvataggio nella prima fetta è una scelta: rende il round-trip un percorso
-unico e verificabile, invece di tre percorsi che devono coincidere.
+**Per otto fette il momento è stato uno solo, ed era una scelta**: rendeva il round-trip un percorso
+unico e verificabile, invece di tre percorsi che devono coincidere. Il percorso è stato costruito,
+provato e attraversato, e da [D041](../delega/D041-il-salvataggio-ha-una-cadenza.md) gliene si
+affianca un secondo — che non è un terzo percorso, perché è la **stessa** riga di scrittura chiamata
+da un altro momento.
+
+**Il difetto che quel momento unico lasciava aperto:** `onClosing` è un `beforeunload`, quindi copre
+la chiusura della finestra e nient'altro. Un crollo del renderer o un processo terminato non ci
+passano, e prima di D041 l'intera sessione di gioco spariva con la memoria. La cadenza non sostituisce
+la scrittura della chiusura: le si aggiunge, e **mai due insieme** (INV-25).

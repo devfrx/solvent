@@ -45,7 +45,7 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 | `main`                   | **è di nuovo l'unico ramo, e li ha tutti.** Il 2026-08-23, chiudendo la quinta sessione, sono stati fusi i due rami incatenati che aspettavano: `d038-cio-che-si-preme-e-cio-che-scorre` discendeva da `d037-il-tempo-che-avanza-e-un-operazione-del-gioco`, quindi è bastato un `--ff-only` sul secondo per portarli tutti e due. `verify` e `verify:release` sono stati girati **su `main` fuso**, non solo sui rami, e i due rami sono stati cancellati con `git branch -d` — quello che si rifiuta se resta lavoro non fuso: **nessuno dei due si è rifiutato** |
 | `origin/main`            | **si verifica, non si dichiara.** Un allineamento scritto qui lo invalida il primo commit che arriva dopo — compreso quello che lo scrive — e l'elenco di cosa si è spinto invecchia a ogni delega consegnata. Lo dice `git rev-list --count origin/main..main`: se non fa `0`, c'è del lavoro solo su questa macchina. Quando si spinge, i gate girano prima **su `main` fuso** e non solo sui rami                                                                                                                                                                |
 | Albero di lavoro         | non si scrive qui, per la ragione della riga sopra: lo dice `git status`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Prossimo passo           | **eseguire [D041](D041-il-salvataggio-ha-una-cadenza.md)**, la seconda delega della fetta 03: scritta il 2026-08-24, non eseguita, con **tre decisioni aperte** che si prendono con l'utente prima di cominciare. La fetta 03 è **in corso**, non conclusa                                                                                                                                                                                                                                                                                                          |
+| Prossimo passo           | **scrivere la prima delega della fetta 04**, calore e black market: la fetta 03 è **conclusa** con [D041](D041-il-salvataggio-ha-una-cadenza.md), e non c'è niente da eseguire. Il lavoro torna di specie diversa, e comincia da una **scheda di dominio compilata** — che sarà la quarta, cioè quella su cui la forma della scheda va rivista                                                                                                                                                                                                                      |
 
 > **Il lavoro non è più solo su questa macchina.** Per due settimane `origin/main` è rimasto fermo
 > al 2026-08-20, al commit `84dbe47`, e questa riga era un avvertimento. Il 2026-08-21 i
@@ -67,10 +67,97 @@ sopravvivono solo come lettura interna in [roadmap-fette.md](../roadmap-fette.md
 > Se non è zero, siamo di nuovo nella situazione che questa riga descriveva. Un `push` è visibile
 > agli altri e non si disfa pulendo: resta una di quelle cose che si chiedono.
 
-## La **sesta** sessione del 2026-08-23: `npm install` alla causa, e la fetta 03 comincia
+## La **settima** sessione del 2026-08-24: D041 scritta ed eseguita, e la fetta 03 chiusa
 
 Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione. **Questa è la più
 recente**: tutte le sezioni sotto descrivono stati già superati, e si leggono come storia.
+
+**Cosa è stato chiuso.**
+
+| Cosa                                          | Cos'era                                                                                            |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| [D041](D041-il-salvataggio-ha-una-cadenza.md) | il gioco scriveva su disco solo chiudendo la finestra, e chi non chiudeva perdeva la sessione      |
+| La **fetta 03**                               | conclusa: il recupero avanza a blocchi (D040) e il gioco non aspetta più la chiusura per scriversi |
+| Una divergenza del passaggio di consegne      | il registro dichiarava «lo stesso problema» una cosa che è vera solo a metà                        |
+
+### Le sei cose che chi arriva adesso deve sapere
+
+**1. Il gioco si salva da sé ogni trenta secondi**, e la cadenza sta **sulla via unica del tempo** —
+dentro `Game.advance`, accanto alla cronaca — non in un timer e non nello store. È l'
+[ADR 0050](../adr/0050-la-cadenza-sta-sulla-via-unica.md), e serve soprattutto perché nessuno la
+«semplifichi» spostandola: R25 non la vedrebbe nemmeno, perché guarda chi nomina `tickAll` e una
+cadenza non lo nomina. Sarebbe una regola verde con la sua ragione aggirata.
+
+**2. «Salvataggio a intervalli e progresso offline sono lo stesso problema» è vero a metà, e la metà
+falsa costa il primo ramo scritto.** Vero del **gancio**: c'è un posto solo dove passa ogni tick.
+Falso dell'**unità**: la durabilità si misura in tempo reale, i blocchi in tempo di gioco. Mentre si
+gioca coincidono — dieci tick sono un secondo — e durante un recupero no: 7.300 tick passano in meno
+di tre millisecondi, quindi una cadenza da trenta secondi è dovuta **ventiquattro volte** in quei tre
+millisecondi. Ne discende che ciò che si accumula è un `boolean` e non un numero.
+
+**3. Non salvare durante un recupero non perde niente**, e l'istinto dice il contrario. Un recupero è
+**ripetibile**: parte da `savedAt`, chiama `stepOf` e produce lo stesso stato ogni volta. Chi crolla
+subito dopo riapre, recupera di nuovo dallo stesso istante, e torna dove era. Ciò che il recupero
+ricostruisce non è gioco che si può perdere — è gioco che non è ancora stato giocato.
+
+**4. Una scrittura a cadenza che fallisce non manda la partita in errore, e la chiusura sì.** Non è
+incoerenza: là la finestra sta chiudendo e quella è l'unica copia, qui la partita è in memoria e la
+chiusura riproverà comunque. Il sintomo esiste già senza disegnare niente — `savedAt` è a schermo
+sotto «Ultimo salvataggio» — ed è dichiarato che è il **minimo** onesto, con un grilletto nel
+registro YAGNI per quando servirà di più.
+
+**5. Il salvataggio dell'utente adesso è in pericolo in un modo nuovo, e la vecchia precauzione non
+basta.** D040 lo proteggeva **terminando** l'applicazione invece di chiuderla. Con una cadenza
+attiva il gioco scrive **da sé**, senza che nessuno chiuda niente: l'unica difesa è
+`--user-data-dir` su una cartella usa-e-getta. Questa sessione l'ha usata, e ha verificato dopo che
+il `save.json` vero è rimasto al 22 agosto.
+
+**6. `node node_modules/electron/install.js` è obsoleto davvero**, e questa è la prima sessione a
+ripagare la riga invece di riscoprirla: `npm ci` non scarica il binario, e
+`node -e "require('electron')"` lo scarica al primo `require`. Se `npm run dev` dice _Electron
+uninstall_, è quello il comando.
+
+### Cosa c'è nell'albero di lavoro alla chiusura
+
+Verificato con i comandi, non ricordato.
+
+- **`npm run verify` verde** e **`npm run verify:release` verde**. Quanti siano i test e quanto duri
+  la catena lo dice [qualita.md](../qualita.md), rimisurata in questa sessione dopo nove deleghe di
+  numeri scaduti.
+- **Il ramo `d041-il-salvataggio-ha-una-cadenza` non è in `main`.** Fondere e spingere sono
+  decisioni dell'utente, e questa sessione non le ha prese.
+- **Niente residui di debug**, e la cartella usa-e-getta della prova sta nello scratchpad, non nel
+  repo.
+- **Il ramo è stato provato rompendolo sei volte**, con il conto in fondo alla delega — 3, 3, 2, 1,
+  1 e 5 test caduti — più un **controllo** che doveva restare verde ed è restato.
+
+### Cosa questa sessione ha lasciato indietro
+
+Censito, non nascosto.
+
+1. **La misura della catena a macchina scarica è stata presa**, dopo otto sessioni in cui era il
+   primo punto di questo elenco. Sta in [qualita.md](../qualita.md) con la data e le condizioni.
+2. **La posizione di `saveCadence.advance` dentro il ciclo dei blocchi non è provata da nessun
+   test.** Spostarla fuori lascia tutti i test verdi — misurato di proposito. È un argomento di
+   disegno, non una proprietà verificata, e la correzione 9 di D041 dice quando comincerà a esserlo.
+3. **La guardia di INV-17 in `writeAtCadence` non è raggiungibile da nessuno stato.** Resta, per la
+   ragione che `close()` porta accanto alla propria, e il codice lo dichiara invece di lasciarla
+   sembrare una difesa attiva. Vedi la correzione 6.
+4. **Le tre decisioni di D041 sono contestabili**, e i conti che le hanno decise stanno in fondo alla
+   delega. Quella dei trenta secondi in particolare è bilanciamento: se giocandoci sembra troppo o
+   troppo poco, il numero si sposta in una riga e la derivazione accanto dice cosa si sta cambiando.
+
+### Un vicolo cieco, per non ripercorrerlo
+
+**Guardare la cadenza a finestra nascosta non funziona, ed è il contrario del recupero.** Con la
+porta di ispezione aperta la pagina è `hidden`: non passano tick, quindi la cadenza non scatta, e lo
+schermo sembra fermo per un difetto che non c'è. Misurato invece che creduto — il saldo è rimasto a
+387,60 € per quindici secondi di orologio vero, campionato tre volte. Il recupero si guarda proprio
+lì perché non passa dal frame (D040); questa no.
+
+## La **sesta** sessione del 2026-08-23: `npm install` alla causa, e la fetta 03 comincia
+
+Scritta chiudendo quella sessione, rileggendo il repo e non la conversazione.
 
 **Cosa è stato chiuso.**
 
@@ -1393,57 +1480,41 @@ Non serve leggerli tutti, gli ADR. Servono quando stai per contraddirne uno: all
 
 ## Il prossimo passo, in concreto
 
-**È eseguire [D041](D041-il-salvataggio-ha-una-cadenza.md) — il salvataggio a intervalli — che è
-stata scritta il 2026-08-24 e non è stata eseguita.** Quante deleghe siano aperte lo dice
-[stato.md](../stato.md), che le conta.
+**La fetta 03 è conclusa, e non c'è niente da eseguire.** Quante deleghe siano aperte lo dice
+[stato.md](../stato.md), che le conta. Il lavoro torna di specie diversa: **si scrive una delega**,
+la prima della fetta 04 — calore e black market.
 
-**Ha tre decisioni aperte, e non si esegue prima di averle prese con l'utente**: dove vive la
-cadenza, ogni quanto scatta, e cosa succede quando una scrittura a cadenza fallisce. Ognuna porta il
-proprio budget, e la prima cambia la forma di tutto il resto.
+**Comincia da una scheda, non da una schermata**, ed è la differenza che
+[D018](D018-la-scheda-di-dominio.md) è servita a fare: il modulo sta in
+[design/domini/README.md](../design/domini/README.md), e un dominio nuovo lo compila **prima** che
+qualcuno ne scriva una riga. Sarà la **quarta** compilata, quindi è anche il momento in cui la forma
+della scheda va rivista: due sezioni oggi non discriminano, e con tre casi non si poteva sapere se
+fosse un difetto della forma o del campione.
 
-**Una cosa che quella delega ha trovato leggendo il codice, e che questa pagina dichiarava al
-contrario.** Il registro dice che salvataggio a intervalli e progresso offline sono «lo stesso
-problema», e il prompt qui sotto lo ripeteva: è vero del **gancio** — una via unica dove passa ogni
-tick — e falso dell'**unità**. La durabilità si misura in tempo reale, i blocchi in tempo di gioco, e
-le due cose coincidono solo mentre si gioca: al tetto pieno passano 7.300 tick in meno di tre
-millisecondi, quindi una cadenza da un minuto contata sui tick sarebbe «ora» dodici volte in tre
-millisecondi. Ne discende che qualunque ramo conti i tick deve **coalizzare**, e che non salvare
-durante un recupero non perde niente — un recupero riparte dallo stesso `savedAt` e produce lo stesso
-stato. Il ragionamento per esteso sta in D041, sotto _Il gancio che D040 ha costruito_.
+**Il calore è il primo sistema che ascolta invece di importare**, ed è la ragione per cui la fetta
+04 viene adesso: il [registro](../roadmap-fette.md) lo dice nella riga della fetta — il primo
+consumatore reale dell'Rng con stream separati, e il primo dominio che reagisce a eventi di altri
+domini senza conoscerli. La regola che glielo impedisce esiste già ed è R19, con il suo test.
 
-**Il gancio esiste già, ed è quello che D040 ha costruito.** Il
-[registro YAGNI](../roadmap-fette.md) dice che salvataggio a intervalli e progresso offline sono
-«lo stesso problema», ed è vero nel meccanismo: tutti e due vogliono che qualcosa succeda ogni N
-tick di gioco sulla **via unica**. Adesso quella via cammina a blocchi, quindi la cadenza ha già
-dove attaccarsi — e non serve un secondo ciclo, che sarebbe il difetto che
-l'[ADR 0049](../adr/0049-il-mondo-avanza-a-blocchi.md) esiste per impedire.
+**Due cose che la fetta 03 lascia in eredità e che vale la pena avere in mente**, perché la fetta 04
+è la prima a poterle usare davvero:
 
-**Sono rimasti fuori da D040 di proposito, e la ragione vale per chi scrive la seconda:** correttezza
-della simulazione e durabilità del dato sono due rischi diversi, e costruirli insieme darebbe un
-verde solo per due cose — senza poter dire quale ha funzionato.
+- **Il mondo avanza a blocchi di un giorno di gioco** ([ADR 0049](../adr/0049-il-mondo-avanza-a-blocchi.md)),
+  quindi una soglia attraversata e rientrata durante un'assenza adesso **scatta**. Il calore è
+  esattamente quel genere di cosa — sfonda e ridiscende — ed è il primo dominio che rende visibile
+  ciò che D040 ha costruito. Fino a oggi nessuno dei tre domini aveva una soglia da attraversare.
+- **Qualunque cosa debba succedere ogni N tick ha dove attaccarsi**
+  ([ADR 0050](../adr/0050-la-cadenza-sta-sulla-via-unica.md)): una `Cadence` in `runtime/`,
+  alimentata da `Game.advance`. Se il calore dovrà raffreddarsi a intervalli, non serve inventare
+  niente — e soprattutto non serve un secondo posto che conti il tempo.
 
-**Non è il blocco A, ed è un errore che questa pagina ha fatto fino al 2026-08-23.** Questa sezione
-mandava a eseguire [D034](D034-le-serie-degli-strumenti.md), che era chiusa; il prompt in fondo
-mandava a scrivere «la prima delega della fetta 03» descrivendo però il black market e le aste di
-box — cioè il **blocco A**, che nel [registro delle fette](../roadmap-fette.md) non è una fetta ma
-un segnaposto **oltre la 06**, e quel registro lo dice a chiare lettere: «un blocco non è una
-fetta». Sono due lavori diversi, e la differenza si paga subito: la fetta 03 non porta nessun
-dominio nuovo, quindi **non comincia da una scheda di dominio compilata**. Ne discende che
-l'[ADR 0010](../adr/0010-liste-storiche-limitate-alla-definizione.md) non può cambiare stato con
-questa fetta — a farlo passare sono gli oggetti, e gli oggetti sono del blocco A.
-
-**Il codice del recupero esiste già, e la fetta lo ridiscute invece di scriverlo.** Il tetto è
-`RECOVERY_CAP` in [balance/constants.ts](../../src/core/balance/constants.ts); la regola che decide
-quanti tick si recuperano è `stepOf` in [runtime/loop.ts](../../src/renderer/runtime/loop.ts), ed è
-**la stessa** del tempo reale ([ADR 0009](../adr/0009-passo-fisso-e-tipi-branded-per-il-tempo.md));
-a chiamarla al caricamento è `recover()` in [stores/game.ts](../../src/renderer/stores/game.ts), che
-fa **un `advance` solo**. Chi apre la fetta parta leggendo quelle tre righe, non da zero.
-
-I problemi da cui partire sono già misurati, e stanno sotto la riga della fetta nel
-[registro](../roadmap-fette.md): il tetto è limitato dal caveau invece che da sé stesso, è tarato in
-ore reali su un gioco il cui giorno dura due secondi, e quel singolo `advance` rende invisibile ogni
-soglia attraversata e rientrata. La domanda della fetta non è «di quanto alziamo il tetto»: è
-**«cosa vuol dire offline quando il mondo va avanti anche contro di te»**.
+**E il blocco A non è la fetta 04**, benché il black market compaia in tutte e due. Il blocco A —
+black market **e aste di box** — è un segnaposto **oltre la fetta 06** nel
+[registro delle fette](../roadmap-fette.md), che lo dice a chiare lettere: «un blocco non è una
+fetta». Questa pagina le ha confuse una volta, il 2026-08-23, ed è il motivo per cui il paragrafo
+esiste. Ne discende che l'[ADR 0010](../adr/0010-liste-storiche-limitate-alla-definizione.md) non
+può cambiare stato con questa fetta: a farlo passare sono gli **oggetti**, e gli oggetti sono del
+blocco A.
 
 ### Come si guarda l'applicazione senza toccarla
 
@@ -1988,7 +2059,8 @@ invece di avere tre campi cablati — ed è la ragione per cui la prima riga è 
 prima. Costano `runtime/chronicle.ts`, `Game.advance` e i loro test; contestarne una vuol dire
 spostare un file e cambiare due firme, non disfare del comportamento.
 
-Sono contestabili anche i **numeri**: il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
+Sono contestabili anche i **numeri**: i 30 secondi di `AUTOSAVE_SECONDS` scelti da D041 — derivati dall'acquisto più economico del gioco al reddito massimo, e la derivazione sta accanto alla costante —
+il moltiplicatore ×1,5 dell'upgrade, le otto ore di tetto al
 recupero e l'intervallo 700–740 del primo minuto scelti da D008, più i 2,50 € di `ATM_FEE_FLOOR` scelti
 da D014, e i quattro importi rapidi del bancomat — 1 · 10 · 100 · 500 — scelti da D015. Sono di
 un'altra categoria: cambiarli costa una riga in `balance/constants.ts` e un test che diventa rosso
@@ -1997,93 +2069,85 @@ apposta. Reddito base e costo dell'upgrade vengono invece dai
 
 ## Prompt pronto per una sessione nuova
 
-**Non c'è niente da fondere, e c'è una delega da eseguire.** Quante ne restino aperte lo dice
+**Non c'è niente da fondere in `main` che l'utente non abbia deciso, e non c'è una delega da
+eseguire.** Il lavoro torna di specie diversa: si scrive. Quante ne restino aperte lo dice
 [stato.md](../stato.md), che le conta.
 
 ```
-Esegui D041 — il salvataggio ha una cadenza.
-
-La delega e' docs/delega/D041-il-salvataggio-ha-una-cadenza.md, scritta il
-2026-08-24 e non eseguita. HA TRE DECISIONI APERTE e non si esegue prima di
-averle prese con l'utente: dove vive la cadenza, ogni quanto scatta, cosa
-succede se una scrittura a cadenza fallisce. Ognuna porta il proprio budget, e
-la prima cambia la forma di tutto il resto.
+Non c'e' una delega da eseguire: si SCRIVE la prima della fetta 04, il calore e
+il black market. La fetta 03 e' conclusa con D041.
 
 Prima pero' si controlla che il punto di partenza sia quello che il passaggio di
 consegne dichiara, perche' un handoff si verifica invece di crederci — e il
 primo comando non basta senza il fetch, che e' la lezione del 2026-08-24:
 
   git fetch --all --prune
-  git branch                              # deve restare `main` e basta
-  git rev-list --count origin/main..main  # deve fare 0
-  git rev-list --count main..origin/main  # deve fare 0 — senza il fetch mente
+  git branch                              # quali rami esistono davvero
+  git rev-list --count origin/main..main  # quanto c'e' solo su questa macchina
+  git rev-list --count main..origin/main  # quanto c'e' solo sul remoto
 
-Se non torna, siamo in una situazione che questo documento non descrive: vale la
-realta', non il documento.
+Se non torna, vale la realta' e non il documento. In particolare: il ramo
+d041-il-salvataggio-ha-una-cadenza potrebbe non essere ancora in main, perche'
+fondere e spingere sono decisioni dell'utente.
 
-IL GANCIO C'E' GIA', E L'UNITA' NO. D040 ha fatto camminare Game.advance a
-blocchi di un giorno di gioco (ADR 0049), quindi c'e' un posto solo dove passa
-ogni tick e qualunque cosa debba succedere «ogni N tick» ha dove attaccarsi — e
-la primitiva pura esiste, e' sampleOf in runtime/loop.ts. Ma la durabilita' si
-misura in tempo REALE e i blocchi sono tempo di GIOCO: coincidono mentre si
-gioca (dieci tick = un secondo) e non durante un recupero, dove 7.300 tick
-passano in meno di tre millisecondi. Ne discende che qualunque ramo conti i tick
-deve COALIZZARE. Il ragionamento per esteso e' nella delega, e questo paragrafo
-sostituisce quello che questa pagina diceva prima.
+SI COMINCIA DA UNA SCHEDA, NON DA UNA SCHERMATA. Il modulo e'
+docs/design/domini/README.md, e un dominio nuovo lo compila PRIMA che qualcuno
+ne scriva una riga. Questa e' la QUARTA compilata, quindi e' anche il momento in
+cui la forma della scheda va rivista: due sezioni non discriminano ancora, e con
+tre casi non si poteva sapere se fosse un difetto della forma o del campione.
 
-Le tre cose da leggere prima, e sono corte: l'ADR 0049 per capire di chi e' la
-responsabilita' quando il tempo passa, la tabella «Quando si salva» in
-design/ciclo-di-vita.md (e' la riga che questa delega ribalta), e close() in
-renderer/stores/game.ts — l'unico posto che oggi scrive, con la guardia INV-17
-che la cadenza deve riusare invece di copiare.
+Le tre cose da leggere prima, e sono corte: la riga della fetta 04 nel registro
+delle fette, la sezione sul calore in prodotto/visione.md, e R19 con il suo test
+(tests/rules/domains-are-independent) — perche' il calore e' il primo sistema
+che ASCOLTA eventi di altri domini invece di importarli, ed e' quella la regola
+che glielo impedisce.
 
-Tre trappole gia' pagate, per non ripagarle:
-- non mettere la cadenza nel chiamante. R25 non la vedrebbe nemmeno: guarda chi
-  nomina tickAll, e una cadenza non lo nomina. Resterebbe verde mentre la sua
-  ragione viene aggirata, ed e' successo abbastanza da avere un ADR
-- il velo del recupero dura tre millisecondi e non si fotografa: si legge il DOM
-  dentro la stessa Runtime.evaluate che forza lo stato, dopo un setTimeout(0)
-- a finestra nascosta NON passano tick, quindi la cadenza NON scatta: guardare
-  questa delega li' darebbe zero scritture e sembrerebbe un difetto. E' il
-  contrario del recupero, che si guarda proprio a finestra nascosta
+Due eredita' della fetta 03 che la 04 e' la prima a poter usare:
+- il mondo avanza a blocchi di un giorno di gioco (ADR 0049), quindi una soglia
+  attraversata e rientrata durante un'assenza adesso SCATTA. Il calore e'
+  esattamente quel genere di cosa, ed e' il primo dominio che lo rende visibile
+- qualunque cosa debba succedere ogni N tick ha gia' dove attaccarsi: una
+  Cadence in runtime/, alimentata da Game.advance (ADR 0050). Non serve
+  inventare un secondo posto che conti il tempo
 
-E una precauzione che con questa delega non basta piu': il salvataggio
-dell'utente in %APPDATA%/solvent/ D040 lo ha protetto TERMINANDO l'app invece di
-chiuderla. Una cadenza attiva ci scrive sopra da se', senza che nessuno chiuda
-niente. Si prova con --user-data-dir, e qui non e' un consiglio.
+IL BLOCCO A NON E' LA FETTA 04, benche' il black market compaia in tutte e due:
+il blocco A e' black market PIU' aste di box, ed e' un segnaposto oltre la fetta
+06. Ne discende che l'ADR 0010 non puo' cambiare stato con questa fetta — a
+farlo passare sono gli oggetti, e gli oggetti sono del blocco A.
 
-E tre regole che valgono per QUALUNQUE schermata nuova, da D038: un pulsante si
+Tre regole che valgono per QUALUNQUE schermata nuova, da D038: un pulsante si
 scrive `<UiButton>` e non `<button>` (R26), un'area che scorre si scrive
 `<UiScroll>` (R27), e un'icona si aggiunge con una riga in ui/icons.ts piu'
 `npx vitest run tests/rules/icons -u` (R28). Sono rosse prima che qualcuno se ne
 accorga a occhio, quindi non c'e' niente da ricordare.
 
-Il blocco A (black market, aste di box) NON e' la fetta 03: e' un segnaposto
-oltre la fetta 06. Questo documento le ha confuse fino al 2026-08-23, ed e' il
-motivo per cui questo paragrafo esiste.
-
-Per guardare la finestra vera c'e' scripts/cdp.mjs, da D039: non va piu'
-riscritto a ogni sessione, e come si usa lo dice il commento in testa al file.
-`npm ci` gira senza flag — se un giorno ne chiede uno, qualcuno ha alzato vite
-senza alzare electron-vite (ADR 0048).
+Per guardare la finestra vera c'e' scripts/cdp.mjs, da D039. Se dice «Electron
+uninstall», il binario si scarica con `node -e "require('electron')"` — NON con
+install.js, che e' obsoleto dalla versione 42. E da D041 il gioco SCRIVE DA SE'
+ogni trenta secondi: si usa --user-data-dir su una cartella usa-e-getta, o si
+sovrascrive il salvataggio dell'utente senza chiudere niente.
 ```
 
 I prompt delle deleghe già consegnate stanno nel `git log` di questo file: si recuperano da lì
 invece di tenerli tutti in vita, che è la stessa ragione per cui i numeri stanno in un posto solo.
 Questa riga li elencava per nome, ed era un elenco che invecchiava a ogni delega consegnata.
 
-**E dopo D041, torna il lavoro di specie diversa: scrivere una delega, non eseguirne una** — perché
-D041 chiude la fetta 03, e la successiva non è ancora scritta. Il materiale c'è tutto e non va
-inventato:
+**Il materiale per scriverla c'è tutto e non va inventato:**
 
 - il [registro delle fette](../roadmap-fette.md) dice cosa viene dopo e in che ordine: la **fetta
-  03** è il progresso offline, e sotto la sua riga stanno i problemi che la riga stessa non dice;
-- il [registro YAGNI](../roadmap-fette.md) ha i grilletti già scritti — due voci hanno proprio
-  questa fetta per grilletto, il salvataggio a intervalli e i tick che il tetto scarta — e si guarda
-  quali sono scattati invece di decidere a sentimento cosa costruire;
-- la [scheda di dominio](../design/domini/README.md) **non** serve qui, perché questa fetta non
-  porta un dominio nuovo: serve al blocco A, e la sua forma va rivista alla **quarta** compilata,
-  che sarà quella.
+  04** è il calore e il black market, e la riga dice cosa quella fetta deve dimostrare del kernel —
+  il primo sistema che **ascolta** invece di importare, e il primo consumatore reale dell'Rng con
+  stream separati;
+- il [registro YAGNI](../roadmap-fette.md) ha i grilletti già scritti, e si guarda **quali sono
+  scattati** invece di decidere a sentimento cosa costruire. Le due voci che avevano la fetta 03 per
+  grilletto sono state obbedite tutte e due — i tick scartati dal tetto (D040) e il salvataggio a
+  intervalli (D041) — e restano barrate invece di sparire, perché la lezione è in quello che
+  dicevano;
+- la [scheda di dominio](../design/domini/README.md) **serve, e stavolta è il punto**: la fetta 04
+  porta un dominio nuovo, il calore, e un dominio nuovo compila la sua scheda prima che qualcuno ne
+  scriva una riga. Sarà la **quarta** compilata, cioè quella su cui la forma della scheda va rivista:
+  due sezioni non discriminano ancora, e con tre casi non si poteva sapere se fosse un difetto della
+  forma o del campione.
 
 Una delega di questo progetto si riconosce dalla forma: dipendenze, ADR vincolanti, budget dichiarato
 per **ogni** ramo che le decisioni aperte producono, _Da produrre_, _Invarianti_, _Fuori scope_,

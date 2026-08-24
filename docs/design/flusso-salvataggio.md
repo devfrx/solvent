@@ -41,6 +41,19 @@ rispettare, è una cosa che non si può scrivere.
 
 ## Salvataggio
 
+**Due momenti, un percorso.** Da [D041](../delega/D041-il-salvataggio-ha-una-cadenza.md) il gioco
+scrive alla chiusura della finestra **e** ogni trenta secondi di gioco, e il diagramma qui sotto vale
+per tutti e due: la cadenza non porta un secondo percorso, chiama la stessa riga da un altro momento.
+Quali siano i momenti e quale sia autoritativo lo dice [ciclo-di-vita.md](ciclo-di-vita.md), sotto
+_Quando si salva_.
+
+Due cose che ne discendono e che il diagramma non disegna. **Mai due scritture in volo** (INV-25): la
+chiusura aspetta quella a cadenza, e la cadenza salta il giro se ne trova una — il `rename` atomico
+protegge dal file troncato, non dal payload più vecchio che vince perché è arrivato secondo. E **una
+scrittura a cadenza che fallisce non manda la partita in errore**, a differenza di quella della
+chiusura: là la finestra sta chiudendo e quella è l'unica copia, qui la partita è in memoria e la
+chiusura riproverà comunque ([ADR 0050](../adr/0050-la-cadenza-sta-sulla-via-unica.md)).
+
 ```mermaid
 sequenceDiagram
     participant R as Registry (renderer)

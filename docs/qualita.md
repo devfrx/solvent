@@ -21,6 +21,41 @@ bene: `verify` non paga l'avvio di `npm` due volte per lo stesso gate. Sono temp
 quindi comprendono l'avvio di `npm` e di Node: `typecheck` ne paga tre, perché incatena tre
 `npm run`.
 
+**La prima misura a macchina scarica, e arriva dopo otto sessioni in cui era il punto lasciato
+indietro.** Presa il 2026-08-24 chiudendo [D041](delega/D041-il-salvataggio-ha-una-cadenza.md),
+**senza** la finestra di sviluppo aperta e senza nient'altro in esecuzione: la catena intera è
+**46,8 s** con **1.292 test** in 89 file.
+
+**È il numero che riapre la questione del minuto, e va letto con attenzione.** L'ultima misura
+scritta qui era 66 s con 814 test, e fra quella e questa i test sono cresciuti del **59%** mentre la
+catena è **scesa del 29%**. La conclusione ovvia — «qualcosa è stato ottimizzato» — è sbagliata:
+nessuno ha toccato la catena. A cambiare sono state le **condizioni**. I 66 s erano stati presi
+mentre la finestra di sviluppo dell'utente girava, come i 51,6 s di D030 prima di loro.
+
+Ne discende la cosa che conta: **il minuto non è mai stato superato a macchina scarica.** La soglia
+che [D031](delega/D031-la-sovrapposizione-e-un-pezzo-del-kit.md) ha dichiarato passata è stata
+passata da un numero preso nelle condizioni sbagliate, e il grilletto del
+[registro YAGNI](roadmap-fette.md) — togliere l'avvio ripetuto di `npm` — è scattato su quel numero.
+È la lezione di [D030](delega/D030-il-contenuto-scorre-nel-telaio.md) con un'altra faccia: una
+misura strana va confrontata con un controllo preso **allo stesso modo**, e per otto sessioni quel
+controllo è mancato.
+
+**I quattro gate, misurati uno a uno lo stesso giorno e nelle stesse condizioni:** `typecheck`
+14,2 s, `lint` 12,0 s, `format:check` 12,6 s, `test` 8,3 s. La somma è **47,1 s** contro i 46,8 s
+della catena, cioè le due coincidono dentro la variazione fra due esecuzioni.
+
+**E questo smentisce una frase che questa pagina ripeteva dal 2026-08-20:** «la catena è meno della
+somma, e va bene — `verify` non paga l'avvio di `npm` due volte». A 35,3 s contro 36 di somma il
+margine era misurabile; adesso non c'è più. Non è che il risparmio sia sparito: è che è sempre stato
+dentro il rumore, e con quattro gate più lenti si vede. Chi tirerà il grilletto dell'avvio ripetuto
+di `npm` parta da qui, perché è il numero che dice quanto c'è da guadagnare — poco.
+
+**Il conto dei test è cresciuto di 478 in nove deleghe**, da 814 a 1.292, e questa pagina lo aveva
+scaduto per tutte e nove: la riga da D031 è rimasta scritta mentre D033, D034, D035, D036, D037,
+D038, D039, D040 e D041 aggiungevano i loro. È il buco dichiarato in cima a [stato.md](stato.md) —
+il numero di test non è derivabile dal repo senza eseguirli — e l'unica difesa è rimisurarlo
+chiudendo, che è quello che è successo qui.
+
 **Rimisurata alla chiusura di [D031](delega/D031-la-sovrapposizione-e-un-pezzo-del-kit.md)**, il
 2026-08-21 e sulla stessa macchina: la catena intera **66 s**, con **814 test**. È il primo valore
 che **supera** il minuto, e la soglia che D030 vedeva avvicinarsi è stata passata.
@@ -29,13 +64,14 @@ che **supera** il minuto, e la soglia che D030 vedeva avvicinarsi è stata passa
 quella sbagliata: fra D030 e qui i test sono cresciuti del 2,5% e la catena del 28%. La misura di
 D030 — 51,6 s — era già stata presa **mentre la finestra di sviluppo dell'utente girava**, e questa
 è stata presa nelle stesse condizioni, dopo una sessione intera di build e di finestre aperte. Le
-due sono confrontabili fra loro e **nessuna delle due è il numero a macchina scarica**, che nessuno
-ha ancora preso.
+due sono confrontabili fra loro e **nessuna delle due è il numero a macchina scarica** — che
+adesso esiste, ed è qui sopra.
 
 Il rimedio resta quello censito nel [registro YAGNI](roadmap-fette.md) — togliere l'avvio ripetuto
-di `npm`, non togliere un gate — e adesso ha anche il suo grilletto tirato: la catena ha passato il
-minuto. Prima di stringere qualcosa però va presa **una** misura a macchina scarica, o si
-ottimizzerà contro il rumore invece che contro il costo.
+di `npm`, non togliere un gate — e questa riga dichiarava il suo grilletto **tirato**, perché la
+catena aveva passato il minuto. La misura a macchina scarica, presa il 2026-08-24 e scritta qui
+sopra, dice che quel grilletto è scattato su un numero preso nelle condizioni sbagliate: a macchina
+scarica il minuto non è mai stato superato.
 
 Prima, alla chiusura di [D018](delega/D018-la-scheda-di-dominio.md): **33,3 s** con **745 test**. Era 38,4 s con 726 test a
 [D024](delega/D024-il-telaio.md) e [D025](delega/D025-il-tooltip.md), 36,4 s con 678 test a
@@ -257,6 +293,15 @@ metodo.
 | ------------------- | ----------- | -------- |
 | a D037, il 23       | 1.207,33 kB | 22,84 kB |
 | a D038, il 23       | 1.208,70 kB | 23,15 kB |
+| a D041, il 24       | 1.191,82 kB | 23,32 kB |
+
+**A D041 il JS è sceso di 16,88 kB mentre il codice cresceva, e non si sa perché.** È scritto qui
+invece che taciuto: fra le due misure stanno **tre** deleghe — D039, D040 e D041 — e in mezzo c'è
+stata una reinstallazione delle dipendenze, perché D040 ha riportato `vite` dalla 8 alla 7
+([ADR 0048](adr/0048-la-catena-di-build-si-muove-insieme.md)). Un bundler diverso che minifica in
+modo diverso spiegherebbe il segno, e nessuno l'ha verificato. Attribuirlo a una delle tre deleghe
+sarebbe inventare una causa: chi vorrà saperlo rimisuri D038 con le dipendenze di oggi, che è
+l'unico confronto onesto.
 
 **Un chilobyte e mezzo di JS, trecento byte di CSS**, per tre componenti nuovi del kit, due icone e
 tre regole. È poco perché quasi tutto è **spostamento e non aggiunta**: `UiButton` guadagna le

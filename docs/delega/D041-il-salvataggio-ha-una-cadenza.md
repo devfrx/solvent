@@ -1,9 +1,11 @@
 # D041 — Il salvataggio ha una cadenza, e non è un secondo orologio
 
-- **Stato:** **Aperta** — scritta il 2026-08-24, non eseguita. Il ramo si chiami
-  `d041-il-salvataggio-ha-una-cadenza` e parta da **`main`**: dal 2026-08-21 i rami di lavoro si
-  fondono e si cancellano, quindi il punto di partenza è `main` appena la delega a monte è chiusa,
-  e [D040](D040-il-recupero-avanza-a-blocchi.md) lo è
+- **Stato:** **Chiusa** — ramo `d041-il-salvataggio-ha-una-cadenza`, che parte da `main`. Scritta ed
+  eseguita il 2026-08-24, nella stessa sessione. Le tre decisioni aperte sono state prese **in
+  autonomia** su direttiva generale dell'utente, e sono **contestabili**: vedi _Le correzioni_
+- **Stato precedente:** **Aperta** — scritta il 2026-08-24, non eseguita. Il ramo parte da `main`:
+  dal 2026-08-21 i rami di lavoro si fondono e si cancellano, quindi il punto di partenza è `main`
+  appena la delega a monte è chiusa, e [D040](D040-il-recupero-avanza-a-blocchi.md) lo è
 - **Dipende da:** [D040](D040-il-recupero-avanza-a-blocchi.md), che ha costruito il gancio — una via
   unica che cammina a blocchi; [D009](D009-persistenza-main.md), che ha portato la scrittura atomica
   e i tre canali IPC; [D011](D011-runtime-e-store.md), che ha portato il loop e l'unico chiamante
@@ -20,15 +22,17 @@
   `Proposta` per la quarta fetta di fila — una cadenza non è una lista storica, e nessuna serie
   entra nel salvataggio; e l'[ADR 0023](../adr/0023-il-tempo-di-gioco-e-un-sistema-di-dominio.md),
   che resta `Proposta`
-- **Produce:** un ADR, nel ramo 1A della decisione 1 — _la cadenza sta sulla via unica_. Sarebbe il
-  cinquantesimo, e serve per la ragione dell'ADR 0049: senza, qualcuno la «semplificherà» spostandola
+- **Produce:** l'[ADR 0050](../adr/0050-la-cadenza-sta-sulla-via-unica.md) — _la cadenza sta sulla
+  via unica, e si consuma in un posto solo_ — e l'invariante **INV-25**, _mai due scritture in volo
+  insieme_. L'ADR serve per la ragione dell'ADR 0049: senza, qualcuno la «semplificherà» spostandola
   nel chiamante
 - **Regole:** R01 (nessuno store importa ciò che gli sta accanto), R04 (niente numeri di gioco fuori
   da `balance/`), R05, R08 (il contratto è del main), R25 (una sola via per avanzare), INV-03,
   INV-16 (il preload resta tre funzioni), INV-17 (si scrive solo da una partita vera)
 - **Budget:** dichiarato **per ramo** in _Le tre decisioni aperte_, ed è la lezione di
-  [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md). Il ramo consigliato — 1A + 2 + 3A — è
-  **~200 righe**, di cui meno di quaranta fuori dai test
+  [D027](D027-un-grafico-e-una-serie-che-nessuno-tiene.md). Dichiarato ~200 righe per il ramo
+  consigliato, **misurato 234** — 52 di codice e 182 di test. Lo sforamento e la riga sbagliata
+  dentro questa dichiarazione stanno nella correzione 8
 
 ## Obiettivo
 
@@ -306,3 +310,103 @@ quarto canale, perché `save` è già quello giusto.
    cadenza **non scatta**: guardare questa delega a finestra nascosta darebbe zero scritture e
    sembrerebbe un difetto. È l'opposto del recupero, che si guarda proprio lì perché non passa dal
    frame (D040, trappola 4).
+
+## Le correzioni rispetto a com'era scritta
+
+Undici, e le prime tre sono le decisioni che la delega lasciava aperte. Sono state prese **in
+autonomia** su direttiva generale dell'utente — «coerenza, zero debiti futuri, professionalità, stato
+dell'arte odierno, non pigrizia, non necessariamente la soluzione più invasiva» — e per la regola di
+_Come si lavora_ sono **contestabili**: chi vuole ridiscuterle trova qui il conto che le ha decise.
+
+1. **Decisione 1 — ramo 1A, la cadenza sulla via unica.** È quello che la delega consigliava, e non
+   per obbedienza: il ramo 1B lasciava R25 verde mentre la sua ragione veniva aggirata, e questa
+   volta in modo peggiore del solito — R25 guarda chi nomina `tickAll`, e una cadenza non lo nomina,
+   quindi non c'era nemmeno un gate a cui mentire. Il costo del ramo consigliato è **28 righe** di
+   `runtime/cadence.ts` più sette di `createGame.ts`: la parola «invasiva» non si applica. La
+   decisione ha il suo [ADR 0050](../adr/0050-la-cadenza-sta-sulla-via-unica.md).
+2. **Decisione 2 — trenta secondi**, `AUTOSAVE_SECONDS = 30`. Derivato invece che scelto: il criterio
+   è che ciò che si può perdere resti sotto la cosa più economica che il gioco vende — 800,00 €,
+   l'upgrade del reddito — al reddito **massimo** che il gioco raggiunge. Il massimo è 18,00 €/s e
+   non 12,00 €, perché l'upgrade è un `boolean` e si compra una volta sola: la soglia è **44
+   secondi**. Trenta ci stanno con margine — 540,00 € al massimo, 360,00 € alla base — e il margine
+   non è prudenza generica: è ciò che tiene il criterio in piedi quando entrerà un moltiplicatore
+   nuovo, invece di farlo scadere in silenzio come è successo al tetto tarato in ore reali. Costa
+   120 scritture in un'ora di gioco.
+3. **Decisione 3 — ramo 3A, una scrittura a cadenza che fallisce non interrompe la partita.** Il
+   sintomo esiste già e non si è disegnato niente: `savedAt` è a schermo sotto «Ultimo salvataggio».
+   Il rischio dichiarato — un fallimento silenzioso e ripetuto è peggio di nessuna cadenza — è
+   diventato una **voce nuova del [registro YAGNI](../roadmap-fette.md)** con un grilletto che non è
+   un'ipotesi: _il primo fallimento visto davvero_. Prima di allora non si sa se il caso da coprire è
+   il disco pieno, il permesso negato o il file in uso, e sono tre frasi diverse.
+4. **Ventiquattro soglie, non dodici.** La delega faceva il conto su una cadenza da un minuto —
+   7.300 tick diviso 600 — e con trenta secondi diventa 7.300 diviso 300. Il numero nella prosa della
+   delega era un'ipotesi e resta corretto come tale; nei commenti del codice e nell'ADR è
+   **ventiquattro**, perché là descrive ciò che il codice fa davvero.
+5. **Il percorso del test non era quello.** La delega diceva `tests/renderer/runtime/cadence.test.ts`;
+   il repo tiene i test dei file di `runtime/` **piatti** in `tests/renderer/` — `chronicle.test.ts`,
+   `candles.test.ts`, `loop.test.ts`. È `tests/renderer/cadence.test.ts`, e la convenzione del repo
+   vince su quella che la delega aveva immaginato.
+6. **La guardia di INV-17 non è raggiungibile da nessuno stato, e resta.** La definizione di fatto
+   chiedeva un test che da `startup`, `loading` e `failed`-per-caricamento non si scrivesse: quel test
+   **non si può scrivere passando dal gioco**, perché a `writeAtCadence` ci si arriva solo da
+   `loop.onStep`, e il loop gira solo dopo `play()` — `playing`, `suspended` e `recovering` sono tutti
+   e tre autoritativi, e da `closing` il loop è già fermo. La guardia è scritta comunque, per la
+   ragione che `close()` porta accanto alla propria: la precondizione appartiene a chi sa **cosa** sta
+   per scrivere. Al posto del test impossibile ce n'è uno che prova il meccanismo vero — dopo
+   `close()` nessun frame scrive più, perché il loop è fermo — e il codice porta scritto che la
+   guardia oggi non scatta, invece di lasciarla sembrare una difesa attiva.
+7. **`Game` espone una funzione, non l'oggetto `Cadence`.** Non era nella delega e discende da una
+   regola che il progetto ha già: `Series` espone `list()` e non la lista, «così chi legge non si
+   tiene una fotografia credendo di avere la serie». Con la `Cadence` in mano, una riga scritta nello
+   store la desincronizzerebbe dal tempo di gioco senza che nulla lo dica.
+8. **Il budget: 234 righe contro ~200 dichiarate, e una riga della dichiarazione era sbagliata in
+   partenza.** Misurato col metodo di `projectState.ts` — commenti e righe vuote escluse — sono **52
+   di codice e 182 di test**. Lo sforamento è dei test, ed è il genere giusto. La riga sbagliata è
+   «di cui meno di quaranta fuori dai test»: contraddiceva la ripartizione scritta quattro righe più
+   sotto nella stessa delega, che ne prevedeva ottanta. Il vero è 52 — `cadence.ts` 28, lo store 15,
+   `createGame.ts` 7, `balance/` 2 — quindi le stime per lo store e per `balance/` erano il doppio
+   del necessario.
+9. **La posizione di `saveCadence.advance` dentro il ciclo dei blocchi non è provata da nessun test, e
+   va detto.** Spostarla fuori, con un `advance(elapsed)` dopo il ciclo, lascia **tutti** i 113 test
+   verdi: è stato misurato di proposito. I due sono equivalenti per un booleano, e c'è un test che
+   asserisce proprio quell'equivalenza. Sta dentro il ciclo per un argomento di disegno — la cadenza
+   vede esattamente il tempo che vedono i sistemi e la cronaca, e non una seconda idea di quanto tempo
+   è passato — non per una proprietà verificata. Il giorno in cui una cadenza dovrà contare **quante**
+   volte è scattata, la posizione comincerà a contare e il test comincerà a discriminare.
+10. **`ciclo-di-vita.md` ha perso una colonna che era diventata falsa.** La tabella _Quando si salva_
+    intestava «In questa fetta», scritto quando le fette erano una: con una riga che passa a `sì`
+    nella fetta 03 quella colonna non voleva più dire niente. Adesso è «Esiste». Non era nella lista
+    dei file da toccare, ed è la regola di sempre — si rileggono i documenti vivi che **nominano** ciò
+    che hai cambiato, non solo quelli che la delega elencava.
+11. **Il ramo è stato provato rompendolo sei volte, e il conto sta qui.** Il `||` della coalizione
+    ridotto a `=`: 3 test. Il `take` che non azzera: 3. Il `clear` che dimentica il resto: 2. Il
+    `reset` che non azzera la cadenza: 1. La chiusura che non aspetta la scrittura in volo: 1. La
+    cadenza mai alimentata: 5. Più un **controllo** che doveva restare verde ed è restato — la
+    posizione fuori dal ciclo, correzione 9. I tre file sono stati copiati prima e ripristinati con un
+    `diff` che conferma l'identità.
+
+### Cosa è stato guardato nella finestra vera
+
+Con `scripts/cdp.mjs`, e con `--user-data-dir` su una cartella dello scratchpad. **Quella precauzione
+qui non è un consiglio:** con una cadenza attiva il gioco scrive da sé, senza che nessuno chiuda
+niente, quindi la sola cosa che protegge il salvataggio dell'utente è non farsi dare quella cartella.
+Verificato dopo: il `save.json` vero è rimasto al **22 agosto**, due giorni prima di questa sessione.
+
+- **Il riquadro «Ultimo salvataggio» è passato da «Mai: questa partita non è ancora stata scritta su
+  disco» a «24/08/2026, 09:08», senza che nessuno chiudesse la finestra.** È la prima verifica a
+  occhio di questo progetto che si fa **non** facendo un gesto: si apre il gioco, non si tocca
+  niente, e quel numero deve muoversi.
+- **Il file su disco esiste e la busta è valida**, che è più di quanto dica lo schermo: un payload che
+  lo schema `zod` del main rifiuta **non viene scritto** (D009), quindi la sua esistenza è la prova
+  che ha attraversato il confine intero. Dentro c'era `cash: "1000"` — il caveau di partenza pieno,
+  cioè anche il muro della fetta 02 al lavoro.
+- **La cadenza è una cadenza e non un caso isolato:** `savedAt` sul disco è passato da
+  `1787555218723` a `1787555337557`, cioè da 09:06:58 a 09:08:57. Sono **119 secondi** con una cadenza
+  da trenta: le scritture sono state più di una, e a dirlo è il file e non un'impressione.
+- **Una trappola confermata, e vale il contrario di quello che sembra comodo:** a finestra nascosta
+  non passano tick, quindi la cadenza **non scatta**. Il saldo è rimasto fermo a 387,60 € per quindici
+  secondi di orologio vero, campionato tre volte. È la trappola 7 di questa delega, misurata invece
+  che creduta — e per vedere la cadenza scattare bisogna che la finestra componga frame.
+- **`node node_modules/electron/install.js` è davvero obsoleto**, come la sesta sessione aveva
+  scritto: `npm ci` non scarica il binario, e `node -e "require('electron')"` lo scarica al primo
+  `require`. È la prima delega a ripagare quella riga invece di riscoprirla.
