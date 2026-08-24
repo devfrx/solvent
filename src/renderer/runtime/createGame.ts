@@ -22,6 +22,7 @@ import type { LoadReport, Registry, RegistryError, SystemContext } from '@core/k
 import { createRegistry } from '@core/kernel/Registry'
 import { createRng, randomSeed } from '@core/kernel/Rng'
 
+import { createCadence } from './cadence'
 import type { Candle } from './candles'
 import { createChronicle, type Series } from './chronicle'
 
@@ -95,6 +96,18 @@ export interface Game {
    * del renderer nomina `tickAll`.
    */
   readonly advance: (elapsed: Ticks) => void
+  /**
+   * D041 · ADR 0050 — **se la partita è dovuta al disco**, e prenderlo azzera la risposta.
+   *
+   * La cadenza avanza dentro `advance`, cioè sulla via unica, e viene consumata in **un** posto —
+   * lo store, che è l'unico che ha `SaveApi` sotto mano. Sono due metà volutamente separate: qui
+   * non si sa cosa sia un disco, e là non si sa cosa sia un tick.
+   *
+   * Esce come funzione e non come oggetto `Cadence` per la ragione di `Series`: chi la consuma non
+   * deve poterla far avanzare. Con l'oggetto in mano, una riga scritta nello store la
+   * desincronizzerebbe dal tempo di gioco senza che nulla lo dica.
+   */
+  readonly takeSaveDue: () => boolean
   readonly save: () => SavePayload
   readonly load: (payload: SavePayload) => Result<LoadReport, GameLoadError>
   readonly reset: (scope: ResetScope) => void
@@ -155,6 +168,13 @@ export const createGame = (seed: number = randomSeed()): Game => {
    */
   const chronicle = createChronicle(bus)
 
+  /**
+   * D041 · ADR 0050 — la cadenza del salvataggio, dichiarata qui accanto alla cronaca e per la
+   * stessa ragione: questo file è l'unico che ha i numeri di gioco e la via del tempo sotto mano
+   * insieme (ADR 0024). Non sa cosa sia un disco — sa contare, e chi scrive glielo chiede.
+   */
+  const saveCadence = createCadence(BALANCE.AUTOSAVE_EVERY)
+
   const series: GameSeries = {
     netWorth: chronicle.samples({
       every: BALANCE.NET_WORTH_SAMPLE_EVERY,
@@ -211,8 +231,15 @@ export const createGame = (seed: number = randomSeed()): Game => {
         const block = ticks(Math.min(BALANCE.ADVANCE_BLOCK, elapsed - done))
         registry.tickAll(ctx, block)
         chronicle.advance(block)
+        // **Dentro** il ciclo e non fuori con `elapsed`, benché per un booleano i due siano
+        // equivalenti: la cadenza vede esattamente il tempo che vedono i sistemi e la cronaca, e
+        // non una seconda idea di quanto tempo è passato. Il giorno in cui una cadenza dovesse
+        // contare **quante** volte è scattata, fuori dal ciclo sarebbe già la risposta sbagliata.
+        saveCadence.advance(block)
       }
     },
+
+    takeSaveDue: () => saveCadence.take(),
 
     save: () => ({ ledger: ledger.save(), rng: rng.save(), systems: registry.saveAll() }),
 
@@ -235,6 +262,13 @@ export const createGame = (seed: number = randomSeed()): Game => {
       // che decide la scala dell'asse. Solo se il caricamento è riuscito: da un salvataggio
       // rifiutato non si riparte, si va in `Errore`.
       if (loaded.ok) chronicle.reopen()
+      // D041 — la cadenza appartiene alla partita che è in memoria, e caricare la sostituisce:
+      // quando il gioco cambia sotto, il conto riparte. **Su ogni percorso che esiste oggi è un
+      // no-op**, e va detto invece di lasciarlo credere una difesa: `start()` entra solo da `Avvio`
+      // o da `Errore`, e su nessuna delle due il loop ha mai girato, quindi il conto è già zero. È
+      // scritta comunque perché la regola è «la cadenza è di questa partita», e una regola che vale
+      // per caso è la cosa che D031 ha imparato a non fidarsi.
+      saveCadence.clear()
       return loaded
     },
 
@@ -249,6 +283,10 @@ export const createGame = (seed: number = randomSeed()): Game => {
       // **Dopo** il Ledger, non prima: azzerare una serie significa anche riaprire le escursioni
       // sui saldi che ci sono adesso, e adesso è dopo che i saldi sono stati azzerati.
       chronicle.reset()
+      // D041 — e qui **non** è un no-op: `newGame()` si preme da una partita che stava girando,
+      // quindi il conto è a metà. Senza questa riga la prima scrittura della partita nuova
+      // arriverebbe a un istante deciso da quella buttata via.
+      saveCadence.clear()
       if (scope === 'hard') rng.reset(randomSeed())
     }
   }

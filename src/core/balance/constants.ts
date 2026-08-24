@@ -70,6 +70,35 @@ const NET_WORTH_SAMPLE_SECONDS = 5
 const INSTRUMENT_CANDLE_SECONDS = 5
 
 /**
+ * Ogni quanti secondi la partita si scrive su disco **mentre si gioca** (D041).
+ *
+ * **Da dove viene, invece di essere scelto perché suona bene.** Il criterio è che ciò che si può
+ * perdere resti sotto la cosa più economica che il gioco vende: se una scrittura mancata non costa
+ * mai un acquisto, non c'è un momento in cui il giocatore perde una **decisione** invece che del
+ * tempo. La cosa più economica è l'upgrade del reddito, `UPGRADE_PRICE_CARD`, a 800,00 €.
+ *
+ * Il reddito massimo che questo gioco raggiunge oggi è **18,00 €/s** — la base di 12,00 € per il
+ * ×1,5 dell'upgrade, che si compra **una volta sola** (`upgraded` è un booleano, non un livello).
+ * Ne discende la soglia: 800,00 € a 18,00 €/s sono **44 secondi**, e qualunque cadenza sotto quel
+ * numero mantiene il criterio a **qualunque** momento della partita.
+ *
+ * **Trenta e non quarantacinque**, che sarebbe il limite: al reddito massimo trenta secondi valgono
+ * 540,00 € e al reddito base 360,00 €, cioè due terzi e meno della metà dell'acquisto più
+ * economico. Il margine non è prudenza generica — è ciò che tiene il criterio in piedi il giorno in
+ * cui un moltiplicatore nuovo entra nel gioco, invece di farlo scadere in silenzio come è successo
+ * al tetto di recupero tarato in ore reali.
+ *
+ * **Cosa si paga.** Una scrittura è un round-trip IPC più un `rename` su un payload di poche
+ * centinaia di byte: a trenta secondi sono **120 scritture in un'ora** di gioco, contro le sessanta
+ * di un minuto. È il lato economico della scelta, e a trenta secondi non morde.
+ *
+ * Non è un tempo di **gioco** contro un tempo reale: mentre si gioca dieci tick sono un secondo, e
+ * i due coincidono. Non coincidono durante un recupero, e quella è la ragione per cui la cadenza
+ * coalizza invece di scattare dodici volte (`renderer/runtime/cadence.ts`).
+ */
+const AUTOSAVE_SECONDS = 30
+
+/**
  * Il più grande degli importi rapidi del bancomat, che è anche quello con cui la schermata si
  * apre. Sta in una costante sua invece di essere ripescato in fondo alla lista: due letture dello
  * stesso numero sono due letture che prima o poi divergono.
@@ -255,6 +284,16 @@ export const BALANCE = {
    * cambia il recupero, non la partita.
    */
   ADVANCE_BLOCK: clock.secondsToTicks(seconds(SECONDS_PER_GAME_DAY)),
+
+  /**
+   * Ogni quanti tick la partita è dovuta al disco (D041). Il numero è in `AUTOSAVE_SECONDS`, qui
+   * c'è solo la conversione: chi bilancia guarda i secondi, non i tick.
+   *
+   * Fino a D041 il gioco scriveva in **un** momento solo, la chiusura della finestra, e chi non
+   * chiudeva — un crollo, un processo terminato — perdeva la sessione intera. La cadenza non
+   * sostituisce quella scrittura: le si aggiunge, e la chiusura resta l'unica autoritativa.
+   */
+  AUTOSAVE_EVERY: clock.secondsToTicks(seconds(AUTOSAVE_SECONDS)),
 
   /**
    * Quanti campioni tiene la serie del patrimonio netto (D027). È il tetto della lista limitata,

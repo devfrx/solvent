@@ -659,6 +659,17 @@ export const useGameStore = defineStore('game', () => {
       // Il primo frame dopo il ritorno dal nascondimento porta con sé tutto il tempo passato: è
       // quello che chiude `Recupero`, e non c'è un secondo percorso che lo faccia.
       if (status.value === 'recovering') status.value = 'playing'
+
+      // D041 · ADR 0050 — **l'unico posto che consuma la cadenza.** A contare è `Game.advance`,
+      // sulla via unica; qui si prende la risposta e si scrive, perché questo è il solo file che
+      // ha `SaveApi`. Il `take` azzera, quindi un recupero che ha superato la soglia ventiquattro volte
+      // produce **una** scrittura, e arriva proprio a questo frame — lo stesso che chiude
+      // `Recupero`.
+      //
+      // `writeAtCadence` è dichiarata più sotto, accanto a `close()`, che è dove vive tutto ciò
+      // che scrive: il riferimento in avanti è sicuro perché il loop parte solo da `play()`, cioè
+      // dopo che questo modulo ha finito di costruirsi.
+      if (game.takeSaveDue()) void writeAtCadence()
     }
   })
 
@@ -781,6 +792,60 @@ export const useGameStore = defineStore('game', () => {
     (status.value === 'failed' && failedDuring.value === 'saving')
 
   /**
+   * La scrittura in volo, o `null`. È **una** variabile che fa due lavori, e nessuno dei due è
+   * accessorio: dice che una scrittura c'è, e **è** la cosa da attendere.
+   *
+   * Serve perché due scritture in volo insieme arrivano sul disco in un ordine che nessuno
+   * garantisce. Il file temporaneo più `rename` del main (D009) protegge dal file **troncato**, non
+   * dal payload più vecchio che vince perché è arrivato secondo.
+   */
+  let writing: Promise<unknown> | null = null
+
+  /**
+   * D041 · ADR 0050 — la scrittura a cadenza. La chiama `loop.onStep` quando `takeSaveDue()` dice
+   * di sì, e nessun altro.
+   *
+   * **Non va in `failed` se fallisce**, e la differenza con `close()` non è incoerenza: là una
+   * scrittura mancata **ha** perso qualcosa, perché la finestra sta chiudendo e quella è l'unica
+   * copia; qui non ha perso niente — la partita è in memoria, il gioco continua, e la chiusura
+   * riproverà comunque. Interrompere la partita per un guasto che non ha ancora perso nulla
+   * sarebbe il contrario di ciò che INV-17 protegge.
+   *
+   * **A dirlo al giocatore è `savedAt`**, che è già a schermo sotto «Ultimo salvataggio»
+   * (`StatsView.vue`): se smette di avanzare, quel riquadro è il sintomo. È il minimo onesto, ed è
+   * dichiarato invece che nascosto — un fallimento silenzioso e ripetuto è peggio di nessuna
+   * cadenza, perché il giocatore crede di essere protetto. Un'indicazione più forte è una decisione
+   * sull'interfaccia e sta nel registro YAGNI con il suo grilletto.
+   *
+   * **Se una scrittura è già in volo, la cadenza salta il giro** invece di accodarsi: la prossima
+   * arriva fra trenta secondi, e accodare significherebbe scrivere due volte lo stesso stato
+   * appena il disco è lento.
+   */
+  const writeAtCadence = async (): Promise<void> => {
+    if (writing !== null) return
+
+    // INV-17, e la **stessa** guardia di `close()` invece di una copia: il giorno in cui gli stati
+    // cambiano, cambia un posto.
+    //
+    // **Oggi nessuno stato raggiungibile la fa scattare, e va detto invece di lasciarla sembrare
+    // una difesa attiva.** Ci si arriva solo da `loop.onStep`, e il loop gira solo dopo `play()`:
+    // `playing`, `suspended` e `recovering` sono tutti e tre autoritativi, e da `closing` il loop
+    // è già fermo. È scritta comunque per la ragione che `close()` porta scritta accanto alla
+    // propria: la precondizione appartiene a chi sa **cosa** sta per scrivere, perché una guardia
+    // messa in chi chiama non copre il secondo chiamante il giorno in cui compare.
+    if (!isAuthoritative()) return
+
+    const attempt = host.saveApi.save(game.save())
+    writing = attempt
+    try {
+      const written = await attempt
+      if (written.ok) savedAt.value = written.value
+    } finally {
+      writing = null
+    }
+  }
+
+  /**
    * `InGioco → Chiusura`: la finestra è già stata trattenuta da `onClosing`, e si chiude **dopo**
    * che il main ha confermato la scrittura.
    *
@@ -798,6 +863,15 @@ export const useGameStore = defineStore('game', () => {
 
     status.value = 'closing'
     loop.stop()
+
+    // D041 — una scrittura a cadenza può essere in volo, e si aspetta: partire adesso manderebbe
+    // sul disco due payload in un ordine che nessuno garantisce, e il `rename` atomico del main
+    // protegge dal file troncato, non dal più vecchio che arriva secondo.
+    //
+    // **Nella direzione opposta non serve niente**, e per due ragioni indipendenti: `loop.stop()`
+    // qui sopra impedisce a un altro `onStep` di partire, e `closing` non è uno stato
+    // autoritativo — quindi `writeAtCadence` si fermerebbe da sé anche se ci arrivasse.
+    if (writing !== null) await writing
 
     const written = await host.saveApi.save(game.save())
     if (!written.ok) return fail(written.error, 'saving')

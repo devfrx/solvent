@@ -1467,3 +1467,174 @@ describe('la carta di questa partita', () => {
     expect(store.card).toEqual(cardOf(SEED + 1))
   })
 })
+
+/**
+ * D041 · ADR 0050 — il salvataggio a cadenza.
+ *
+ * Fino a D041 il gioco scriveva in **un** momento solo, la chiusura della finestra, e chi non
+ * chiudeva — un crollo, un processo terminato — perdeva la sessione intera. Qui le scritture si
+ * **contano**, che è l'unico modo di provare la coalizione: che la cadenza sia dovuta è di
+ * `cadence.test.ts`, che il disco venga toccato una volta e non ventiquattro è di questo file.
+ */
+describe('il salvataggio a cadenza', () => {
+  const TICK = clock.ticksToMilliseconds(ticks(1))
+  const EVERY = clock.ticksToMilliseconds(BALANCE.AUTOSAVE_EVERY)
+  /** Il tetto del recupero, in millisecondi: la notte più lunga che il gioco riconosce. */
+  const A_NIGHT = clock.ticksToMilliseconds(BALANCE.RECOVERY_CAP)
+
+  /** Fa passare del tempo davvero, frame per frame, come farebbe il browser. */
+  const run = (elapsed: number): void => {
+    stage.advance(elapsed)
+    stage.frame()
+  }
+
+  /**
+   * Lascia atterrare la scrittura in volo. `writeAtCadence` azzera `writing` in un `finally`, cioè
+   * in un microtask: senza aspettarlo, la cadenza successiva troverebbe una scrittura ancora in
+   * volo e salterebbe il giro. Nel gioco non succede — fra due cadenze passano trenta secondi
+   * veri — e qui succederebbe sempre, perché passano zero millisecondi.
+   */
+  const settle = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0))
+
+  it('non scrive niente prima della cadenza, e alla cadenza scaduta scrive una volta', async () => {
+    await start()
+    stage.frame()
+
+    run(EVERY - TICK)
+    expect(stage.written()).toHaveLength(0)
+
+    run(TICK)
+    expect(stage.written()).toHaveLength(1)
+  })
+
+  it('scrive una volta per cadenza, non una per frame', async () => {
+    await start()
+    stage.frame()
+
+    run(EVERY)
+    await settle()
+    run(EVERY)
+    await settle()
+    run(EVERY)
+    await settle()
+
+    expect(stage.written()).toHaveLength(3)
+  })
+
+  it('e fa avanzare l’istante che la schermata Statistiche mostra, senza che nessuno chiuda', async () => {
+    // È la spia di questa delega: `savedAt` è già a schermo sotto «Ultimo salvataggio», e prima di
+    // D041 poteva muoversi solo caricando o chiudendo.
+    const store = await start({ savedAt: SAVED_AT })
+    stage.frame()
+    expect(store.savedAt).toBeNull()
+
+    run(EVERY)
+    await settle()
+
+    expect(store.savedAt).toBe(SAVED_AT)
+  })
+
+  it('un recupero al tetto pieno produce UNA scrittura, non una per soglia attraversata', async () => {
+    // Il recupero fa passare 7.300 tick in un colpo: a trecento tick di cadenza sono ventiquattro
+    // soglie. È il test che giustifica la coalizione — senza, sarebbero ventiquattro round-trip IPC
+    // dentro il caricamento, cioè il tempo di avvio che il tetto di recupero esiste per proteggere.
+    await start({ load: found(freshPayload(), SAVED_AT), wallClock: SAVED_AT + A_NIGHT })
+
+    // Il primo frame ha delta zero e non chiama `onStep`: il dovuto resta lì e aspetta.
+    stage.frame()
+    expect(stage.written()).toHaveLength(0)
+
+    run(TICK)
+    expect(stage.written()).toHaveLength(1)
+  })
+
+  it('una partita nuova riparte da zero, invece di ereditare il conto di quella buttata via', async () => {
+    const store = await start()
+    stage.frame()
+
+    // Un tick dalla scadenza.
+    run(EVERY - TICK)
+    expect(stage.written()).toHaveLength(0)
+
+    await store.newGame()
+    stage.frame()
+
+    // Il tick che avrebbe fatto scattare la cadenza vecchia: adesso non fa scattare niente.
+    run(TICK)
+    expect(stage.written()).toHaveLength(0)
+  })
+
+  it('una scrittura a cadenza che fallisce non interrompe la partita', async () => {
+    // La differenza con `close()` non è incoerenza: là una scrittura mancata **ha** perso qualcosa,
+    // perché la finestra sta chiudendo e quella è l'unica copia. Qui la partita è in memoria e la
+    // chiusura riproverà comunque, quindi interromperla sarebbe il contrario di ciò che INV-17
+    // protegge. Il sintomo è `savedAt` che non avanza.
+    const store = await start({
+      save: () =>
+        Promise.resolve({ ok: false, error: { code: 'error.save.io', cause: 'disco pieno' } })
+    })
+    stage.frame()
+
+    run(EVERY)
+    await settle()
+
+    expect(store.status).toBe('playing')
+    expect(store.failure).toBeNull()
+    expect(store.savedAt).toBeNull()
+  })
+
+  it('la chiusura aspetta la scrittura in volo, invece di affiancarle la propria', async () => {
+    // Due scritture in volo insieme arrivano sul disco in un ordine che nessuno garantisce: il
+    // `rename` atomico del main protegge dal file troncato, non dal payload più vecchio che vince
+    // perché è arrivato secondo.
+    const started: SavePayload[] = []
+
+    // Il deferred si costruisce **prima**, e `release` nasce con una funzione dentro: assegnarla
+    // solo dentro l'esecutore la farebbe restringere a `null` per il resto del test, che e' un
+    // limite dell'analisi di flusso e non un difetto del test.
+    let release = (): void => undefined
+    const slowDisk = new Promise<SaveResult<number>>((resolve) => {
+      release = () => resolve({ ok: true, value: SAVED_AT })
+    })
+
+    const store = await start({
+      save: (payload): Promise<SaveResult<number>> => {
+        started.push(payload)
+        if (started.length > 1) return Promise.resolve({ ok: true, value: SAVED_AT })
+        return slowDisk
+      }
+    })
+    stage.frame()
+
+    run(EVERY)
+    expect(started).toHaveLength(1)
+
+    const closing = store.close()
+    await settle()
+
+    // La scrittura della chiusura **non** è partita: sta aspettando la prima.
+    expect(started).toHaveLength(1)
+    expect(stage.isClosed()).toBe(false)
+
+    release()
+    await closing
+
+    expect(started).toHaveLength(2)
+    expect(stage.isClosed()).toBe(true)
+  })
+
+  it('e dopo la chiusura nessun frame scrive più, perché il loop è fermo', async () => {
+    // È il meccanismo vero per cui non si scrive da uno stato che non è la partita vera: la guardia
+    // di INV-17 in `writeAtCadence` esiste, ma nessuno stato raggiungibile la fa scattare — ci si
+    // arriva solo da `onStep`, e `close()` ferma il loop prima di scrivere.
+    const store = await start()
+    stage.frame()
+    await store.close()
+
+    const written = stage.written().length
+    expect(stage.frame()).toBe(false)
+
+    run(EVERY)
+    expect(stage.written()).toHaveLength(written)
+  })
+})
